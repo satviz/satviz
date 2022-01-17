@@ -21,6 +21,8 @@ if(NOT THEORA_FOUND)
     message(FATAL_ERROR "Was not able to locate OGG/Theora development files.")
 endif()
 
+include_directories(include)
+
 add_library(
   satviz-consumer-native SHARED
   src/Bindings.cpp
