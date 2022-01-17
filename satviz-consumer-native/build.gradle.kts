@@ -1,3 +1,0 @@
-plugins {
-    `cpp-library`
-}
