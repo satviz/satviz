@@ -17,4 +17,12 @@ public class FileExistsConstraint implements Constraint<Path> {
       fail(obj + (mustExist ? " does not exist" : " already exists"));
     }
   }
+
+  public static FileExistsConstraint fileExists() {
+    return new FileExistsConstraint(true);
+  }
+
+  public static FileExistsConstraint fileDoesNotExist() {
+    return new FileExistsConstraint(false);
+  }
 }
