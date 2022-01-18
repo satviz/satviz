@@ -6,6 +6,8 @@ package edu.kit.satviz.sat;
  * In case that variable within the clause is used as a positive literal,
  * the integer stored for it will be <code>varID</code>, and if it's used as a negative literal,
  * then the integer stored will be <code>-varID</code>.
+ *
+ * @author quorty
  */
 public record Clause(int[] literals) {
 }
