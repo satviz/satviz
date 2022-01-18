@@ -30,6 +30,7 @@ subprojects {
 
     checkstyle {
         configFile = configDirectory.file("google_checks.xml").get().asFile
+        toolVersion = "9.2.1"
     }
 
 }
