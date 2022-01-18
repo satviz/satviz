@@ -6,17 +6,21 @@ public interface Constraint<T> {
 
   void validate(T obj) throws ConstraintValidationException;
 
-  default <U> Constraint<T> on(Function<U, T> mapper) {
-    return null;
+  default <U> Constraint<U> on(Function<U, T> mapper) {
+    return (obj) -> validate(mapper.apply(obj));
   }
 
-  default void fail(String message) {
-
+  default void fail(String message) throws ConstraintValidationException {
+    throw new ConstraintValidationException(message);
   }
 
   @SafeVarargs
   static <T> Constraint<T> allOf(Constraint<T>... constraints) {
-    return null;
+    return (obj) -> {
+      for (Constraint<T> constraint : constraints) {
+        constraint.validate(obj);
+      }
+    };
   }
 
 }
