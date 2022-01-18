@@ -1,4 +1,8 @@
 package edu.kit.satviz.sat;
 
-public class ClauseUpdate {
+/**
+ * This record is adds additional information to the Clause record.<br>
+ * One can now differentiate between different types of clauses (in the <code>Type</code> enum).
+ */
+public record ClauseUpdate(Clause clause, Type type) {
 }
