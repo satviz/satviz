@@ -2,9 +2,7 @@ package edu.kit.satviz.network;
 
 import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.Serializer;
-import java.io.OutputStream;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 /**
  * A mapping of message types to transmitted objects.
@@ -35,7 +33,7 @@ public class NetworkBlueprint {
 
   /**
    * Returns a deserialization builder according to the given type.
-   * TODO should not return null, always a valid builder.
+   * If no matching builder was specified, return a new {@link NullSerialBuilder}.
    *
    * @param type the type
    * @return a new builder for the given type of objects
@@ -45,6 +43,6 @@ public class NetworkBlueprint {
     if (s != null) {
       return s.getBuilder();
     }
-    return null;
+    return new NullSerialBuilder();
   }
 }
