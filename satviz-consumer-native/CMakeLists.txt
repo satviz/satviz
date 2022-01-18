@@ -42,3 +42,8 @@ target_link_libraries(
   PRIVATE ${THEORA_LIBRARIES}
 )
 
+target_compile_options(
+  satviz-consumer-native
+  PRIVATE -Wall -Wextra -Wconversion -pedantic
+)
+
