@@ -4,6 +4,7 @@ import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.Serializer;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * A mapping of message types to transmitted objects.
@@ -23,18 +24,13 @@ public class NetworkBlueprint {
   }
 
   /**
-   * Serializes an object according to its type.
+   * Returns the serializer corresponding to a type.
    *
-   * @param obj the object
-   * @param type the object's type
-   * @param out the stream to serialize to
+   * @param type the type
+   * @return the serializer matching the type
    */
-  public void serialize(Object obj, byte type, OutputStream out) {
-    @SuppressWarnings("unchecked")
-    Serializer<Object> s = (Serializer<Object>) typeMap.get(type);
-    if (s != null) {
-      s.serialize(obj, out);
-    }
+  public Serializer<?> getSerializer(byte type) {
+    return typeMap.get(type);
   }
 
   /**
