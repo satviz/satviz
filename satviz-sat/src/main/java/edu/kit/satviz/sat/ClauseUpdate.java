@@ -7,4 +7,11 @@ package edu.kit.satviz.sat;
  * @author quorty
  */
 public record ClauseUpdate(Clause clause, Type type) {
+  /**
+   * This enum holds possible clause update types.
+   */
+  public enum Type {
+    ADD,
+    REMOVE
+  }
 }
