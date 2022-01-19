@@ -11,6 +11,7 @@ import java.util.function.Predicate;
  * @param <T> The type of this constraint's subject.
  * @see #validate(Object)
  */
+@FunctionalInterface
 public interface Constraint<T> {
 
   /**
