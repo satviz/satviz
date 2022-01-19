@@ -22,7 +22,8 @@ public final class PathArgumentType implements ArgumentType<Path> {
     try {
       return Paths.get(value);
     } catch (InvalidPathException e) {
-      throw new ArgumentParserException(e.getMessage(), e, parser);
+      throw new ArgumentParserException(value + " is not a valid path: "
+          + e.getMessage(), e, parser);
     }
   }
 
