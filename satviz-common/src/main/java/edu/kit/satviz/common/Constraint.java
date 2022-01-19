@@ -6,8 +6,7 @@ import java.util.function.Predicate;
 /**
  * Represents a statement about subjects of type T that can be validated.
  *
- * <p>
- * This class may be used to check input argument conditions for example.
+ * <p>This class may be used to check input argument conditions for example.
  *
  * @param <T> The type of this constraint's subject.
  * @see #validate(Object)
@@ -68,8 +67,7 @@ public interface Constraint<T> {
    * Produces a constraint that combines all given constraints. In other words, the resulting
    * constraint is the logical <em>AND</em> of the given constraints.
    *
-   * <p>
-   * The new constraint will validate the given constraints in order and fail immediately
+   * <p>The new constraint will validate the given constraints in order and fail immediately
    * with the provided exception when one of them fails.
    *
    * @param constraints The constraints to combine
