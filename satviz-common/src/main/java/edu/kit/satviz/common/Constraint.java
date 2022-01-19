@@ -77,9 +77,9 @@ public interface Constraint<T> {
    * @return A constraint representing "constraint1 && constraint2 && ..."
    */
   @SafeVarargs
-  static <T> Constraint<T> allOf(Constraint<T>... constraints) {
+  static <T> Constraint<T> allOf(Constraint<? super T>... constraints) {
     return obj -> {
-      for (Constraint<T> constraint : constraints) {
+      for (Constraint<? super T> constraint : constraints) {
         constraint.validate(obj);
       }
     };
