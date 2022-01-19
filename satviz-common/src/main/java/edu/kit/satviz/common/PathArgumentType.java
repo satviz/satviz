@@ -8,7 +8,13 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.ArgumentType;
 
-public class PathArgumentType implements ArgumentType<Path> {
+public final class PathArgumentType implements ArgumentType<Path> {
+
+  private static final PathArgumentType INSTANCE = new PathArgumentType();
+
+  private PathArgumentType() {
+
+  }
 
   @Override
   public Path convert(ArgumentParser parser, Argument arg, String value)
@@ -18,5 +24,9 @@ public class PathArgumentType implements ArgumentType<Path> {
     } catch (InvalidPathException e) {
       throw new ArgumentParserException(e.getMessage(), e, parser);
     }
+  }
+
+  public static PathArgumentType get() {
+    return INSTANCE;
   }
 }
