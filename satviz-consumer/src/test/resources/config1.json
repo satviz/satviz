@@ -1,0 +1,12 @@
+{
+  "noGui": false,
+  "videoTemplatePath": "/Videos/video-%s.mp4",
+  "bufferSize": 0,
+  "windowSize": 0,
+  "modeConfig": {
+    "port": 12345,
+    "mode": "EXTERNAL"
+  },
+  "instancePath": "C:\\Users\\Michael\\Schumacher\\instance.cnf",
+  "recordImmediately": false
+}
