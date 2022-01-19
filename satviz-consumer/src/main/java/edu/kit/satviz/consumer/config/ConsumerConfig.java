@@ -5,25 +5,21 @@ import java.nio.file.Path;
 public class ConsumerConfig {
 
   private boolean noGui;
-
-  private String resultTemplate;
-
+  private String videoTemplatePath;
   private int bufferSize;
-
   private WeightFactor weightFactor;
-
   private int windowSize;
-
   private HeatmapColors heatmapColors;
-
   private ConsumerModeConfig modeConfig;
+  private Path instancePath;
+  private boolean recordImmediately;
 
   public boolean isNoGui() {
     return noGui;
   }
 
-  public String getResultTemplate() {
-    return resultTemplate;
+  public String getVideoTemplatePath() {
+    return videoTemplatePath;
   }
 
   public int getBufferSize() {
@@ -46,5 +42,11 @@ public class ConsumerConfig {
     return modeConfig;
   }
 
+  public boolean isRecordImmediately() {
+    return recordImmediately;
+  }
 
+  public Path getInstancePath() {
+    return instancePath;
+  }
 }
