@@ -14,6 +14,42 @@ public class ConsumerConfig {
   private Path instancePath;
   private boolean recordImmediately;
 
+  public void setNoGui(boolean noGui) {
+    this.noGui = noGui;
+  }
+
+  public void setVideoTemplatePath(String videoTemplatePath) {
+    this.videoTemplatePath = videoTemplatePath;
+  }
+
+  public void setBufferSize(int bufferSize) {
+    this.bufferSize = bufferSize;
+  }
+
+  public void setWeightFactor(WeightFactor weightFactor) {
+    this.weightFactor = weightFactor;
+  }
+
+  public void setWindowSize(int windowSize) {
+    this.windowSize = windowSize;
+  }
+
+  public void setHeatmapColors(HeatmapColors heatmapColors) {
+    this.heatmapColors = heatmapColors;
+  }
+
+  public void setModeConfig(ConsumerModeConfig modeConfig) {
+    this.modeConfig = modeConfig;
+  }
+
+  public void setInstancePath(Path instancePath) {
+    this.instancePath = instancePath;
+  }
+
+  public void setRecordImmediately(boolean recordImmediately) {
+    this.recordImmediately = recordImmediately;
+  }
+
   public boolean isNoGui() {
     return noGui;
   }
