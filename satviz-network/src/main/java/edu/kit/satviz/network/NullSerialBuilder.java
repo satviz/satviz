@@ -27,6 +27,11 @@ public class NullSerialBuilder extends SerialBuilder<Object> {
   }
 
   @Override
+  public boolean objectFinished() {
+    return done;
+  }
+
+  @Override
   public Object getObject() {
     return null;
   }

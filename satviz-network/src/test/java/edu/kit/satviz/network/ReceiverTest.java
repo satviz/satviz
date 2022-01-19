@@ -59,6 +59,11 @@ class ReceiverTest {
     }
 
     @Override
+    public boolean objectFinished() {
+      return nread == 4;
+    }
+
+    @Override
     public Integer getObject() {
       return nread == 4 ? i : null;
     }
