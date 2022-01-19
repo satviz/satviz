@@ -48,6 +48,7 @@ class ReceiverTest {
   private static class IntSerialBuilder extends SerialBuilder<Integer> {
     private int nread = 0;
     int i = 0;
+
     @Override
     public boolean addByte(int inb) throws SerializationException {
       if (nread == 4)
@@ -99,8 +100,10 @@ class ReceiverTest {
 
   @Test
   void testReadMultipleAtOnce() throws IOException {
+    // receive data from three different integers.
     ByteBuffer bb = ByteBuffer.allocate(15);
     ByteBufferOutputStream bbOut = new ByteBufferOutputStream(bb);
+
     bbOut.write(INT_MSG_NUM);
     is.serialize(5, bbOut);
     bbOut.write(INT_MSG_NUM);
@@ -109,28 +112,38 @@ class ReceiverTest {
     is.serialize(30000, bbOut);
     bb.flip();
 
-    NetworkObject netobj;
+    NetworkMessage msg;
 
-    assertTrue(r.receive(bb));
-    netobj = r.getObject();
-    assertEquals(NetworkObject.State.PRESENT, netobj.getState());
-    assertEquals(INT_MSG_NUM, netobj.getType());
-    assertEquals(5, (Integer) netobj.getObject());
+    msg = r.receive(bb);
+    assertNotNull(msg);
+    assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+    assertEquals(INT_MSG_NUM, msg.getType());
+    assertEquals(5, (Integer) msg.getObject());
 
-    assertTrue(r.receive(bb));
-    netobj = r.getObject();
-    assertEquals(NetworkObject.State.PRESENT, netobj.getState());
-    assertEquals(INT_MSG_NUM, netobj.getType());
-    assertEquals(42, (Integer) netobj.getObject());
+    msg = r.receive(bb);
+    assertNotNull(msg);
+    assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+    assertEquals(INT_MSG_NUM, msg.getType());
+    assertEquals(42, (Integer) msg.getObject());
 
-    assertTrue(r.receive(bb));
-    netobj = r.getObject();
-    assertEquals(NetworkObject.State.PRESENT, netobj.getState());
-    assertEquals(INT_MSG_NUM, netobj.getType());
-    assertEquals(30000, (Integer) netobj.getObject());
+    msg = r.receive(bb);
+    assertNotNull(msg);
+    assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+    assertEquals(INT_MSG_NUM, msg.getType());
+    assertEquals(30000, (Integer) msg.getObject());
 
-    assertFalse(r.receive(bb));
-    netobj = r.getObject();
-    assert(netobj.getState() == NetworkObject.State.NONE);
+    assertNull(r.receive(bb));
+  }
+
+  @Test
+  void failOnUnexpected() {
+    // read a type byte that doesn't have a corresponding serializer
+    ByteBuffer bb = ByteBuffer.allocate(1);
+    bb.put((byte) 42);
+    bb.flip();
+
+    NetworkMessage msg = r.receive(bb);
+    assertNotNull(msg);
+    assertEquals(msg.getState(), NetworkMessage.State.FAIL);
   }
 }

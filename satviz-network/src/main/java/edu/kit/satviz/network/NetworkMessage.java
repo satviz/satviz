@@ -1,18 +1,17 @@
 package edu.kit.satviz.network;
 
 /**
- * A message with an object transmitted over network.
+ * A message transmitted over network.
  * Each message has a type, which denotes the information this message carries.
+ * Additionally, each message can carry an object.
  *
  * @author luwae
  */
-public class NetworkObject {
+public class NetworkMessage {
   /**
    * The state of this message.
    */
   public enum State {
-    /** No object or message present. */
-    NONE,
     /** An object or message is present. */
     PRESENT,
     /** Indicates that the corresponding connection has failed. */
@@ -21,15 +20,15 @@ public class NetworkObject {
     TERM
   }
 
-  private static final NetworkObject objNone = new NetworkObject(State.NONE);
-  private static final NetworkObject objFail = new NetworkObject(State.FAIL);
-  private static final NetworkObject objTerm = new NetworkObject(State.TERM);
+  // single instances to save space
+  private static final NetworkMessage objFail = new NetworkMessage(State.FAIL);
+  private static final NetworkMessage objTerm = new NetworkMessage(State.TERM);
 
   /** The state. */
   private final State state;
-  /** The message type, as specified by {@link edu.kit.satviz.network.NetworkBlueprint}. */
+  /** The message type. */
   private final byte type;
-  /** The object contained in this message. Only present if state is <code>PRESENT</code> */
+  /** The object contained in this message. Only relevant if state is <code>PRESENT</code> */
   private final Object obj;
 
   /**
@@ -38,7 +37,7 @@ public class NetworkObject {
    * @param type the message type
    * @param obj the message object
    */
-  public NetworkObject(byte type, Object obj) {
+  public NetworkMessage(byte type, Object obj) {
     this.state = State.PRESENT;
     this.type = type;
     this.obj = obj;
@@ -49,19 +48,10 @@ public class NetworkObject {
    *
    * @param state the message state
    */
-  private NetworkObject(State state) {
+  private NetworkMessage(State state) {
     this.state = state;
     this.type = 0;
     this.obj = null;
-  }
-
-  /**
-   * Gets a network object with the <code>NONE</code> state.
-   *
-   * @return a network object
-   */
-  public static NetworkObject createNone() {
-    return objNone;
   }
 
   /**
@@ -69,7 +59,7 @@ public class NetworkObject {
    *
    * @return a network object
    */
-  public static NetworkObject createFail() {
+  public static NetworkMessage createFail() {
     return objFail;
   }
 
@@ -78,7 +68,7 @@ public class NetworkObject {
    *
    * @return a network object
    */
-  public static NetworkObject createTerm() {
+  public static NetworkMessage createTerm() {
     return objTerm;
   }
 

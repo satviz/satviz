@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 import java.util.function.IntFunction;
 
 /**
- * Transforms a byte stream into an object stream.
- * Objects are deserialized based on given {@link edu.kit.satviz.serial.SerialBuilder}s.
+ * Transforms a byte stream into a network message stream.
+ * Messages are deserialized based on given {@link SerialBuilder}s.
  *
  * @author luwae
  */
@@ -15,66 +15,55 @@ public class Receiver {
   private final IntFunction<SerialBuilder<?>> gen;
   private byte type;
   private SerialBuilder<?> builder = null;
-  private NetworkObject netObj = null;
 
   /**
    * Creates a new empty receiver.
    *
-   * @param gen a function generating {@link edu.kit.satviz.serial.SerialBuilder}s from a type
+   * @param gen a function generating {@link SerialBuilder}s from a type
    */
   public Receiver(IntFunction<SerialBuilder<?>> gen) {
     this.gen = gen;
   }
 
   /**
-   * Receives input bytes from a bytebuffer and constructs objects.
+   * Receives input bytes from a bytebuffer and constructs messages.
+   * The bytes previously read are taken into account, so that a long stream
+   *     of bytes can be received by subsequent calls to <code>receive</code>.
    * Reads bytes as long as the buffer is not empty and an object is not finished.
    *
    * @param bb the buffer to read from
-   * @return <code>true</code> if an object is present, <code>false</code> otherwise.
+   * @return a message if one was received in its entirety, <code>null</code> otherwise
    */
-  public boolean receive(ByteBuffer bb) {
+  public NetworkMessage receive(ByteBuffer bb) {
     int nb = bb.remaining();
     if (nb == 0) {
-      return false;
+      return null;
     }
 
     if (builder == null) {
       type = bb.get();
-      builder = gen.apply(type);
       nb--;
+      builder = gen.apply(type); // get new builder according to type
+      if (builder == null) { // didn't get one
+        return NetworkMessage.createFail();
+      }
     }
 
     while (nb > 0) {
       nb--;
       boolean done;
       try {
-        done = builder.addByte(bb.get());
+        done = builder.addByte(bb.get()); // TODO use addBytes
       } catch (SerializationException e) {
-        netObj = NetworkObject.createFail();
-        return true;
+        return NetworkMessage.createFail();
       }
 
       if (done) {
-        netObj = new NetworkObject(type, builder.getObject());
-        return true;
+        NetworkMessage msg = new NetworkMessage(type, builder.getObject());
+        builder = null; // remove last builder
+        return msg;
       }
     }
-    return false;
-  }
-
-  /**
-   * Gets a finished network object.
-   * Removes the stored object from this class.
-   *
-   * @return the network object, one with <code>State.NONE</code> if none present
-   */
-  public NetworkObject getObject() {
-    if (netObj != null) {
-      NetworkObject tmp = netObj;
-      netObj = null;
-      return tmp;
-    }
-    return NetworkObject.createNone();
+    return null;
   }
 }

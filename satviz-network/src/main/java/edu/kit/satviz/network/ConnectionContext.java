@@ -12,7 +12,7 @@ public class ConnectionContext {
   private ConnectionId cid;
   private SocketChannel chan;
   private Receiver recv;
-  private BiConsumer<ConnectionId, NetworkObject> ls;
+  private BiConsumer<ConnectionId, NetworkMessage> ls;
 
   /**
    * Creates a new connection context with all attributes set.
@@ -23,7 +23,7 @@ public class ConnectionContext {
    * @param ls the listener
    */
   public ConnectionContext(ConnectionId cid, SocketChannel chan, Receiver recv,
-      BiConsumer<ConnectionId, NetworkObject> ls) {
+      BiConsumer<ConnectionId, NetworkMessage> ls) {
     this.cid = cid;
     this.chan = chan;
     this.recv = recv;
@@ -63,7 +63,7 @@ public class ConnectionContext {
    *
    * @return the channel
    */
-  public SocketChannel getChan() {
+  public SocketChannel getChannel() {
     return chan;
   }
 
@@ -72,7 +72,7 @@ public class ConnectionContext {
    *
    * @param chan the channel
    */
-  public void setChan(SocketChannel chan) {
+  public void setChannel(SocketChannel chan) {
     this.chan = chan;
   }
 
@@ -81,7 +81,7 @@ public class ConnectionContext {
    *
    * @return the receiver
    */
-  public Receiver getRecv() {
+  public Receiver getReceiver() {
     return recv;
   }
 
@@ -90,7 +90,7 @@ public class ConnectionContext {
    *
    * @param recv the receiver
    */
-  public void setRecv(Receiver recv) {
+  public void setReceiver(Receiver recv) {
     this.recv = recv;
   }
 
@@ -99,7 +99,7 @@ public class ConnectionContext {
    *
    * @return the listener
    */
-  public BiConsumer<ConnectionId, NetworkObject> getLs() {
+  public BiConsumer<ConnectionId, NetworkMessage> getListener() {
     return ls;
   }
 
@@ -108,7 +108,7 @@ public class ConnectionContext {
    *
    * @param ls the listener
    */
-  public void setLs(BiConsumer<ConnectionId, NetworkObject> ls) {
+  public void setListener(BiConsumer<ConnectionId, NetworkMessage> ls) {
     this.ls = ls;
   }
 }
