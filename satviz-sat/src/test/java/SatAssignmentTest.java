@@ -1,32 +1,41 @@
 import edu.kit.satviz.sat.SatAssignment;
+import edu.kit.satviz.sat.SatAssignment.VariableState;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * This class tests the functionality of the SatAssignment class.
+ *
+ * @author quorty
+ */
 class SatAssignmentTest {
 
+  /**
+   * This test recursively tests all possible combinations of variables and states.
+   */
   @Test
-  void setValueTest() {
-    recursive_setValue_test(4, 4);
+  void setTest() {
+    recursive_set_test(4, 4);
   }
 
-  private void recursive_setValue_test(int depth, int varCount) {
+  private void recursive_set_test(int depth, int varCount) {
     assert depth <= varCount;
     SatAssignment satAssignment = new SatAssignment(varCount);
-    int[] array = new int[varCount];
-    for (int i = 0; i < varCount; i++) {
-      array[i] = 0;
+    int[] intStateArray = new int[varCount+1];
+    for (int i = 0; i < varCount+1; i++) {
+      intStateArray[i] = 0;
     }
-    rec_setValue(satAssignment, array, depth, 0);
+    rec_set(satAssignment, intStateArray, depth, 1);
   }
 
-  private void rec_setValue(SatAssignment satAssignment, int[] array, int depth, int current) {
-    for (int i = current + 1; i < satAssignment.getVarCount(); i++) {
-      for (byte j = 0; j < 4; j++) {
-        array[i] = j;
-        satAssignment.setVal(i, j);
+  private void rec_set(SatAssignment satAssignment, int[] array, int depth, int current) {
+    for (int i = current; i <= satAssignment.getVarCount(); i++) {
+      for (byte j = 3; j >= 0; j--) {
+        array[i] = SatAssignment.convertVariableStateToIntState(i, VariableState.fromValue(j));
+        satAssignment.set(i, VariableState.fromValue(j));
         if (depth > 1) {
-          rec_setValue(satAssignment, array, --depth, i);
+          rec_set(satAssignment, array, depth - 1, i + 1);
         } else {
           isSatAssignmentEqualToArray(satAssignment, array);
         }
@@ -35,9 +44,9 @@ class SatAssignmentTest {
   }
 
   private void isSatAssignmentEqualToArray(SatAssignment satAssignment, int[] array) {
-    assertEquals(array.length, satAssignment.getVarCount());
+    assertEquals(array.length - 1, satAssignment.getVarCount());
     for (int i = 0; i < array.length; i++) {
-      assertEquals(array[i], satAssignment.getVal(i));
+      assertEquals(array[i], satAssignment.getIntState(i));
     }
   }
 
