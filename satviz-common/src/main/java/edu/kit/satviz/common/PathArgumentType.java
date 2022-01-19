@@ -8,6 +8,13 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.ArgumentType;
 
+/**
+ * An {@code ArgumentType} implementation that parses its input to a {@link java.nio.file.Path}
+ * object.<br>
+ * This class is a singleton.
+ *
+ * @see #get()
+ */
 public final class PathArgumentType implements ArgumentType<Path> {
 
   private static final PathArgumentType INSTANCE = new PathArgumentType();
@@ -27,6 +34,11 @@ public final class PathArgumentType implements ArgumentType<Path> {
     }
   }
 
+  /**
+   * Gets the singleton instance of this ArgumentType.
+   *
+   * @return the {@code PathArgumentType} instance.
+   */
   public static PathArgumentType get() {
     return INSTANCE;
   }
