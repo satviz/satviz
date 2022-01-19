@@ -28,7 +28,7 @@ class PathArgumentTypeTest {
 
   @Test
   void testInvalidPath() {
-    String[] args = {"--foo", "\0"};
+    String[] args = {"--foo", "\0/:*?|<>"};
     assertThrows(ArgumentParserException.class, () -> parser.parseArgs(args));
   }
 
