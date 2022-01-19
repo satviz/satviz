@@ -65,8 +65,9 @@ public class Receiver {
 
   /**
    * Gets a finished network object.
+   * Removes the stored object from this class.
    *
-   * @return the network object (never <code>null</code>)
+   * @return the network object, one with <code>State.NONE</code> if none present
    */
   public NetworkObject getObject() {
     if (netObj != null) {
