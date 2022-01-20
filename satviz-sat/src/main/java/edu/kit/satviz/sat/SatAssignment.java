@@ -68,13 +68,15 @@ public class SatAssignment {
   private final int varCount;
   private final byte[] satAssignment;
 
+  private static final int TWO_SET_BITS_MASK = 3; // 00000011
+
   /**
    * An instance of the SatAssignment class can be used similarly to a
    * <code>VariableState</code> array.<br>
    *
    * <p>
-   * <i>NOTE: The variable index starts with <b>1</b> instead of the usual 0.</i>
-   * <code>varCount</code> <i>has to be greater than 0.</i>
+   * <i>NOTE: The variable index starts with</i> <code>1</code> <i>instead of the usual</i>
+   * <code>0</code>. <code>varCount</code> <i>has to be greater than</i> <code>0</code>.
    * </p>
    *
    * @param varCount The total amount of different variables.
@@ -82,7 +84,7 @@ public class SatAssignment {
   public SatAssignment(int varCount) {
     if (varCount > 0) {
       this.varCount = varCount;
-      this.satAssignment = new byte[(varCount + 4) >> 2];
+      this.satAssignment = new byte[(varCount >> 2) + 1]; // >> 2 is dividing by 4
     } else {
       this.varCount = 0;
       this.satAssignment = new byte[0];
@@ -100,16 +102,21 @@ public class SatAssignment {
    * @param state    The state as an instance of the <code>VariableState</code> class.
    */
   public void set(int variable, VariableState state) {
-    if (variable <= 0 || variable > varCount || state == null) {
+    if (variable <= 0 || variable > this.varCount || state == null) {
       return;
     }
 
-    int shift = (variable & 3) << 1;
-    byte mask = (byte) ~(3 << shift);
+    // ex.: variable = 7, state = RESERVED (RESERVED is 11 in binary.)
+    // Because 4 variables are stored in one byte, the index is 2.
+    int index = variable >> 2;
+    // There is an offset of 3 variables.
+    int offset = (variable & TWO_SET_BITS_MASK) << 1;  // 3 2-bit offset = 6 bit offset
+    byte mask = (byte) ~(TWO_SET_BITS_MASK << offset); // The mask looks like this: 11001111
 
+    // Now the previous 2-bit state has to be removed and replaced by the new one.
     byte result = (byte) (
-            (state.val << shift) | (this.satAssignment[(variable >> 2)] & mask)
-    );
+            (state.val << offset) | (this.satAssignment[index] & mask)
+    );  // 00110000 | ??00???? = ??11????
     this.satAssignment[(variable >> 2)] = result;
   }
 
@@ -125,13 +132,14 @@ public class SatAssignment {
    * @return The state as an instance of the <code>VariableState</code> class.
    */
   public VariableState get(int variable) {
-    if (variable <= 0 || variable > varCount) {
+    if (variable <= 0 || variable > this.varCount) {
       return VariableState.DONTCARE;
     }
 
-    int shift = (variable & 3) << 1;
+    int index = variable >> 2;
+    int offset = (variable & TWO_SET_BITS_MASK) << 1;
 
-    return VariableState.fromValue((this.satAssignment[variable >> 2] >> shift) & 3);
+    return VariableState.fromValue((this.satAssignment[index] >> offset) & TWO_SET_BITS_MASK);
   }
 
   /**
