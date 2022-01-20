@@ -1,7 +1,9 @@
 package edu.kit.satviz.sat;
 
+import java.util.Arrays;
+
 /**
- * This class represents a finished solution for a SAT-instance.
+ * This class holds a truth assignment for the variables of a SAT-instance.
  *
  * @author quorty, luwae
  */
@@ -35,11 +37,11 @@ public class SatAssignment {
   }
 
   private final int varCount;
-  private final VariableState[] satAssignment;
+  private final VariableState[] variableStates;
 
   /**
-   * An instance of the SatAssignment class can be used similarly to a
-   * <code>VariableState</code> array.<br>
+   * An instance of the SatAssignment class always starts out
+   * with every variable state being <code>DONTCARE</code>.<br>
    *
    * <p>
    * <i>NOTE: The variable index starts with</i> <code>1</code> <i>instead of the usual</i>
@@ -54,7 +56,10 @@ public class SatAssignment {
       throw new IllegalArgumentException();
     }
     this.varCount = varCount;
-    this.satAssignment = new VariableState[varCount];
+    this.variableStates = new VariableState[varCount];
+    for (int i = 0; i < varCount; i++) {
+      this.variableStates[i] = VariableState.DONTCARE;
+    }
   }
 
   /**
@@ -74,7 +79,7 @@ public class SatAssignment {
     if (variable <= 0 || variable > this.varCount || state == null) {
       throw new IllegalArgumentException();
     }
-    this.satAssignment[variable - 1] = state;
+    this.variableStates[variable - 1] = state;
   }
 
   /**
@@ -94,7 +99,7 @@ public class SatAssignment {
     if (variable <= 0 || variable > this.varCount) {
       throw new IllegalArgumentException();
     }
-    return this.satAssignment[variable - 1];
+    return this.variableStates[variable - 1];
   }
 
   /**
@@ -146,6 +151,36 @@ public class SatAssignment {
    */
   public int getVarCount() {
     return this.varCount;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    SatAssignment satAssignment = (SatAssignment) o;
+    if (this.varCount != satAssignment.getVarCount()) {
+      return false;
+    }
+    for (int i = 1; i <= this.varCount; i++) {
+      if (this.variableStates[i - 1].equals(satAssignment.get(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(this.variableStates);
+  }
+
+  @Override
+  public String toString() {
+    return Arrays.toString(this.variableStates);
   }
 
 }
