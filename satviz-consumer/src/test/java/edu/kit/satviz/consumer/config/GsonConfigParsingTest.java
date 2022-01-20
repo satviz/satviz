@@ -14,7 +14,9 @@ import java.io.Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class GsonConfigParsingTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class GsonConfigParsingTest {
 
   private Gson gson;
   private ConsumerConfig config1;
@@ -35,19 +37,25 @@ public class GsonConfigParsingTest {
     this.config1.setVideoTemplatePath("/Videos/video-%s.mp4");
   }
 
+  /**
+   * This tests, whether the parser parses out <code>config1.json</code> correctly.
+   */
   @Test
   void deserialize_configuration_test() {
     try (Reader reader = new InputStreamReader(
             GsonConfigParsingTest.class.getResourceAsStream("/config2.json")
     )){
       ConsumerConfig config = this.gson.fromJson(reader, ConsumerConfig.class);
-      System.out.println("22");
+      assertEquals(config1, config);
     } catch (IOException e) {
       e.printStackTrace();
       Assertions.fail();
     }
   }
 
+  /**
+   * Not really a test but can be used to print out a serialized configuration.
+   */
   @Test
   void serialize_configuration_test() {
     System.out.println(this.gson.toJson(this.config1));
