@@ -131,10 +131,11 @@ public class SatAssignment {
    * @param variable The variable, whose state is being returned.
    * @param state    The state as an instance of the <code>VariableState</code> class.
    * @return The state as an integer value, that can also hold the variable-ID.
-   * @throws IllegalArgumentException In case <code>state == null</code>.
+   * @throws IllegalArgumentException In case <code>variable ≤ 0</code> or
+   *                                  <code>state == null</code>.
    */
   public static int convertVariableStateToIntState(int variable, VariableState state) {
-    if (state == null) {
+    if (variable <= 0 || state == null) {
       throw new IllegalArgumentException();
     }
     return switch (state) {
