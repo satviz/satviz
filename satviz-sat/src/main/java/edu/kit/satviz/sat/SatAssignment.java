@@ -117,7 +117,7 @@ public class SatAssignment {
     byte result = (byte) (
             (state.val << offset) | (this.satAssignment[index] & mask)
     );  // 00110000 | ??00???? = ??11????
-    this.satAssignment[(variable >> 2)] = result;
+    this.satAssignment[index] = result;
   }
 
   /**
