@@ -6,6 +6,20 @@
 namespace satviz {
 namespace graph {
 
+class GraphObserver;
+
+struct NodeInfo {
+};
+
+struct EdgeInfo {
+};
+
+class WeightUpdate {
+};
+
+class HeatUpdate {
+};
+
 /**
  *
  */
@@ -28,7 +42,7 @@ public:
   EdgeInfo queryEdge(int index1, int index2);
 };
 
-} // namespace video
 } // namespace graph
+} // namespace satviz
 
 #endif

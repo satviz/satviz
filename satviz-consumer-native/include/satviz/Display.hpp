@@ -1,6 +1,11 @@
 #ifndef SATVIZ_DISPLAY_HPP_
 #define SATVIZ_DISPLAY_HPP_
 
+#include <satviz/VideoFrame.hpp>
+
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+
 namespace satviz {
 namespace video {
 
