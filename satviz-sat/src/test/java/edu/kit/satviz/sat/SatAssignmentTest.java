@@ -1,41 +1,43 @@
-import edu.kit.satviz.sat.SatAssignment;
+package edu.kit.satviz.sat;
+
 import edu.kit.satviz.sat.SatAssignment.VariableState;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * This class tests the functionality of the SatAssignment class.
+ * This class tests the functionality of the <code>SatAssignment</code> class.
  *
  * @author quorty
  */
 class SatAssignmentTest {
 
   /**
-   * This test recursively tests all possible combinations of variables and states.
+   * This test recursively tests the <code>set()</code> and <code>get()</code>
+   * for a lot of possible combinations of variables and states.
    */
   @Test
-  void setTest() {
-    recursive_set_test(4, 4);
+  void set_and_get_test() {
+    recursive_test(4, 4);
   }
 
-  private void recursive_set_test(int depth, int varCount) {
+  private void recursive_test(int depth, int varCount) {
     assert depth <= varCount;
     SatAssignment satAssignment = new SatAssignment(varCount);
     int[] intStateArray = new int[varCount+1];
     for (int i = 0; i < varCount+1; i++) {
       intStateArray[i] = 0;
     }
-    rec_set(satAssignment, intStateArray, depth, 1);
+    rec(satAssignment, intStateArray, depth, 1);
   }
 
-  private void rec_set(SatAssignment satAssignment, int[] array, int depth, int current) {
+  private void rec(SatAssignment satAssignment, int[] array, int depth, int current) {
     for (int i = current; i <= satAssignment.getVarCount(); i++) {
       for (byte j = 3; j >= 0; j--) {
         array[i] = SatAssignment.convertVariableStateToIntState(i, VariableState.fromValue(j));
         satAssignment.set(i, VariableState.fromValue(j));
         if (depth > 1) {
-          rec_set(satAssignment, array, depth - 1, i + 1);
+          rec(satAssignment, array, depth - 1, i + 1);
         } else {
           isSatAssignmentEqualToArray(satAssignment, array);
         }
