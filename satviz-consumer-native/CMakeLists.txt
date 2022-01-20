@@ -25,7 +25,7 @@ include_directories(include)
 
 add_library(
   satviz-consumer-native SHARED
-  src/Bindings.cpp
+        src/satviz/Bindings.cpp
 )
 
 target_include_directories(
