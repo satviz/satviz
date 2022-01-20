@@ -24,18 +24,18 @@ class SatAssignmentTest {
   private void recursiveTest(int depth, int varCount) {
     assert depth <= varCount;
     SatAssignment satAssignment = new SatAssignment(varCount);
-    int[] intStateArray = new int[varCount+1];
-    for (int i = 0; i < varCount+1; i++) {
+    int[] intStateArray = new int[varCount];
+    for (int i = 0; i < varCount; i++) {
       intStateArray[i] = 0;
     }
-    rec(satAssignment, intStateArray, depth, 1);
+    rec(satAssignment, intStateArray, depth, 0);
   }
 
   private void rec(SatAssignment satAssignment, int[] array, int depth, int current) {
-    for (int i = current; i <= satAssignment.getVarCount(); i++) {
-      for (byte j = 3; j >= 0; j--) {
-        array[i] = SatAssignment.convertVariableStateToIntState(i, VariableState.fromValue(j));
-        satAssignment.set(i, VariableState.fromValue(j));
+    for (int i = current; i < satAssignment.getVarCount(); i++) {
+      for (VariableState state : VariableState.values()) {
+        array[i] = SatAssignment.convertVariableStateToIntState(i + 1, state);
+        satAssignment.set(i + 1, state);
         if (depth > 1) {
           rec(satAssignment, array, depth - 1, i + 1);
         } else {
@@ -46,9 +46,9 @@ class SatAssignmentTest {
   }
 
   private void isSatAssignmentEqualToArray(SatAssignment satAssignment, int[] array) {
-    assertEquals(array.length - 1, satAssignment.getVarCount());
+    assertEquals(array.length, satAssignment.getVarCount());
     for (int i = 0; i < array.length; i++) {
-      assertEquals(array[i], satAssignment.getIntState(i));
+      assertEquals(array[i], satAssignment.getIntState(i + 1));
     }
   }
 

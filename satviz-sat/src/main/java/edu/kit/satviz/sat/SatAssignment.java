@@ -11,41 +11,10 @@ public class SatAssignment {
    * This enum represents the variable state.
    */
   public enum VariableState {
-    DONTCARE(0),
-    SET(1),
-    UNSET(2),
-    RESERVED(3);
-
-    /**
-     * This contains the 2-bit representation of the variable state (stored as a byte).
-     */
-    public final byte val;
-
-    /**
-     * Simple constructor for mapping byte values to the states.
-     *
-     * @param val Byte representation of the variable state.
-     */
-    VariableState(int val) {
-      this.val = (byte) val;
-    }
-
-    /**
-     * This method converts a given 2-bit state representation into an instance of the
-     * <code>VariableState</code> enum.
-     *
-     * @param val 2-bit representation of the variable state.
-     * @return An instance of the <code>VariableState</code> enum,
-     *         or <code>null</code> (in case <code>val</code> is invalid).
-     */
-    public static VariableState fromValue(int val) {
-      for (VariableState state : VariableState.values()) {
-        if (state.val == val) {
-          return state;
-        }
-      }
-      return null;
-    }
+    DONTCARE,
+    SET,
+    UNSET,
+    RESERVED;
 
     /**
      * This method converts a given integer state representation into an instance of the
