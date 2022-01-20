@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.1)
+
 add_library(
   satviz-consumer-native SHARED
   Bindings.cpp
