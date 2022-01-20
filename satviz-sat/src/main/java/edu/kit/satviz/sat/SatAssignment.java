@@ -65,10 +65,6 @@ public class SatAssignment {
   /**
    * This method sets the state of a variable.<br>
    *
-   * <p>
-   * <i>NOTE: In case an invalid variable or state is entered, nothing changes.</i>
-   * </p>
-   *
    * @param variable The variable, whose state is being set.
    * @param state    The state as an instance of the <code>VariableState</code> class.
    * @throws IllegalArgumentException In case <code>variable ≤ 0</code>,
@@ -85,11 +81,6 @@ public class SatAssignment {
   /**
    * This method gets the state of a variable as a <code>VariableState</code>.<br>
    *
-   * <p>
-   * <i>NOTE: In case an invalid variable is entered,</i>
-   * <code>DONTCARE</code> <i>is returned.</i>
-   * </p>
-   *
    * @param variable The variable, whose state is being returned.
    * @return The state as an instance of the <code>VariableState</code> class.
    * @throws IllegalArgumentException In case <code>variable ≤ 0</code> or
@@ -105,11 +96,6 @@ public class SatAssignment {
   /**
    * This method gets the integer representation of the state of a variable.<br>
    *
-   * <p>
-   * <i>NOTE: In case an invalid variable is entered,</i>
-   * <code>0</code> <i>is returned.</i>
-   * </p>
-   *
    * @param variable The variable, whose state is being returned.
    * @return The state as an integer value, that can also hold the variable-ID.
    * @throws IllegalArgumentException In case <code>variable ≤ 0</code> or
@@ -122,11 +108,6 @@ public class SatAssignment {
   /**
    * This method converts an instance of the <code>VariableState</code> class
    * into an integer representation of the state.
-   *
-   * <p>
-   * <i>NOTE: In case an invalid state is entered,</i>
-   * <code>0</code> <i>is returned.</i>
-   * </p>
    *
    * @param variable The variable, whose state is being returned.
    * @param state    The state as an instance of the <code>VariableState</code> class.
