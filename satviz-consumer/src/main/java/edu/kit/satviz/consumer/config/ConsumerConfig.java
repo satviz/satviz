@@ -4,15 +4,29 @@ import java.nio.file.Path;
 
 public class ConsumerConfig {
 
+  // manditory settings
+  private ConsumerModeConfig modeConfig;
+  private Path instancePath;
+
+  // workflow settings
   private boolean noGui;
   private String videoTemplatePath;
+  private boolean recordImmediately;
+
+  // cosmetic settings
   private int bufferSize;
   private WeightFactor weightFactor;
   private int windowSize;
   private HeatmapColors heatmapColors;
-  private ConsumerModeConfig modeConfig;
-  private Path instancePath;
-  private boolean recordImmediately;
+
+
+  public void setModeConfig(ConsumerModeConfig modeConfig) {
+    this.modeConfig = modeConfig;
+  }
+
+  public void setInstancePath(Path instancePath) {
+    this.instancePath = instancePath;
+  }
 
   public void setNoGui(boolean noGui) {
     this.noGui = noGui;
@@ -20,6 +34,10 @@ public class ConsumerConfig {
 
   public void setVideoTemplatePath(String videoTemplatePath) {
     this.videoTemplatePath = videoTemplatePath;
+  }
+
+  public void setRecordImmediately(boolean recordImmediately) {
+    this.recordImmediately = recordImmediately;
   }
 
   public void setBufferSize(int bufferSize) {
@@ -38,16 +56,13 @@ public class ConsumerConfig {
     this.heatmapColors = heatmapColors;
   }
 
-  public void setModeConfig(ConsumerModeConfig modeConfig) {
-    this.modeConfig = modeConfig;
+
+  public ConsumerModeConfig getModeConfig() {
+    return modeConfig;
   }
 
-  public void setInstancePath(Path instancePath) {
-    this.instancePath = instancePath;
-  }
-
-  public void setRecordImmediately(boolean recordImmediately) {
-    this.recordImmediately = recordImmediately;
+  public Path getInstancePath() {
+    return instancePath;
   }
 
   public boolean isNoGui() {
@@ -56,6 +71,10 @@ public class ConsumerConfig {
 
   public String getVideoTemplatePath() {
     return videoTemplatePath;
+  }
+
+  public boolean isRecordImmediately() {
+    return recordImmediately;
   }
 
   public int getBufferSize() {
@@ -74,15 +93,33 @@ public class ConsumerConfig {
     return heatmapColors;
   }
 
-  public ConsumerModeConfig getModeConfig() {
-    return modeConfig;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ConsumerConfig config = (ConsumerConfig) o;
+
+    boolean equalManditorySettings = modeConfig.equals(config.getModeConfig())
+                    && instancePath.equals(config.getInstancePath());
+    boolean equalWorkflowSettings = noGui == config.isNoGui()
+                    && videoTemplatePath.equals(config.getVideoTemplatePath())
+                    && recordImmediately == config.isRecordImmediately();
+    boolean equalCosmeticSettings = bufferSize == config.getBufferSize()
+                    && weightFactor.equals(config.getWeightFactor())
+                    && windowSize == config.getWindowSize()
+                    && heatmapColors.equals(config.getHeatmapColors());
+    return equalManditorySettings && equalWorkflowSettings && equalCosmeticSettings;
   }
 
-  public boolean isRecordImmediately() {
-    return recordImmediately;
+  @Override
+  public int hashCode() {
+    // TODO
+    return super.hashCode();
   }
 
-  public Path getInstancePath() {
-    return instancePath;
-  }
 }
