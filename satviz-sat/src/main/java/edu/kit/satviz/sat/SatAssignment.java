@@ -145,12 +145,7 @@ public class SatAssignment {
     if (getVarCount() != satAssignment.getVarCount()) {
       return false;
     }
-    for (int i = 1; i <= getVarCount(); i++) {
-      if (this.variableStates[i - 1].equals(satAssignment.get(i))) {
-        return false;
-      }
-    }
-    return true;
+    return Arrays.equals(this.variableStates, satAssignment.variableStates);
   }
 
   @Override
