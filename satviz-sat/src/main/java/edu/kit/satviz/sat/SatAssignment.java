@@ -66,9 +66,7 @@ public class SatAssignment {
   }
 
   private final int varCount;
-  private final byte[] satAssignment;
-
-  private static final int TWO_SET_BITS_MASK = 3; // 00000011
+  private final VariableState[] satAssignment;
 
   /**
    * An instance of the SatAssignment class can be used similarly to a
@@ -84,10 +82,10 @@ public class SatAssignment {
   public SatAssignment(int varCount) {
     if (varCount > 0) {
       this.varCount = varCount;
-      this.satAssignment = new byte[(varCount >> 2) + 1]; // >> 2 is dividing by 4
+      this.satAssignment = new VariableState[varCount + 1];
     } else {
       this.varCount = 0;
-      this.satAssignment = new byte[0];
+      this.satAssignment = new VariableState[0];
     }
   }
 
@@ -105,19 +103,7 @@ public class SatAssignment {
     if (variable <= 0 || variable > this.varCount || state == null) {
       return;
     }
-
-    // ex.: variable = 7, state = RESERVED (RESERVED is 11 in binary.)
-    // Because 4 variables are stored in one byte, the index is 2.
-    int index = variable >> 2;
-    // There is an offset of 3 variables.
-    int offset = (variable & TWO_SET_BITS_MASK) << 1;  // 3 2-bit offset = 6 bit offset
-    byte mask = (byte) ~(TWO_SET_BITS_MASK << offset); // The mask looks like this: 11001111
-
-    // Now the previous 2-bit state has to be removed and replaced by the new one.
-    byte result = (byte) (
-            (state.val << offset) | (this.satAssignment[index] & mask)
-    );  // 00110000 | ??00???? = ??11????
-    this.satAssignment[index] = result;
+    this.satAssignment[variable] = state;
   }
 
   /**
@@ -135,11 +121,7 @@ public class SatAssignment {
     if (variable <= 0 || variable > this.varCount) {
       return VariableState.DONTCARE;
     }
-
-    int index = variable >> 2;
-    int offset = (variable & TWO_SET_BITS_MASK) << 1;
-
-    return VariableState.fromValue((this.satAssignment[index] >> offset) & TWO_SET_BITS_MASK);
+    return this.satAssignment[variable];
   }
 
   /**
