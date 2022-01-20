@@ -11,4 +11,17 @@ public class ExternalModeConfig extends ConsumerModeConfig {
   public int getPort() {
     return port;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    return super.equals(o)
+            && port == ((ExternalModeConfig) o).port;
+  }
+
+  @Override
+  public int hashCode() {
+    // TODO
+    return super.hashCode();
+  }
+
 }

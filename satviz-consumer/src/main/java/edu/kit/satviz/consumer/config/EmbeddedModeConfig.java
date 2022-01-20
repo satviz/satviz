@@ -22,4 +22,18 @@ public class EmbeddedModeConfig extends ConsumerModeConfig {
   public EmbeddedModeSource getSource() {
     return source;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    return super.equals(o)
+            && source == ((EmbeddedModeConfig) o).source
+            && sourcePath.equals(((EmbeddedModeConfig) o).sourcePath);
+  }
+
+  @Override
+  public int hashCode() {
+    // TODO
+    return super.hashCode();
+  }
+
 }
