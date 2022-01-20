@@ -17,7 +17,7 @@ public class SatAssignment {
     RESERVED(3);
 
     /**
-     * This contains the byte representation of the variable state.
+     * This contains the 2-bit representation of the variable state (stored as a byte).
      */
     public final byte val;
 
@@ -31,28 +31,45 @@ public class SatAssignment {
     }
 
     /**
-     * This method converts a given value into an instance of the <code>VariableState</code> enum.
+     * This method converts a given 2-bit state representation into an instance of the
+     * <code>VariableState</code> enum.
      *
-     * @param val Integer representation of the variable state.
+     * @param val 2-bit representation of the variable state.
      * @return An instance of the <code>VariableState</code> enum,
      *         or <code>null</code> (in case <code>val</code> is invalid).
      */
     public static VariableState fromValue(int val) {
-      return switch (val) {
+      for (VariableState state : VariableState.values()) {
+        if (state.val == val) {
+          return state;
+        }
+      }
+      return null;
+    }
+
+    /**
+     * This method converts a given integer state representation into an instance of the
+     * <code>VariableState</code> enum.
+     *
+     * @param intState Integer representation of the variable state.
+     * @return An instance of the <code>VariableState</code> enum.
+     */
+    public static VariableState fromIntState(int intState) {
+      return switch ((int) Math.signum(intState)) {
         case 0 -> DONTCARE;
+        case -1 -> UNSET;
         case 1 -> SET;
-        case 2 -> UNSET;
-        case 3 -> RESERVED;
         default -> null;
       };
     }
+
   }
 
   private final int varCount;
   private final byte[] satAssignment;
 
   /**
-   * An instance of the SatAssignment class can be usedsimilarly to a
+   * An instance of the SatAssignment class can be used similarly to a
    * <code>VariableState</code> array.<br>
    *
    * <p>
@@ -73,13 +90,17 @@ public class SatAssignment {
   }
 
   /**
-   * This method sets the state of a variable.
+   * This method sets the state of a variable.<br>
+   *
+   * <p>
+   * <i>NOTE: In case an invalid variable or state is entered, nothing changes.</i>
+   * </p>
    *
    * @param variable The variable, whose state is being set.
    * @param state    The state as an instance of the <code>VariableState</code> class.
    */
   public void set(int variable, VariableState state) {
-    if (variable <= 0 || variable > varCount) {
+    if (variable <= 0 || variable > varCount || state == null) {
       return;
     }
 
@@ -93,7 +114,12 @@ public class SatAssignment {
   }
 
   /**
-   * This method gets the state of a variable as a <code>VariableState</code>.
+   * This method gets the state of a variable as a <code>VariableState</code>.<br>
+   *
+   * <p>
+   * <i>NOTE: In case an invalid variable is entered,</i>
+   * <code>DONTCARE</code> <i>is returned.</i>
+   * </p>
    *
    * @param variable The variable, whose state is being returned.
    * @return The state as an instance of the <code>VariableState</code> class.
@@ -109,7 +135,12 @@ public class SatAssignment {
   }
 
   /**
-   * This method gets the integer representation of the state of a variable.
+   * This method gets the integer representation of the state of a variable.<br>
+   *
+   * <p>
+   * <i>NOTE: In case an invalid variable is entered,</i>
+   * <code>0</code> <i>is returned.</i>
+   * </p>
    *
    * @param variable The variable, whose state is being returned.
    * @return The state as an integer value, that can also hold the variable-ID.
@@ -122,11 +153,19 @@ public class SatAssignment {
    * This method converts an instance of the <code>VariableState</code> class
    * into an integer representation of the state.
    *
+   * <p>
+   * <i>NOTE: In case an invalid state is entered,</i>
+   * <code>0</code> <i>is returned.</i>
+   * </p>
+   *
    * @param variable The variable, whose state is being returned.
    * @param state    The state as an instance of the <code>VariableState</code> class.
    * @return The state as an integer value, that can also hold the variable-ID.
    */
   public static int convertVariableStateToIntState(int variable, VariableState state) {
+    if (state == null) {
+      return 0;
+    }
     return switch (state) {
       case SET -> variable;
       case UNSET -> -variable;

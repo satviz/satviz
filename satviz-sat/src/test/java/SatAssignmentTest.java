@@ -50,4 +50,12 @@ class SatAssignmentTest {
     }
   }
 
+  /**
+   * This tests, whether the error handling of <code>convertVariableStateToIntState()</code> works.
+   */
+  @Test
+  void convertVariableStateToIntState_test() {
+    assertEquals(0, SatAssignment.convertVariableStateToIntState(1, null));
+  }
+
 }
