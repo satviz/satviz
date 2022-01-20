@@ -18,10 +18,10 @@ class SatAssignmentTest {
    */
   @Test
   void set_and_get_test() {
-    recursive_test(4, 4);
+    recursiveTest(4, 4);
   }
 
-  private void recursive_test(int depth, int varCount) {
+  private void recursiveTest(int depth, int varCount) {
     assert depth <= varCount;
     SatAssignment satAssignment = new SatAssignment(varCount);
     int[] intStateArray = new int[varCount+1];

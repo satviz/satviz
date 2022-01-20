@@ -3,7 +3,7 @@ package edu.kit.satviz.sat;
 /**
  * This class represents a finished solution for a SAT-instance.
  *
- * @author quorty, LuWae
+ * @author quorty, luwae
  */
 public class SatAssignment {
 
