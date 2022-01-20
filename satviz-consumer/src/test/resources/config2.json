@@ -1,8 +1,9 @@
 {
-  "noGui": false,
-  "videoTemplatePath": "/Videos/video-%s.mp4",
-  "bufferSize": 0,
-  "windowSize": 0,
+  "bufferSize": 100,
+  "heatmapColors": {
+    "fromColor": 16034815,
+    "toColor": 8921120
+  },
   "instancePath": "C:\\Users\\Michael\\Schumacher\\instance.cnf",
-  "recordImmediately": false
+  "videoTemplatePath": "/Videos/video-%s.mp4"
 }

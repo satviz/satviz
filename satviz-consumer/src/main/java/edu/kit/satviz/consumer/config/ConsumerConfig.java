@@ -111,13 +111,22 @@ public class ConsumerConfig {
     }
     ConsumerConfig config = (ConsumerConfig) o;
 
-    boolean equalMandatorySettings = modeConfig.equals(config.modeConfig)
-                    && instancePath.equals(config.instancePath);
+    boolean bothModeConfigsAreNull = modeConfig == null && config.modeConfig == null;
+    boolean oneModeConfigIsNull = modeConfig == null || config.modeConfig == null;
+    boolean bothPathsAreNull = instancePath == null && config.instancePath == null;
+    boolean onePathIsNull = instancePath == null || config.instancePath == null;
+    boolean equalModeConfig = bothModeConfigsAreNull
+            || (!oneModeConfigIsNull && modeConfig.equals(config.modeConfig));
+    boolean equalInstancePath = bothPathsAreNull
+            || (!onePathIsNull && instancePath.equals(config.instancePath));
+    boolean equalMandatorySettings = equalModeConfig && equalInstancePath;
+
     boolean equalWorkflowSettings = noGui == config.isNoGui()
                     && videoTemplatePath.equals(config.videoTemplatePath)
                     && recordImmediately == config.recordImmediately;
+
     boolean equalCosmeticSettings = bufferSize == config.bufferSize
-                    && weightFactor.equals(config.weightFactor)
+                    && weightFactor == config.weightFactor
                     && windowSize == config.windowSize
                     && heatmapColors.equals(config.heatmapColors);
     return equalMandatorySettings && equalWorkflowSettings && equalCosmeticSettings;

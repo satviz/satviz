@@ -14,7 +14,7 @@ import java.io.Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GsonConfigParsingTest {
 
@@ -32,7 +32,7 @@ class GsonConfigParsingTest {
     modeConfig.setPort(12345);
     modeConfig.setMode(ConsumerMode.EXTERNAL);
     this.config1 = new ConsumerConfig();
-    this.config1.setModeConfig(modeConfig);
+    //this.config1.setModeConfig(modeConfig);
     this.config1.setInstancePath(Paths.get("C:/Users/Michael/Schumacher/instance.cnf"));
     this.config1.setVideoTemplatePath("/Videos/video-%s.mp4");
   }
@@ -49,7 +49,7 @@ class GsonConfigParsingTest {
       assertEquals(config1, config);
     } catch (IOException e) {
       e.printStackTrace();
-      Assertions.fail();
+      fail();
     }
   }
 
