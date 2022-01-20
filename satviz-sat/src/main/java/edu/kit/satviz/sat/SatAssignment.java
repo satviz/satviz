@@ -52,11 +52,12 @@ public class SatAssignment {
   private final byte[] satAssignment;
 
   /**
-   * An instance of the SatAssignment class can be used similarly to a <code>VariableState</code> array.<br>
+   * An instance of the SatAssignment class can be usedsimilarly to a
+   * <code>VariableState</code> array.<br>
    *
    * <p>
-   *   <i>NOTE: The variable index starts with <b>1</b> instead of the usual 0.</i>
-   *   <code>varCount</code> <i>has to be greater than 0.</i>
+   * <i>NOTE: The variable index starts with <b>1</b> instead of the usual 0.</i>
+   * <code>varCount</code> <i>has to be greater than 0.</i>
    * </p>
    *
    * @param varCount The total amount of different variables.
@@ -75,7 +76,7 @@ public class SatAssignment {
    * This method sets the state of a variable.
    *
    * @param variable The variable, whose state is being set.
-   * @param state The state as an instance of the <code>VariableState</code> class.
+   * @param state    The state as an instance of the <code>VariableState</code> class.
    */
   public void set(int variable, VariableState state) {
     if (variable <= 0 || variable > varCount) {
@@ -92,7 +93,7 @@ public class SatAssignment {
   }
 
   /**
-   * This method returns the state of a variable.
+   * This method gets the state of a variable as a <code>VariableState</code>.
    *
    * @param variable The variable, whose state is being returned.
    * @return The state as an instance of the <code>VariableState</code> class.
@@ -108,7 +109,7 @@ public class SatAssignment {
   }
 
   /**
-   * This method returns the integer representation of a variable.
+   * This method gets the integer representation of the state of a variable.
    *
    * @param variable The variable, whose state is being returned.
    * @return The state as an integer value, that can also hold the variable-ID.
@@ -122,7 +123,7 @@ public class SatAssignment {
    * into an integer representation of the state.
    *
    * @param variable The variable, whose state is being returned.
-   * @param state The state as an instance of the <code>VariableState</code> class.
+   * @param state    The state as an instance of the <code>VariableState</code> class.
    * @return The state as an integer value, that can also hold the variable-ID.
    */
   public static int convertVariableStateToIntState(int variable, VariableState state) {
