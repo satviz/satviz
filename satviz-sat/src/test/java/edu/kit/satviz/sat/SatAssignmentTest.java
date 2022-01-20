@@ -1,6 +1,7 @@
 package edu.kit.satviz.sat;
 
 import edu.kit.satviz.sat.SatAssignment.VariableState;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +13,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author quorty
  */
 class SatAssignmentTest {
+
+  /**
+   * This tests, whether invalid parameters result in an
+   * <code>IllegalArgumentException</code> in the constructor.
+   */
+  @Test
+  void constructor_invalidParameters_test() {
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> new SatAssignment(-3)
+    );
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> new SatAssignment(0)
+    );
+  }
 
   /**
    * This test recursively tests the <code>set()</code> and <code>get()</code>
@@ -54,13 +71,74 @@ class SatAssignmentTest {
   }
 
   /**
-   * This tests, whether the error handling of <code>convertVariableStateToIntState()</code> works.
+   * This tests, whether invalid parameters result in an
+   * <code>IllegalArgumentException</code> in the <code>set()</code> method.
    */
   @Test
-  void convertVariableStateToIntState_test() {
+  void set_invalidParameters_test() {
+    SatAssignment satAssignment = new SatAssignment(10);
+    satAssignment.set(1, VariableState.SET);
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> satAssignment.set(100, VariableState.DONTCARE)
+    );
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> satAssignment.set(0, VariableState.DONTCARE)
+    );
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> satAssignment.set(3, null)
+    );
+  }
+
+  /**
+   * This tests, whether invalid parameters result in an
+   * <code>IllegalArgumentException</code> in the <code>get()</code> method.
+   */
+  @Test
+  void get_invalidParameters_test() {
+    SatAssignment satAssignment = new SatAssignment(10);
+    satAssignment.set(1, VariableState.SET);
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> satAssignment.get(100)
+    );
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> satAssignment.get(0)
+    );
+  }
+
+  /**
+   * This tests, whether an instance of <code>SatAssignment</code> is initialised
+   * with <code>DONTCARE</code> for every variable state.
+   */
+  @Test
+  void get_noAssignment_test() {
+    SatAssignment satAssignment = new SatAssignment(10);
+    for (int i = 1; i <= satAssignment.getVarCount(); i++) {
+      assertEquals(VariableState.DONTCARE, satAssignment.get(i));
+    }
+  }
+
+  /**
+   * This tests, whether invalid parameters result in an <code>IllegalArgumentException</code>
+   * in the <code>convertVariableStateToIntState()</code> method.
+   */
+  @Test
+  void convertVariableStateToIntState_invalidParameters_test() {
     assertThrows(
             IllegalArgumentException.class,
             () -> SatAssignment.convertVariableStateToIntState(1, null)
+    );
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> SatAssignment.convertVariableStateToIntState(0, VariableState.SET)
+    );
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> SatAssignment.convertVariableStateToIntState(-10, VariableState.SET)
     );
   }
 
