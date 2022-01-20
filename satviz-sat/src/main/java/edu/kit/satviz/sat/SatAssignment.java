@@ -47,15 +47,14 @@ public class SatAssignment {
    * </p>
    *
    * @param varCount The total amount of different variables.
+   * @throws IllegalArgumentException In case <code>varCount ≤ 0</code>.
    */
   public SatAssignment(int varCount) {
-    if (varCount > 0) {
-      this.varCount = varCount;
-      this.satAssignment = new VariableState[varCount + 1];
-    } else {
-      this.varCount = 0;
-      this.satAssignment = new VariableState[0];
+    if (varCount <= 0) {
+      throw new IllegalArgumentException();
     }
+    this.varCount = varCount;
+    this.satAssignment = new VariableState[varCount];
   }
 
   /**
@@ -67,12 +66,15 @@ public class SatAssignment {
    *
    * @param variable The variable, whose state is being set.
    * @param state    The state as an instance of the <code>VariableState</code> class.
+   * @throws IllegalArgumentException In case <code>variable ≤ 0</code>,
+   *                                  <code>variable > varCount</code> or
+   *                                  <code>state == null</code>.
    */
   public void set(int variable, VariableState state) {
     if (variable <= 0 || variable > this.varCount || state == null) {
-      return;
+      throw new IllegalArgumentException();
     }
-    this.satAssignment[variable] = state;
+    this.satAssignment[variable - 1] = state;
   }
 
   /**
@@ -85,12 +87,14 @@ public class SatAssignment {
    *
    * @param variable The variable, whose state is being returned.
    * @return The state as an instance of the <code>VariableState</code> class.
+   * @throws IllegalArgumentException In case <code>variable ≤ 0</code> or
+   *                                  <code>variable > varCount</code>.
    */
   public VariableState get(int variable) {
     if (variable <= 0 || variable > this.varCount) {
-      return VariableState.DONTCARE;
+      throw new IllegalArgumentException();
     }
-    return this.satAssignment[variable];
+    return this.satAssignment[variable - 1];
   }
 
   /**
@@ -103,6 +107,8 @@ public class SatAssignment {
    *
    * @param variable The variable, whose state is being returned.
    * @return The state as an integer value, that can also hold the variable-ID.
+   * @throws IllegalArgumentException In case <code>variable ≤ 0</code> or
+   *                                  <code>variable > varCount</code>.
    */
   public int getIntState(int variable) {
     return convertVariableStateToIntState(variable, get(variable));
@@ -120,10 +126,11 @@ public class SatAssignment {
    * @param variable The variable, whose state is being returned.
    * @param state    The state as an instance of the <code>VariableState</code> class.
    * @return The state as an integer value, that can also hold the variable-ID.
+   * @throws IllegalArgumentException In case <code>state == null</code>.
    */
   public static int convertVariableStateToIntState(int variable, VariableState state) {
     if (state == null) {
-      return 0;
+      throw new IllegalArgumentException();
     }
     return switch (state) {
       case SET -> variable;

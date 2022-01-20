@@ -4,6 +4,7 @@ import edu.kit.satviz.sat.SatAssignment.VariableState;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * This class tests the functionality of the <code>SatAssignment</code> class.
@@ -57,7 +58,10 @@ class SatAssignmentTest {
    */
   @Test
   void convertVariableStateToIntState_test() {
-    assertEquals(0, SatAssignment.convertVariableStateToIntState(1, null));
+    assertThrows(
+            IllegalArgumentException.class,
+            () -> SatAssignment.convertVariableStateToIntState(1, null)
+    );
   }
 
 }
