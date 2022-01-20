@@ -36,7 +36,6 @@ public class SatAssignment {
 
   }
 
-  private final int varCount;
   private final VariableState[] variableStates;
 
   /**
@@ -55,7 +54,6 @@ public class SatAssignment {
     if (varCount <= 0) {
       throw new IllegalArgumentException();
     }
-    this.varCount = varCount;
     this.variableStates = new VariableState[varCount];
     for (int i = 0; i < varCount; i++) {
       this.variableStates[i] = VariableState.DONTCARE;
@@ -72,7 +70,7 @@ public class SatAssignment {
    *                                  <code>state == null</code>.
    */
   public void set(int variable, VariableState state) {
-    if (variable <= 0 || variable > this.varCount || state == null) {
+    if (variable <= 0 || variable > getVarCount() || state == null) {
       throw new IllegalArgumentException();
     }
     this.variableStates[variable - 1] = state;
@@ -87,7 +85,7 @@ public class SatAssignment {
    *                                  <code>variable > varCount</code>.
    */
   public VariableState get(int variable) {
-    if (variable <= 0 || variable > this.varCount) {
+    if (variable <= 0 || variable > getVarCount()) {
       throw new IllegalArgumentException();
     }
     return this.variableStates[variable - 1];
@@ -132,7 +130,7 @@ public class SatAssignment {
    * @return The total amount of variables.
    */
   public int getVarCount() {
-    return this.varCount;
+    return this.variableStates.length;
   }
 
   @Override
@@ -144,10 +142,10 @@ public class SatAssignment {
       return false;
     }
     SatAssignment satAssignment = (SatAssignment) o;
-    if (this.varCount != satAssignment.getVarCount()) {
+    if (getVarCount() != satAssignment.getVarCount()) {
       return false;
     }
-    for (int i = 1; i <= this.varCount; i++) {
+    for (int i = 1; i <= getVarCount(); i++) {
       if (this.variableStates[i - 1].equals(satAssignment.get(i))) {
         return false;
       }
