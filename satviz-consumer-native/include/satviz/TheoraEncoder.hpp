@@ -11,6 +11,8 @@ namespace video {
  */
 class TheoraEncoder : VideoEncoder {
 public:
+  TheoraEncoder();
+  ~TheoraEncoder();
 };
 
 } // namespace video

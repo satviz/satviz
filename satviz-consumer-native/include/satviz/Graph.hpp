@@ -1,6 +1,8 @@
 #ifndef SATVIZ_GRAPH_HPP_
 #define SATVIZ_GRAPH_HPP_
 
+#include <vector>
+#include <tuple>
 #include <sstream>
 
 namespace satviz {
@@ -9,15 +11,24 @@ namespace graph {
 class GraphObserver;
 
 struct NodeInfo {
+  int index;
+  int heat;
+  float x;
+  float y;
 };
 
 struct EdgeInfo {
+  int index1;
+  int index2;
+  float weight;
 };
 
-class WeightUpdate {
+struct WeightUpdate {
+  std::vector<std::tuple<int, int, float> > values;
 };
 
-class HeatUpdate {
+struct HeatUpdate {
+  std::vector<std::tuple<int, int> > values;
 };
 
 /**

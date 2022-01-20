@@ -10,7 +10,17 @@ namespace video {
  *
  */
 class OnscreenDisplay : Display {
+private:
+  sf::Window window;
+
+  void activateContext();
+
 public:
+  OnscreenDisplay(int width, int height);
+  ~OnscreenDisplay();
+
+  bool pollEvent(sf::Event &event);
+  void lockSize(bool lock);
 };
 
 } // namespace video

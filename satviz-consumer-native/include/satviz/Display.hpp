@@ -20,8 +20,11 @@ private:
   virtual void activateContext() = 0;
 
 public:
+  virtual ~Display() {}
+
   inline int getWidth() { return width; }
   inline int getHeight() { return height; }
+
   // TODO Camera
 
   void drawFrame();

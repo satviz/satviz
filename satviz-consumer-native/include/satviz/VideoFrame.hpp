@@ -7,8 +7,15 @@ namespace video {
 /**
  *
  */
-class VideoFrame {
-public:
+struct VideoFrame {
+  int width;
+  int height;
+  int stride;
+  unsigned char *Y;
+  unsigned char *Cb;
+  unsigned char *Cr;
+
+  VideoFrame(int width, int height);
 };
 
 } // namespace video
