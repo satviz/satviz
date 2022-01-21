@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 project(satviz-consumer-native CXX)
 
+enable_testing()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -23,27 +25,5 @@ endif()
 
 include_directories(include)
 
-add_library(
-  satviz-consumer-native SHARED
-        src/satviz/Bindings.cpp
-)
-
-target_include_directories(
-  satviz-consumer-native
-  PRIVATE ${OGDF_INCLUDE_DIRS}
-  PRIVATE ${SFML_INCLUDE_DIRS}
-  PRIVATE ${THEORA_INCLUDE_DIRS}
-)
-
-target_link_libraries(
-  satviz-consumer-native
-  PRIVATE OGDF
-  PRIVATE sfml-window
-  PRIVATE ${THEORA_LIBRARIES}
-)
-
-target_compile_options(
-  satviz-consumer-native
-  PRIVATE -Wall -Wextra -Wconversion -pedantic
-)
-
+add_subdirectory(src/satviz)
+add_subdirectory(test)
