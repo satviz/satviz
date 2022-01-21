@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 
 /**
  * A class for deserializing objects in several steps.
- * The total amount of bytes required to deserialize an object can be passed by parts.
- * This way, the deserialization process can be halted and resumed.
+ * The total amount of bytes required to deserialize an object can be passed in parts.
+ * This way, a deserialization process can be halted and resumed.
  *
  * @param <T> the type of object to deserialize
  * @author luwae
@@ -22,14 +22,13 @@ public abstract class SerialBuilder<T> {
 
   /**
    * Adds a number of bytes to the deserialization process.
-   * Read from the buffer as long as bytes are remaining and the object is not finished.
+   * Reads from the buffer as long as bytes are remaining and the object is not finished.
    *
    * @param bb the buffer to read from
    * @return whether the deserialization process is complete
    * @throws SerializationException if one of the bytes read was invalid
    */
   public boolean addBytes(ByteBuffer bb) throws SerializationException {
-    // naive; @override for more efficient implementations
     while (bb.hasRemaining()) {
       if (addByte(bb.get())) {
         return true;
@@ -39,7 +38,9 @@ public abstract class SerialBuilder<T> {
   }
 
   /**
-   * Returns the state of the deserialization process.
+   * Returns the current state of the deserialization process.
+   * If the process has failed (i.e., a {@link SerializationException} has been thrown
+   *     in one of the add methods), this method shall return false.
    *
    * @return whether the process is complete or not.
    */
