@@ -30,4 +30,9 @@ public class StringSerialBuilder extends SerialBuilder<String> {
   public String getObject() {
     return finishedString;
   }
+
+  public void reset() {
+    bytes.reset();
+    finishedString = null;
+  }
 }

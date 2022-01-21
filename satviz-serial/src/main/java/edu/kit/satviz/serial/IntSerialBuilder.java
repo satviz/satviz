@@ -1,7 +1,7 @@
 package edu.kit.satviz.serial;
 
 public class IntSerialBuilder extends SerialBuilder<Integer> {
-  private int i = 0;
+  private int acc = 0;
   private int numByte = 0;
 
   @Override
@@ -10,7 +10,7 @@ public class IntSerialBuilder extends SerialBuilder<Integer> {
       throw new SerializationException("done");
     }
 
-    i |= b << (numByte++ << 3);
+    acc |= b << (numByte++ << 3);
 
     return numByte == 4;
   }
@@ -22,6 +22,11 @@ public class IntSerialBuilder extends SerialBuilder<Integer> {
 
   @Override
   public Integer getObject() {
-    return i;
+    return (numByte == 4) ? acc : null;
+  }
+
+  public void reset() {
+    acc = 0;
+    numByte = 0;
   }
 }
