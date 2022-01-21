@@ -52,7 +52,7 @@ public class SatAssignment {
    */
   public SatAssignment(int varCount) {
     if (varCount <= 0) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("Invalid parameter: varCount <= 0");
     }
     this.variableStates = new VariableState[varCount];
     for (int i = 0; i < varCount; i++) {
@@ -71,7 +71,9 @@ public class SatAssignment {
    */
   public void set(int variable, VariableState state) {
     if (variable <= 0 || variable > getVarCount() || state == null) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException(
+              "Invalid parameter: Variable does not exist or state is null."
+      );
     }
     this.variableStates[variable - 1] = state;
   }
@@ -86,7 +88,7 @@ public class SatAssignment {
    */
   public VariableState get(int variable) {
     if (variable <= 0 || variable > getVarCount()) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("Invalid parameter: Variable does not exist.");
     }
     return this.variableStates[variable - 1];
   }
@@ -115,7 +117,7 @@ public class SatAssignment {
    */
   public static int convertVariableStateToIntState(int variable, VariableState state) {
     if (variable <= 0 || state == null) {
-      throw new IllegalArgumentException();
+      throw new IllegalArgumentException("Invalid parameter: variable <= 0 or state == null");
     }
     return switch (state) {
       case SET -> variable;
