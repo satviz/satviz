@@ -7,7 +7,7 @@ namespace satviz {
 namespace video {
 
 /**
- *
+ * A Display that renders to a window.
  */
 class OnscreenDisplay : Display {
 private:

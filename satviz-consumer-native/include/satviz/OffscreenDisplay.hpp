@@ -7,7 +7,7 @@ namespace satviz {
 namespace video {
 
 /**
- *
+ * A Display that does not open a window or show anything on the screen.
  */
 class OffscreenDisplay : Display {
 private:
