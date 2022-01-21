@@ -48,7 +48,7 @@ public class SatAssignment {
    * </p>
    *
    * @param varCount The total amount of different variables.
-   * @throws IllegalArgumentException In case <code>varCount ≤ 0</code>.
+   * @throws IllegalArgumentException In case <code>varCount <= 0</code>.
    */
   public SatAssignment(int varCount) {
     if (varCount <= 0) {
@@ -65,7 +65,7 @@ public class SatAssignment {
    *
    * @param variable The variable, whose state is being set.
    * @param state    The state as an instance of the <code>VariableState</code> class.
-   * @throws IllegalArgumentException In case <code>variable ≤ 0</code>,
+   * @throws IllegalArgumentException In case <code>variable <= 0</code>,
    *                                  <code>variable > varCount</code> or
    *                                  <code>state == null</code>.
    */
@@ -81,7 +81,7 @@ public class SatAssignment {
    *
    * @param variable The variable, whose state is being returned.
    * @return The state as an instance of the <code>VariableState</code> class.
-   * @throws IllegalArgumentException In case <code>variable ≤ 0</code> or
+   * @throws IllegalArgumentException In case <code>variable <= 0</code> or
    *                                  <code>variable > varCount</code>.
    */
   public VariableState get(int variable) {
@@ -96,7 +96,7 @@ public class SatAssignment {
    *
    * @param variable The variable, whose state is being returned.
    * @return The state as an integer value, that can also hold the variable-ID.
-   * @throws IllegalArgumentException In case <code>variable ≤ 0</code> or
+   * @throws IllegalArgumentException In case <code>variable <= 0</code> or
    *                                  <code>variable > varCount</code>.
    */
   public int getIntState(int variable) {
@@ -110,7 +110,7 @@ public class SatAssignment {
    * @param variable The variable, whose state is being returned.
    * @param state    The state as an instance of the <code>VariableState</code> class.
    * @return The state as an integer value, that can also hold the variable-ID.
-   * @throws IllegalArgumentException In case <code>variable ≤ 0</code> or
+   * @throws IllegalArgumentException In case <code>variable <= 0</code> or
    *                                  <code>state == null</code>.
    */
   public static int convertVariableStateToIntState(int variable, VariableState state) {
@@ -142,9 +142,6 @@ public class SatAssignment {
       return false;
     }
     SatAssignment satAssignment = (SatAssignment) o;
-    if (getVarCount() != satAssignment.getVarCount()) {
-      return false;
-    }
     return Arrays.equals(this.variableStates, satAssignment.variableStates);
   }
 
