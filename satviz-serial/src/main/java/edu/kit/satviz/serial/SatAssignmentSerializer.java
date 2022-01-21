@@ -2,31 +2,31 @@ package edu.kit.satviz.serial;
 
 import edu.kit.satviz.sat.SatAssignment;
 import edu.kit.satviz.sat.SatAssignment.VariableState;
-
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class SatAssignmentSerializer extends Serializer<SatAssignment> {
 
   @Override
-  public void serialize(SatAssignment satAssignment, OutputStream out) throws IOException, SerializationException {
-    if (satAssignment == null) {
-      throw new SerializationException("The given instance of SatAssignment is null.");
-    }
-
+  public void serialize(SatAssignment assign, OutputStream out) throws IOException, SerializationException {
     IntSerializer intSerializer = new IntSerializer();
-    intSerializer.serialize(satAssignment.getVarCount(), out);
+    intSerializer.serialize(assign.getVarCount(), out);
 
-    byte[] byteArray = new byte[satAssignment.getVarCount() >> 2];
-    for (int variable = 1; variable <= satAssignment.getVarCount(); variable++) {
-      byteArray[variable - 1] = convertVariableStateToValue(satAssignment.get(variable));
+    byte b = 0;
+    for (int i = 1; i <= assign.getVarCount(); i++) {
+      byte val = convertVariableStateToValue(assign.get(i));
+      int shift = (i & 3) << 1;
+      b |= val << shift;
+      if ((i & 3) == 0) {
+        out.write(b);
+        b = 0;
+      }
     }
-    out.write(byteArray);
   }
 
   @Override
   public SerialBuilder<SatAssignment> getBuilder() {
-    return null;
+    return new SatAssignmentSerialBuilder();
   }
 
   private static byte convertVariableStateToValue(VariableState state) {
