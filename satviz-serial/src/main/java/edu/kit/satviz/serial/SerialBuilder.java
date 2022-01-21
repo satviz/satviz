@@ -14,11 +14,11 @@ public abstract class SerialBuilder<T> {
   /**
    * Adds a single byte to the deserialization process.
    *
-   * @param i the byte (as integer, only lowest 8 bits are used)
+   * @param b the byte to add
    * @return whether the deserialization process is complete
    * @throws SerializationException if the byte was invalid
    */
-  public abstract boolean addByte(int i) throws SerializationException;
+  public abstract boolean addByte(byte b) throws SerializationException;
 
   /**
    * Adds a number of bytes to the deserialization process.
