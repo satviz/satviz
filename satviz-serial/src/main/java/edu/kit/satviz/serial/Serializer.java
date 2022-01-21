@@ -8,7 +8,7 @@ import java.io.OutputStream;
  * A class for (de)serializing objects.
  *
  * @param <T> the type of object that gets serialized
- * @author luwae
+ * @author luwae, quorty
  */
 public abstract class Serializer<T> {
 
@@ -47,7 +47,19 @@ public abstract class Serializer<T> {
    * @throws IOException if the stream cannot be used
    * @throws SerializationException if the stream contains invalid data
    */
-  public abstract T deserialize(InputStream in) throws IOException, SerializationException;
+  public T deserialize(InputStream in) throws IOException, SerializationException {
+    SerialBuilder<T> builder = getBuilder();
+
+    int i;
+    do {
+      i = in.read();
+      if (i == -1) {
+        throw new SerializationException("unexpected end of stream");
+      }
+    } while (!builder.addByte((byte) i));
+
+    return builder.getObject();
+  }
 
   /**
    * Gets a new {@link SerialBuilder} to deserialize an object of type <code>T</code> in steps.
