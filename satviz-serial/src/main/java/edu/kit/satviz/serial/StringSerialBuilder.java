@@ -1,6 +1,7 @@
 package edu.kit.satviz.serial;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class StringSerialBuilder extends SerialBuilder<String> {
   private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -14,7 +15,7 @@ public class StringSerialBuilder extends SerialBuilder<String> {
 
     bytes.write(b);
     if (b == 0) {
-      finishedString = bytes.toString();
+      finishedString = bytes.toString(StandardCharsets.UTF_8);
       return true;
     }
     return false;
