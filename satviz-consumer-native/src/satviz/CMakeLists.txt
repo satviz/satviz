@@ -23,6 +23,7 @@ target_link_libraries(
   PRIVATE OGDF
   PRIVATE sfml-window
   PRIVATE ${THEORA_LIBRARIES}
+  PRIVATE satviz-glad
 )
 
 target_compile_options(

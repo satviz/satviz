@@ -6,12 +6,9 @@ namespace video {
 OnscreenDisplay::OnscreenDisplay(int w, int h)
   : Display(w, h)
 {
-  sf::ContextSettings settings;
-  settings.attributeFlags |= sf::ContextSettings::Core;
-  settings.attributeFlags |= sf::ContextSettings::Debug;
-  settings.majorVersion = 3;
-  settings.minorVersion = 3;
+  sf::ContextSettings settings = makeContextSettings();
   window.create(sf::VideoMode(w, h), "satviz", sf::Style::Default, settings);
+  loadGLExtensions();
 }
 
 OnscreenDisplay::~OnscreenDisplay()

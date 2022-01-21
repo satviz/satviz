@@ -19,6 +19,8 @@ protected:
 
   Display(int w, int h) : width(w), height(h) {}
 
+  static sf::ContextSettings makeContextSettings();
+  void loadGLExtensions();
   virtual void activateContext() = 0;
 
 public:
