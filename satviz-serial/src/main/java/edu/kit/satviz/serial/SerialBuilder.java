@@ -54,4 +54,9 @@ public abstract class SerialBuilder<T> {
    * @return the object if done, <code>null</code> otherwise.
    */
   public abstract T getObject();
+
+  /**
+   * Resets this builder to its initial state.
+   */
+  public abstract void reset();
 }
