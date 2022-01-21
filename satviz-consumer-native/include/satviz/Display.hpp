@@ -13,9 +13,11 @@ namespace video {
  *
  */
 class Display {
-private:
+protected:
   int width;
   int height;
+
+  Display(int w, int h) : width(w), height(h) {}
 
   virtual void activateContext() = 0;
 
