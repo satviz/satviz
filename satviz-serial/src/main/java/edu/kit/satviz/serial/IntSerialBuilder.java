@@ -15,13 +15,13 @@ public class IntSerialBuilder extends SerialBuilder<Integer> {
 
   @Override
   public boolean addByte(byte b) throws SerializationException {
-    if (numByte == 4) {
+    if (objectFinished()) {
       throw new SerializationException("done");
     }
 
     acc |= b << (numByte++ << 3);
 
-    return numByte == 4;
+    return objectFinished();
   }
 
   @Override
@@ -31,7 +31,7 @@ public class IntSerialBuilder extends SerialBuilder<Integer> {
 
   @Override
   public Integer getObject() {
-    return (numByte == 4) ? acc : null;
+    return (objectFinished()) ? acc : null;
   }
 
   @Override

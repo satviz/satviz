@@ -1,24 +1,30 @@
 package edu.kit.satviz.serial;
 
 import edu.kit.satviz.sat.Clause;
-
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * A {@link Serializer} for SAT clauses.
+ * This class uses the variable-length binary DRAT format.
+ *
+ * @author luwae
+ */
 public class ClauseSerializer extends Serializer<Clause> {
 
   @Override
-  public void serialize(Clause clause, OutputStream out) throws IOException, SerializationException {
+  public void serialize(Clause clause, OutputStream out) throws IOException {
     int[] literals = clause.literals();
-    for (int i = 0; i < literals.length; i++) {
-      int lit = literals[i];
-      int ui = (i > 0) ? 2 * lit : (-2 * lit) + 1;
-      while (ui > 0x7f) {
-        out.write((ui & 0x7f) | 0x80);
-        ui >>>= 7;
+    for (int lit : literals) {
+      int unsignedMapping = (lit > 0) ? 2 * lit : (-2 * lit) + 1;
+      // split into 7 bit blocks
+      while (unsignedMapping > 0x7f) {
+        out.write((unsignedMapping & 0x7f) | 0x80);
+        unsignedMapping >>>= 7;
       }
-      out.write(ui);
+      out.write(unsignedMapping); // last byte has MSB 0
     }
+    // literals only contains the literals; need to write trailing 0 manually
     out.write(0);
   }
 

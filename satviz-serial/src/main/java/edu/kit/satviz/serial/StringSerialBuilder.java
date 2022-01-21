@@ -3,18 +3,24 @@ package edu.kit.satviz.serial;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * A {@link SerialBuilder} for strings.
+ * Deserializes strings according to UTF-8.
+ *
+ * @author luwae
+ */
 public class StringSerialBuilder extends SerialBuilder<String> {
   private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
   private String finishedString;
 
   @Override
   public boolean addByte(byte b) throws SerializationException {
-    if (finishedString != null) {
+    if (objectFinished()) {
       throw new SerializationException("done");
     }
 
     bytes.write(b);
-    if (b == 0) {
+    if (b == (byte) '\0') {
       finishedString = bytes.toString(StandardCharsets.UTF_8);
       return true;
     }
@@ -31,6 +37,7 @@ public class StringSerialBuilder extends SerialBuilder<String> {
     return finishedString;
   }
 
+  @Override
   public void reset() {
     bytes.reset();
     finishedString = null;
