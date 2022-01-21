@@ -34,5 +34,16 @@ bool OnscreenDisplay::pollEvent(sf::Event &event)
   }
 }
 
+void OnscreenDisplay::lockSize(bool lock)
+{
+  // TODO stub
+  (void) lock;
+}
+
+void OnscreenDisplay::displayFrame()
+{
+  window.display();
+}
+
 } // namespace video
 } // namespace satviz

@@ -20,8 +20,10 @@ void Display::loadGLExtensions()
   gladLoaderLoadGL();
 }
 
-void Display::drawFrame()
+void Display::startFrame()
 {
+  glViewport(0, 0, width, height);
+  glClear(GL_COLOR_BUFFER_BIT);
 }
 
 } // namespace video

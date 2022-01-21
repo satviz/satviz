@@ -21,6 +21,7 @@ public:
 
   bool pollEvent(sf::Event &event);
   void lockSize(bool lock);
+  void displayFrame();
 };
 
 } // namespace video

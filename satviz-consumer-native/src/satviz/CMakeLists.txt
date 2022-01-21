@@ -4,6 +4,7 @@ set(SRC_SATVIZ_FILES
   Bindings.cpp
   Display.cpp
   OnscreenDisplay.cpp
+  OffscreenDisplay.cpp
 )
 
 add_library(

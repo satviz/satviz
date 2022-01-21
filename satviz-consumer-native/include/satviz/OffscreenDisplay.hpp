@@ -19,8 +19,9 @@ public:
   OffscreenDisplay(int width, int height);
   ~OffscreenDisplay();
 
-  bool pollEvent(sf::Event &event) { return false; }
-  void lockSize(bool lock);
+  bool pollEvent(sf::Event &event) { (void) event; return false; }
+  void lockSize(bool lock) { (void) lock; }
+  void displayFrame() {}
 };
 
 } // namespace video

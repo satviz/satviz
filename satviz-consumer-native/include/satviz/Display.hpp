@@ -31,11 +31,13 @@ public:
 
   // TODO Camera
 
+  void startFrame();
   void drawFrame();
   VideoFrame grabFrame();
 
   virtual bool pollEvent(sf::Event &event) = 0;
   virtual void lockSize(bool lock) = 0;
+  virtual void displayFrame() = 0;
 };
 
 } // namespace video
