@@ -1,8 +1,17 @@
 package edu.kit.satviz.serial;
 
+/**
+ * A {@link SerialBuilder} for integers.
+ *
+ * @author luwae
+ */
 public class IntSerialBuilder extends SerialBuilder<Integer> {
-  private int acc = 0;
-  private int numByte = 0;
+  private int acc;
+  private int numByte;
+
+  public IntSerialBuilder() {
+    reset();
+  }
 
   @Override
   public boolean addByte(byte b) throws SerializationException {
@@ -25,6 +34,7 @@ public class IntSerialBuilder extends SerialBuilder<Integer> {
     return (numByte == 4) ? acc : null;
   }
 
+  @Override
   public void reset() {
     acc = 0;
     numByte = 0;

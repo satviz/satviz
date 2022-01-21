@@ -5,12 +5,16 @@ import edu.kit.satviz.sat.Clause;
 public class ClauseSerialBuilder extends SerialBuilder<Clause> {
   private static final int DEFAULT_CAP = 8;
 
-  int numLiterals = 0;
-  int[] literals = new int[DEFAULT_CAP];
+  int numLiterals;
+  int[] literals;
   Clause clause;
 
-  int currentULit = 0;
-  int currentShift = 0;
+  int currentInt;
+  int currentShift;
+
+  public ClauseSerialBuilder() {
+    reset();
+  }
 
   private void addLiteral(int lit) {
     if (numLiterals == literals.length) {
@@ -30,7 +34,7 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
 
     if (b == 0) {
       // done
-      addLiteral(currentULit);
+      addLiteral(currentInt);
       int[] cutLiterals = new int[numLiterals];
       System.arraycopy(literals, 0, cutLiterals, 0, numLiterals);
       clause = new Clause(cutLiterals);
@@ -39,17 +43,17 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
 
     if ((b & 0x80) != 0) {
       // literal not done
-      currentULit |= (b & 0x7f) << currentShift;
+      currentInt |= (b & 0x7f) << currentShift;
       currentShift += 7;
     } else {
       // literal done
-      currentULit |= b << currentShift;
-      int currentLit = ((currentULit % 2) != 0) ? -(currentULit - 1) / 2 : currentULit / 2;
+      currentInt |= b << currentShift;
+      int currentLit = ((currentInt % 2) != 0) ? -(currentInt - 1) / 2 : currentInt / 2;
       if (currentLit == 0) {
         throw new SerializationException("invalid unsigned literal mapping value");
       }
       addLiteral(currentLit);
-      currentULit = 0;
+      currentInt = 0;
       currentShift = 0;
     }
     return false;
@@ -63,5 +67,13 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
   @Override
   public Clause getObject() {
     return clause;
+  }
+
+  @Override
+  public void reset() {
+    numLiterals = 0;
+    literals = new int[DEFAULT_CAP];
+    currentInt = 0;
+    currentShift = 0;
   }
 }
