@@ -1,8 +1,14 @@
 cmake_minimum_required(VERSION 3.1)
 
+set(SRC_SATVIZ_FILES
+  Bindings.cpp
+  Display.cpp
+  OnscreenDisplay.cpp
+)
+
 add_library(
   satviz-consumer-native SHARED
-  Bindings.cpp
+  ${SRC_SATVIZ_FILES}
 )
 
 target_include_directories(
