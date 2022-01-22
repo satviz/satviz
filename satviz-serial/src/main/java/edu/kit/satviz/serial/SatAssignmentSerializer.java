@@ -5,16 +5,22 @@ import edu.kit.satviz.sat.SatAssignment.VariableState;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * TODO
+ *
+ * @author quorty
+ */
 public class SatAssignmentSerializer extends Serializer<SatAssignment> {
 
   @Override
-  public void serialize(SatAssignment assign, OutputStream out) throws IOException, SerializationException {
+  public void serialize(SatAssignment assign, OutputStream out) throws IOException {
     IntSerializer intSerializer = new IntSerializer();
     intSerializer.serialize(assign.getVarCount(), out);
 
     byte b = 0;
     for (int i = 1; i <= assign.getVarCount(); i++) {
       byte val = convertVariableStateToValue(assign.get(i));
+      // value of literal is index in two-bit array
       int shift = (i & 3) << 1;
       b |= val << shift;
       if ((i & 3) == 0) {
@@ -37,5 +43,4 @@ public class SatAssignmentSerializer extends Serializer<SatAssignment> {
       case RESERVED -> 3;
     };
   }
-
 }

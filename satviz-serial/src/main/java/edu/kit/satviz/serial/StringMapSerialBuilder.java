@@ -3,6 +3,11 @@ package edu.kit.satviz.serial;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A {@link SerialBuilder} for string key-value maps.
+ *
+ * @author luwae
+ */
 public class StringMapSerialBuilder extends SerialBuilder<Map<String, String>> {
   private final StringSerialBuilder builder = new StringSerialBuilder();
   private boolean currentEmpty = true;
@@ -63,6 +68,17 @@ public class StringMapSerialBuilder extends SerialBuilder<Map<String, String>> {
 
   @Override
   public Map<String, String> getObject() {
-    return done ? null : map;
+    return done ? map : null;
+  }
+
+  @Override
+  public void reset() {
+    builder.reset();
+    currentEmpty = true;
+    buildingKey = true;
+    currentKey = null;
+    map.clear();
+    failed = false;
+    done = false;
   }
 }

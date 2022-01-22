@@ -2,6 +2,7 @@ package edu.kit.satviz.serial;
 
 /**
  * A {@link SerialBuilder} for integers.
+ * Uses little endian format.
  *
  * @author luwae
  */

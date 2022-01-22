@@ -6,6 +6,7 @@ import java.io.OutputStream;
 
 /**
  * A {@link Serializer} for integers.
+ * Uses little endian format.
  *
  * @author luwae
  */

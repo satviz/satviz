@@ -2,12 +2,21 @@ package edu.kit.satviz.serial;
 
 import edu.kit.satviz.sat.SatAssignment;
 
+/**
+ * TODO
+ *
+ * @author quorty
+ */
 public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
-  private final IntSerialBuilder intBuilder = new IntSerialBuilder();
-  private boolean intBuilderDone = false;
+  private IntSerialBuilder intBuilder;
+  private boolean intBuilderDone;
 
   private SatAssignment assign;
-  private int currentVariable = 1;
+  private int currentVariable;
+
+  public SatAssignmentSerialBuilder() {
+    reset();
+  }
 
   @Override
   public boolean addByte(byte b) throws SerializationException {
@@ -16,8 +25,8 @@ public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
         throw new SerializationException("done");
       }
       for (int i = 0; currentVariable <= assign.getVarCount() && i < 4; i++) {
-        int offset = (currentVariable & 3) << 1;
-        byte value = (byte) ((b >> offset) & 3);
+        int shift = (currentVariable & 3) << 1;
+        byte value = (byte) ((b >> shift) & 3);
         assign.set(currentVariable++, convertValueToVariableState(value));
       }
       return objectFinished();
@@ -38,6 +47,14 @@ public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
   @Override
   public SatAssignment getObject() {
     return (objectFinished()) ? assign : null;
+  }
+
+  @Override
+  public void reset() {
+    intBuilder = new IntSerialBuilder();
+    intBuilderDone = false;
+    assign = null;
+    currentVariable = 1;
   }
 
   private static SatAssignment.VariableState convertValueToVariableState(byte val) {

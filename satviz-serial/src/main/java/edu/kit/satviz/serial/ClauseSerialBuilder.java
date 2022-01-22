@@ -19,6 +19,8 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
   int acc;
   int currentShift;
 
+  boolean failed = false;
+
   public ClauseSerialBuilder() {
     reset();
   }
@@ -36,6 +38,7 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
   private int unsignedMappingToLit(int unsignedMapping) throws SerializationException {
     int lit = (unsignedMapping % 2) == 0 ? unsignedMapping / 2 : -(unsignedMapping - 1) / 2;
     if (lit == 0) {
+      failed = true;
       throw new SerializationException("invalid unsigned literal mapping value");
     }
     return lit;
@@ -43,7 +46,9 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
 
   @Override
   public boolean addByte(byte b) throws SerializationException {
-    if (objectFinished()) {
+    if (objectFinished() || failed) {
+      failed = true;
+      // TODO encountered problem with failed state; every builder needs this?
       throw new SerializationException("done");
     }
 
@@ -72,12 +77,12 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
 
   @Override
   public boolean objectFinished() {
-    return clause != null;
+    return clause != null && !failed;
   }
 
   @Override
   public Clause getObject() {
-    return clause;
+    return objectFinished() ? clause : null;
   }
 
   @Override
@@ -87,5 +92,6 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
     clause = null;
     acc = 0;
     currentShift = 0;
+    failed = false;
   }
 }
