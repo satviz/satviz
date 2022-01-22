@@ -5,6 +5,8 @@ set(SRC_SATVIZ_FILES
   Display.cpp
   OnscreenDisplay.cpp
   OffscreenDisplay.cpp
+  GraphRenderer.cpp
+  GlUtils.cpp
 )
 
 add_library(
