@@ -43,7 +43,7 @@ class GsonConfigParsingTest {
   @Test
   void deserialize_configuration_test() {
     try (Reader reader = new InputStreamReader(
-            GsonConfigParsingTest.class.getResourceAsStream("/config2.json")
+            GsonConfigParsingTest.class.getResourceAsStream("/config1.json")
     )){
       ConsumerConfig config = this.gson.fromJson(reader, ConsumerConfig.class);
       assertEquals(config1, config);
