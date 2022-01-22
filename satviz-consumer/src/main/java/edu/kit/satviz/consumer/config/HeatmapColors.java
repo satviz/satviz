@@ -1,5 +1,7 @@
 package edu.kit.satviz.consumer.config;
 
+import java.util.Objects;
+
 public class HeatmapColors {
 
   /**
@@ -36,8 +38,6 @@ public class HeatmapColors {
 
   @Override
   public int hashCode() {
-    // TODO
-    return super.hashCode();
+    return Objects.hash(fromColor, toColor);
   }
-
 }
