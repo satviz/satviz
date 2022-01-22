@@ -1,6 +1,7 @@
 package edu.kit.satviz.consumer.config;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class EmbeddedModeConfig extends ConsumerModeConfig {
 
@@ -25,15 +26,15 @@ public class EmbeddedModeConfig extends ConsumerModeConfig {
 
   @Override
   public boolean equals(Object o) {
-    return super.equals(o)
-            && source == ((EmbeddedModeConfig) o).source
-            && sourcePath.equals(((EmbeddedModeConfig) o).sourcePath);
+    if (!super.equals(o)) {
+      return false;
+    }
+    EmbeddedModeConfig that = (EmbeddedModeConfig) o;
+    return source == that.source && Objects.equals(sourcePath, that.sourcePath);
   }
 
   @Override
   public int hashCode() {
-    // TODO
-    return super.hashCode();
+    return Objects.hash(super.hashCode(), source, sourcePath);
   }
-
 }

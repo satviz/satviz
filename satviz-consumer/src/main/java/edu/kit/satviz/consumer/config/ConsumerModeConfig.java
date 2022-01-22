@@ -1,5 +1,7 @@
 package edu.kit.satviz.consumer.config;
 
+import java.util.Objects;
+
 public abstract class ConsumerModeConfig {
 
   private ConsumerMode mode;
@@ -20,14 +22,12 @@ public abstract class ConsumerModeConfig {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ConsumerModeConfig modeConfig = (ConsumerModeConfig) o;
-    return mode.equals(modeConfig.mode);
+    ConsumerModeConfig that = (ConsumerModeConfig) o;
+    return mode == that.mode;
   }
 
   @Override
   public int hashCode() {
-    // TODO
-    return super.hashCode();
+    return Objects.hash(mode);
   }
-
 }

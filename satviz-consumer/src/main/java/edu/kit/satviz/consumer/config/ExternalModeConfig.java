@@ -1,5 +1,7 @@
 package edu.kit.satviz.consumer.config;
 
+import java.util.Objects;
+
 public class ExternalModeConfig extends ConsumerModeConfig {
 
   private int port;
@@ -14,14 +16,15 @@ public class ExternalModeConfig extends ConsumerModeConfig {
 
   @Override
   public boolean equals(Object o) {
-    return super.equals(o)
-            && port == ((ExternalModeConfig) o).port;
+    if (!super.equals(o)) {
+      return false;
+    }
+    ExternalModeConfig that = (ExternalModeConfig) o;
+    return port == that.port;
   }
 
   @Override
   public int hashCode() {
-    // TODO
-    return super.hashCode();
+    return Objects.hash(super.hashCode(), port);
   }
-
 }
