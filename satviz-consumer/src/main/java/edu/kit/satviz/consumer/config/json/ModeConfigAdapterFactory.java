@@ -43,7 +43,7 @@ public class ModeConfigAdapterFactory implements TypeAdapterFactory {
             ModeConfigAdapterFactory.this, TypeToken.get(cls)
         );
 
-        return (T) adapter.read(in);
+        return (T) adapter.fromJsonTree(element);
       }
     };
   }
