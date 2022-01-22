@@ -7,6 +7,6 @@
     "port": 12345,
     "mode": "EXTERNAL"
   },
-  "instancePath": "C:\\Users\\Michael\\Schumacher\\instance.cnf",
+  "instancePath": "foo/bar/instance.cnf",
   "recordImmediately": false
 }
