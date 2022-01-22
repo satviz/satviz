@@ -13,8 +13,12 @@ import java.nio.charset.StandardCharsets;
 public class StringSerializer extends Serializer<String> {
 
   @Override
-  public void serialize(String s, OutputStream out) throws IOException {
+  public void serialize(String s, OutputStream out) throws IOException, SerializationException {
+    if (s.contains("\0")) {
+      throw new SerializationException("invalid string");
+    }
     out.write(s.getBytes(StandardCharsets.UTF_8));
+    out.write('\0');
   }
 
   @Override
