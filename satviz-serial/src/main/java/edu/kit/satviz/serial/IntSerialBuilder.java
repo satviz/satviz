@@ -12,7 +12,7 @@ public class IntSerialBuilder extends SerialBuilder<Integer> {
 
   @Override
   protected void processAddByte(byte b) {
-    acc |= b << (read++ << 3);
+    acc |= (b & 0xff) << (read++ << 3);
     if (read == 4) {
       finish();
     }

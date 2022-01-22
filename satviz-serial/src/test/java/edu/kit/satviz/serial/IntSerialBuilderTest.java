@@ -45,18 +45,18 @@ class IntSerialBuilderTest {
   }
 
   @Test
-  void objectFinished_notFinished_test() throws SerializationException {
+  void finished_notFinished_test() throws SerializationException {
     int generatedNumber = generateNewInteger();
 
     for (int i = 0; i < 4; i++) {
-      assertFalse(emptyIntBuilder.objectFinished());
+      assertFalse(emptyIntBuilder.finished());
       emptyIntBuilder.addByte((byte) (generatedNumber >>> (8 * i)));
     }
   }
 
   @Test
-  void objectFinished_finished_test() {
-    assertTrue(fullIntBuilder.objectFinished());
+  void finished_finished_test() {
+    assertTrue(fullIntBuilder.finished());
   }
 
   @Test
@@ -81,7 +81,7 @@ class IntSerialBuilderTest {
 
     fullIntBuilder.reset();
 
-    assertFalse(fullIntBuilder.objectFinished());
+    assertFalse(fullIntBuilder.finished());
     assertNull(fullIntBuilder.getObject());
     assertDoesNotThrow(() -> {
       emptyIntBuilder.addByte((byte) generatedNumber);

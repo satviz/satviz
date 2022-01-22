@@ -13,24 +13,22 @@ class IntSerializerTest {
 
   private IntSerializer serializer;
   private int generatedInt;
-  private PipedOutputStream out;
-  private PipedInputStream in;
+  private ByteArrayOutputStream out;
+  private ByteArrayInputStream in;
 
   @BeforeEach
   void setUp() throws SerializationException, IOException {
     serializer = new IntSerializer();
     generatedInt = generateNewInteger();
-    byte[] buffer = new byte[4];
-    in = new PipedInputStream();
-    out = new PipedOutputStream(in);
+    byte[] array = new byte[4];
+    out = new ByteArrayOutputStream(array);
+    in = new ByteArrayInputStream(array);
   }
 
   @Test
   void deserialize_then_serialize_test() throws SerializationException, IOException {
-    in.read();
     serializer.serialize(generatedInt, out);
-    serializer.deserialize(in);
-    assertEquals(generatedInt, in.read());
+    assertEquals(generatedInt, serializer.deserialize(in));
   }
 
   private static int generateNewInteger() {
