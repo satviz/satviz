@@ -1,62 +1,117 @@
 package edu.kit.satviz.serial;
 
-import java.nio.ByteBuffer;
-
 /**
- * A class for deserializing objects in several steps.
- * The total amount of bytes required to deserialize an object can be passed in parts.
- * This way, a deserialization process can be halted and resumed.
+ * A class to deserialize objects of type <code>T</code>.
+ * The deserialization process can be done in several steps, as individual bytes are added.
  *
- * @param <T> the type of object to deserialize
+ * @param <T> the type of deserialized objects
  * @author luwae
  */
 public abstract class SerialBuilder<T> {
-  /**
-   * Adds a single byte to the deserialization process.
-   *
-   * @param b the byte to add
-   * @return whether the deserialization process is complete
-   * @throws SerializationException if the byte was invalid
-   */
-  public abstract boolean addByte(byte b) throws SerializationException;
+  private boolean failed = false;
+  private boolean finished = false;
 
   /**
-   * Adds a number of bytes to the deserialization process.
-   * Reads from the buffer as long as bytes are remaining and the object is not finished.
+   * Returns whether the deserialization has failed.
    *
-   * @param bb the buffer to read from
-   * @return whether the deserialization process is complete
-   * @throws SerializationException if one of the bytes read was invalid
+   * @return whether it has failed or not
    */
-  public boolean addBytes(ByteBuffer bb) throws SerializationException {
-    while (bb.hasRemaining()) {
-      if (addByte(bb.get())) {
-        return true;
-      }
-    }
-    return false;
+  public final boolean failed() {
+    return failed;
   }
 
   /**
-   * Returns the current state of the deserialization process.
-   * If the process has failed (i.e., a {@link SerializationException} has been thrown
-   *     in one of the add methods), this method shall return false.
+   * Returns whether the deserialization is finished.
    *
-   * @return whether the process is complete or not.
+   * @return whether it is finished or not
    */
-  public abstract boolean objectFinished();
+  public final boolean finished() {
+    return finished;
+  }
+
+  /**
+   * Establishes that the current deserialization has failed and throws an according exception.
+   * Call this from any concrete subclass in <code>addByte</code>.
+   *
+   * @param reason the reason of failure
+   * @throws SerializationException corresponding exception, always thrown
+   */
+  protected final void fail(String reason) throws SerializationException {
+    failed = true;
+    throw new SerializationException(reason);
+  }
+
+  /**
+   * Establishes that the current deserialization is finished.
+   * Call this from any concrete subclass in <code>addByte</code>.
+   */
+  protected final void finish() {
+    finished = true;
+  }
+
+  /**
+   * Adds a byte to the deserialization process.
+   * Adding a byte after the process has finished will change this builder to the failed state.
+   *
+   * @param b the byte to add
+   * @return whether the process is finished or not
+   * @throws SerializationException if the process failed or finished before, or failed now
+   */
+  public final boolean addByte(byte b) throws SerializationException {
+    if (failed || finished) {
+      failed = true;
+      throw new SerializationException("no more bytes expected");
+    }
+    processAddByte(b); // may change fail or finish
+    return finished;
+  }
 
   /**
    * Gets the finished object.
-   * <code>null</code> as return value does not necessarily indicate that the process
-   * is not done. Some builders might see <code>null</code> as a valid object.
    *
-   * @return the object if done, <code>null</code> otherwise.
+   * @return the finished object, null if the process has failed or not yet finished
    */
-  public abstract T getObject();
+  public final T getObject() {
+    if (failed || !finished) {
+      return null;
+    }
+    return processGetObject();
+  }
 
   /**
    * Resets this builder to its initial state.
    */
-  public abstract void reset();
+  public final void reset() {
+    failed = false;
+    finished = false;
+    processReset();
+  }
+
+  /**
+   * Adds a byte to the deserialization process.
+   * This is the primitive method to the template <code>addByte</code>.
+   * The concrete class may assume that this method is only called while
+   *     the process has not yet failed or finished.
+   *
+   * @param b the byte to add
+   * @throws SerializationException if the byte is invalid
+   */
+  protected abstract void processAddByte(byte b) throws SerializationException;
+
+  /**
+   * Gets the finished object.
+   * This is the primitive method to the template <code>getObject</code>.
+   * The concrete class may assume that this method is only called while
+   *     the process has not failed, and has finished.
+   *
+   * @return the finished object
+   */
+  protected abstract T processGetObject();
+
+  /**
+   * Resets this builder to its initial state.
+   * This is the primitive method to the template <code>reset</code>.
+   * The concrete class doesn't have to care about resetting the failed and finished state.
+   */
+  protected abstract void processReset();
 }

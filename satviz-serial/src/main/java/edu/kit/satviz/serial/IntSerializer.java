@@ -11,6 +11,7 @@ import java.io.OutputStream;
  * @author luwae
  */
 public class IntSerializer extends Serializer<Integer> {
+
   @Override
   public void serialize(Integer i, OutputStream out) throws IOException {
     int primitive = i;
@@ -21,13 +22,13 @@ public class IntSerializer extends Serializer<Integer> {
   }
 
   @Override
-  public Integer deserialize(InputStream in) throws IOException {
-    // overwritten to avoid an abundance of builders to be created
+  public Integer deserialize(InputStream in) throws IOException, SerializationException {
+    // overwritten to avoid an abundance of builders being created
     int i = 0;
     for (int numByte = 0; numByte < 4; numByte++) {
       int readByte = in.read();
       if (readByte == -1) {
-        throw new IllegalArgumentException("unexpected end of stream");
+        throw new SerializationException("unexpected end of stream");
       }
       i |= readByte << (numByte << 3);
     }

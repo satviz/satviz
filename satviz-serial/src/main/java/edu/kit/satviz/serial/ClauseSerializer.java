@@ -24,7 +24,7 @@ public class ClauseSerializer extends Serializer<Clause> {
       }
       out.write(unsignedMapping); // last byte has MSB 0
     }
-    // literals only contains the literals; need to write trailing 0 manually
+    // need to write trailing 0 manually
     out.write(0);
   }
 

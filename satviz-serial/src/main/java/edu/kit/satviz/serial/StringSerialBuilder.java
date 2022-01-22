@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * A {@link SerialBuilder} for strings.
- * Deserializes strings according to UTF-8.
+ * Uses UTF-8 to deserialize strings.
  *
  * @author luwae
  */
@@ -14,31 +14,22 @@ public class StringSerialBuilder extends SerialBuilder<String> {
   private String finishedString;
 
   @Override
-  public boolean addByte(byte b) throws SerializationException {
-    if (objectFinished()) {
-      throw new SerializationException("done");
-    }
-
-    bytes.write(b);
-    if (b == (byte) '\0') {
+  protected void processAddByte(byte b) {
+    if (b != (byte) '\0') {
+      bytes.write(b);
+    } else {
       finishedString = bytes.toString(StandardCharsets.UTF_8);
-      return true;
+      finish();
     }
-    return false;
   }
 
   @Override
-  public boolean objectFinished() {
-    return finishedString != null;
-  }
-
-  @Override
-  public String getObject() {
+  protected String processGetObject() {
     return finishedString;
   }
 
   @Override
-  public void reset() {
+  protected void processReset() {
     bytes.reset();
     finishedString = null;
   }

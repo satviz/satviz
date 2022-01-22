@@ -28,6 +28,10 @@ public class SatAssignmentSerializer extends Serializer<SatAssignment> {
         b = 0;
       }
     }
+    if (assign.getVarCount() % 4 != 0) {
+      // write final byte
+      out.write(b);
+    }
   }
 
   @Override

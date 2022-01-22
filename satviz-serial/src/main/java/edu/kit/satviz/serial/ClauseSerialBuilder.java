@@ -15,14 +15,11 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
   int numLiterals;
   int[] literals;
   Clause clause;
-
   int acc;
   int currentShift;
 
-  boolean failed = false;
-
   public ClauseSerialBuilder() {
-    reset();
+    processReset();
   }
 
   private void addLiteral(int lit) {
@@ -38,33 +35,32 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
   private int unsignedMappingToLit(int unsignedMapping) throws SerializationException {
     int lit = (unsignedMapping % 2) == 0 ? unsignedMapping / 2 : -(unsignedMapping - 1) / 2;
     if (lit == 0) {
-      failed = true;
-      throw new SerializationException("invalid unsigned literal mapping value");
+      fail("invalid unsigned literal mapping value");
     }
     return lit;
   }
 
   @Override
-  public boolean addByte(byte b) throws SerializationException {
-    if (objectFinished() || failed) {
-      failed = true;
-      // TODO encountered problem with failed state; every builder needs this?
-      throw new SerializationException("done");
-    }
-
+  protected void processAddByte(byte b) throws SerializationException {
     if (b == 0) {
-      // done; add last literal and properly resize the array
-      addLiteral(unsignedMappingToLit(acc));
+      if (acc != 0) {
+        fail("literal mapping not terminated correctly");
+      }
+      // crop array
       int[] cutLiterals = new int[numLiterals];
       System.arraycopy(literals, 0, cutLiterals, 0, numLiterals);
       clause = new Clause(cutLiterals);
-      return true;
+      finish();
+      return;
     }
 
     if ((b & 0x80) != 0) {
       // literal not done
       acc |= (b & 0x7f) << currentShift;
       currentShift += 7;
+      if (currentShift > 28) {
+        fail("unsigned literal mapping too big");
+      }
     } else {
       // literal done with this byte; add and reset
       acc |= b << currentShift;
@@ -72,26 +68,19 @@ public class ClauseSerialBuilder extends SerialBuilder<Clause> {
       acc = 0;
       currentShift = 0;
     }
-    return false;
   }
 
   @Override
-  public boolean objectFinished() {
-    return clause != null && !failed;
+  protected Clause processGetObject() {
+    return clause;
   }
 
   @Override
-  public Clause getObject() {
-    return objectFinished() ? clause : null;
-  }
-
-  @Override
-  public void reset() {
+  protected void processReset() {
     numLiterals = 0;
     literals = new int[DEFAULT_CAP];
     clause = null;
     acc = 0;
     currentShift = 0;
-    failed = false;
   }
 }

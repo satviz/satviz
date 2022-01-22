@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * A {@link Serializer} for strings.
- * Serializes strings according to UTF-8.
+ * Uses UTF-8 to serialize strings.
  *
  * @author luwae
  */

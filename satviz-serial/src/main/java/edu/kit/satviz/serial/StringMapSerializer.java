@@ -17,7 +17,8 @@ import java.util.Map;
 public class StringMapSerializer extends Serializer<Map<String, String>> {
 
   @Override
-  public void serialize(Map<String, String> map, OutputStream out) throws IOException, SerializationException {
+  public void serialize(Map<String, String> map, OutputStream out) throws IOException,
+      SerializationException {
     for (Map.Entry<String, String> entry : map.entrySet()) {
       String key = entry.getKey();
       String value = entry.getValue();
@@ -26,7 +27,7 @@ public class StringMapSerializer extends Serializer<Map<String, String>> {
         throw new SerializationException("encountered an invalid character");
       }
     }
-    // do this separated in two loops to uphold the contract of serialize (see doc)
+    // do this in two loops to avoid out being written if something goes wrong
     int pairsToDo = map.size();
     for (Map.Entry<String, String> entry : map.entrySet()) {
       String key = entry.getKey();

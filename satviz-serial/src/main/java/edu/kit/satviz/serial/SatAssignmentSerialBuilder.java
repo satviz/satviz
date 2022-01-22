@@ -15,42 +15,35 @@ public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
   private int currentVariable;
 
   public SatAssignmentSerialBuilder() {
-    reset();
+    processReset();
   }
 
   @Override
-  public boolean addByte(byte b) throws SerializationException {
+  protected void processAddByte(byte b) throws SerializationException {
     if (intBuilderDone) {
-      if (currentVariable > assign.getVarCount()) {
-        throw new SerializationException("done");
-      }
       for (int i = 0; currentVariable <= assign.getVarCount() && i < 4; i++) {
         int shift = (currentVariable & 3) << 1;
         byte value = (byte) ((b >> shift) & 3);
         assign.set(currentVariable++, convertValueToVariableState(value));
       }
-      return objectFinished();
+      if (currentVariable > assign.getVarCount()) {
+        finish();
+      }
     } else {
       if (intBuilder.addByte(b)) {
         intBuilderDone = true;
         assign = new SatAssignment(intBuilder.getObject());
       }
     }
-    return false;
   }
 
   @Override
-  public boolean objectFinished() {
-    return assign != null && currentVariable == assign.getVarCount();
+  protected SatAssignment processGetObject() {
+    return assign;
   }
 
   @Override
-  public SatAssignment getObject() {
-    return (objectFinished()) ? assign : null;
-  }
-
-  @Override
-  public void reset() {
+  protected void processReset() {
     intBuilder = new IntSerialBuilder();
     intBuilderDone = false;
     assign = null;
@@ -63,7 +56,7 @@ public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
       case 1 -> SatAssignment.VariableState.SET;
       case 2 -> SatAssignment.VariableState.UNSET;
       case 3 -> SatAssignment.VariableState.RESERVED;
-      default -> throw new IllegalArgumentException("Impossible error, what are you doing?");
+      default -> null;
     };
   }
 

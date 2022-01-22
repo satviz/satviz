@@ -2,42 +2,30 @@ package edu.kit.satviz.serial;
 
 /**
  * A {@link SerialBuilder} for integers.
- * Uses little endian format.
+ * Uses ittle endian format.
  *
  * @author luwae
  */
 public class IntSerialBuilder extends SerialBuilder<Integer> {
-  private int acc;
-  private int numByte;
-
-  public IntSerialBuilder() {
-    reset();
-  }
+  int acc = 0;
+  int read = 0;
 
   @Override
-  public boolean addByte(byte b) throws SerializationException {
-    if (objectFinished()) {
-      throw new SerializationException("done");
+  protected void processAddByte(byte b) {
+    acc |= b << (read++ << 3);
+    if (read == 4) {
+      finish();
     }
-
-    acc |= b << (numByte++ << 3);
-
-    return objectFinished();
   }
 
   @Override
-  public boolean objectFinished() {
-    return numByte == 4;
+  protected Integer processGetObject() {
+    return acc;
   }
 
   @Override
-  public Integer getObject() {
-    return (objectFinished()) ? acc : null;
-  }
-
-  @Override
-  public void reset() {
+  protected void processReset() {
     acc = 0;
-    numByte = 0;
+    read = 0;
   }
 }
