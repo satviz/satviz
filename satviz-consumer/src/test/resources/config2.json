@@ -5,5 +5,5 @@
     "toColor": 8921120
   },
   "instancePath": "../instance.cnf",
-  "videoTemplatePath": "/Videos/video-%s.mp4"
+  "videoTemplatePath": "Videos/video-%s.mp4"
 }

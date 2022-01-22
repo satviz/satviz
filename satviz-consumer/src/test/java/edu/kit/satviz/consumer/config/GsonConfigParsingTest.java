@@ -32,9 +32,9 @@ class GsonConfigParsingTest {
     modeConfig.setPort(12345);
     modeConfig.setMode(ConsumerMode.EXTERNAL);
     this.config1 = new ConsumerConfig();
-    //this.config1.setModeConfig(modeConfig);
-    this.config1.setInstancePath(Paths.get("C:/Users/Michael/Schumacher/instance.cnf"));
-    this.config1.setVideoTemplatePath("/Videos/video-%s.mp4");
+    this.config1.setModeConfig(modeConfig);
+    this.config1.setInstancePath(Paths.get("foo/bar/instance.cnf"));
+    this.config1.setVideoTemplatePath("Videos/video-%s.mp4");
   }
 
   /**

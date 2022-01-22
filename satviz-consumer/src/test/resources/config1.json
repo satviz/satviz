@@ -1,6 +1,6 @@
 {
   "noGui": false,
-  "videoTemplatePath": "/Videos/video-%s.mp4",
+  "videoTemplatePath": "Videos/video-%s.mp4",
   "bufferSize": 0,
   "windowSize": 0,
   "modeConfig": {
