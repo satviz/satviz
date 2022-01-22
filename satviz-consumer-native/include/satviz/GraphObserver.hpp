@@ -17,10 +17,10 @@ protected:
   GraphObserver(Graph *gr) : my_graph(gr) {}
 
 public:
-  virtual void onWeightUpdate(WeightUpdate &update) {}
-  virtual void onHeatUpdate(HeatUpdate &update) {}
+  virtual void onWeightUpdate(WeightUpdate &update) { (void) update; }
+  virtual void onHeatUpdate(HeatUpdate &update) { (void) update; }
   virtual void onLayoutChange() {}
-  virtual void onLayoutChange(std::vector<int> changed) {}
+  virtual void onLayoutChange(std::vector<int> changed) { (void) changed; }
   virtual void onReload() {}
 };
 

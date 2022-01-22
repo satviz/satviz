@@ -14,6 +14,7 @@ GraphRenderer::~GraphRenderer()
 
 void GraphRenderer::draw(Camera &camera)
 {
+  (void) camera;
 }
 
 } // namespace video
