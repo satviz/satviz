@@ -1,6 +1,7 @@
 package edu.kit.satviz.consumer.config;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class ConsumerConfig {
 
@@ -100,7 +101,6 @@ public class ConsumerConfig {
     return heatmapColors;
   }
 
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -110,32 +110,21 @@ public class ConsumerConfig {
       return false;
     }
     ConsumerConfig config = (ConsumerConfig) o;
-
-    boolean bothModeConfigsAreNull = modeConfig == null && config.modeConfig == null;
-    boolean oneModeConfigIsNull = modeConfig == null || config.modeConfig == null;
-    boolean bothPathsAreNull = instancePath == null && config.instancePath == null;
-    boolean onePathIsNull = instancePath == null || config.instancePath == null;
-    boolean equalModeConfig = bothModeConfigsAreNull
-            || (!oneModeConfigIsNull && modeConfig.equals(config.modeConfig));
-    boolean equalInstancePath = bothPathsAreNull
-            || (!onePathIsNull && instancePath.equals(config.instancePath));
-    boolean equalMandatorySettings = equalModeConfig && equalInstancePath;
-
-    boolean equalWorkflowSettings = noGui == config.isNoGui()
-                    && videoTemplatePath.equals(config.videoTemplatePath)
-                    && recordImmediately == config.recordImmediately;
-
-    boolean equalCosmeticSettings = bufferSize == config.bufferSize
-                    && weightFactor == config.weightFactor
-                    && windowSize == config.windowSize
-                    && heatmapColors.equals(config.heatmapColors);
-    return equalMandatorySettings && equalWorkflowSettings && equalCosmeticSettings;
+    return noGui == config.noGui
+        && recordImmediately == config.recordImmediately
+        && bufferSize == config.bufferSize
+        && windowSize == config.windowSize
+        && Objects.equals(modeConfig, config.modeConfig)
+        && Objects.equals(instancePath, config.instancePath)
+        && Objects.equals(videoTemplatePath, config.videoTemplatePath)
+        && weightFactor == config.weightFactor
+        && Objects.equals(heatmapColors, config.heatmapColors);
   }
 
   @Override
   public int hashCode() {
-    // TODO
-    return super.hashCode();
+    return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
+        recordImmediately, bufferSize, weightFactor, windowSize, heatmapColors);
   }
 
 }
