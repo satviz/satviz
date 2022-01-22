@@ -3,7 +3,7 @@
 
 #include <string>
 #include <stddef.h>
-#include <glad/gl.h>
+#include <glad/gl.h> // TODO don't pull this include in
 
 namespace satviz {
 namespace video {

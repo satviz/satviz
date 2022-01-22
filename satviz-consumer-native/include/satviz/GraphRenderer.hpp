@@ -16,6 +16,8 @@ class GraphRenderer : graph::GraphObserver {
 private:
   unsigned int node_vbo;
   unsigned int edge_ibo;
+  size_t node_count;
+  size_t edge_count;
   ogdf::EdgeArray<int> edge_mapping;
 
 public:
