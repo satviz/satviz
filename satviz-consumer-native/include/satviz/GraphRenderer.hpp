@@ -49,11 +49,11 @@ public:
 
   void draw(Camera &camera, int width, int height);
 
-  void onWeightUpdate(graph::WeightUpdate &update);
-  void onHeatUpdate(graph::HeatUpdate &update);
-  void onLayoutChange();
-  void onLayoutChange(std::vector<int> changed);
-  void onReload();
+  void onWeightUpdate(graph::WeightUpdate &update) override;
+  void onHeatUpdate(graph::HeatUpdate &update) override;
+  void onLayoutChange() override;
+  void onLayoutChange(std::vector<int> changed) override;
+  void onReload() override;
 };
 
 } // namespace video
