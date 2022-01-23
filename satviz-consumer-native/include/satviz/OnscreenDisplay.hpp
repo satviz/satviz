@@ -7,7 +7,7 @@ namespace satviz {
 namespace video {
 
 /**
- *
+ * A Display that renders to a window.
  */
 class OnscreenDisplay : Display {
 private:
@@ -21,6 +21,7 @@ public:
 
   bool pollEvent(sf::Event &event);
   void lockSize(bool lock);
+  void displayFrame();
 };
 
 } // namespace video

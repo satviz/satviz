@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.1)
 
+set(SRC_SATVIZ_FILES
+  Bindings.cpp
+  Display.cpp
+  OnscreenDisplay.cpp
+  OffscreenDisplay.cpp
+)
+
 add_library(
   satviz-consumer-native SHARED
-  Bindings.cpp
+  ${SRC_SATVIZ_FILES}
 )
 
 target_include_directories(
@@ -17,6 +24,7 @@ target_link_libraries(
   PRIVATE OGDF
   PRIVATE sfml-window
   PRIVATE ${THEORA_LIBRARIES}
+  PRIVATE satviz-glad
 )
 
 target_compile_options(
