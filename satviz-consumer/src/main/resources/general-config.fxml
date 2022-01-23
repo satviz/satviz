@@ -25,13 +25,13 @@
                 <ToolBar prefHeight="0.0" prefWidth="348.0" BorderPane.alignment="CENTER">
                     <Pane HBox.hgrow="ALWAYS" />
                     <items>
-                        <Button mnemonicParsing="false" text="Load Settings" />
-                        <Button mnemonicParsing="false" text="Save Settings" />
+                        <Button mnemonicParsing="false" text="Load Settings" fx:id="loadSettingsButton"/>
+                        <Button mnemonicParsing="false" text="Save Settings" fx:id="saveSettingsButton"/>
                     </items>
                 </ToolBar>
             </top>
             <bottom>
-                <Button mnemonicParsing="false" onAction="#run" text="Run" BorderPane.alignment="CENTER" />
+                <Button mnemonicParsing="false" text="Run" BorderPane.alignment="CENTER" fx:id="runButton"/>
             </bottom>
             <center>
                 <VBox prefHeight="429.0" prefWidth="0.0" BorderPane.alignment="CENTER">
@@ -60,20 +60,20 @@
                                           <Insets right="10.0" />
                                        </padding>
                                     </Label>
-                                    <Button mnemonicParsing="false" prefHeight="21.0" prefWidth="61.0" text="Select File">
+                                    <Button mnemonicParsing="false" prefHeight="21.0" prefWidth="61.0" text="Select File" fx:id="recordingFileButton">
                                        <font>
                                           <Font size="10.0" />
                                        </font>
                                     </Button>
-                                    <Label text="home/sat/recordings/recording.ogv">
+                                    <Label text="home/sat/recordings/recording.ogv" fx:id="recordingFileLabel">
                                        <HBox.margin>
                                           <Insets left="10.0" top="2.0" />
                                        </HBox.margin>
                                     </Label>
                                  </children>
                               </HBox>
-                                      <CheckBox mnemonicParsing="false" selected="true" text="Show Live Visualization" />
-                                      <CheckBox mnemonicParsing="false" prefHeight="22.0" prefWidth="190.0" text="Record Animation From Start" />
+                                      <CheckBox mnemonicParsing="false" selected="true" text="Show Live Visualization" fx:id="showLiveVisualizationCheckBox"/>
+                                      <CheckBox mnemonicParsing="false" prefHeight="22.0" prefWidth="190.0" text="Record Animation From Start" fx:id="recordFromStartCheckBox"/>
                            </children>
                            <padding>
                               <Insets bottom="10.0" />
@@ -89,7 +89,7 @@
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <ChoiceBox prefWidth="150.0" value="Constant" />
+                              <ChoiceBox prefWidth="150.0" value="Constant" fx:id="weightFactorChoiceBox"/>
                            </children>
                            <VBox.margin>
                               <Insets bottom="10.0" />
@@ -109,7 +109,7 @@
                                           <Insets right="10.0" />
                                        </padding>
                                     </Label>
-                                    <Spinner>
+                                    <Spinner fx:id="windowSizeSpinner">
                                        <HBox.margin>
                                           <Insets bottom="5.0" />
                                        </HBox.margin>
@@ -123,7 +123,7 @@
                                           <Insets right="10.0" />
                                        </padding>
                                     </Label>
-                                    <ColorPicker prefHeight="22.0" prefWidth="112.0">
+                                    <ColorPicker prefHeight="22.0" prefWidth="112.0" fx:id="coldColorColorPicker">
                                        <HBox.margin>
                                           <Insets />
                                        </HBox.margin>
@@ -133,7 +133,7 @@
                                           <Insets left="10.0" right="10.0" />
                                        </padding>
                                     </Label>
-                                    <ColorPicker layoutX="79.0" layoutY="10.0" prefHeight="22.0" prefWidth="112.0">
+                                    <ColorPicker layoutX="79.0" layoutY="10.0" prefHeight="22.0" prefWidth="112.0" fx:id="hotColorColorPicker">
                                        <HBox.margin>
                                           <Insets />
                                        </HBox.margin></ColorPicker>
@@ -153,8 +153,8 @@
                               </Label>
                               <HBox prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <Button mnemonicParsing="false" prefHeight="27.0" prefWidth="75.0" text="Select File" />
-                                    <Label alignment="BOTTOM_CENTER" text="home/sat/instances/instance.cnf">
+                                    <Button mnemonicParsing="false" prefHeight="27.0" prefWidth="75.0" text="Select File" fx:id="satInstanceFileButton"/>
+                                    <Label alignment="BOTTOM_CENTER" text="home/sat/instances/instance.cnf" fx:id="satInstanceFileLabel">
                                        <HBox.margin>
                                           <Insets left="10.0" top="5.0" />
                                        </HBox.margin>
@@ -173,7 +173,7 @@
                                     <Insets right="10.0" />
                                  </HBox.margin>
                                       </Label>
-                                      <ChoiceBox fx:id="modeChoiceBox" onMouseClicked="#updateMode" prefHeight="0.0" prefWidth="132.0" value="Embedded" />
+                                      <ChoiceBox prefHeight="0.0" prefWidth="132.0" fx:id="modeChoiceBox"/>
                            </children>
                            <padding>
                               <Insets top="10.0" />
