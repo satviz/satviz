@@ -54,6 +54,7 @@ GraphRenderer::GraphRenderer(graph::Graph *gr)
   glGenVertexArrays(1, &node_state);
   glGenVertexArrays(1, &edge_state);
   glGenBuffers(NUM_BUFFER_OBJECTS, buffer_objects);
+  glGenTextures(1, &heat_palette);
 
   // Allocate buffers
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
@@ -75,12 +76,24 @@ GraphRenderer::GraphRenderer(graph::Graph *gr)
   glBindVertexArray(edge_state);
   simpleGlVertexAttrib(ATTR_EDGE_POSITION, buffer_objects[BO_NODE_OFFSET], 2, GL_FLOAT, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+
+  // Set up heatmap color palette
+  const GLuint palette_colors[] = {
+    0x00808CFF,
+    0xF2B34DFF,
+  };
+  glBindTexture(GL_TEXTURE_1D, heat_palette);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, palette_colors);
 }
 
 GraphRenderer::~GraphRenderer() {
   glDeleteVertexArrays(1, &node_state);
   glDeleteVertexArrays(1, &edge_state);
   glDeleteBuffers(NUM_BUFFER_OBJECTS, buffer_objects);
+  glDeleteTextures(1, &heat_palette);
 }
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {
@@ -100,6 +113,7 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
   glUseProgram(resources.node_prog);
   glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
   glBindVertexArray(node_state);
+  glBindTexture(GL_TEXTURE_1D, heat_palette);
   glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, node_count);
 }
 

@@ -33,6 +33,7 @@ private:
   unsigned node_state;
   unsigned edge_state;
   unsigned buffer_objects[NUM_BUFFER_OBJECTS];
+  unsigned heat_palette;
   int node_count;
   int edge_count;
   int node_capacity;
