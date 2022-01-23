@@ -65,28 +65,13 @@ GraphRenderer::GraphRenderer(graph::Graph *gr)
 
   // Set up node render state
   glBindVertexArray(node_state);
-
-  glBindBuffer(GL_ARRAY_BUFFER, resources.template_vbo);
-  glEnableVertexAttribArray(ATTR_NODE_POSITION);
-  glVertexAttribPointer(ATTR_NODE_POSITION, 2, GL_FLOAT, GL_TRUE, 0, (void *) 0);
-
-  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
-  glEnableVertexAttribArray(ATTR_NODE_HEAT);
-  glVertexAttribPointer(ATTR_NODE_HEAT, 1, GL_UNSIGNED_BYTE, GL_TRUE, 0, (void *) 0);
-  glVertexAttribDivisor(ATTR_NODE_HEAT, 1);
-
-  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
-  glEnableVertexAttribArray(ATTR_NODE_OFFSET);
-  glVertexAttribPointer(ATTR_NODE_OFFSET, 2, GL_FLOAT, GL_TRUE, 0, (void *) 0);
-  glVertexAttribDivisor(ATTR_NODE_OFFSET, 1);
+  simpleGlVertexAttrib(ATTR_NODE_POSITION, resources.template_vbo,         2, GL_FLOAT,         0);
+  simpleGlVertexAttrib(ATTR_NODE_HEAT,     buffer_objects[BO_NODE_HEAT],   1, GL_UNSIGNED_BYTE, 1);
+  simpleGlVertexAttrib(ATTR_NODE_OFFSET,   buffer_objects[BO_NODE_OFFSET], 2, GL_FLOAT,         1);
 
   // Set up edge render state
   glBindVertexArray(edge_state);
-
-  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
-  glEnableVertexAttribArray(ATTR_EDGE_POSITION);
-  glVertexAttribPointer(ATTR_EDGE_POSITION, 2, GL_FLOAT, GL_TRUE, 0, (void *) 0);
-
+  simpleGlVertexAttrib(ATTR_EDGE_POSITION, buffer_objects[BO_NODE_OFFSET], 2, GL_FLOAT, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
 }
 

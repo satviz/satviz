@@ -57,5 +57,12 @@ void resizeGlBuffer(GLuint *id, size_t old_size, size_t new_size) {
 	*id = new_id;
 }
 
+void simpleGlVertexAttrib(GLuint attr, GLuint buffer, int count, GLenum type, int divisor) {
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glEnableVertexAttribArray(attr);
+  glVertexAttribPointer(attr, count, type, GL_TRUE, 0, (void *) 0);
+  glVertexAttribDivisor(attr, divisor);
+}
+
 } // namespace video
 } // namespace satviz
