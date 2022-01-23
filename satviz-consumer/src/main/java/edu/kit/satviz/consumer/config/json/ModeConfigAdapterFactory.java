@@ -13,6 +13,16 @@ import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import java.io.IOException;
 
+/**
+ * This TypeAdapterFactory is used for serializing and deserializing instances
+ * of the ConsumerModeConfig subclasses.<br>
+ *
+ *<p>
+ *   Note: This class is used as a workaround for an unresolved issue with gson.
+ *</p>
+ *
+ * @author johnnyjayjay
+ */
 public class ModeConfigAdapterFactory implements TypeAdapterFactory {
 
   @Override

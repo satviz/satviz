@@ -7,6 +7,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * This TypeAdapter adapts the Path class, so that the gson parser can
+ * serialize and deserialize instances of the Path class without issues.
+ *
+ * @author johnnyjayjay
+ */
 public class PathAdapter extends TypeAdapter<Path> {
 
   @Override
