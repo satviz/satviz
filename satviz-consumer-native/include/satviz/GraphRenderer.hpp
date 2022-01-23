@@ -36,7 +36,6 @@ private:
   unsigned heat_palette;
   int node_count;
   int edge_count;
-  int node_capacity;
   int edge_capacity;
   ogdf::EdgeArray<int> edge_mapping;
 

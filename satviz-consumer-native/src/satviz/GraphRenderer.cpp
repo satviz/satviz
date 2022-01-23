@@ -35,6 +35,7 @@ void GraphRenderer::initializeResources() {
   glDeleteShader(node_frag);
   glDeleteShader(edge_vert);
   glDeleteShader(edge_frag);
+
   // Upload template geometry to VRAM
   glGenBuffers(1, &resources.template_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, resources.template_vbo);
@@ -48,7 +49,8 @@ void GraphRenderer::terminateResources() {
 }
 
 GraphRenderer::GraphRenderer(graph::Graph *gr)
-  : GraphObserver(gr), node_count(0), edge_count(0), node_capacity(1000), edge_capacity(1000) {
+  : GraphObserver(gr), edge_count(0), edge_capacity(1000) {
+  node_count = my_graph->getOgdfGraph().numberOfNodes();
 
   // Generate OpenGL handles
   glGenVertexArrays(1, &node_state);
@@ -58,9 +60,9 @@ GraphRenderer::GraphRenderer(graph::Graph *gr)
 
   // Allocate buffers
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
-  glBufferData(GL_ARRAY_BUFFER, 2 * sizeof (float) * node_capacity, NULL, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, 2 * sizeof (float) * node_count, NULL, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
-  glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * node_capacity, NULL, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * node_count, NULL, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_WEIGHT]);
   glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
