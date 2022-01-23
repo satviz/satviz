@@ -1,7 +1,11 @@
 package edu.kit.satviz.network;
 
 import edu.kit.satviz.serial.SerialBuilder;
+import edu.kit.satviz.serial.SerializationException;
 import edu.kit.satviz.serial.Serializer;
+
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
 /**
@@ -23,13 +27,24 @@ public class NetworkBlueprint {
   }
 
   /**
-   * Returns the serializer corresponding to a type.
+   * Serializes an object according to its type.
    *
    * @param type the type
-   * @return the serializer matching the type, <code>null</code> if not specified
+   * @param obj the object to serialize
+   * @param out the stream to write to
+   * @return whether the operation succeeded or not
    */
-  public Serializer<?> getSerializer(byte type) {
-    return typeMap.get(type);
+  public boolean serialize(byte type, Object obj, OutputStream out) {
+    Serializer<?> serial = typeMap.get(type);
+    if (serial != null) {
+      try {
+        serial.serializeUnsafe(obj, out);
+      } catch (IOException | SerializationException | ClassCastException e) {
+        return false;
+      }
+      return true;
+    }
+    return false;
   }
 
   /**
