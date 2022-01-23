@@ -1,15 +1,17 @@
 #include <satviz/GraphRenderer.hpp>
 #include <satviz/GlUtils.hpp>
 
-#define NODE_ATTR_POSITION 0
-#define NODE_ATTR_HEAT     1
-#define NODE_ATTR_OFFSET   2
-
-#define EDGE_ATTR_POSITION 0
-#define EDGE_ATTR_WEIGHT   1
-
 namespace satviz {
 namespace video {
+
+#define UNIFORM_WORLD_TO_VIEW 0
+
+#define ATTR_NODE_POSITION 0
+#define ATTR_NODE_HEAT     1
+#define ATTR_NODE_OFFSET   2
+
+#define ATTR_EDGE_POSITION 0
+#define ATTR_EDGE_WEIGHT   1
 
 static const float template_coordinates[] = {
      1.0f, -1.0f,
@@ -44,52 +46,54 @@ void GraphRenderer::terminateResources() {
 }
 
 GraphRenderer::GraphRenderer(graph::Graph *gr)
-  : GraphObserver(gr) {
-  this->node_count = 0;
-  glGenBuffers(1, &this->node_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, this->node_vbo);
-  glBufferData(GL_ARRAY_BUFFER, (8 + 1) * NODES_PER_VBO, NULL, GL_DYNAMIC_DRAW);
+  : GraphObserver(gr), node_count(0), edge_count(0), node_capacity(1000), edge_capacity(1000) {
 
-  this->edge_count = 0;
-  glGenBuffers(1, &this->edge_ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->edge_ibo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 8 * EDGES_PER_IBO, NULL, GL_DYNAMIC_DRAW);
+  // Generate OpenGL handles
+  glGenVertexArrays(1, &node_state);
+  glGenVertexArrays(1, &edge_state);
+  glGenBuffers(NUM_BUFFER_OBJECTS, buffer_objects);
 
-  glGenVertexArrays(1, &resources.node_vao);
-  glBindVertexArray(resources.node_vao);
+  // Allocate buffers
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
+  glBufferData(GL_ARRAY_BUFFER, 2 * sizeof (float) * node_capacity, NULL, GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
+  glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * node_capacity, NULL, GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_WEIGHT]);
+  glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * sizeof (unsigned) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
 
-  glEnableVertexAttribArray(NODE_ATTR_POSITION);
-  glVertexAttribFormat(NODE_ATTR_POSITION, 2, GL_FLOAT, GL_FALSE, 0);
-  glVertexAttribBinding(NODE_ATTR_POSITION, NODE_ATTR_POSITION);
-  glBindVertexBuffer(NODE_ATTR_POSITION, resources.template_vbo, 0, 2 * sizeof (float));
+  // Set up node render state
+  glBindVertexArray(node_state);
 
-  glEnableVertexAttribArray(NODE_ATTR_HEAT);
-  glVertexAttribFormat(NODE_ATTR_HEAT, 1, GL_UNSIGNED_BYTE, GL_TRUE, 0);
-  glVertexAttribBinding(NODE_ATTR_HEAT, NODE_ATTR_HEAT);
-  glVertexBindingDivisor(NODE_ATTR_HEAT, 1);
+  glBindBuffer(GL_ARRAY_BUFFER, resources.template_vbo);
+  glEnableVertexAttribArray(ATTR_NODE_POSITION);
+  glVertexAttribPointer(ATTR_NODE_POSITION, 2, GL_FLOAT, GL_TRUE, 0, (void *) 0);
 
-  glEnableVertexAttribArray(NODE_ATTR_OFFSET);
-  glVertexAttribFormat(NODE_ATTR_OFFSET, 2, GL_FLOAT, GL_FALSE, 0);
-  glVertexAttribBinding(NODE_ATTR_OFFSET, NODE_ATTR_OFFSET);
-  glVertexBindingDivisor(NODE_ATTR_OFFSET, 1);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
+  glEnableVertexAttribArray(ATTR_NODE_HEAT);
+  glVertexAttribPointer(ATTR_NODE_HEAT, 1, GL_UNSIGNED_BYTE, GL_TRUE, 0, (void *) 0);
+  glVertexAttribDivisor(ATTR_NODE_HEAT, 1);
 
-  glGenVertexArrays(1, &resources.edge_vao);
-  glBindVertexArray(resources.edge_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
+  glEnableVertexAttribArray(ATTR_NODE_OFFSET);
+  glVertexAttribPointer(ATTR_NODE_OFFSET, 2, GL_FLOAT, GL_TRUE, 0, (void *) 0);
+  glVertexAttribDivisor(ATTR_NODE_OFFSET, 1);
 
-  glEnableVertexAttribArray(EDGE_ATTR_POSITION);
-  glVertexAttribFormat(EDGE_ATTR_POSITION, 2, GL_FLOAT, GL_FALSE, 0);
-  glVertexAttribBinding(EDGE_ATTR_POSITION, EDGE_ATTR_POSITION);
+  // Set up edge render state
+  glBindVertexArray(edge_state);
 
-  glEnableVertexAttribArray(EDGE_ATTR_WEIGHT);
-  glVertexAttribFormat(EDGE_ATTR_WEIGHT, 1, GL_UNSIGNED_BYTE, GL_TRUE, 0);
-  glVertexAttribBinding(EDGE_ATTR_WEIGHT, EDGE_ATTR_WEIGHT);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
+  glEnableVertexAttribArray(ATTR_EDGE_POSITION);
+  glVertexAttribPointer(ATTR_EDGE_POSITION, 2, GL_FLOAT, GL_TRUE, 0, (void *) 0);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
 }
 
 GraphRenderer::~GraphRenderer() {
-  glDeleteVertexArrays(1, &resources.node_vao);
-  glDeleteVertexArrays(1, &resources.edge_vao);
-  glDeleteBuffers(1, &this->node_vbo);
-  glDeleteBuffers(1, &this->edge_ibo);
+  glDeleteVertexArrays(1, &node_state);
+  glDeleteVertexArrays(1, &edge_state);
+  glDeleteBuffers(NUM_BUFFER_OBJECTS, buffer_objects);
 }
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {
@@ -99,27 +103,25 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  // Draw edges
   glUseProgram(resources.edge_prog);
-  glUniformMatrix4fv(glGetUniformLocation(resources.edge_prog, "world_to_view"), 1, GL_FALSE, view_matrix);
-  glBindVertexArray(resources.edge_vao);
-  glBindVertexBuffer(EDGE_ATTR_POSITION, this->node_vbo, 0, 2 * sizeof (float));
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->edge_ibo);
-  glDrawElements(GL_LINES, 2 * this->edge_count, GL_UNSIGNED_INT, 0);
+  glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
+  glBindVertexArray(edge_state);
+  glDrawElements(GL_LINES, 2 * edge_count, GL_UNSIGNED_INT, 0);
 
+  // Draw nodes
   glUseProgram(resources.node_prog);
-  glUniformMatrix4fv(glGetUniformLocation(resources.node_prog, "world_to_view"), 1, GL_FALSE, view_matrix);
-  glBindVertexArray(resources.node_vao);
-  glBindVertexBuffer(NODE_ATTR_POSITION, this->node_vbo, 0, 2 * sizeof (float));
-  glBindVertexBuffer(NODE_ATTR_HEAT,     this->node_vbo, 8 * NODES_PER_VBO, 1);
-  glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, this->node_count);
+  glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
+  glBindVertexArray(node_state);
+  glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, node_count);
 }
 
 void GraphRenderer::onWeightUpdate(graph::WeightUpdate &update) {
-
+  (void) update;
 }
 
 void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
-
+  (void) update;
 }
 
 void GraphRenderer::onLayoutChange() {
@@ -127,7 +129,7 @@ void GraphRenderer::onLayoutChange() {
 }
 
 void GraphRenderer::onLayoutChange(std::vector<int> changed) {
-
+  (void) changed;
 }
 
 void GraphRenderer::onReload() {

@@ -14,6 +14,14 @@ namespace video {
  */
 class GraphRenderer : graph::GraphObserver {
 private:
+  enum {
+    BO_NODE_OFFSET,
+    BO_NODE_HEAT,
+    BO_EDGE_WEIGHT,
+    BO_EDGE_INDICES,
+    NUM_BUFFER_OBJECTS
+  };
+
   struct Resources {
     unsigned node_prog;
     unsigned edge_prog;
@@ -22,12 +30,13 @@ private:
 
   static Resources resources;
 
-  unsigned node_vao;
-  unsigned edge_vao;
-  unsigned node_vbo;
-  unsigned edge_ibo;
+  unsigned node_state;
+  unsigned edge_state;
+  unsigned buffer_objects[NUM_BUFFER_OBJECTS];
   int node_count;
   int edge_count;
+  int node_capacity;
+  int edge_capacity;
   ogdf::EdgeArray<int> edge_mapping;
 
 public:

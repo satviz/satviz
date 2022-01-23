@@ -1,3 +1,4 @@
+# TODO dependency tracking!
 function(embed_files output)
     # Create empty output file
     file(WRITE ${output} "")

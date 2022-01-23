@@ -1,6 +1,6 @@
 #version 330 core
 
-uniform mat4 world_to_view;
+layout(location = 0) uniform mat4 world_to_view;
 
 layout(location = 0) in vec2 node_position;
 
