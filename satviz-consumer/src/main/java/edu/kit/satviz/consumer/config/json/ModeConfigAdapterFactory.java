@@ -40,7 +40,7 @@ public class ModeConfigAdapterFactory implements TypeAdapterFactory {
 
       @SuppressWarnings("unchecked")
       @Override
-      public T read(JsonReader in) throws IOException {
+      public T read(JsonReader in) {
         JsonElement element = gson.fromJson(in, JsonElement.class);
         ConsumerMode mode = ConsumerMode.valueOf(
             element.getAsJsonObject().get("mode").getAsString()
