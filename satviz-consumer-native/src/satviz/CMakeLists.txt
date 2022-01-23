@@ -15,7 +15,9 @@ set(SRC_SATVIZ_FILES
   OffscreenDisplay.cpp
   GraphRenderer.cpp
   GlUtils.cpp
-  Camera.cpp)
+  Camera.cpp
+  VideoController.cpp
+)
 
 add_library(
   satviz-consumer-native SHARED

@@ -12,8 +12,15 @@ namespace video {
  *
  */
 class VideoController {
+private:
+  graph::Graph *graph;
+  Display *display;
+
 public:
-  VideoController(Graph *graph, Display *dpy);
+  bool wantToClose;
+
+  VideoController(graph::Graph *gr, Display *dpy);
+  ~VideoController();
 
   void nextFrame();
 
