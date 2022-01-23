@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.1)
 
 embed_files(
   ${CMAKE_CURRENT_BINARY_DIR}/ShaderSources.inl
-  node.vert
-  node.frag
-  edge.vert
-  edge.frag
+  NodeShader.vert
+  NodeShader.frag
+  EdgeShader.vert
+  EdgeShader.frag
 )
 
 set(SRC_SATVIZ_FILES

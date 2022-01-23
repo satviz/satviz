@@ -1,7 +1,7 @@
 # TODO dependency tracking!
 function(embed_files output)
     # Create empty output file
-    file(WRITE ${output} "")
+    file(WRITE ${output} "// This file has been auto-generated at compile time\n")
     # Iterate through input files
     foreach(filepath ${ARGN})
         # Get short filename
