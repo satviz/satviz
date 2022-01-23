@@ -41,7 +41,43 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private Button runButton;
 
+  @FXML
+  private void initialize() {
+
+  }
+
+  @FXML
+  private void loadSettings() {
+
+  }
+
+  @FXML
+  private void saveSettings() {
+
+  }
+
+  @FXML
+  private void selectRecordingFile() {
+
+  }
+
+  @FXML
+  private void setLiveVisualization() {
+
+  }
+
+  @FXML
+  private void selectSatInstanceFile() {
+
+  }
+
+  @FXML
+  private void updateMode() {
+
+  }
+
   @Override
+  @FXML
   protected void run() {
 
   }
