@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.1)
 
+embed_files(
+  ${CMAKE_CURRENT_BINARY_DIR}/ShaderSources.inl
+  node.vert
+  node.frag
+  edge.vert
+  edge.frag
+)
+
 set(SRC_SATVIZ_FILES
   Bindings.cpp
   Display.cpp
@@ -19,6 +27,7 @@ target_include_directories(
   PRIVATE ${OGDF_INCLUDE_DIRS}
   PRIVATE ${SFML_INCLUDE_DIRS}
   PRIVATE ${THEORA_INCLUDE_DIRS}
+  PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(

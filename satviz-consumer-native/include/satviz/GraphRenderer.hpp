@@ -15,17 +15,17 @@ namespace video {
 class GraphRenderer : graph::GraphObserver {
 private:
   struct Resources {
-    GLuint node_prog;
-    GLuint edge_prog;
-    GLuint template_vbo;
+    unsigned node_prog;
+    unsigned edge_prog;
+    unsigned template_vbo;
   };
 
   static Resources resources;
 
-  GLuint node_vao;
-  GLuint edge_vao;
-  unsigned int node_vbo;
-  unsigned int edge_ibo;
+  unsigned node_vao;
+  unsigned edge_vao;
+  unsigned node_vbo;
+  unsigned edge_ibo;
   int node_count;
   int edge_count;
   ogdf::EdgeArray<int> edge_mapping;
@@ -39,8 +39,8 @@ public:
 
   void draw(Camera &camera, int width, int height);
 
-  void onWeightUpdate(WeightUpdate &update);
-  void onHeatUpdate(HeatUpdate &update);
+  void onWeightUpdate(graph::WeightUpdate &update);
+  void onHeatUpdate(graph::HeatUpdate &update);
   void onLayoutChange();
   void onLayoutChange(std::vector<int> changed);
   void onReload();

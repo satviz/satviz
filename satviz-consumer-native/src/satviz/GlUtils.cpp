@@ -1,8 +1,5 @@
 #include <satviz/GlUtils.hpp>
 
-#include <fstream>
-#include <sstream>
-
 #include <glad/gl.h>
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
@@ -10,22 +7,9 @@
 namespace satviz {
 namespace video {
 
-bool readTextFile(const char *filename, std::string &string) {
-  std::ifstream file(filename);
-  if (!file) return false;
-  std::stringstream buffer;
-  buffer << file.rdbuf();
-  string = buffer.str();
-  return true;
-}
-
-GLuint compileGlShader(const char *filename, GLenum type) {
+GLuint compileGlShader(const char *source, unsigned length, GLenum type) {
   GLuint id = glCreateShader(type);
-  std::string source;
-  if (readTextFile(filename, source)) {
-    const char *c_str = source.c_str();
-    glShaderSource(id, 1, (const GLchar * const *) &c_str, NULL);
-  }
+  glShaderSource(id, 1, (const GLchar * const *) &source, (const GLint *) &length);
   glCompileShader(id);
   GLint success;
   glGetShaderiv(id, GL_COMPILE_STATUS, &success);
@@ -33,7 +17,7 @@ GLuint compileGlShader(const char *filename, GLenum type) {
     char msg_buf[1024];
     GLsizei msg_len;
     glGetShaderInfoLog(id, sizeof msg_buf, &msg_len, msg_buf);
-    fprintf(stderr, "%s: %s\n", filename, msg_buf);
+    fprintf(stderr, "GLSL error: %s\n", msg_buf);
   }
   return id;
 }

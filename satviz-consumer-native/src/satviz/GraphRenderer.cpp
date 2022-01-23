@@ -18,25 +18,26 @@ static const float template_coordinates[] = {
     -1.0f,  1.0f,
 };
 
-static void GraphRenderer::initializeResources() {
+void GraphRenderer::initializeResources() {
   // Load shaders
-  GLuint node_vert    = compileGlShader(node_vert_shader_source, GL_VERTEX_SHADER);
-  GLuint node_frag    = compileGlShader(node_frag_shader_source, GL_FRAGMENT_SHADER);
-  GLuint node_vert    = compileGlShader(edge_vert_shader_source, GL_VERTEX_SHADER);
-  GLuint edge_frag    = compileGlShader(edge_frag_shader_source, GL_FRAGMENT_SHADER);
-  resources.node_prog = linkGlProgram(node_vert, node_frag);
-  resources.edge_prog = linkGlProgram(edge_vert, edge_frag);
-  glDeleteShader(node_vert);
-  glDeleteShader(node_frag);
-  glDeleteShader(edge_vert);
-  glDeleteShader(edge_frag);
+#include <ShaderSources.inl>
+  GLuint node_vert_id = compileGlShader(node_vert, node_vert_size, GL_VERTEX_SHADER);
+  GLuint node_frag_id = compileGlShader(node_frag, node_frag_size, GL_FRAGMENT_SHADER);
+  GLuint edge_vert_id = compileGlShader(edge_vert, edge_vert_size, GL_VERTEX_SHADER);
+  GLuint edge_frag_id = compileGlShader(edge_frag, edge_frag_size, GL_FRAGMENT_SHADER);
+  resources.node_prog = linkGlProgram(node_vert_id, node_frag_id);
+  resources.edge_prog = linkGlProgram(edge_vert_id, edge_frag_id);
+  glDeleteShader(node_vert_id);
+  glDeleteShader(node_frag_id);
+  glDeleteShader(edge_vert_id);
+  glDeleteShader(edge_frag_id);
   // Upload template geometry to VRAM
   glGenBuffers(1, &resources.template_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, resources.template_vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof template_coordinates, template_coordinates, GL_STATIC_DRAW);
 }
 
-static void GraphRenderer::terminateResources() {
+void GraphRenderer::terminateResources() {
   glDeleteBuffers(1, &resources.template_vbo);
   glDeleteProgram(resources.node_prog);
   glDeleteProgram(resources.edge_prog);
@@ -113,11 +114,11 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
   glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, this->node_count);
 }
 
-void GraphRenderer::onWeightUpdate(WeightUpdate &update) {
+void GraphRenderer::onWeightUpdate(graph::WeightUpdate &update) {
 
 }
 
-void GraphRenderer::onHeatUpdate(HeatUpdate &update) {
+void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
 
 }
 
