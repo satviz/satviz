@@ -20,6 +20,8 @@ static const float template_coordinates[] = {
     -1.0f,  1.0f,
 };
 
+GraphRenderer::Resources GraphRenderer::resources;
+
 void GraphRenderer::initializeResources() {
   // Load shaders
 #include <ShaderSources.inl>

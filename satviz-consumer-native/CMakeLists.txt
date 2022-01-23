@@ -29,4 +29,5 @@ include_directories(include)
 
 add_subdirectory(src/glad)
 add_subdirectory(src/satviz)
+add_subdirectory(src/dummy)
 add_subdirectory(test)

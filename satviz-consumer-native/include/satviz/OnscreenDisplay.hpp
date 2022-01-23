@@ -9,7 +9,7 @@ namespace video {
 /**
  * A Display that renders to a window.
  */
-class OnscreenDisplay : Display {
+class OnscreenDisplay : public Display {
 private:
   sf::Window window;
 

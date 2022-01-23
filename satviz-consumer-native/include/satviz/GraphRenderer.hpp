@@ -12,7 +12,7 @@ namespace video {
 /**
  *
  */
-class GraphRenderer : graph::GraphObserver {
+class GraphRenderer : public graph::GraphObserver {
 private:
   enum {
     BO_NODE_OFFSET,
