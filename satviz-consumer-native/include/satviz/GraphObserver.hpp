@@ -19,6 +19,8 @@ public:
   virtual void onWeightUpdate(WeightUpdate &update) { (void) update; }
   virtual void onHeatUpdate(HeatUpdate &update) { (void) update; }
   virtual void onLayoutChange(ogdf::Array<ogdf::node> &changed) { (void) changed; }
+  virtual void onEdgeAdded(ogdf::edge e) { (void) e; }
+  virtual void onEdgeDeleted(ogdf::edge e) { (void) e; }
   virtual void onReload() {}
 };
 

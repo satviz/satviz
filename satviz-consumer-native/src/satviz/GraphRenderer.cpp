@@ -142,6 +142,14 @@ void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
+void GraphRenderer::onEdgeAdded(ogdf::edge e) {
+  (void) e;
+}
+
+void GraphRenderer::onEdgeDeleted(ogdf::edge e) {
+  (void) e;
+}
+
 void GraphRenderer::onReload() {
   // TODO also update the other attributes!
   ogdf::Array<ogdf::node> nodes;

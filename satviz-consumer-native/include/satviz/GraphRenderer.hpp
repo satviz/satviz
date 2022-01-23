@@ -51,6 +51,8 @@ public:
   void onWeightUpdate(graph::WeightUpdate &update) override;
   void onHeatUpdate(graph::HeatUpdate &update) override;
   void onLayoutChange(ogdf::Array<ogdf::node> &changed) override;
+  void onEdgeAdded(ogdf::edge e) override;
+  void onEdgeDeleted(ogdf::edge e) override;
   void onReload() override;
 };
 
