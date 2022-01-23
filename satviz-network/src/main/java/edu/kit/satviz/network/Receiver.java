@@ -45,7 +45,7 @@ public class Receiver {
       nb--;
       builder = gen.apply(type); // get new builder according to type
       if (builder == null) { // didn't get one
-        return NetworkMessage.createFail();
+        return NetworkMessage.createFail(); // TODO error handling
       }
     }
 
