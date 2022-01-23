@@ -15,7 +15,7 @@ sf::ContextSettings Display::makeContextSettings()
   return settings;
 }
 
-void Display::loadGLExtensions()
+void Display::loadGlExtensions()
 {
   gladLoaderLoadGL();
 }
