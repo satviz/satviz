@@ -14,17 +14,36 @@ namespace video {
  */
 class GraphRenderer : graph::GraphObserver {
 private:
+  struct Resources {
+    GLuint node_prog;
+    GLuint edge_prog;
+    GLuint template_vbo;
+  };
+
+  static Resources resources;
+
+  GLuint node_vao;
+  GLuint edge_vao;
   unsigned int node_vbo;
   unsigned int edge_ibo;
-  size_t node_count;
-  size_t edge_count;
+  int node_count;
+  int edge_count;
   ogdf::EdgeArray<int> edge_mapping;
 
 public:
+  static void initializeResources();
+  static void terminateResources();
+
   GraphRenderer(graph::Graph *gr);
   ~GraphRenderer();
 
-  void draw(Camera &camera);
+  void draw(Camera &camera, int width, int height);
+
+  void onWeightUpdate(WeightUpdate &update);
+  void onHeatUpdate(HeatUpdate &update);
+  void onLayoutChange();
+  void onLayoutChange(std::vector<int> changed);
+  void onReload();
 };
 
 } // namespace video
