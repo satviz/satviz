@@ -127,30 +127,24 @@ void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
   // TODO update this attribute.
 }
 
-void GraphRenderer::onLayoutChange() {
-  // TODO resize buffer if neccessary!
+void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
-  float (*area)[2] = (float (*)[2]) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-  auto N = my_graph->nodes();
+  float (*area)[2] = (float (*)[2]) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
   // TODO proper mapping to indices!
   int idx = 0;
-  for (auto it = N->begin(); it != N->end(); ++it) {
-    area[idx][0] = my_graph->nodeX[*it];
-    area[idx][1] = my_graph->nodeY[*it];
+  for (ogdf::node node : changed) {
+    area[idx][0] = my_graph->nodeX[node];
+    area[idx][1] = my_graph->nodeY[node];
     idx++;
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
-void GraphRenderer::onLayoutChange(std::vector<int> changed) {
-  (void) changed;
-  // TODO only update things that changed!
-  onLayoutChange();
-}
-
 void GraphRenderer::onReload() {
   // TODO also update the other attributes!
-  onLayoutChange();
+  ogdf::Array<ogdf::node> nodes;
+  my_graph->getOgdfGraph().allNodes(nodes);
+  onLayoutChange(nodes);
 }
 
 } // namespace video

@@ -18,8 +18,7 @@ protected:
 public:
   virtual void onWeightUpdate(WeightUpdate &update) { (void) update; }
   virtual void onHeatUpdate(HeatUpdate &update) { (void) update; }
-  virtual void onLayoutChange() {}
-  virtual void onLayoutChange(std::vector<int> changed) { (void) changed; }
+  virtual void onLayoutChange(ogdf::Array<ogdf::node> &changed) { (void) changed; }
   virtual void onReload() {}
 };
 

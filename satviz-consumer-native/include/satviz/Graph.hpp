@@ -48,8 +48,6 @@ public:
 
   Graph();
 
-  ogdf::internal::GraphObjectContainer<ogdf::NodeElement> *nodes() { return &graph.nodes; }
-
   ogdf::Graph getOgdfGraph() { return graph; }
   ogdf::GraphAttributes getOgdfAttrs() { return attrs; }
 

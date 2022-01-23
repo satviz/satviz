@@ -51,8 +51,7 @@ public:
 
   void onWeightUpdate(graph::WeightUpdate &update) override;
   void onHeatUpdate(graph::HeatUpdate &update) override;
-  void onLayoutChange() override;
-  void onLayoutChange(std::vector<int> changed) override;
+  void onLayoutChange(ogdf::Array<ogdf::node> &changed) override;
   void onReload() override;
 };
 
