@@ -3,6 +3,11 @@ package edu.kit.satviz.consumer.config;
 import java.nio.file.Path;
 import java.util.Objects;
 
+/**
+ * This class contains the starting configuration for the consumer.
+ *
+ * @author johnnyjayjay
+ */
 public class ConsumerConfig {
 
   public static final boolean DEFAULT_NO_GUI = false;
@@ -28,75 +33,170 @@ public class ConsumerConfig {
   private HeatmapColors heatmapColors = new HeatmapColors(); // this contains the default colors
 
 
+  /**
+   * Setter-method for an instance of the <code>ConsumerModeConfig</code> class.
+   *
+   * @param modeConfig An instance of the <code>ConsumerModeConfig</code> class.
+   */
   public void setModeConfig(ConsumerModeConfig modeConfig) {
     this.modeConfig = modeConfig;
   }
 
+  /**
+   * Setter-method for the path of the SAT-instance.
+   *
+   * @param instancePath The path of the SAT-instance.
+   */
   public void setInstancePath(Path instancePath) {
     this.instancePath = instancePath;
   }
 
+  /**
+   * Setter-method for whether the animation should be started with GUI or without.
+   *
+   * @param noGui <i>true</i>, if the animation should run with GUI,<br>
+   *              <i>false</i>, if not.
+   */
   public void setNoGui(boolean noGui) {
     this.noGui = noGui;
   }
 
+  /**
+   * Setter-method for the template-path for the storage of recorded videos.
+   *
+   * @param videoTemplatePath The template-path for the storage of recorded videos.
+   */
   public void setVideoTemplatePath(String videoTemplatePath) {
     this.videoTemplatePath = videoTemplatePath;
   }
 
+  /**
+   * Setter-method for whether the animation should be recorded immediately or not.
+   *
+   * @param recordImmediately <i>true</i>, if the animation should be recorded immediately,<br>
+   *                          <i>false</i>, if not.
+   */
   public void setRecordImmediately(boolean recordImmediately) {
     this.recordImmediately = recordImmediately;
   }
 
+  /**
+   * Setter-method for the buffer-size.
+   *
+   * @param bufferSize The size of the buffer for the incoming clauses.
+   */
   public void setBufferSize(int bufferSize) {
     this.bufferSize = bufferSize;
   }
 
+  /**
+   * Setter-method for the weight factor.
+   *
+   * @param weightFactor An instance of the <code>WeightFactor</code> enum.
+   */
   public void setWeightFactor(WeightFactor weightFactor) {
     this.weightFactor = weightFactor;
   }
 
+  /**
+   * Setter-method for the window size.
+   *
+   * @param windowSize The size of the moving window for the heatmap.
+   */
   public void setWindowSize(int windowSize) {
     this.windowSize = windowSize;
   }
 
+  /**
+   * Setter-method for the heatmap colors.
+   *
+   * @param heatmapColors An instance of the <code>HeatmapColors</code> class.
+   */
   public void setHeatmapColors(HeatmapColors heatmapColors) {
     this.heatmapColors = heatmapColors;
   }
 
 
+  /**
+   * Getter-method for more settings set within an instance of
+   * the <code>ConsumerModeConfig</code> class.
+   *
+   * @return An instance of the <code>ConsumerModeConfig</code> class.
+   */
   public ConsumerModeConfig getModeConfig() {
     return modeConfig;
   }
 
+  /**
+   * Getter-method for the path of the SAT-instance.
+   *
+   * @return The path of the SAT-instance.
+   */
   public Path getInstancePath() {
     return instancePath;
   }
 
+  /**
+   * Getter-method for whether the animation should be started with GUI or without.
+   *
+   * @return <i>true</i>, if the animation should run with GUI,<br>
+   *         <i>false</i>, if not.
+   */
   public boolean isNoGui() {
     return noGui;
   }
 
+  /**
+   * Getter-method for the template-path for the storage of recorded videos.
+   *
+   * @return The template-path for the storage of recorded videos.
+   */
   public String getVideoTemplatePath() {
     return videoTemplatePath;
   }
 
+  /**
+   * Getter-method for whether the animation should be recorded immediately or not.
+   *
+   * @return <i>true</i>, if the animation should be recorded immediately,<br>
+   *         <i>false</i>, if not.
+   */
   public boolean isRecordImmediately() {
     return recordImmediately;
   }
 
+  /**
+   * Getter-method for the buffer-size.
+   *
+   * @return The size of the buffer for the incoming clauses.
+   */
   public int getBufferSize() {
     return bufferSize;
   }
 
+  /**
+   * Getter-method for the weight factor.
+   *
+   * @return An instance of the <code>WeightFactor</code> enum.
+   */
   public WeightFactor getWeightFactor() {
     return weightFactor;
   }
 
+  /**
+   * Getter-method for the window size.
+   *
+   * @return The size of the moving window for the heatmap.
+   */
   public int getWindowSize() {
     return windowSize;
   }
 
+  /**
+   * Getter-method for the heatmap colors.
+   *
+   * @return An instance of the <code>HeatmapColors</code> class.
+   */
   public HeatmapColors getHeatmapColors() {
     return heatmapColors;
   }
