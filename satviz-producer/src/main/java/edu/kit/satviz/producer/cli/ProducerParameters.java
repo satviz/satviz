@@ -1,14 +1,27 @@
 package edu.kit.satviz.producer.cli;
 
+import net.sourceforge.argparse4j.annotation.Arg;
+
 import java.nio.file.Path;
 
 public final class ProducerParameters {
 
+  @Arg(dest = "instance")
   private Path instanceFile;
+
+  @Arg(dest = "solver")
   private Path solverFile;
+
+  @Arg(dest = "proof")
   private Path proofFile;
+
+  @Arg
   private int port;
+
+  @Arg
   private String host;
+
+  @Arg
   private boolean noWait;
 
   public Path getInstanceFile() {
