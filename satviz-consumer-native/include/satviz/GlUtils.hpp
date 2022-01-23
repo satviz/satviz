@@ -8,6 +8,7 @@
 namespace satviz {
 namespace video {
 
+void logGlDebugMessages();
 GLuint compileGlShader(const char *source, unsigned length, GLenum type);
 GLuint linkGlProgram(GLuint vert_shader, GLuint frag_shader);
 void resizeGlBuffer(GLuint *id, size_t old_size, size_t new_size);

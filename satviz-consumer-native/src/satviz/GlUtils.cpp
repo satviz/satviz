@@ -1,11 +1,28 @@
 #include <satviz/GlUtils.hpp>
 
+#include <iostream>
+
 #include <glad/gl.h>
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
 namespace satviz {
 namespace video {
+
+static void messageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+  GLsizei length, const GLchar *message, const void *userParam) {
+  (void) source;
+  (void) type;
+  (void) id;
+  (void) severity;
+  (void) length;
+  (void) userParam;
+  std::cerr << "GL: " << message << std::endl;
+}
+
+void logGlDebugMessages() {
+  glDebugMessageCallback(messageCallback, NULL);
+}
 
 GLuint compileGlShader(const char *source, unsigned length, GLenum type) {
   GLuint id = glCreateShader(type);
@@ -17,7 +34,7 @@ GLuint compileGlShader(const char *source, unsigned length, GLenum type) {
     char msg_buf[1024];
     GLsizei msg_len;
     glGetShaderInfoLog(id, sizeof msg_buf, &msg_len, msg_buf);
-    fprintf(stderr, "GLSL error: %s\n", msg_buf);
+    std::cerr << "GLSL error: " << msg_buf << std::endl;
   }
   return id;
 }
@@ -35,7 +52,7 @@ GLuint linkGlProgram(GLuint vert_shader, GLuint frag_shader) {
     char msg_buf[1024];
     GLsizei msg_len;
     glGetProgramInfoLog(id, sizeof msg_buf, &msg_len, msg_buf);
-    fprintf(stderr, "glsl link error: %s\n", msg_buf);
+    std::cerr << "GLSL link error: " << msg_buf << std::endl;
   }
 
   glDetachShader(id, vert_shader);

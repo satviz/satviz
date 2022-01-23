@@ -1,10 +1,12 @@
 #include <satviz/VideoController.hpp>
+#include <satviz/GlUtils.hpp>
 
 namespace satviz {
 namespace video {
 
 VideoController::VideoController(graph::Graph *gr, Display *dpy)
   : graph(gr), display(dpy), wantToClose(false) {
+  logGlDebugMessages();
 }
 
 VideoController::~VideoController() {
