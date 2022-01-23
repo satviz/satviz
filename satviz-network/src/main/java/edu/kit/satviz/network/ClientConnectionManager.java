@@ -7,29 +7,43 @@ import edu.kit.satviz.serial.Serializer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ClientConnectionManager {
-  private final SocketChannel channel;
   private final String address;
   private final int port;
   private final NetworkBlueprint bp;
 
+  private final ConnectionContext context;
+
   private Consumer<ConnectionId> lsConn;
   private Consumer<String> lsFail;
-  private Consumer<NetworkMessage> ls;
 
+  private boolean started = false;
   private boolean failed = false;
   private boolean finished = false;
 
-  public ClientConnectionManager(String address, int port, NetworkBlueprint bp) throws IOException {
-    this.channel = SocketChannel.open();
+  public ClientConnectionManager(String address, int port, NetworkBlueprint bp) {
+    this.context = new ConnectionContext();
     this.address = address;
     this.port = port;
     this.bp = bp;
   }
 
+  private void fail(String reason) {
+    failed = true;
+    lsFail.accept(reason);
+    context.callListener(NetworkMessage.createFail());
+  }
+
   private void doStart() {
+    try {
+      context.setChannel(SocketChannel.open());
+    } catch (IOException e) {
+      failed = true;
+      lsFail.accept("socket channel could not be created");
+    }
     try {
       channel.connect(new InetSocketAddress(address, port)); // still in blocking mode
     } catch (IOException e) {
@@ -37,14 +51,23 @@ public class ClientConnectionManager {
     }
   }
 
-  public void start() {
+  public boolean start() {
+    if (started || failed || finished) {
+      return false;
+    }
+    started = true;
     new Thread(
         this::doStart
     ).start();
+    return true;
   }
 
-  private void stop() {
-
+  private boolean stop() {
+    if (!started || failed || finished) {
+      return false;
+    }
+    finished = true;
+    return true;
   }
 
   public void registerConnect(Consumer<ConnectionId> ls) {
@@ -55,21 +78,11 @@ public class ClientConnectionManager {
     this.lsFail = ls;
   }
 
-  public void register(Consumer<NetworkMessage> ls) {
-    this.ls = ls;
+  public void register(BiConsumer<ConnectionId, NetworkMessage> ls) {
+    context.setListener(ls);
   }
 
-  public void send(Object o, byte type) throws IOException {
-    Serializer<?> s = bp.getSerializer(type);
-    if (s != null) {
-      try {
-        s.serializeUnsafe(o, channel.socket().getOutputStream());
-      } catch (SerializationException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      } catch (ClassCastException e) {
-        throw new IllegalArgumentException("unknown type");
-      }
-    }
-    throw new IllegalArgumentException("unknown type");
+  public void send(byte type, Object obj) throws IOException {
+    context.send(type, obj);
   }
 }

@@ -1,5 +1,6 @@
 package edu.kit.satviz.network;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.channels.SocketChannel;
 import java.util.function.BiConsumer;
 
@@ -110,5 +111,21 @@ public class ConnectionContext {
    */
   public void setListener(BiConsumer<ConnectionId, NetworkMessage> ls) {
     this.ls = ls;
+  }
+
+  public boolean callListener(NetworkMessage msg) {
+    if (ls != null) {
+      ls.accept(cid, msg);
+    }
+    return ls != null;
+  }
+
+  public boolean send(byte type, Object obj) {
+    if (chan.isConnected()) {
+      return false;
+    }
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+    byteOut.
+    chan.write()
   }
 }
