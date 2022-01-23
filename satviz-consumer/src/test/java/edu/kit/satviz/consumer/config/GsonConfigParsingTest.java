@@ -16,12 +16,20 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * This test class tests the gson parsing of a config file.
+ */
 class GsonConfigParsingTest {
 
   private Gson gson;
   private ConsumerConfig config1;
   private ConsumerConfig config2;
 
+  /**
+   * This set-up method creates a gson parser using the <code>ModeConfigAdapterFactory</code>
+   * and <code>PathAdapter</code>. On top of that it creates an instance of the
+   * <code>ConsumerConfig</code> class.
+   */
   @BeforeEach
   void setUp() {
     this.gson = new GsonBuilder().setPrettyPrinting()
