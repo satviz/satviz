@@ -10,10 +10,9 @@ namespace graph {
  *
  */
 class GraphObserver {
-private:
+protected:
   Graph *my_graph;
 
-protected:
   GraphObserver(Graph *gr) : my_graph(gr) {}
 
 public:

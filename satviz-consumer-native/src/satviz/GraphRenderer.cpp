@@ -103,22 +103,38 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
 
 void GraphRenderer::onWeightUpdate(graph::WeightUpdate &update) {
   (void) update;
+  // TODO update & use this attribute.
 }
 
 void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
   (void) update;
+  // TODO update this attribute.
 }
 
 void GraphRenderer::onLayoutChange() {
-
+  // TODO resize buffer if neccessary!
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
+  float (*area)[2] = (float (*)[2]) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+  auto N = my_graph->nodes();
+  // TODO proper mapping to indices!
+  int idx = 0;
+  for (auto it = N->begin(); it != N->end(); ++it) {
+    area[idx][0] = my_graph->nodeX[*it];
+    area[idx][1] = my_graph->nodeY[*it];
+    idx++;
+  }
+  glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void GraphRenderer::onLayoutChange(std::vector<int> changed) {
   (void) changed;
+  // TODO only update things that changed!
+  onLayoutChange();
 }
 
 void GraphRenderer::onReload() {
-
+  // TODO also update the other attributes!
+  onLayoutChange();
 }
 
 } // namespace video

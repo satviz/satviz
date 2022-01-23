@@ -5,6 +5,9 @@
 #include <tuple>
 #include <sstream>
 
+#include <ogdf/basic/Graph.h>
+#include <ogdf/basic/GraphAttributes.h>
+
 namespace satviz {
 namespace graph {
 
@@ -35,8 +38,20 @@ struct HeatUpdate {
  *
  */
 class Graph {
+private:
+  ogdf::Graph graph;
+  ogdf::GraphAttributes attrs;
+
 public:
+  ogdf::NodeArray<float> &nodeX;
+  ogdf::NodeArray<float> &nodeY;
+
   Graph();
+
+  ogdf::internal::GraphObjectContainer<ogdf::NodeElement> *nodes() { return &graph.nodes; }
+
+  ogdf::Graph getOgdfGraph() { return graph; }
+  ogdf::GraphAttributes getOgdfAttrs() { return attrs; }
 
   void addObserver(GraphObserver *o);
 
