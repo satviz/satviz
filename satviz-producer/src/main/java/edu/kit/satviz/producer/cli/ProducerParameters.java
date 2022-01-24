@@ -22,7 +22,7 @@ public final class ProducerParameters {
   @Arg
   private String host;
 
-  @Arg(dest = "no-wait")
+  @Arg(dest = "no_wait")
   private boolean noWait;
 
   public Path getInstanceFile() {
@@ -93,5 +93,17 @@ public final class ProducerParameters {
   @Override
   public int hashCode() {
     return Objects.hash(instanceFile, solverFile, proofFile, port, host, noWait);
+  }
+
+  @Override
+  public String toString() {
+    return "ProducerParameters{"
+        + "instanceFile=" + instanceFile
+        + ", solverFile=" + solverFile
+        + ", proofFile=" + proofFile
+        + ", port=" + port
+        + ", host='" + host + '\''
+        + ", noWait=" + noWait
+        + '}';
   }
 }
