@@ -18,7 +18,7 @@
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
                <children>
                       <Label text="Listen on port " />
-                      <Spinner editable="true" />
+                      <Spinner editable="true" fx:id="portSpinner"/>
                </children>
             </HBox>
          </children>
