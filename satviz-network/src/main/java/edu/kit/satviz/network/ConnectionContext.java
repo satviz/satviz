@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 /**
  * A Collection for objects related to a network connection.
  *
+ * @apiNote currently not thread-safe
  * @author luwae
  */
 public class ConnectionContext {
@@ -54,18 +55,17 @@ public class ConnectionContext {
     return cid;
   }
 
+  public boolean isConnected() {
+    return state == State.CONNECTED;
+  }
+
   /**
    * Sets the listener of this connection.
    *
    * @param ls the listener
-   * @return false if a listener was already set, true otherwise
    */
-  public boolean setListener(BiConsumer<ConnectionId, NetworkMessage> ls) {
-    if (this.ls == null) {
-      this.ls = ls;
-      return true;
-    }
-    return false;
+  public void setListener(BiConsumer<ConnectionId, NetworkMessage> ls) {
+    this.ls = ls;
   }
 
   /**

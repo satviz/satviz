@@ -1,24 +1,21 @@
 package edu.kit.satviz.network;
 
-import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
-import edu.kit.satviz.serial.Serializer;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.NotYetConnectedException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ClientConnectionManager {
-  private enum Status {
+  private enum State {
     NEW,
     STARTED,
-    FINISHED,
     FAILED,
   }
+
   private static final int READ_CAP = 1024;
 
   private final NetworkBlueprint bp;
@@ -27,67 +24,61 @@ public class ClientConnectionManager {
   private Consumer<ConnectionId> lsConn;
   private Consumer<String> lsFail;
 
-  private Status status = Status.NEW;
+  private State state;
 
-  public ClientConnectionManager(String address, int port, NetworkBlueprint bp) throws IOException {
+  public ClientConnectionManager(String address, int port, NetworkBlueprint bp) {
     InetSocketAddress addr = new InetSocketAddress(address, port);
     this.context = new ConnectionContext(new ConnectionId(addr), new Receiver(bp::getBuilder), null);
     this.bp = bp;
-  }
-
-  private void fail(String reason) {
-    if (status == Status.FAILED) {
-      return;
-    }
-    status = Status.FAILED;
-    lsFail.accept(reason);
-    context.close();
+    this.state = State.NEW;
   }
 
   private void doStart() {
-    while (true) {
+    boolean connected = false;
+    while (!connected) {
       try {
-        context.tryConnect();
+        connected = context.tryConnect();
       } catch (IOException e) {
-        fail("connection");
-        break;
-      }
-      if (context.isConnected()) {
+        // TODO fatal fail
         break;
       }
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {
-        // just continue
+        // just continue? TODO
       }
     }
+    state = State.STARTED; // TODO sync
+    lsConn.accept(context.getCid());
 
     // actual work
     ByteBuffer bb = ByteBuffer.allocate(READ_CAP);
-    while (status == Status.STARTED) {
+    while (state == State.STARTED) {
       // Read from socket and put in receiver
       try {
-        context.readAndConvert(bb);
+        context.read(bb);
       } catch (IOException e) {
-        status = Status.FAILED;
-        return; // is some error handling missing here?
+        // TODO fatal error
       }
-      bb.clear();
     }
   }
 
-  public void start() {
-    if (status != Status.NEW) {
+  public void start() throws IllegalStateException {
+    if (state != State.NEW) {
       throw new IllegalStateException("already started");
     }
-    status = Status.STARTED;
+
+    state = State.STARTED;
     new Thread(
         this::doStart
     ).start();
   }
 
   private void stop() {
-    status = (status == Status.FAILED) ? Status.FAILED : Status.FINISHED;
+    if (state != State.FAILED) {
+      state = State.FINISHED; // TODO synchronize here if the inner thread also closes
+
+    }
   }
 
   public void registerConnect(Consumer<ConnectionId> ls) {
@@ -102,10 +93,21 @@ public class ClientConnectionManager {
     context.setListener(ls);
   }
 
-  public void send(byte type, Object obj) throws SerializationException, IOException {
+  public void send(byte type, Object obj) throws IOException {
+    if (!context.isConnected()) {
+      // TODO make sure this also includes state == FAILED
+      throw new NotYetConnectedException();
+    }
+
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     byteOut.write(type);
-    bp.serialize(type, obj, byteOut);
+    try {
+      bp.serialize(type, obj, byteOut);
+    } catch (SerializationException | IOException | ClassCastException e) {
+      // something went wrong that we can't correct
+      context.close(true); // only fail locally
+      throw new IOException("couldn't turn this object into a message");
+    }
     ByteBuffer bb = ByteBuffer.wrap(byteOut.toByteArray());
     context.write(bb);
   }
