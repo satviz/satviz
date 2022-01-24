@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="embeddedMode" prefHeight="226.0" prefWidth="367.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.kit.gui.EmbeddedConfigController">
+<VBox fx:id="embedded" prefHeight="226.0" prefWidth="367.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.kit.satviz.consumer.gui.config.EmbeddedConfigController">
     <children>
         <Label text="Run Locally Using">
             <font>
