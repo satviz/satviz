@@ -3,6 +3,7 @@ package edu.kit.satviz.producer.cli;
 import net.sourceforge.argparse4j.annotation.Arg;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 public final class ProducerParameters {
 
@@ -70,5 +71,27 @@ public final class ProducerParameters {
 
   public void setNoWait(boolean noWait) {
     this.noWait = noWait;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ProducerParameters that = (ProducerParameters) o;
+    return port == that.port
+        && noWait == that.noWait
+        && Objects.equals(instanceFile, that.instanceFile)
+        && Objects.equals(solverFile, that.solverFile)
+        && Objects.equals(proofFile, that.proofFile)
+        && Objects.equals(host, that.host);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(instanceFile, solverFile, proofFile, port, host, noWait);
   }
 }
