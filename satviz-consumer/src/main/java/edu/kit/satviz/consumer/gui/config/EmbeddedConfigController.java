@@ -26,7 +26,6 @@ public class EmbeddedConfigController extends ConfigController {
   }
 
   @Override
-  @FXML
   protected void run() {
 
   }
