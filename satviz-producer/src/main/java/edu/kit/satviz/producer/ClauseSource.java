@@ -1,6 +1,7 @@
 package edu.kit.satviz.producer;
 
 import edu.kit.satviz.sat.Clause;
+import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.function.Consumer;
 
 public abstract class ClauseSource implements AutoCloseable {
 
-  private final List<Consumer<? super Clause>> clauseListeners;
+  private final List<Consumer<? super ClauseUpdate>> clauseListeners;
 
   private Consumer<SatAssignment> doneListener;
   private Runnable closeListener;
@@ -23,7 +24,7 @@ public abstract class ClauseSource implements AutoCloseable {
 
   public abstract void open() throws SourceOpeningException;
 
-  public void subscribe(Consumer<Clause> listener) {
+  public void subscribe(Consumer<? super ClauseUpdate> listener) {
     clauseListeners.add(Objects.requireNonNull(listener));
   }
 
@@ -35,8 +36,8 @@ public abstract class ClauseSource implements AutoCloseable {
     doneListener = Objects.requireNonNull(action);
   }
 
-  protected void notifyListeners(Clause clause) {
-    clauseListeners.forEach(listener -> listener.accept(clause));
+  protected void notifyListeners(ClauseUpdate update) {
+    clauseListeners.forEach(listener -> listener.accept(update));
   }
 
 }
