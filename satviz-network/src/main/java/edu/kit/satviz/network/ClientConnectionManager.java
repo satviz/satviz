@@ -41,7 +41,7 @@ public class ClientConnectionManager {
     }
     status = Status.FAILED;
     lsFail.accept(reason);
-    context.callListener(NetworkMessage.createFail());
+    context.close();
   }
 
   private void doStart() {
@@ -104,6 +104,9 @@ public class ClientConnectionManager {
 
   public void send(byte type, Object obj) throws SerializationException, IOException {
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+    byteOut.write(type);
     bp.serialize(type, obj, byteOut);
+    ByteBuffer bb = ByteBuffer.wrap(byteOut.toByteArray());
+    context.write(bb);
   }
 }

@@ -16,6 +16,8 @@ public class Receiver {
   private byte type;
   private SerialBuilder<?> builder = null;
 
+  private boolean failed = true;
+
   /**
    * Creates a new empty receiver.
    *
@@ -30,11 +32,17 @@ public class Receiver {
    * The bytes previously read are taken into account, so that a long stream
    *     of bytes can be received by subsequent calls to <code>receive</code>.
    * Reads bytes as long as the buffer is not empty and an object is not finished.
+   * If something goes wrong, the receiver returns a <code>FAIL</code> network message.
+   * In that case, the number of bytes read may be <code>0</code>.
    *
    * @param bb the buffer to read from
    * @return a message if one was received in its entirety, <code>null</code> otherwise
    */
   public NetworkMessage receive(ByteBuffer bb) {
+    if (failed) {
+      return NetworkMessage.createFail();
+    }
+
     int nb = bb.remaining();
     if (nb == 0) {
       return null;
@@ -45,7 +53,8 @@ public class Receiver {
       nb--;
       builder = gen.apply(type); // get new builder according to type
       if (builder == null) { // didn't get one
-        return NetworkMessage.createFail(); // TODO error handling
+        failed = true;
+        return NetworkMessage.createFail();
       }
     }
 
@@ -53,8 +62,9 @@ public class Receiver {
       nb--;
       boolean done;
       try {
-        done = builder.addByte(bb.get()); // TODO use addBytes
+        done = builder.addByte(bb.get());
       } catch (SerializationException e) {
+        failed = true;
         return NetworkMessage.createFail();
       }
 
