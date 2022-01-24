@@ -19,17 +19,17 @@
          <children>
             <HBox alignment="CENTER" prefHeight="0.0" prefWidth="367.0" spacing="5.0">
                <children>
-                  <ChoiceBox prefHeight="25.0" prefWidth="70.0" value="Solver">
+                  <ChoiceBox prefHeight="25.0" prefWidth="70.0" fx:id="producerModeChoiceBox">
                      <HBox.margin>
                         <Insets left="5.0" />
                      </HBox.margin>
                   </ChoiceBox>
-                  <Button mnemonicParsing="false" text="Select File">
+                  <Button mnemonicParsing="false" text="Select File" fx:id="producerModeFileButton">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
                   </Button>
-                  <Label text="home/sat/solvers/cadical.so">
+                  <Label text="home/sat/solvers/cadical.so" fx:id="producerModeFileLabel">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
