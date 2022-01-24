@@ -9,7 +9,7 @@ namespace satviz {
 namespace video {
 
 /**
- *
+ * High-level object for managing & controlling the video module.
  */
 class VideoController {
 private:
@@ -22,6 +22,11 @@ public:
   VideoController(graph::Graph *gr, Display *dpy);
   ~VideoController();
 
+  /**
+   * Process a new frame.
+   *
+   * This entails reacting to user input, redrawing the visuals, etc.
+   */
   void nextFrame();
 
   bool startRecording(const char *filename, VideoEncoder *enc);

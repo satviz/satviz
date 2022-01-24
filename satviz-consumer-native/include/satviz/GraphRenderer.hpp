@@ -10,7 +10,7 @@ namespace satviz {
 namespace video {
 
 /**
- *
+ * Visual representation of a graph. Implements hardware-accelerated graphics.
  */
 class GraphRenderer : public graph::GraphObserver {
 private:
@@ -22,6 +22,9 @@ private:
     NUM_BUFFER_OBJECTS
   };
 
+  /**
+   * A bundle of OpenGL resources that only need to be created once, not per graph.
+   */
   struct Resources {
     unsigned node_prog;
     unsigned edge_prog;
@@ -46,6 +49,13 @@ public:
   GraphRenderer(graph::Graph *gr);
   ~GraphRenderer();
 
+  /**
+   * Draw the associated graph onto the OpenGL framebuffer.
+   *
+   * @param camera The virtual camera from which the graph should be viewed
+   * @param width  the width of the display
+   * @param height the height of the display
+   */
   void draw(Camera &camera, int width, int height);
 
   void onWeightUpdate(graph::WeightUpdate &update) override;
