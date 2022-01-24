@@ -2,6 +2,7 @@ package edu.kit.satviz.producer.cli;
 
 import edu.kit.satviz.common.PathArgumentType;
 import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
@@ -35,6 +36,7 @@ public final class ProducerCli {
         .help("Port of the target clause consumer");
     PARSER.addArgument("--no-wait")
         .type(boolean.class)
+        .action(Arguments.storeTrue())
         .help("Do not wait for a connection to be established, start solving immediately");
   }
 
