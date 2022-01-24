@@ -7,7 +7,7 @@ import edu.kit.satviz.producer.cli.ProducerParameters;
 public class SolverMode implements ProducerMode {
   @Override
   public boolean isSet(ProducerParameters parameters) {
-    return false;
+    return parameters.getSolverFile() != null && parameters.getInstanceFile() != null;
   }
 
   @Override

@@ -7,7 +7,7 @@ import edu.kit.satviz.producer.cli.ProducerParameters;
 public class ProofMode implements ProducerMode {
   @Override
   public boolean isSet(ProducerParameters parameters) {
-    return false;
+    return parameters.getProofFile() != null;
   }
 
   @Override
