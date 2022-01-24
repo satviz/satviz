@@ -62,7 +62,12 @@ public abstract class SerialBuilder<T> {
       failed = true;
       throw new SerializationException("no more bytes expected");
     }
-    processAddByte(b); // may change fail or finish
+    try {
+      processAddByte(b); // may change fail or finish
+    } catch (SerializationException e) {
+      failed = true;
+      throw e;
+    }
     return finished;
   }
 
