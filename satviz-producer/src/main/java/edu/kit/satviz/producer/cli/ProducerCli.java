@@ -31,7 +31,7 @@ public final class ProducerCli {
         .type(String.class)
         .help("The host address of the target clause consumer");
     PARSER.addArgument("--port", "-P")
-        .setDefault(34321)
+        .setDefault(34312)
         .type(int.class)
         .help("Port of the target clause consumer");
     PARSER.addArgument("--no-wait")
