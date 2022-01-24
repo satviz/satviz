@@ -1,11 +1,8 @@
 package edu.kit.satviz.producer;
 
-import edu.kit.satviz.common.ConstraintValidationException;
-import edu.kit.satviz.network.ProducerConnection;
 import edu.kit.satviz.producer.cli.ProducerCli;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
