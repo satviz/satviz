@@ -15,6 +15,12 @@ public class EmbeddedConfigController extends ConfigController {
   @FXML
   private Label producerModeFileLabel;
 
+
+  @FXML
+  private void initialize() {
+
+  }
+
   @FXML
   private void updateProducerMode() {
 

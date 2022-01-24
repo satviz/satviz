@@ -9,7 +9,7 @@ public class ExternalConfigController extends ConfigController {
   private Spinner<Integer> portSpinner;
 
   @FXML
-  private void setPort() {
+  private void initialize() {
 
   }
 
