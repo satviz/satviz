@@ -73,7 +73,7 @@ public class ConnectionManager {
 
     while (state == State.OPEN) {
       try {
-        int numEvents = select.select();
+        select.select();
       } catch (IOException e) {
         terminateGlobal(true);
         return;

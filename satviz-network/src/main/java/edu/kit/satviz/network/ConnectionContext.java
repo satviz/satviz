@@ -3,13 +3,14 @@ package edu.kit.satviz.network;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.function.BiConsumer;
 
 /**
- * A Collection for objects related to a network connection.
+ * A Collection of objects related to a network connection.
  *
  * @apiNote currently not thread-safe
  * @author luwae
@@ -28,10 +29,10 @@ public class ConnectionContext {
   private final Receiver recv;
   private BiConsumer<ConnectionId, NetworkMessage> ls;
 
-  private State state;
+  private State state = State.NEW;
 
   /**
-   * Creates a new connection context.
+   * Creates a new connection context where the socket is opened upon <code>tryConnect</code>.
    * Does not open or connect the socket.
    *
    * @param cid the ID of this connection
@@ -43,7 +44,24 @@ public class ConnectionContext {
     this.cid = cid;
     this.recv = recv;
     this.ls = ls;
-    this.state = State.NEW;
+  }
+
+  // TODO where do client and server functionality diverge?
+
+  /**
+   * Creates a new connection context with previously opened socket.
+   *
+   * @param cid the ID of this connection
+   * @param chan the socket channel
+   * @param recv the receiver
+   * @param ls the listener
+   */
+  public ConnectionContext(ConnectionId cid, SocketChannel chan, Receiver recv,
+      BiConsumer<ConnectionId, NetworkMessage> ls) {
+    this.cid = cid;
+    this.chan = chan;
+    this.recv = recv;
+    this.ls = ls;
   }
 
   /**
@@ -53,10 +71,6 @@ public class ConnectionContext {
    */
   public ConnectionId getCid() {
     return cid;
-  }
-
-  public boolean isConnected() {
-    return state == State.CONNECTED;
   }
 
   /**
