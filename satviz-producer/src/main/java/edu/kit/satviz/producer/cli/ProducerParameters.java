@@ -21,7 +21,7 @@ public final class ProducerParameters {
   @Arg
   private String host;
 
-  @Arg
+  @Arg(dest = "no-wait")
   private boolean noWait;
 
   public Path getInstanceFile() {
