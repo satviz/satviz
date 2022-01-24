@@ -1,3 +1,7 @@
+# Don't count auto-generated C code in language statistics
+satviz-consumer-native/src/glad/*.c         linguist-vendored
+satviz-consumer-native/include/glad/*.h     linguist-vendored
+satviz-consumer-native/include/KHR/*.h      linguist-vendored
 #
 # https://help.github.com/articles/dealing-with-line-endings/
 #

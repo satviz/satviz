@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(satviz-consumer-native CXX)
+project(satviz-consumer-native LANGUAGES CXX C)
 
 enable_testing()
 
@@ -25,5 +25,6 @@ endif()
 
 include_directories(include)
 
+add_subdirectory(src/glad)
 add_subdirectory(src/satviz)
 add_subdirectory(test)
