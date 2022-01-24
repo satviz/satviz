@@ -17,8 +17,8 @@ public class ConnectionListener implements ProducerConnectionListener {
     this.connection = connection;
     this.source = source;
     source.subscribe(connection::sendClauseUpdate);
-    source.whenDone(connection::terminateSolved);
-    source.whenClosed(connection::terminateRefuted);
+    source.whenSolved(connection::terminateSolved);
+    source.whenRefuted(connection::terminateRefuted);
   }
 
   @Override
