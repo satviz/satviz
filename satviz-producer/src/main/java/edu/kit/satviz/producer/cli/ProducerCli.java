@@ -2,7 +2,6 @@ package edu.kit.satviz.producer.cli;
 
 import edu.kit.satviz.common.PathArgumentType;
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
@@ -37,21 +36,12 @@ public final class ProducerCli {
     PARSER.addArgument("--no-wait")
         .type(boolean.class)
         .help("Do not wait for a connection to be established, start solving immediately");
-    PARSER.addArgument("--help", "-h")
-        .action(Arguments.help())
-        .help("Displays the command help message");
   }
 
-  public static ProducerParameters parseArgs(String[] args) {
-    try {
-      ProducerParameters params = new ProducerParameters();
-      PARSER.parseArgs(args, params);
-      return params;
-    } catch (ArgumentParserException e) {
-      e.printStackTrace();
-      PARSER.handleError(e);
-      return null;
-    }
+  public static ProducerParameters parseArgs(String[] args) throws ArgumentParserException {
+    ProducerParameters params = new ProducerParameters();
+    PARSER.parseArgs(args, params);
+    return params;
   }
 
 }
