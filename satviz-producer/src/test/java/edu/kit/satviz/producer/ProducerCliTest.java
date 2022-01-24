@@ -31,9 +31,26 @@ class ProducerCliTest {
     var expected = new ProducerParameters();
     expected.setHost("example.com");
     expected.setPort(1234);
-    expected.setSolverFile(Paths.get("foo/bar.so"));
+    expected.setProofFile(Paths.get("foo/bar.drat"));
     expected.setNoWait(true);
-    String[] args = {"-H", "example.com", "-P", "1234", "-s", "foo/bar.so", "--no-wait"};
+    String[] args = {"-H", "example.com", "-P", "1234", "-p", "foo/bar.drat", "--no-wait"};
+    try {
+      var params = ProducerCli.parseArgs(args);
+      assertEquals(expected, params);
+    } catch (ArgumentParserException e) {
+      fail(e);
+    }
+  }
+
+  @Test
+  void test_parseArgs_defaults() {
+    var expected = new ProducerParameters();
+    expected.setPort(34312);
+    expected.setHost("example.com");
+    expected.setNoWait(false);
+    expected.setSolverFile(Paths.get("foo/bar.so"));
+    expected.setInstanceFile(Paths.get("instance.cnf"));
+    String[] args = {"-H", "example.com", "-s", "foo/bar.so", "-i", "instance.cnf"};
     try {
       var params = ProducerCli.parseArgs(args);
       assertEquals(expected, params);
