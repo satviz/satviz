@@ -2,6 +2,7 @@ package edu.kit.satviz.producer;
 
 import edu.kit.satviz.common.PathArgumentType;
 import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 
 
@@ -26,6 +27,7 @@ public class ProducerApplication {
         .type(PathArgumentType.get())
         .help("Path to a DRAT proof or '-' for standard input");
     PARSER.addArgument("--host", "-H")
+        .required(true)
         .type(String.class)
         .help("The host address of the target clause consumer");
     PARSER.addArgument("--port", "-P")
@@ -35,7 +37,9 @@ public class ProducerApplication {
     PARSER.addArgument("--no-wait")
         .type(boolean.class)
         .help("Do not wait for a connection to be established, start solving immediately");
-
+    PARSER.addArgument("--help", "-h")
+        .action(Arguments.help())
+        .help("Displays the command help message");
   }
 
   public static void main(String[] args) {
