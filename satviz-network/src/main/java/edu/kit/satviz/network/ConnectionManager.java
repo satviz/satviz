@@ -118,7 +118,6 @@ public class ConnectionManager {
           }
         }
         if (key.isReadable()) {
-          ((SocketChannel) key.channel()).read(null);
         }
         iter.remove();
       }
