@@ -31,12 +31,16 @@ public class ClauseTest {
     lits[0] = 1000000000;
     Clause c = new Clause(lits);
     serial.serialize(c, out);
-    assertEquals(b[0], 0x00 | 0x80);
-    assertEquals(b[1], 0x14 | 0x80);
-    assertEquals(b[2], 0x6b | 0x80);
-    assertEquals(b[3], 0x5c | 0x80);
-    assertEquals(b[4], 0x03);
-    assertEquals(b[5], 0x00);
-    assertEquals(b[6], 0x88);
+    for (int i = 0; i < 7; i++) {
+      System.out.println(Integer.toHexString(b[i] & 0xff));
+    }
+    // expect number 2000000000 encoded in 7-bit blocks
+    assertEquals(b[0], (byte) (0x00 | 0x80));
+    assertEquals(b[1], (byte) (0x28 | 0x80));
+    assertEquals(b[2], (byte) (0x56 | 0x80));
+    assertEquals(b[3], (byte) (0x39 | 0x80));
+    assertEquals(b[4], (byte) 0x07);
+    assertEquals(b[5], (byte) 0x00);
+    assertEquals(b[6], (byte) 0x88);
   }
 }
