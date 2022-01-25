@@ -36,6 +36,7 @@ public class SolverSource extends ClauseSource {
         come purposefully from the network connection, so it can be handled with a no-op. */
       }
     }
+    solver.close();
   }
 
   private SatAssignment solvingAssignment() {
