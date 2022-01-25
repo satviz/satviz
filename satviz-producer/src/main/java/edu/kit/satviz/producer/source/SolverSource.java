@@ -1,11 +1,11 @@
 package edu.kit.satviz.producer.source;
 
 import edu.kit.satviz.producer.ClauseSource;
-import edu.kit.satviz.producer.SourceOpeningException;
+import edu.kit.satviz.producer.SourceException;
 
 public class SolverSource extends ClauseSource {
   @Override
-  public void open() throws SourceOpeningException {
+  public void open() throws SourceException {
 
   }
 

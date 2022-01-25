@@ -26,7 +26,7 @@ public class ConnectionListener implements ProducerConnectionListener {
     executor.submit(() -> {
       try (source) {
         source.open();
-      } catch (SourceOpeningException e) {
+      } catch (SourceException e) {
         e.printStackTrace();
         connection.terminateFailed(e.getMessage());
       } catch (Exception e) {

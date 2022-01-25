@@ -1,21 +1,19 @@
 package edu.kit.satviz.producer.source;
 
+import edu.kit.satviz.parsers.DratFile;
 import edu.kit.satviz.producer.ClauseSource;
-import edu.kit.satviz.producer.SourceOpeningException;
-import edu.kit.satviz.sat.ClauseUpdate;
-
-import java.util.Iterator;
+import edu.kit.satviz.producer.SourceException;
 
 public class ProofSource extends ClauseSource {
 
-  private final Iterator<ClauseUpdate> updates;
+  private final DratFile drat;
 
-  public ProofSource(Iterator<ClauseUpdate> updates) {
-    this.updates = updates;
+  public ProofSource(DratFile drat) {
+    this.drat = drat;
   }
 
   @Override
-  public void open() throws SourceOpeningException {
+  public void open() throws SourceException {
 
   }
 
