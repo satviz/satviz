@@ -10,16 +10,18 @@ import java.util.stream.Collectors;
 
 public class SingleModeConstraint implements Constraint<ProducerParameters> {
 
-  private final Collection<ProducerMode> modes;
+  private final Collection<? extends ProducerMode> modes;
 
-  public SingleModeConstraint(Collection<ProducerMode> modes) {
+  public SingleModeConstraint(Collection<? extends ProducerMode> modes) {
     this.modes = modes;
   }
 
   @Override
   public void validate(ProducerParameters params) throws ConstraintValidationException {
-    List<ProducerMode> modesSet = modes.stream().filter(mode -> mode.isSet(params)).toList();
-    if (modesSet.size() == 0) {
+    List<? extends ProducerMode> modesSet = modes.stream()
+        .filter(mode -> mode.isSet(params))
+        .toList();
+    if (modesSet.isEmpty()) {
       fail("No producer mode set");
     } else if (modesSet.size() > 1) {
       fail(
