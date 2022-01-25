@@ -18,7 +18,7 @@ public abstract class ClauseSource implements AutoCloseable {
     refutedListener = () -> {};
   }
 
-  public abstract void open() throws SourceOpeningException;
+  public abstract void open() throws SourceException;
 
   public void subscribe(Consumer<? super ClauseUpdate> listener) {
     clauseListener = Objects.requireNonNull(listener);

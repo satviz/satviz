@@ -6,6 +6,6 @@ public interface ProducerMode {
 
   boolean isSet(ProducerParameters parameters);
 
-  ClauseSource createSource(ProducerParameters parameters);
+  ClauseSource createSource(ProducerParameters parameters) throws SourceException;
 
 }
