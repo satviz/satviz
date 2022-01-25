@@ -1,6 +1,7 @@
 package edu.kit.satviz.producer.mode;
 
 import edu.kit.ipasir4j.Ipasir;
+import edu.kit.ipasir4j.IpasirNotFoundException;
 import edu.kit.ipasir4j.Solver;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
@@ -31,6 +32,8 @@ public class SolverMode implements ProducerMode {
       throw new SourceException("I/O exception trying to read instance file", e);
     } catch (ParsingException e) {
       throw new SourceException("Error while parsing DIMACS CNF file", e);
+    } catch (IpasirNotFoundException e) {
+      throw new SourceException("Ipasir function(s) not found in shared library", e);
     }
 
   }
