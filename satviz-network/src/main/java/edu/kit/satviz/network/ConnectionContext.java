@@ -74,6 +74,16 @@ public class ConnectionContext {
   }
 
   /**
+   * Gets the socket channel of this connection.
+   * May be null if the channel has not been opened.
+   *
+   * @return the socket channel
+   */
+  public SocketChannel getChannel() {
+    return chan;
+  }
+
+  /**
    * Sets the listener of this connection.
    * Sends the corresponding message if the connection has already failed or terminated.
    *
