@@ -23,6 +23,9 @@ public class HeatmapColors {
   private int fromColor;
   private int toColor;
 
+  /**
+   * Simple constructor for instances of the <code>HeatmapColors</code> class.
+   */
   public HeatmapColors() {
     this.fromColor = DEFAULT_FROM_COLOR;
     this.toColor = DEFAULT_TO_COLOR;
