@@ -23,8 +23,11 @@ if(NOT THEORA_FOUND)
     message(FATAL_ERROR "Was not able to locate OGG/Theora development files.")
 endif()
 
+include(embed)
+
 include_directories(include)
 
 add_subdirectory(src/glad)
 add_subdirectory(src/satviz)
+add_subdirectory(src/dummy)
 add_subdirectory(test)

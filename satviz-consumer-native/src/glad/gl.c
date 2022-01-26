@@ -34,6 +34,7 @@ int GLAD_GL_VERSION_3_2 = 0;
 int GLAD_GL_VERSION_3_3 = 0;
 int GLAD_GL_ARB_buffer_storage = 0;
 int GLAD_GL_ARB_explicit_attrib_location = 0;
+int GLAD_GL_ARB_explicit_uniform_location = 0;
 int GLAD_GL_ARB_vertex_attrib_binding = 0;
 int GLAD_GL_KHR_debug = 0;
 
@@ -923,6 +924,7 @@ static int glad_gl_find_extensions_gl( int version) {
 
     GLAD_GL_ARB_buffer_storage = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_buffer_storage");
     GLAD_GL_ARB_explicit_attrib_location = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_explicit_attrib_location");
+    GLAD_GL_ARB_explicit_uniform_location = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_explicit_uniform_location");
     GLAD_GL_ARB_vertex_attrib_binding = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_vertex_attrib_binding");
     GLAD_GL_KHR_debug = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_KHR_debug");
 

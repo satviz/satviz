@@ -1,10 +1,22 @@
 cmake_minimum_required(VERSION 3.1)
 
+embed_files(
+  ${CMAKE_CURRENT_BINARY_DIR}/ShaderSources.inl
+  NodeShader.vert
+  NodeShader.frag
+  EdgeShader.vert
+  EdgeShader.frag
+)
+
 set(SRC_SATVIZ_FILES
   Bindings.cpp
   Display.cpp
   OnscreenDisplay.cpp
   OffscreenDisplay.cpp
+  GraphRenderer.cpp
+  GlUtils.cpp
+  Camera.cpp
+  VideoController.cpp
 )
 
 add_library(
@@ -17,6 +29,7 @@ target_include_directories(
   PRIVATE ${OGDF_INCLUDE_DIRS}
   PRIVATE ${SFML_INCLUDE_DIRS}
   PRIVATE ${THEORA_INCLUDE_DIRS}
+  PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(

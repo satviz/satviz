@@ -30,7 +30,7 @@ protected:
    *
    * This is done at object construction time.
    */
-  void loadGLExtensions();
+  void loadGlExtensions();
   /**
    * Switch to this Displays OpenGL context.
    */
