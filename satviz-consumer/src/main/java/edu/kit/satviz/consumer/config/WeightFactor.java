@@ -11,14 +11,14 @@ import java.util.function.DoubleUnaryOperator;
 public enum WeightFactor {
 
   /**
-   * Each new clause adds <code>1</code> to the corresponding edge weights.<br><br>
+   * Scales the weight-update by <code>1</code>.<br><br>
    *
    * <code>apply(n) = 1</code>
    */
   CONSTANT(n -> 1),
 
   /**
-   * Each new clause adds <code>1/n</code> to the corresponding edge weights,
+   * Scales the weight-update by <code>1/n</code>,
    * with <code>n</code> being the clause-size.<br><br>
    *
    * <code>apply(n) = 1/n</code>
@@ -26,7 +26,7 @@ public enum WeightFactor {
   RECIPROCAL(n -> 1.0 / n),
 
   /**
-   * Each new clause adds <code>1/(2^n)</code> to the corresponding edge weights,
+   * Scales the weight-update by <code>1/(2^n)</code>,
    * with <code>n</code> being the clause-size.<br><br>
    *
    * <code>apply(n) = 1/(2^n)</code>
