@@ -1,4 +1,5 @@
 #include <satviz/Graph.hpp>
+#include <satviz/GraphObserver.hpp>
 
 #include <ogdf/energybased/FMMMLayout.h>
 
@@ -19,6 +20,12 @@ void Graph::recalculateLayout() {
   fmmm.newInitialPlacement(true);
   fmmm.qualityVersusSpeed(ogdf::FMMMOptions::QualityVsSpeed::GorgeousAndEfficient);
   fmmm.call(attrs);
+
+  ogdf::Array<ogdf::node> nodes;
+  graph.allNodes(nodes);
+  for (auto o : observers) {
+    o->onLayoutChange(nodes);
+  }
 }
 
 } // namespace graph

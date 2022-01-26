@@ -77,18 +77,21 @@ GraphRenderer::GraphRenderer(graph::Graph *gr)
   // Set up edge render state
   glBindVertexArray(edge_state);
   simpleGlVertexAttrib(ATTR_EDGE_POSITION, buffer_objects[BO_NODE_OFFSET], 2, GL_FLOAT, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
 
   // Set up heatmap color palette
+  const int heat_palette_width = 4;
   const GLuint palette_colors[] = {
-    0x00808CFF,
-    0xF2B34DFF,
+      0xFFA0A0A0,
+      0xFF8C8000,
+      0xFF4DB3F2,
+      0xFF00A0FF,
   };
   glBindTexture(GL_TEXTURE_1D, heat_palette);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, palette_colors);
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, heat_palette_width, 0, GL_RGBA, GL_UNSIGNED_BYTE, palette_colors);
+  glUniform1i(glGetUniformLocation(resources.node_prog, "heat_palette"), 0);
 }
 
 GraphRenderer::~GraphRenderer() {
@@ -109,6 +112,7 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
   glUseProgram(resources.edge_prog);
   glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
   glBindVertexArray(edge_state);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
   glDrawElements(GL_LINES, 2 * edge_count, GL_UNSIGNED_INT, 0);
 
   // Draw nodes
@@ -134,9 +138,11 @@ void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   float (*area)[2] = (float (*)[2]) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
   // TODO proper mapping to indices!
   int idx = 0;
+  printf("onLayoutChange():\n");
   for (ogdf::node node : changed) {
     area[idx][0] = (float) my_graph->getX(node);
     area[idx][1] = (float) my_graph->getY(node);
+    printf("\t[%03d] = %f, %f\n", idx, area[idx][0], area[idx][1]);
     idx++;
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);

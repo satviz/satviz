@@ -7,12 +7,14 @@ namespace video {
 VideoController::VideoController(graph::Graph *gr, Display *dpy)
   : graph(gr), display(dpy), camera(), wantToClose(false) {
   logGlDebugMessages();
+  video::GraphRenderer::initializeResources();
   renderer = new GraphRenderer(graph);
   graph->addObserver(renderer);
 }
 
 VideoController::~VideoController() {
   delete renderer;
+  video::GraphRenderer::terminateResources();
   delete display;
 }
 
