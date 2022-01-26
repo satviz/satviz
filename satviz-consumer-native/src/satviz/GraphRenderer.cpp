@@ -135,8 +135,8 @@ void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   // TODO proper mapping to indices!
   int idx = 0;
   for (ogdf::node node : changed) {
-    area[idx][0] = my_graph->nodeX[node];
-    area[idx][1] = my_graph->nodeY[node];
+    area[idx][0] = (float) my_graph->getX(node);
+    area[idx][1] = (float) my_graph->getY(node);
     idx++;
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);

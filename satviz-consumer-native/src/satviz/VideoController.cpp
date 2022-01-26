@@ -5,11 +5,14 @@ namespace satviz {
 namespace video {
 
 VideoController::VideoController(graph::Graph *gr, Display *dpy)
-  : graph(gr), display(dpy), wantToClose(false) {
+  : graph(gr), display(dpy), camera(), wantToClose(false) {
   logGlDebugMessages();
+  renderer = new GraphRenderer(graph);
+  graph->addObserver(renderer);
 }
 
 VideoController::~VideoController() {
+  delete renderer;
   delete display;
 }
 
@@ -20,6 +23,7 @@ void VideoController::nextFrame() {
       wantToClose = true;
   }
   display->startFrame();
+  renderer->draw(camera, display->getWidth(), display->getHeight());
   display->displayFrame();
 }
 

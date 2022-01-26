@@ -41,17 +41,15 @@ class Graph {
 private:
   ogdf::Graph graph;
   ogdf::GraphAttributes attrs;
+  std::vector<GraphObserver*> observers;
 
 public:
-  ogdf::NodeArray<float> &nodeX;
-  ogdf::NodeArray<float> &nodeY;
-
-  Graph();
+  Graph(size_t num_nodes = 0);
 
   ogdf::Graph getOgdfGraph() { return graph; }
   ogdf::GraphAttributes getOgdfAttrs() { return attrs; }
 
-  void addObserver(GraphObserver *o);
+  void addObserver(GraphObserver *o) { observers.push_back(o); }
 
   void submitWeightUpdate(WeightUpdate &update);
   void submitHeatUpdate(HeatUpdate &update);
@@ -64,6 +62,9 @@ public:
 
   NodeInfo queryNode(int index);
   EdgeInfo queryEdge(int index1, int index2);
+
+  double getX(ogdf::node v) { return attrs.x(v); }
+  double getY(ogdf::node v) { return attrs.y(v); }
 };
 
 } // namespace graph

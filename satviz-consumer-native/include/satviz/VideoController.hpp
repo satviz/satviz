@@ -3,6 +3,7 @@
 
 #include <satviz/Graph.hpp>
 #include <satviz/Display.hpp>
+#include <satviz/GraphRenderer.hpp>
 #include <satviz/VideoEncoder.hpp>
 
 namespace satviz {
@@ -15,6 +16,8 @@ class VideoController {
 private:
   graph::Graph *graph;
   Display *display;
+  GraphRenderer *renderer;
+  Camera camera;
 
 public:
   bool wantToClose;

@@ -47,7 +47,7 @@ public:
   static void terminateResources();
 
   GraphRenderer(graph::Graph *gr);
-  ~GraphRenderer();
+  virtual ~GraphRenderer();
 
   /**
    * Draw the associated graph onto the OpenGL framebuffer.
