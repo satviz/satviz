@@ -2,10 +2,18 @@
 #include <satviz/OnscreenDisplay.hpp>
 #include <satviz/VideoController.hpp>
 
+#include <ogdf/basic/graph_generators.h>
+#include <ogdf/layered/DfsAcyclicSubgraph.h>
+
 using namespace ::satviz;
 
 int main() {
-  graph::Graph graph(10);
+  ogdf::Graph ogdfGraph;
+  ogdf::randomSimpleGraph(ogdfGraph, 10, 20);
+  ogdf::DfsAcyclicSubgraph das;
+  das.callAndReverse(ogdfGraph);
+
+  graph::Graph graph(ogdfGraph);
   video::Display *display = new video::OnscreenDisplay(640, 480);
   video::VideoController controller(&graph, display);
   graph.recalculateLayout();

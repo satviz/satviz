@@ -45,6 +45,11 @@ private:
 
 public:
   Graph(size_t num_nodes = 0);
+  /**
+   * This variant of the constructor only exists to aid
+   * debugging & testing. It should not be used directly.
+   */
+  Graph(ogdf::Graph &ogdfGraph);
 
   ogdf::Graph getOgdfGraph() { return graph; }
   ogdf::GraphAttributes getOgdfAttrs() { return attrs; }
