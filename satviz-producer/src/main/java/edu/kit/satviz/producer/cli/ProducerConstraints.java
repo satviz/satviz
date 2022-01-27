@@ -1,5 +1,7 @@
 package edu.kit.satviz.producer.cli;
 
+import static edu.kit.satviz.common.Constraint.allOf;
+import static edu.kit.satviz.common.Constraint.oneOf;
 import static edu.kit.satviz.common.FileExistsConstraint.fileExists;
 
 import edu.kit.satviz.common.Constraint;
@@ -15,11 +17,11 @@ public class ProducerConstraints {
       List<? extends ProducerMode> supportedModes
   ) {
     Constraint<Object> isNull = Constraint.checking(Objects::isNull, "Is not null");
-    return Constraint.allOf(
+    return allOf(
         new SingleModeConstraint(supportedModes),
-        fileExists().on(ProducerParameters::getInstanceFile),
-        fileExists().on(ProducerParameters::getProofFile),
-        fileExists().on(ProducerParameters::getSolverFile)
+        oneOf(isNull, fileExists().on(ProducerParameters::getInstanceFile)),
+        oneOf(isNull, fileExists().on(ProducerParameters::getProofFile)),
+        oneOf(isNull, fileExists().on(ProducerParameters::getSolverFile))
     );
   }
 
