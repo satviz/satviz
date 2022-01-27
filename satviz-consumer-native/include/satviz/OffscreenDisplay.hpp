@@ -9,19 +9,19 @@ namespace video {
 /**
  * A Display that does not open a window or show anything on the screen.
  */
-class OffscreenDisplay : Display {
+class OffscreenDisplay : public Display {
 private:
   sf::Context context;
 
-  void activateContext();
+  void activateContext() override;
 
 public:
   OffscreenDisplay(int width, int height);
   ~OffscreenDisplay();
 
-  bool pollEvent(sf::Event &event) { (void) event; return false; }
-  void lockSize(bool lock) { (void) lock; }
-  void displayFrame() {}
+  bool pollEvent(sf::Event &event) override { (void) event; return false; }
+  void lockSize(bool lock) override { (void) lock; }
+  void displayFrame() override {}
 };
 
 } // namespace video

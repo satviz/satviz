@@ -15,7 +15,7 @@ sf::ContextSettings Display::makeContextSettings()
   return settings;
 }
 
-void Display::loadGLExtensions()
+void Display::loadGlExtensions()
 {
   gladLoaderLoadGL();
 }
@@ -23,6 +23,7 @@ void Display::loadGLExtensions()
 void Display::startFrame()
 {
   glViewport(0, 0, width, height);
+  glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
