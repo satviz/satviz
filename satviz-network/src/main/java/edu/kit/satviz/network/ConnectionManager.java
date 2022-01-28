@@ -11,6 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+/**
+ * A server servicing multiple {@link ClientConnectionManager}s.
+ *
+ * @author luwae
+ */
 public class ConnectionManager {
   private enum State {
     NEW,
@@ -35,6 +40,14 @@ public class ConnectionManager {
   private Consumer<ConnectionId> lsAccept;
   private Consumer<String> lsFail;
 
+  /**
+   * Creates a new manager with a specific port and message types.
+   * The socket channel is not yet opened.
+   * Any client that wants to connect with this manager must possess an equal message type mapping.
+   *
+   * @param port the port to listen on
+   * @param bp the mapping of message types
+   */
   public ConnectionManager(int port, NetworkBlueprint bp) {
     serverAddress = new InetSocketAddress("localhost", port);
     this.contexts = ConcurrentHashMap.newKeySet();
@@ -88,6 +101,12 @@ public class ConnectionManager {
     }
   }
 
+  /**
+   * Return whether the manager has finished.
+   * If true, no more clients can connect to this manager.
+   *
+   * @return whether it has finished or not
+   */
   public boolean isClosed() {
     return state == State.FINISHED || state == State.FAILED;
   }
@@ -170,6 +189,13 @@ public class ConnectionManager {
     }
   }
 
+  /**
+   * Start this connection manager.
+   * Starts a new thread in the background to listen to incoming clients and data.
+   * Calling this method after the manager has finished has no effect.
+   *
+   * @return whether the start was successful or not
+   */
   public boolean start() {
     synchronized (syncState) { // start() should be called at most once
       if (state != State.NEW) {
@@ -182,6 +208,14 @@ public class ConnectionManager {
     return true;
   }
 
+  /**
+   * Stops this connection manager.
+   * Signals the background thread, which closes all sockets before terminating itself.
+   * This method blocks until the background thread is terminated, to ensure safe shutdown.
+   * Calling this method if the manager has finished has no effect.
+   *
+   * @throws InterruptedException if an interrupt occurs before the other thread terminated.
+   */
   public void stop() throws InterruptedException {
     synchronized (syncState) {
       if (state != State.OPEN) {
@@ -197,15 +231,36 @@ public class ConnectionManager {
     }
   }
 
-  void registerAccept(Consumer<ConnectionId> ls) {
+  /**
+   * Registers a new listener that gets notified if a new socket connection is accepted.
+   *
+   * @implNote currently, the old listener gets overwritten if this method is called twice.
+   * @param ls the listener
+   */
+  public void registerAccept(Consumer<ConnectionId> ls) {
     this.lsAccept = ls;
   }
 
-  void registerGlobalFail(Consumer<String> ls) {
+  /**
+   * Registers a new listener that gets notified if the manager globally fails
+   *     (i.e., a fatal error occurs that doesn't only affect a single connection)
+   *
+   * @implNote currently, the old listener gets overwritten if this method is called twice.
+   * @param ls the listener
+   */
+  public void registerGlobalFail(Consumer<String> ls) {
     this.lsFail = ls;
   }
 
-  void register(ConnectionId cid, BiConsumer<ConnectionId, NetworkMessage> ls) {
+  /**
+   * Registers a new listener for a single client connection.
+   * The listener gets notified for all network messages received from this client.
+   *
+   * @implNote currently, the old listener gets overwritten if this method is called twice.
+   * @param cid the ID of the client
+   * @param ls the listener
+   */
+  public void register(ConnectionId cid, BiConsumer<ConnectionId, NetworkMessage> ls) {
     ConnectionContext ctx = getContextFrom(cid);
     if (ctx != null) {
       ctx.setListener(ls);
@@ -230,6 +285,17 @@ public class ConnectionManager {
     return null;
   }
 
+  /**
+   * Sends a message to the specified client.
+   * If the message cannot be sent due to some error, the connection to the client is closed.
+   * This does not affect the connection manager as a whole.
+   *
+   * @param cid the ID of the client
+   * @param type the type byte of the message
+   * @param obj the object to send with the message
+   * @throws IOException if the socket is closed, the message cannot be serialized,
+   *     or any other I/O error occurs.
+   */
   public void send(ConnectionId cid, Byte type, Object obj) throws IOException {
     ConnectionContext ctx = getContextFrom(cid);
     if (ctx == null) {
