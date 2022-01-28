@@ -17,15 +17,6 @@ public final class ProducerCli {
         .description("""
                         A clause producer for sat-viz.
                         Can be started with either a solver and a SAT instance or a proof.""");
-    PARSER.addArgument("--instance", "-i")
-        .type(PathArgumentType.get())
-        .help("Path to a DIMACS CNF instance file or '-' for standard input");
-    PARSER.addArgument("--solver", "-s")
-        .type(PathArgumentType.get())
-        .help("Path to an IPASIR solver shared library");
-    PARSER.addArgument("--proof", "-p")
-        .type(PathArgumentType.get())
-        .help("Path to a DRAT proof or '-' for standard input");
     PARSER.addArgument("--host", "-H")
         .required(true)
         .type(String.class)
@@ -34,6 +25,15 @@ public final class ProducerCli {
         .setDefault(34312)
         .type(int.class)
         .help("Port of the target clause consumer");
+    PARSER.addArgument("--solver", "-s")
+        .type(PathArgumentType.get())
+        .help("Path to an IPASIR solver shared library");
+    PARSER.addArgument("--instance", "-i")
+        .type(PathArgumentType.get())
+        .help("Path to a DIMACS CNF instance file or '-' for standard input");
+    PARSER.addArgument("--proof", "-p")
+        .type(PathArgumentType.get())
+        .help("Path to a DRAT proof or '-' for standard input");
     PARSER.addArgument("--no-wait")
         .type(boolean.class)
         .action(Arguments.storeTrue())
