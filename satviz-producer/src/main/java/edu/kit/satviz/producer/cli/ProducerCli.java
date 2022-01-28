@@ -8,7 +8,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
 public final class ProducerCli {
 
-  private static final ArgumentParser PARSER;
+  public static final ArgumentParser PARSER;
 
   static {
     PARSER = ArgumentParsers.newFor("sat-prod").build()
