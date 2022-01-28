@@ -65,7 +65,7 @@ class ConstraintTest {
     );
 
     assertDoesNotThrow(
-        () -> Constraint.oneOf(failing, succeeding, succeeding)
+        () -> Constraint.oneOf(failing, succeeding, succeeding).validate("")
     );
 
     assertDoesNotThrow(
