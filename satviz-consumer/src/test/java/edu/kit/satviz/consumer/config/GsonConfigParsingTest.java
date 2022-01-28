@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class GsonConfigParsingTest {
 
+  private static final String CONFIG1_JSON_PATH = "/config1.json";
+  private static final String CONFIG2_JSON_PATH = "/config2.json";
+
   private static final String VIDEO_TEMPLATE_PATH = "Videos/video-%s.mp4";
   private static final Path INSTANCE_PATH = Paths.get("foo/bar/instance.cnf");
   private static final ConsumerMode CONFIG1_MODE = ConsumerMode.EXTERNAL;
@@ -86,7 +89,7 @@ class GsonConfigParsingTest {
   @Test
   void deserializeConfiguration_test1() throws IOException {
     Reader reader = new InputStreamReader(
-            GsonConfigParsingTest.class.getResourceAsStream("/config1.json")
+            GsonConfigParsingTest.class.getResourceAsStream(CONFIG1_JSON_PATH)
     );
     ConsumerConfig config = this.gson.fromJson(reader, ConsumerConfig.class);
     assertEquals(config1, config);
@@ -99,7 +102,7 @@ class GsonConfigParsingTest {
   @Test
   void deserializeConfiguration_test2() throws IOException {
     Reader reader = new InputStreamReader(
-            GsonConfigParsingTest.class.getResourceAsStream("/config2.json")
+            GsonConfigParsingTest.class.getResourceAsStream(CONFIG2_JSON_PATH)
     );
     ConsumerConfig config = gson.fromJson(reader, ConsumerConfig.class);
     assertEquals(config2, config);

@@ -13,6 +13,13 @@ public class ExternalModeConfig extends ConsumerModeConfig {
   private int port;
 
   /**
+   * This constructor creates an instance of the ExternalModeConfig class.
+   */
+  public ExternalModeConfig() {
+    super.setMode(ConsumerMode.EXTERNAL);
+  }
+
+  /**
    * This method sets the port, on which the clauses will be received.
    *
    * @param port The port, on which the clauses will be received.

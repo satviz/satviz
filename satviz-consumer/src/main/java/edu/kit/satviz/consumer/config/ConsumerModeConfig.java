@@ -17,7 +17,7 @@ public abstract class ConsumerModeConfig {
    *
    * @param mode An instance of the <code>ConsumerMode</code> enum.
    */
-  public void setMode(ConsumerMode mode) {
+  protected void setMode(ConsumerMode mode) {
     this.mode = mode;
   }
 

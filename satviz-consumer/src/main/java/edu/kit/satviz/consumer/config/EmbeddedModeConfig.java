@@ -15,6 +15,13 @@ public class EmbeddedModeConfig extends ConsumerModeConfig {
   private Path sourcePath;
 
   /**
+   * This constructor creates an instance of the EmbeddedModeConfig class.
+   */
+  public EmbeddedModeConfig() {
+    super.setMode(ConsumerMode.EMBEDDED);
+  }
+
+  /**
    * This method sets the source type for the embedded producer.
    * This is specified through an instance of the <code>EmbeddedModeSource</code> enum.
    *
