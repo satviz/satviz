@@ -19,9 +19,9 @@ public class ProducerConstraints {
     Constraint<Object> isNull = Constraint.checking(Objects::isNull, "Is not null");
     return allOf(
         new SingleModeConstraint(supportedModes),
-        oneOf(isNull, fileExists().on(ProducerParameters::getInstanceFile)),
-        oneOf(isNull, fileExists().on(ProducerParameters::getProofFile)),
-        oneOf(isNull, fileExists().on(ProducerParameters::getSolverFile))
+        oneOf(isNull, fileExists()).on(ProducerParameters::getInstanceFile),
+        oneOf(isNull, fileExists()).on(ProducerParameters::getProofFile),
+        oneOf(isNull, fileExists()).on(ProducerParameters::getSolverFile)
     );
   }
 
