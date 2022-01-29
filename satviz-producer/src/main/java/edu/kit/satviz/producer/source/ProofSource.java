@@ -6,6 +6,7 @@ import edu.kit.satviz.producer.ClauseSource;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.IOException;
+import java.util.Iterator;
 
 public class ProofSource extends ClauseSource {
 
@@ -21,8 +22,9 @@ public class ProofSource extends ClauseSource {
   @Override
   public void open() throws SourceException {
     try (proof) {
-      for (ClauseUpdate update : proof) {
-        clauseListener.accept(update);
+      Iterator<ClauseUpdate> iterator = proof.iterator();
+      while (!stop && iterator.hasNext()) {
+        clauseListener.accept(iterator.next());
       }
     } catch (ParsingException e) {
       throw new SourceException("DRAT proof parsing error", e);
