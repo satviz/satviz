@@ -4,12 +4,12 @@
 namespace satviz {
 namespace video {
 
-VideoController::VideoController(graph::Graph *gr, Display *dpy)
+VideoController::VideoController(graph::Graph &gr, Display *dpy)
   : graph(gr), display(dpy), camera(), wantToClose(false) {
   logGlDebugMessages();
   video::GraphRenderer::initializeResources();
   renderer = new GraphRenderer(graph);
-  graph->addObserver(renderer);
+  graph.addObserver(renderer);
 }
 
 VideoController::~VideoController() {

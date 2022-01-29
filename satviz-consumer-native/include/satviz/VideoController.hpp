@@ -14,7 +14,7 @@ namespace video {
  */
 class VideoController {
 private:
-  graph::Graph *graph;
+  graph::Graph &graph;
   Display *display;
   GraphRenderer *renderer;
   Camera camera;
@@ -22,7 +22,7 @@ private:
 public:
   bool wantToClose;
 
-  VideoController(graph::Graph *gr, Display *dpy);
+  VideoController(graph::Graph &gr, Display *dpy);
   ~VideoController();
 
   /**

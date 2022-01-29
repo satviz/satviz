@@ -48,9 +48,10 @@ void GraphRenderer::terminateResources() {
   glDeleteProgram(resources.edge_prog);
 }
 
-GraphRenderer::GraphRenderer(graph::Graph *gr)
+GraphRenderer::GraphRenderer(graph::Graph &gr)
   : GraphObserver(gr), edge_count(0), edge_capacity(1000) {
-  node_count = my_graph->getOgdfGraph().numberOfNodes();
+  node_count = my_graph.getOgdfGraph().numberOfNodes();
+  edge_mapping.init(my_graph.getOgdfGraph(), -1);
 
   // Generate OpenGL handles
   glGenVertexArrays(1, &node_state);
@@ -150,8 +151,8 @@ void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   int idx = 0;
   printf("onLayoutChange():\n");
   for (ogdf::node node : changed) {
-    area[idx][0] = (float) my_graph->getX(node);
-    area[idx][1] = (float) my_graph->getY(node);
+    area[idx][0] = (float) my_graph.getX(node);
+    area[idx][1] = (float) my_graph.getY(node);
     printf("\t[%03d] = %f, %f\n", idx, area[idx][0], area[idx][1]);
     idx++;
   }
@@ -169,7 +170,7 @@ void GraphRenderer::onEdgeDeleted(ogdf::edge e) {
 void GraphRenderer::onReload() {
   // TODO also update the other attributes!
   ogdf::Array<ogdf::node> nodes;
-  my_graph->getOgdfGraph().allNodes(nodes);
+  my_graph.getOgdfGraph().allNodes(nodes);
   onLayoutChange(nodes);
 }
 

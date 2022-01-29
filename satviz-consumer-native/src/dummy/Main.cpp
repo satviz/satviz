@@ -15,7 +15,7 @@ int main() {
 
   graph::Graph graph(ogdfGraph);
   video::Display *display = new video::OnscreenDisplay(640, 480);
-  video::VideoController controller(&graph, display);
+  video::VideoController controller(graph, display);
   graph.recalculateLayout();
   while (!controller.wantToClose) {
     controller.nextFrame();

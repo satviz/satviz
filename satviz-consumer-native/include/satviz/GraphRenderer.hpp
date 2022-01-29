@@ -47,7 +47,7 @@ public:
   static void initializeResources();
   static void terminateResources();
 
-  GraphRenderer(graph::Graph *gr);
+  GraphRenderer(graph::Graph &gr);
   virtual ~GraphRenderer();
 
   /**
