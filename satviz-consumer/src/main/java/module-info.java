@@ -8,4 +8,6 @@ module edu.kit.satviz.consumer {
   requires javafx.fxml;
   requires javafx.controls;
 
+  opens edu.kit.satviz.consumer.config to com.google.gson;
+
 }
