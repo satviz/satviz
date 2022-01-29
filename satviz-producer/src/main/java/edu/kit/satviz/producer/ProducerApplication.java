@@ -12,8 +12,12 @@ import edu.kit.satviz.producer.mode.SolverMode;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ProducerApplication {
+
+  private static final Logger logger = Logger.getLogger("Producer");
 
   private static final List<ProducerMode> SUPPORTED_MODES
       = List.of(new ProofMode(), new SolverMode());
@@ -34,7 +38,7 @@ public class ProducerApplication {
       // TODO: 29/01/2022
       connection.establish(new ProducerId(null, null, null, false, 0));
     } catch (SourceException e) {
-      System.err.println(e.getMessage());
+      logger.log(Level.SEVERE, e.getMessage(), e);
       System.exit(1);
     }
 
@@ -56,7 +60,7 @@ public class ProducerApplication {
     try {
       inputConstraint.validate(params);
     } catch (ConstraintValidationException e) {
-      System.err.println(e.getMessage());
+      logger.severe(e.getMessage());
       System.exit(1);
     }
   }

@@ -1,5 +1,7 @@
 module edu.kit.satviz.producer {
 
+  requires java.logging;
+
   requires edu.kit.satviz.common;
   requires edu.kit.satviz.sat;
   requires edu.kit.satviz.parsers;

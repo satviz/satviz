@@ -17,6 +17,7 @@ public final class ProducerCli {
         .description("""
                         A clause producer for sat-viz.
                         Can be started with either a solver and a SAT instance or a proof.""");
+    // TODO PARSER.addArgument("-l", "--log-level")
     PARSER.addArgument("--host", "-H")
         .required(true)
         .type(String.class)
