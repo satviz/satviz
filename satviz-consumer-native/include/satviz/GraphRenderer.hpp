@@ -17,8 +17,8 @@ private:
   enum {
     BO_NODE_OFFSET,
     BO_NODE_HEAT,
-    BO_EDGE_WEIGHT,
     BO_EDGE_INDICES,
+    BO_EDGE_WEIGHT,
     NUM_BUFFER_OBJECTS
   };
 
@@ -36,6 +36,7 @@ private:
   unsigned node_state;
   unsigned edge_state;
   unsigned buffer_objects[NUM_BUFFER_OBJECTS];
+  unsigned offset_texview;
   unsigned heat_palette;
   int node_count;
   int edge_count;

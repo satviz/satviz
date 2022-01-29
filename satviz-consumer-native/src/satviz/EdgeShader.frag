@@ -1,7 +1,9 @@
 #version 330 core
 
+in float weight;
+
 out vec4 frag_color;
 
 void main() {
-    frag_color = vec4(1.0, 1.0, 1.0, 0.5);
+    frag_color = vec4(1.0, 1.0, 1.0, weight);
 }

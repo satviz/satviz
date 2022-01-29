@@ -10,7 +10,7 @@ namespace video {
 #define ATTR_NODE_HEAT     1
 #define ATTR_NODE_OFFSET   2
 
-#define ATTR_EDGE_POSITION 0
+#define ATTR_EDGE_INDICES  0
 #define ATTR_EDGE_WEIGHT   1
 
 static const float template_coordinates[] = {
@@ -57,16 +57,21 @@ GraphRenderer::GraphRenderer(graph::Graph *gr)
   glGenVertexArrays(1, &edge_state);
   glGenBuffers(NUM_BUFFER_OBJECTS, buffer_objects);
   glGenTextures(1, &heat_palette);
+  glGenTextures(1, &offset_texview);
 
   // Allocate buffers
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
   glBufferData(GL_ARRAY_BUFFER, 2 * sizeof (float) * node_count, NULL, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
   glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * node_count, NULL, GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+  glBufferData(GL_ARRAY_BUFFER, 2 * sizeof (unsigned) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_WEIGHT]);
   glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * sizeof (unsigned) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
+
+  glBindTexture(GL_TEXTURE_BUFFER, offset_texview);
+  glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, buffer_objects[BO_NODE_OFFSET]);
+  glUniform1i(glGetUniformLocation(resources.edge_prog, "offset_texview"), 0);
 
   // Set up node render state
   glBindVertexArray(node_state);
@@ -76,7 +81,11 @@ GraphRenderer::GraphRenderer(graph::Graph *gr)
 
   // Set up edge render state
   glBindVertexArray(edge_state);
-  simpleGlVertexAttrib(ATTR_EDGE_POSITION, buffer_objects[BO_NODE_OFFSET], 2, GL_FLOAT, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+  glEnableVertexAttribArray(ATTR_EDGE_INDICES);
+  glVertexAttribIPointer(ATTR_EDGE_INDICES, 2, GL_UNSIGNED_INT, 0, (void *) 0);
+  glVertexAttribDivisor(ATTR_EDGE_INDICES, 1);
+  simpleGlVertexAttrib(ATTR_EDGE_WEIGHT, buffer_objects[BO_EDGE_WEIGHT], 1, GL_UNSIGNED_BYTE, 1);
 
   // Set up heatmap color palette
   const int heat_palette_width = 4;
@@ -99,6 +108,7 @@ GraphRenderer::~GraphRenderer() {
   glDeleteVertexArrays(1, &edge_state);
   glDeleteBuffers(NUM_BUFFER_OBJECTS, buffer_objects);
   glDeleteTextures(1, &heat_palette);
+  glDeleteTextures(1, &offset_texview);
 }
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {
@@ -112,8 +122,8 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
   glUseProgram(resources.edge_prog);
   glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
   glBindVertexArray(edge_state);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
-  glDrawElements(GL_LINES, 2 * edge_count, GL_UNSIGNED_INT, 0);
+  glBindTexture(GL_TEXTURE_BUFFER, offset_texview);
+  glDrawArraysInstanced(GL_LINES, 0, 2, edge_count);
 
   // Draw nodes
   glUseProgram(resources.node_prog);
