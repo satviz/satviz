@@ -8,6 +8,12 @@ import java.nio.ByteBuffer;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+/**
+ * A client to connect to a {@link ConnectionManager}.
+ *
+ * @apiNote thread-safe
+ * @author luwae
+ */
 public class ClientConnectionManager {
   private enum State {
     NEW,
@@ -29,6 +35,13 @@ public class ClientConnectionManager {
   private Consumer<ConnectionId> lsConnect;
   private Consumer<String> lsFail;
 
+  /**
+   * Creates a new client connection with specified address and port, and message type mapping.
+   *
+   * @param address the address to connect to
+   * @param port the port to connect to
+   * @param bp the message type mapping
+   */
   public ClientConnectionManager(String address, int port, NetworkBlueprint bp) {
     this.bp = bp;
     this.ctx = new ConnectionContext(
@@ -57,6 +70,11 @@ public class ClientConnectionManager {
   // TODO make sure a handler calling a method can't do anything stupid (it holds some locks!)
 
 
+  /**
+   * Returns whether the client has finished.
+   *
+   * @return whether it has finished or not
+   */
   public boolean isClosed() {
     return state == State.FINISHED || state == State.FAILED;
   }

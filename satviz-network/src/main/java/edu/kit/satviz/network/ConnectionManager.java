@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 /**
  * A server servicing multiple {@link ClientConnectionManager}s.
  *
+ * @apiNote thread-safe
  * @author luwae
  */
 public class ConnectionManager {
@@ -41,12 +42,12 @@ public class ConnectionManager {
   private Consumer<String> lsFail;
 
   /**
-   * Creates a new manager with a specific port and message types.
+   * Creates a new manager with a specific port and message type mapping.
    * The socket channel is not yet opened.
    * Any client that wants to connect with this manager must possess an equal message type mapping.
    *
    * @param port the port to listen on
-   * @param bp the mapping of message types
+   * @param bp the message type mapping
    */
   public ConnectionManager(int port, NetworkBlueprint bp) {
     serverAddress = new InetSocketAddress("localhost", port);
@@ -102,7 +103,7 @@ public class ConnectionManager {
   }
 
   /**
-   * Return whether the manager has finished.
+   * Returns whether the manager has finished.
    * If true, no more clients can connect to this manager.
    *
    * @return whether it has finished or not
