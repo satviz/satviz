@@ -10,6 +10,7 @@ VideoController::VideoController(graph::Graph &gr, Display *dpy)
   video::GraphRenderer::initializeResources();
   renderer = new GraphRenderer(graph);
   graph.addObserver(renderer);
+  renderer->onReload();
 }
 
 VideoController::~VideoController() {

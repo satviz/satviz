@@ -13,7 +13,7 @@ private:
   float zoom;
 
 public:
-  Camera() : position{0.0f, 0.0f}, zoom(1.0f) {}
+  Camera() : position{0.0f, 0.0f}, zoom(2.0f) {}
 
   // TODO Position Getters & Setters
   inline float getZoom() { return zoom; }

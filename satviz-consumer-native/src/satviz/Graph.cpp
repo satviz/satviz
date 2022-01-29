@@ -13,8 +13,8 @@ Graph::Graph(size_t num_nodes)
   }
 }
 
-Graph::Graph(ogdf::Graph &ogdfGraph)
-    : graph(ogdfGraph), attrs(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics) {
+Graph::Graph(ogdf::Graph &graphToCopy)
+    : graph(graphToCopy), attrs(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics) {
 }
 
 void Graph::recalculateLayout() {

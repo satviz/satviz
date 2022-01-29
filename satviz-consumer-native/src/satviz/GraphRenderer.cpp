@@ -49,9 +49,8 @@ void GraphRenderer::terminateResources() {
 }
 
 GraphRenderer::GraphRenderer(graph::Graph &gr)
-  : GraphObserver(gr), edge_count(0), edge_capacity(1000) {
+  : GraphObserver(gr), edge_count(0), edge_capacity(1000), edge_mapping(gr.getOgdfGraph(), -1) {
   node_count = my_graph.getOgdfGraph().numberOfNodes();
-  edge_mapping.init(my_graph.getOgdfGraph(), -1);
 
   // Generate OpenGL handles
   glGenVertexArrays(1, &node_state);
@@ -147,20 +146,35 @@ void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
 void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
   float (*area)[2] = (float (*)[2]) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
-  // TODO proper mapping to indices!
-  int idx = 0;
+  // TODO proper mapping of nodes to indices!
   printf("onLayoutChange():\n");
   for (ogdf::node node : changed) {
+    int idx = node->index();
     area[idx][0] = (float) my_graph.getX(node);
     area[idx][1] = (float) my_graph.getY(node);
     printf("\t[%03d] = %f, %f\n", idx, area[idx][0], area[idx][1]);
-    idx++;
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void GraphRenderer::onEdgeAdded(ogdf::edge e) {
-  (void) e;
+  int offset = edge_mapping[e];
+  if (offset < 0) {
+    offset = edge_count++;
+    edge_mapping[e] = offset;
+    if (edge_count > edge_capacity) {
+      resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * 2 * sizeof(unsigned), edge_capacity * 2 * 2 * sizeof (unsigned));
+      edge_capacity *= 2;
+    }
+  }
+  offset *= 2 * sizeof(unsigned);
+
+  // TODO proper mapping of nodes to indices!
+  std::array<ogdf::node, 2> nodes = e->nodes();
+  int data[2] = { nodes[0]->index(), nodes[1]->index() };
+
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+  glBufferSubData(GL_ARRAY_BUFFER, offset, 2 * sizeof (unsigned), data);
 }
 
 void GraphRenderer::onEdgeDeleted(ogdf::edge e) {
@@ -169,9 +183,18 @@ void GraphRenderer::onEdgeDeleted(ogdf::edge e) {
 
 void GraphRenderer::onReload() {
   // TODO also update the other attributes!
+
   ogdf::Array<ogdf::node> nodes;
   my_graph.getOgdfGraph().allNodes(nodes);
   onLayoutChange(nodes);
+
+  ogdf::Array<ogdf::edge> edges;
+  my_graph.getOgdfGraph().allEdges(edges);
+  edge_mapping.fill(-1);
+  edge_count = 0;
+  for (auto edge : edges) {
+    onEdgeAdded(edge);
+  }
 }
 
 } // namespace video

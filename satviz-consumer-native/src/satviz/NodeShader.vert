@@ -11,7 +11,7 @@ layout(location = 2) in vec2  node_position;
 out vec2 frag_offset;
 out vec4 node_color;
 
-const float node_radius = 10.0;
+const float node_radius = 5.0;
 
 void main() {
   frag_offset = template_position;

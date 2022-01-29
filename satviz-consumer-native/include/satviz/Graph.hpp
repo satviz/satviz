@@ -49,10 +49,10 @@ public:
    * This variant of the constructor only exists to aid
    * debugging & testing. It should not be used directly.
    */
-  Graph(ogdf::Graph &ogdfGraph);
+  Graph(ogdf::Graph &graphToCopy);
 
-  ogdf::Graph getOgdfGraph() { return graph; }
-  ogdf::GraphAttributes getOgdfAttrs() { return attrs; }
+  ogdf::Graph &getOgdfGraph() { return graph; }
+  ogdf::GraphAttributes &getOgdfAttrs() { return attrs; }
 
   void addObserver(GraphObserver *o) { observers.push_back(o); }
 
