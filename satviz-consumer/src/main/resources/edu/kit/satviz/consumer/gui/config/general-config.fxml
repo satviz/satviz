@@ -65,7 +65,7 @@
                                           <Font size="10.0" />
                                        </font>
                                     </Button>
-                                    <Label text="home/sat/recordings/recording.ogv" fx:id="recordingFileLabel">
+                                    <Label fx:id="recordingFileLabel">
                                        <HBox.margin>
                                           <Insets left="10.0" top="2.0" />
                                        </HBox.margin>
@@ -89,7 +89,7 @@
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <ChoiceBox prefWidth="150.0" value="Constant" fx:id="weightFactorChoiceBox"/>
+                              <ChoiceBox prefWidth="150.0" fx:id="weightFactorChoiceBox"/>
                            </children>
                            <VBox.margin>
                               <Insets bottom="10.0" />
@@ -154,7 +154,7 @@
                               <HBox prefHeight="100.0" prefWidth="200.0">
                                  <children>
                                     <Button mnemonicParsing="false" prefHeight="27.0" prefWidth="75.0" text="Select File" fx:id="satInstanceFileButton"/>
-                                    <Label alignment="BOTTOM_CENTER" text="home/sat/instances/instance.cnf" fx:id="satInstanceFileLabel">
+                                    <Label alignment="BOTTOM_CENTER" fx:id="satInstanceFileLabel">
                                        <HBox.margin>
                                           <Insets left="10.0" top="5.0" />
                                        </HBox.margin>

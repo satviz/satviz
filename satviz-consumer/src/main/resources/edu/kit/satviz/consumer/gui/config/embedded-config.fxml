@@ -29,7 +29,7 @@
                         <Insets />
                      </HBox.margin>
                   </Button>
-                  <Label text="home/sat/solvers/cadical.so" fx:id="producerModeFileLabel">
+                  <Label fx:id="producerModeFileLabel">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
