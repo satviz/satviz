@@ -39,9 +39,9 @@ private:
   unsigned offset_texview;
   unsigned heat_palette;
   int node_count;
-  int edge_count;
   int edge_capacity;
   ogdf::EdgeArray<int> edge_mapping;
+  std::vector<int> free_edges;
 
 public:
   static void initializeResources();

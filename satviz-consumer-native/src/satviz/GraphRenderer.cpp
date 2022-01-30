@@ -13,6 +13,8 @@ namespace video {
 #define ATTR_EDGE_INDICES  0
 #define ATTR_EDGE_WEIGHT   1
 
+#define SENTINEL_INDEX 0xFFFFFFFF
+
 static const float template_coordinates[] = {
      1.0f, -1.0f,
      1.0f,  1.0f,
@@ -49,7 +51,7 @@ void GraphRenderer::terminateResources() {
 }
 
 GraphRenderer::GraphRenderer(graph::Graph &gr)
-  : GraphObserver(gr), edge_count(0), edge_capacity(1000), edge_mapping(gr.getOgdfGraph(), -1) {
+  : GraphObserver(gr), edge_capacity(1000), edge_mapping(gr.getOgdfGraph(), -1) {
   node_count = my_graph.getOgdfGraph().numberOfNodes();
 
   // Generate OpenGL handles
@@ -65,7 +67,7 @@ GraphRenderer::GraphRenderer(graph::Graph &gr)
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
   glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * node_count, NULL, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
-  glBufferData(GL_ARRAY_BUFFER, 2 * sizeof (unsigned) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof (unsigned[2]) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_WEIGHT]);
   glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
 
@@ -86,6 +88,13 @@ GraphRenderer::GraphRenderer(graph::Graph &gr)
   glVertexAttribIPointer(ATTR_EDGE_INDICES, 2, GL_UNSIGNED_INT, 0, (void *) 0);
   glVertexAttribDivisor(ATTR_EDGE_INDICES, 1);
   simpleGlVertexAttrib(ATTR_EDGE_WEIGHT, buffer_objects[BO_EDGE_WEIGHT], 1, GL_UNSIGNED_BYTE, 1);
+
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+  for (int i = 0; i < edge_capacity; i++) {
+    free_edges.push_back(i);
+    unsigned data[2] = { SENTINEL_INDEX, SENTINEL_INDEX };
+    glBufferSubData(GL_ARRAY_BUFFER, i * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
+  }
 
   // Set up heatmap color palette
   const int heat_palette_width = 4;
@@ -123,7 +132,7 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
   glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
   glBindVertexArray(edge_state);
   glBindTexture(GL_TEXTURE_BUFFER, offset_texview);
-  glDrawArraysInstanced(GL_LINES, 0, 2, edge_count);
+  glDrawArraysInstanced(GL_LINES, 0, 2, edge_capacity);
 
   // Draw nodes
   glUseProgram(resources.node_prog);
@@ -158,27 +167,42 @@ void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
 }
 
 void GraphRenderer::onEdgeAdded(ogdf::edge e) {
-  int offset = edge_mapping[e];
-  if (offset < 0) {
-    offset = edge_count++;
-    edge_mapping[e] = offset;
-    if (edge_count > edge_capacity) {
-      resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * 2 * sizeof(unsigned), edge_capacity * 2 * 2 * sizeof (unsigned));
-      edge_capacity *= 2;
+  int index = edge_mapping[e];
+  if (index < 0) {
+    if (free_edges.empty()) {
+      int new_capacity = 2 * edge_capacity;
+      resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * 2 * sizeof(unsigned), new_capacity * sizeof (unsigned[2]));
+      glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+      for (int i = edge_capacity; i < new_capacity; i++) {
+        free_edges.push_back(i);
+        unsigned data[2] = { SENTINEL_INDEX, SENTINEL_INDEX };
+        glBufferSubData(GL_ARRAY_BUFFER, i * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
+      }
+      edge_capacity = new_capacity;
     }
+    index = free_edges.back();
+    free_edges.pop_back();
+    edge_mapping[e] = index;
   }
-  offset *= 2 * sizeof(unsigned);
+  int offset = index * 2 * sizeof(unsigned);
 
   // TODO proper mapping of nodes to indices!
   std::array<ogdf::node, 2> nodes = e->nodes();
   int data[2] = { nodes[0]->index(), nodes[1]->index() };
 
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
-  glBufferSubData(GL_ARRAY_BUFFER, offset, 2 * sizeof (unsigned), data);
+  glBufferSubData(GL_ARRAY_BUFFER, offset, sizeof (unsigned[2]), data);
 }
 
 void GraphRenderer::onEdgeDeleted(ogdf::edge e) {
-  (void) e;
+  int index = edge_mapping[e];
+  if (index >= 0) {
+    free_edges.push_back(index);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+    unsigned data[2] = { SENTINEL_INDEX, SENTINEL_INDEX };
+    glBufferSubData(GL_ARRAY_BUFFER, index * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
+    edge_mapping[e] = -1;
+  }
 }
 
 void GraphRenderer::onReload() {
@@ -190,8 +214,9 @@ void GraphRenderer::onReload() {
 
   ogdf::Array<ogdf::edge> edges;
   my_graph.getOgdfGraph().allEdges(edges);
-  edge_mapping.fill(-1);
-  edge_count = 0;
+  for (auto edge : edges) {
+    onEdgeDeleted(edge);
+  }
   for (auto edge : edges) {
     onEdgeAdded(edge);
   }
