@@ -8,4 +8,8 @@ module edu.kit.satviz.consumer {
   requires javafx.fxml;
   requires javafx.controls;
 
+  exports edu.kit.satviz.consumer.gui.config to javafx.graphics;
+
+  opens edu.kit.satviz.consumer.gui.config to javafx.fxml;
+
 }
