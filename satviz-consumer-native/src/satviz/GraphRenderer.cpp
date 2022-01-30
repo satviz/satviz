@@ -51,7 +51,7 @@ void GraphRenderer::terminateResources() {
 }
 
 GraphRenderer::GraphRenderer(graph::Graph &gr)
-  : GraphObserver(gr), edge_capacity(1000), edge_mapping(gr.getOgdfGraph(), -1) {
+  : GraphObserver(gr), edge_capacity(10), edge_mapping(gr.getOgdfGraph(), -1) {
   node_count = my_graph.getOgdfGraph().numberOfNodes();
 
   // Generate OpenGL handles
@@ -73,6 +73,7 @@ GraphRenderer::GraphRenderer(graph::Graph &gr)
 
   glBindTexture(GL_TEXTURE_BUFFER, offset_texview);
   glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, buffer_objects[BO_NODE_OFFSET]);
+  glUseProgram(resources.edge_prog);
   glUniform1i(glGetUniformLocation(resources.edge_prog, "offset_texview"), 0);
 
   // Set up node render state
@@ -109,6 +110,7 @@ GraphRenderer::GraphRenderer(graph::Graph &gr)
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, heat_palette_width, 0, GL_RGBA, GL_UNSIGNED_BYTE, palette_colors);
+  glUseProgram(resources.node_prog);
   glUniform1i(glGetUniformLocation(resources.node_prog, "heat_palette"), 0);
 }
 
@@ -171,7 +173,7 @@ void GraphRenderer::onEdgeAdded(ogdf::edge e) {
   if (index < 0) {
     if (free_edges.empty()) {
       int new_capacity = 2 * edge_capacity;
-      resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * 2 * sizeof(unsigned), new_capacity * sizeof (unsigned[2]));
+      resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * sizeof(unsigned[2]), new_capacity * sizeof (unsigned[2]));
       glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
       for (int i = edge_capacity; i < new_capacity; i++) {
         free_edges.push_back(i);
@@ -184,7 +186,7 @@ void GraphRenderer::onEdgeAdded(ogdf::edge e) {
     free_edges.pop_back();
     edge_mapping[e] = index;
   }
-  int offset = index * 2 * sizeof(unsigned);
+  int offset = index * sizeof(unsigned[2]);
 
   // TODO proper mapping of nodes to indices!
   std::array<ogdf::node, 2> nodes = e->nodes();

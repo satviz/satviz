@@ -66,7 +66,7 @@ void resizeGlBuffer(GLuint *id, size_t old_size, size_t new_size) {
 	glGenBuffers(1, &new_id);
 	glBindBuffer(GL_COPY_READ_BUFFER,  *id);
 	glBindBuffer(GL_COPY_WRITE_BUFFER, new_id);
-	glBufferStorage(GL_COPY_WRITE_BUFFER, new_size, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_COPY_WRITE_BUFFER, new_size, NULL, GL_DYNAMIC_DRAW);
 	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, MIN(old_size, new_size));
 	glBindBuffer(GL_COPY_READ_BUFFER,  0);
 	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
