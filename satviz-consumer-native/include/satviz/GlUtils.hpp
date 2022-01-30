@@ -11,6 +11,7 @@ namespace video {
 void logGlDebugMessages();
 GLuint compileGlShader(const char *source, unsigned length, GLenum type);
 GLuint linkGlProgram(GLuint vert_shader, GLuint frag_shader);
+void allocateGlBuffer(GLuint id, const char *name, size_t size);
 void resizeGlBuffer(GLuint *id, size_t old_size, size_t new_size);
 void simpleGlVertexAttrib(GLuint attr, GLuint buffer, int count, GLenum type, int divisor);
 

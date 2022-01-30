@@ -61,16 +61,31 @@ GLuint linkGlProgram(GLuint vert_shader, GLuint frag_shader) {
   return id;
 }
 
+void allocateGlBuffer(GLuint id, const char *name, size_t size) {
+  glBindBuffer(GL_COPY_WRITE_BUFFER, id);
+  glObjectLabel(GL_BUFFER, id, -1, name);
+  glBufferData(GL_COPY_WRITE_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+}
+
 void resizeGlBuffer(GLuint *id, size_t old_size, size_t new_size) {
+  char label[128];
   GLuint new_id;
+
 	glGenBuffers(1, &new_id);
-	glBindBuffer(GL_COPY_READ_BUFFER,  *id);
-	glBindBuffer(GL_COPY_WRITE_BUFFER, new_id);
-	glBufferData(GL_COPY_WRITE_BUFFER, new_size, NULL, GL_DYNAMIC_DRAW);
+  glBindBuffer(GL_COPY_READ_BUFFER,  *id);
+  glBindBuffer(GL_COPY_WRITE_BUFFER, new_id);
+
+  glGetObjectLabel(GL_BUFFER, *id, sizeof label, NULL, label);
+  glObjectLabel(GL_BUFFER, new_id, -1, label);
+
+  glBufferData(GL_COPY_WRITE_BUFFER, new_size, NULL, GL_DYNAMIC_DRAW);
 	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, MIN(old_size, new_size));
-	glBindBuffer(GL_COPY_READ_BUFFER,  0);
+
+  glBindBuffer(GL_COPY_READ_BUFFER,  0);
 	glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-	glDeleteBuffers(1, id);
+
+  glDeleteBuffers(1, id);
 	*id = new_id;
 }
 

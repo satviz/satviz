@@ -50,6 +50,9 @@ public:
   GraphRenderer(graph::Graph &gr);
   virtual ~GraphRenderer();
 
+  void init();
+  void deinit();
+
   /**
    * Draw the associated graph onto the OpenGL framebuffer.
    *

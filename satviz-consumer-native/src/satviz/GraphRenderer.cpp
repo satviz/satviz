@@ -51,8 +51,18 @@ void GraphRenderer::terminateResources() {
 }
 
 GraphRenderer::GraphRenderer(graph::Graph &gr)
-  : GraphObserver(gr), edge_capacity(10), edge_mapping(gr.getOgdfGraph(), -1) {
+    : GraphObserver(gr) {
+  init();
+}
+
+GraphRenderer::~GraphRenderer() {
+  deinit();
+}
+
+void GraphRenderer::init() {
   node_count = my_graph.getOgdfGraph().numberOfNodes();
+  edge_capacity = 10;
+  edge_mapping.init(my_graph.getOgdfGraph(), -1);
 
   // Generate OpenGL handles
   glGenVertexArrays(1, &node_state);
@@ -62,14 +72,10 @@ GraphRenderer::GraphRenderer(graph::Graph &gr)
   glGenTextures(1, &offset_texview);
 
   // Allocate buffers
-  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
-  glBufferData(GL_ARRAY_BUFFER, 2 * sizeof (float) * node_count, NULL, GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
-  glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * node_count, NULL, GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
-  glBufferData(GL_ARRAY_BUFFER, sizeof (unsigned[2]) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_WEIGHT]);
-  glBufferData(GL_ARRAY_BUFFER, 1 * sizeof (char) * edge_capacity, NULL, GL_DYNAMIC_DRAW);
+  allocateGlBuffer(buffer_objects[BO_NODE_OFFSET],  "node:offset",  node_count * sizeof (float[2]));
+  allocateGlBuffer(buffer_objects[BO_NODE_HEAT],    "node:heat",    node_count * sizeof (char));
+  allocateGlBuffer(buffer_objects[BO_EDGE_INDICES], "edge:indices", edge_capacity * sizeof (unsigned[2]));
+  allocateGlBuffer(buffer_objects[BO_EDGE_WEIGHT],  "edge:weight",  edge_capacity * sizeof (char));
 
   glBindTexture(GL_TEXTURE_BUFFER, offset_texview);
   glTexBuffer(GL_TEXTURE_BUFFER, GL_RG32F, buffer_objects[BO_NODE_OFFSET]);
@@ -114,7 +120,7 @@ GraphRenderer::GraphRenderer(graph::Graph &gr)
   glUniform1i(glGetUniformLocation(resources.node_prog, "heat_palette"), 0);
 }
 
-GraphRenderer::~GraphRenderer() {
+void GraphRenderer::deinit() {
   glDeleteVertexArrays(1, &node_state);
   glDeleteVertexArrays(1, &edge_state);
   glDeleteBuffers(NUM_BUFFER_OBJECTS, buffer_objects);
@@ -174,6 +180,13 @@ void GraphRenderer::onEdgeAdded(ogdf::edge e) {
     if (free_edges.empty()) {
       int new_capacity = 2 * edge_capacity;
       resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * sizeof(unsigned[2]), new_capacity * sizeof (unsigned[2]));
+      resizeGlBuffer(&buffer_objects[BO_EDGE_WEIGHT], edge_capacity * sizeof(char), new_capacity * sizeof (char));
+      glBindVertexArray(edge_state);
+      glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+      glEnableVertexAttribArray(ATTR_EDGE_INDICES);
+      glVertexAttribIPointer(ATTR_EDGE_INDICES, 2, GL_UNSIGNED_INT, 0, (void *) 0);
+      glVertexAttribDivisor(ATTR_EDGE_INDICES, 1);
+      simpleGlVertexAttrib(ATTR_EDGE_WEIGHT, buffer_objects[BO_EDGE_WEIGHT], 1, GL_UNSIGNED_BYTE, 1);
       glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
       for (int i = edge_capacity; i < new_capacity; i++) {
         free_edges.push_back(i);
