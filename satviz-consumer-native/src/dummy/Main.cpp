@@ -9,7 +9,7 @@ using namespace ::satviz;
 
 int main() {
   ogdf::Graph ogdfGraph;
-  ogdf::randomSimpleGraph(ogdfGraph, 10, 20);
+  ogdf::randomSimpleGraph(ogdfGraph, 100, 200);
   ogdf::DfsAcyclicSubgraph das;
   das.callAndReverse(ogdfGraph);
 

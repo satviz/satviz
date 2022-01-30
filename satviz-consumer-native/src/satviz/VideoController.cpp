@@ -22,8 +22,33 @@ VideoController::~VideoController() {
 void VideoController::nextFrame() {
   sf::Event event;
   while (display->pollEvent(event)) {
-    if (event.type == sf::Event::Closed)
+    if (event.type == sf::Event::Closed) {
       wantToClose = true;
+    }
+    if (event.type == sf::Event::MouseWheelScrolled) {
+      float factor = 1.0f;
+      if (event.mouseWheelScroll.delta < 0.0f) {
+        factor = 1.0f / 1.5f;
+      } else {
+        factor = 1.0f * 1.5f;
+      }
+      camera.setZoom(camera.getZoom() * factor);
+    }
+    if (event.type == sf::Event::KeyPressed) {
+      if (event.key.code == sf::Keyboard::D) {
+        ogdf::Graph &og = graph.getOgdfGraph();
+        ogdf::node node1 = og.chooseNode();
+        ogdf::node node2 = og.chooseNode();
+        ogdf::edge edge = og.searchEdge(node1, node2, false);
+        if (edge == nullptr) {
+          ogdf::edge edge = og.newEdge(node1, node2);
+          renderer->onEdgeAdded(edge);
+        } else {
+          renderer->onEdgeDeleted(edge);
+          og.delEdge(edge);
+        }
+      }
+    }
   }
   display->startFrame();
   renderer->draw(camera, display->getWidth(), display->getHeight());
