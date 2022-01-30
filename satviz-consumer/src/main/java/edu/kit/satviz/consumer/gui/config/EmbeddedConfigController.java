@@ -1,6 +1,8 @@
 package edu.kit.satviz.consumer.gui.config;
 
+import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -18,7 +20,9 @@ public class EmbeddedConfigController extends ConfigController {
 
   @FXML
   private void initialize() {
-
+    producerModeChoiceBox.setItems(FXCollections.observableArrayList(EmbeddedModeSource.values()));
+    // TODO: add constant in EmbeddedModeConfig
+    producerModeChoiceBox.setValue(EmbeddedModeConfig.DEFAULT_EMBEDDED_MODE_SOURCE);
   }
 
   @FXML
