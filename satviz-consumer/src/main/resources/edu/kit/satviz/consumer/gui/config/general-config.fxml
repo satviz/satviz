@@ -183,7 +183,7 @@
                   </VBox>
                         <VBox fx:id="modeConfig" prefHeight="104.0" prefWidth="415.0" style="-fx-border-color: black;">
                             <children>
-                                <fx:include source="embedded-config.fxml" />
+                                <fx:include source="external-config.fxml" />
                             </children>
                             <VBox.margin>
                                 <Insets top="10.0" />
