@@ -1,11 +1,24 @@
 package edu.kit.satviz.common;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConstraintTest {
+
+  private Constraint<String> succeeding;
+  private Constraint<String> failing;
+
+  @BeforeEach
+  void setUp() {
+    succeeding = (s) -> {
+    };
+    failing = (s) -> {
+      throw new ConstraintValidationException("fail");
+    };
+  }
 
   @Test
   void testChecking() {
@@ -24,8 +37,6 @@ class ConstraintTest {
 
   @Test
   void testAllOf() {
-    Constraint<String> succeeding = (s) -> {};
-    Constraint<String> failing = (s) -> { throw new ConstraintValidationException("fail"); };
     assertThrows(
         ConstraintValidationException.class,
         () -> Constraint.allOf(succeeding, succeeding, failing).validate("")
@@ -43,6 +54,26 @@ class ConstraintTest {
 
     assertDoesNotThrow(
         () -> Constraint.allOf(succeeding, succeeding, succeeding).validate("")
+    );
+  }
+
+  @Test
+  void testOneOf() {
+    assertThrows(
+        ConstraintValidationException.class,
+        () -> Constraint.oneOf(failing, failing, failing).validate("")
+    );
+
+    assertDoesNotThrow(
+        () -> Constraint.oneOf(failing, succeeding, succeeding).validate("")
+    );
+
+    assertDoesNotThrow(
+        () -> Constraint.oneOf(succeeding, failing, succeeding).validate("")
+    );
+
+    assertDoesNotThrow(
+        () -> Constraint.oneOf(succeeding, succeeding, succeeding).validate("")
     );
   }
 
