@@ -35,7 +35,19 @@ void VideoController::nextFrame() {
       camera.setZoom(camera.getZoom() * factor);
     }
     if (event.type == sf::Event::KeyPressed) {
-      if (event.key.code == sf::Keyboard::D) {
+      if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) {
+        camera.setX(camera.getX() - 0.2f * camera.getZoom());
+      }
+      if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
+        camera.setX(camera.getX() + 0.2f * camera.getZoom());
+      }
+      if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
+        camera.setY(camera.getY() - 0.2f * camera.getZoom());
+      }
+      if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
+        camera.setY(camera.getY() + 0.2f * camera.getZoom());
+      }
+      if (event.key.code == sf::Keyboard::K) {
         ogdf::Graph &og = graph.getOgdfGraph();
         ogdf::node node1 = og.chooseNode();
         ogdf::node node2 = og.chooseNode();

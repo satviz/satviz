@@ -11,6 +11,8 @@ namespace video {
 
 /**
  * Visual representation of a graph. Implements hardware-accelerated graphics.
+ *
+ * Each GraphRenderer object is associated with exactly one Graph.
  */
 class GraphRenderer : public graph::GraphObserver {
 private:
@@ -40,18 +42,45 @@ private:
   unsigned heat_palette;
   int node_count;
   int edge_capacity;
+  /// Mapping from edge handles to edge indices
   ogdf::EdgeArray<int> edge_mapping;
+  /// List of free/unused edge indices
   std::vector<int> free_edges;
 
+  /**
+   * Initialize rendering data.
+   *
+   * Gets called by the constructor.
+   */
+  void init();
+  /**
+   * Un-Initialize rendering data.
+   *
+   * Gets called by the destructor.
+   */
+  void deinit();
+
 public:
+  /**
+   * The GraphRenderer needs some global (per GL context) state to operate.
+   * This static method initializes theses resources.
+   */
   static void initializeResources();
+  /**
+   * The GraphRenderer needs some global (per GL context) state to operate.
+   * This static method un-initializes theses resources.
+   */
   static void terminateResources();
 
+  /**
+   * Creates a new GraphRenderer.
+   *
+   * Note that the GraphRenderer still has to be registered as an observer afterwards.
+   *
+   * @param gr a reference to the graph that this GraphRenderer should be attached to.
+   */
   GraphRenderer(graph::Graph &gr);
   virtual ~GraphRenderer();
-
-  void init();
-  void deinit();
 
   /**
    * Draw the associated graph onto the OpenGL framebuffer.
@@ -62,6 +91,7 @@ public:
    */
   void draw(Camera &camera, int width, int height);
 
+  // The following methods are all inherited from GraphObserver
   void onWeightUpdate(graph::WeightUpdate &update) override;
   void onHeatUpdate(graph::HeatUpdate &update) override;
   void onLayoutChange(ogdf::Array<ogdf::node> &changed) override;
