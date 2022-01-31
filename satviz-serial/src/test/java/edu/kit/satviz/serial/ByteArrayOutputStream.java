@@ -18,4 +18,8 @@ public class ByteArrayOutputStream extends OutputStream {
     }
     b[writepos++] = (byte) i;
   }
+
+  public void reset() {
+    writepos = 0;
+  }
 }

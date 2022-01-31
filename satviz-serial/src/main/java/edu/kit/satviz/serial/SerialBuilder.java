@@ -21,9 +21,9 @@ public abstract class SerialBuilder<T> {
   }
 
   /**
-   * Returns whether the deserialization is finished.
+   * Returns whether the deserialization has finished.
    *
-   * @return whether it is finished or not
+   * @return whether it has finished or not
    */
   public final boolean finished() {
     return finished;

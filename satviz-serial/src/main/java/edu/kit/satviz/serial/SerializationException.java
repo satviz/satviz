@@ -1,7 +1,8 @@
 package edu.kit.satviz.serial;
 
 /**
- * An exception that is thrown whenever a byte stream cannot be (de)serialized to a valid object.
+ * An exception that is thrown whenever an object cannot be serialized or deserialized
+ *     from the given data.
  *
  * @author luwae
  */

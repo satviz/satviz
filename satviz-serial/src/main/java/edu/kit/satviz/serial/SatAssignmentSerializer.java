@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * TODO
+ * A {@link Serializer} for SAT assignments.
+ * This class uses a bitmap to store the variable assignments.
  *
  * @author quorty
  */
@@ -28,7 +29,7 @@ public class SatAssignmentSerializer extends Serializer<SatAssignment> {
         b = 0;
       }
     }
-    if (assign.getVarCount() % 4 != 0) {
+    if ((assign.getVarCount() & 3) != 0) {
       // write final byte
       out.write(b);
     }

@@ -3,15 +3,10 @@ package edu.kit.satviz.serial;
 import edu.kit.satviz.sat.Clause;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
-import java.util.Arrays;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-public class ClauseTest {
-
+class ClauseTest {
   private byte[] b;
   ByteArrayInputStream in;
   ByteArrayOutputStream out;
@@ -43,8 +38,8 @@ public class ClauseTest {
     assertEquals(b[6], (byte) 0x88);
 
     Clause cNew = serial.deserialize(in);
-    assertTrue(cNew.literals().length == 1);
-    assertTrue(cNew.literals()[0] == lits[0]);
+    assertEquals(1, cNew.literals().length);
+    assertEquals(cNew.literals()[0], lits[0]);
   }
 
   @Test
@@ -53,11 +48,12 @@ public class ClauseTest {
     testClause(new int[]{-20, 10, 10, 20});
     testClause(new int[0]);
     testClause(new int[]{-1000000, 1000000});
+    testClause(new int[]{-1, 1, -2, 2, -3, 3, -4, 4, -5, 5});
   }
 
   void testClause(int[] lits) throws IOException, SerializationException {
     serial.serialize(new Clause(lits), out);
     Clause cNew = serial.deserialize(in);
-    assertTrue(Arrays.equals(cNew.literals(), lits));
+    assertArrayEquals(cNew.literals(), lits);
   }
 }

@@ -3,20 +3,16 @@ package edu.kit.satviz.serial;
 import edu.kit.satviz.sat.SatAssignment;
 
 /**
- * TODO
+ * A {@link SerialBuilder} for SAT assignments.
  *
  * @author quorty
  */
 public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
-  private IntSerialBuilder intBuilder;
-  private boolean intBuilderDone;
+  private final IntSerialBuilder intBuilder = new IntSerialBuilder();
+  private boolean intBuilderDone = false;
 
-  private SatAssignment assign;
-  private int currentVariable;
-
-  public SatAssignmentSerialBuilder() {
-    processReset();
-  }
+  private SatAssignment assign = null;
+  private int currentVariable = 1;
 
   @Override
   protected void processAddByte(byte b) throws SerializationException {
@@ -32,7 +28,12 @@ public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
     } else {
       if (intBuilder.addByte(b)) {
         intBuilderDone = true;
-        assign = new SatAssignment(intBuilder.getObject());
+        Integer i = intBuilder.getObject();
+        if (i == null) {
+          fail("unexpected null integer");
+          return; // never reached, but removes NullPointerException warning
+        }
+        assign = new SatAssignment(i);
       }
     }
   }
@@ -44,7 +45,7 @@ public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
 
   @Override
   protected void processReset() {
-    intBuilder = new IntSerialBuilder();
+    intBuilder.reset();
     intBuilderDone = false;
     assign = null;
     currentVariable = 1;

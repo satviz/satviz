@@ -15,6 +15,10 @@ public class ByteArrayInputStream extends InputStream {
     if (readpos == b.length) {
       return -1;
     }
-    return b[readpos++];
+    return b[readpos++] & 0xff; // weird java sign extension
+  }
+
+  public void reset() {
+    readpos = 0;
   }
 }

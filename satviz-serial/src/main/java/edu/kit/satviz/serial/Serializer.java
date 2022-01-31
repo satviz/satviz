@@ -8,7 +8,8 @@ import java.io.OutputStream;
  * An abstract class for serializing and deserializing objects.
  *
  * @param <T> the type of object that gets serialized
- * @author luwae, quorty
+ * @author luwae
+ * @author quorty
  */
 public abstract class Serializer<T> {
 
@@ -27,10 +28,10 @@ public abstract class Serializer<T> {
   /**
    * Serializes an object.
    * Tries to cast the object to type <code>T</code>, and serialize that.
-   * The suppression of type safety violation warnings is intentional, as we cannot guarantee
-   *     at compile time that a user of this method will always use it properly.
-   * However, a checked exception will be thrown at runtime if a cast is not possible.
    *
+   * @implNote The suppression of type safety violation warnings is intentional, as we cannot
+   *     guarantee at compile time that a user of this method will always use it properly.
+   *     However, a checked exception will be thrown at runtime if a cast is not possible.
    * @param o the object
    * @param out the stream to write to
    * @throws IOException if the stream cannot be used
@@ -54,7 +55,6 @@ public abstract class Serializer<T> {
    * @throws SerializationException if the stream contains invalid data
    */
   public T deserialize(InputStream in) throws IOException, SerializationException {
-    // this default implementation simply uses a builder
     SerialBuilder<T> builder = getBuilder();
     if (builder == null) {
       throw new NullPointerException("no builder available");
