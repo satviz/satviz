@@ -2,7 +2,9 @@ package edu.kit.satviz.parsers;
 
 import edu.kit.satviz.sat.ClauseUpdate;
 
+
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
@@ -18,10 +20,9 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
 
   @Override
   public ClauseUpdate next() {
-    return null;
+    throw new NoSuchElementException();
   }
 
-  protected abstract ClauseUpdate.Type readType();
-
+  protected abstract ClauseUpdate.Type readType(String updateString);
 
 }
