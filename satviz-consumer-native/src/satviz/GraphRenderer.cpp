@@ -174,29 +174,49 @@ void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
+int GraphRenderer::allocateEdgeIndex() {
+  // Resize everything if we ran out of free indices
+  if (free_edges.empty()) {
+    // Resize OpenGL buffers
+    int new_capacity = 2 * edge_capacity;
+    resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * sizeof(unsigned[2]), new_capacity * sizeof (unsigned[2]));
+    resizeGlBuffer(&buffer_objects[BO_EDGE_WEIGHT], edge_capacity * sizeof(char), new_capacity * sizeof (char));
+
+    // The buffer ids have changed, we have to re-register the VAO vertex attributes
+    glBindVertexArray(edge_state);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+    glEnableVertexAttribArray(ATTR_EDGE_INDICES);
+    glVertexAttribIPointer(ATTR_EDGE_INDICES, 2, GL_UNSIGNED_INT, 0, (void *) 0);
+    glVertexAttribDivisor(ATTR_EDGE_INDICES, 1);
+    simpleGlVertexAttrib(ATTR_EDGE_WEIGHT, buffer_objects[BO_EDGE_WEIGHT], 1, GL_UNSIGNED_BYTE, 1);
+
+    // Properly keep track of the new free indices
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+    for (int i = edge_capacity; i < new_capacity; i++) {
+      free_edges.push_back(i);
+      unsigned data[2] = { SENTINEL_INDEX, SENTINEL_INDEX };
+      glBufferSubData(GL_ARRAY_BUFFER, i * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
+    }
+    edge_capacity = new_capacity;
+  }
+
+  // Take a new index off the free list
+  int index = free_edges.back();
+  free_edges.pop_back();
+  return index;
+}
+
+void GraphRenderer::freeEdgeIndex(int index) {
+  free_edges.push_back(index);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+  unsigned data[2] = { SENTINEL_INDEX, SENTINEL_INDEX };
+  glBufferSubData(GL_ARRAY_BUFFER, index * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
+}
+
 void GraphRenderer::onEdgeAdded(ogdf::edge e) {
   int index = edge_mapping[e];
   if (index < 0) {
-    if (free_edges.empty()) {
-      int new_capacity = 2 * edge_capacity;
-      resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * sizeof(unsigned[2]), new_capacity * sizeof (unsigned[2]));
-      resizeGlBuffer(&buffer_objects[BO_EDGE_WEIGHT], edge_capacity * sizeof(char), new_capacity * sizeof (char));
-      glBindVertexArray(edge_state);
-      glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
-      glEnableVertexAttribArray(ATTR_EDGE_INDICES);
-      glVertexAttribIPointer(ATTR_EDGE_INDICES, 2, GL_UNSIGNED_INT, 0, (void *) 0);
-      glVertexAttribDivisor(ATTR_EDGE_INDICES, 1);
-      simpleGlVertexAttrib(ATTR_EDGE_WEIGHT, buffer_objects[BO_EDGE_WEIGHT], 1, GL_UNSIGNED_BYTE, 1);
-      glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
-      for (int i = edge_capacity; i < new_capacity; i++) {
-        free_edges.push_back(i);
-        unsigned data[2] = { SENTINEL_INDEX, SENTINEL_INDEX };
-        glBufferSubData(GL_ARRAY_BUFFER, i * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
-      }
-      edge_capacity = new_capacity;
-    }
-    index = free_edges.back();
-    free_edges.pop_back();
+    index = allocateEdgeIndex();
     edge_mapping[e] = index;
   }
   int offset = index * sizeof(unsigned[2]);
@@ -212,10 +232,7 @@ void GraphRenderer::onEdgeAdded(ogdf::edge e) {
 void GraphRenderer::onEdgeDeleted(ogdf::edge e) {
   int index = edge_mapping[e];
   if (index >= 0) {
-    free_edges.push_back(index);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
-    unsigned data[2] = { SENTINEL_INDEX, SENTINEL_INDEX };
-    glBufferSubData(GL_ARRAY_BUFFER, index * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
+    freeEdgeIndex(index);
     edge_mapping[e] = -1;
   }
 }
@@ -229,6 +246,7 @@ void GraphRenderer::onReload() {
 
   ogdf::Array<ogdf::edge> edges;
   my_graph.getOgdfGraph().allEdges(edges);
+  // TODO properly reset edges!
   for (auto edge : edges) {
     onEdgeDeleted(edge);
   }

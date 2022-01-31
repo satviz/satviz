@@ -60,6 +60,9 @@ private:
    */
   void deinit();
 
+  int  allocateEdgeIndex();
+  void freeEdgeIndex(int index);
+
 public:
   /**
    * The GraphRenderer needs some global (per GL context) state to operate.
