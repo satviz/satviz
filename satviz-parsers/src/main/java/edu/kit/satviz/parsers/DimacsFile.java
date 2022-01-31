@@ -1,40 +1,59 @@
 package edu.kit.satviz.parsers;
 
 import edu.kit.satviz.sat.ClauseUpdate;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
 
-  private final InputStream in;
+  private static final String INVALID_FILE_MESSAGE = "File is invalid.";
+
+  private final Scanner scanner;
   private final ClauseParsingIterator parsingIterator;
   private int variableAmount;
   private int clauseAmount;
 
   public DimacsFile(InputStream in) {
-    this.in = in;
-    Scanner scanner = new Scanner(in);
-    scanner.useDelimiter("\n");
-    parseHeader(scanner);
+    scanner = new Scanner(in);
+    parseHeader();
     parsingIterator = new DimacsParsingIterator(scanner);
   }
 
-  private void parseHeader(Scanner scanner) {
-    String header;
-    do {
-      header = scanner.next();
-    } while (header.matches("p cnf (([1-9][0-9]*)|0) (([1-9][0-9]*)|0)"));
-    String[] numberStrings = header.replaceAll("[\\D]", " ").split(" ");
-    numberStrings = Arrays.stream(numberStrings)
-            .filter(value ->
-                    value != null && value.length() > 0
-            )
-            .toArray(String[]::new);
-    variableAmount = Integer.parseInt(numberStrings[0]);
-    clauseAmount = Integer.parseInt(numberStrings[1]);
+  private void parseHeader() {
+    while (scanner.hasNext("c")) {
+      scanner.nextLine();
+    }
+    if (!scanner.hasNext()) {
+      throw new ParsingException(INVALID_FILE_MESSAGE);
+    }
+    String header = scanner.nextLine();
+    try (Scanner headerScanner = new Scanner(header)) {
+      headerScanner.useDelimiter(" ");
+
+      if (!headerScanner.hasNext("p")) {
+        throw new ParsingException(INVALID_FILE_MESSAGE);
+      }
+      headerScanner.next();
+      if (!headerScanner.hasNext("cnf")) {
+        throw new ParsingException(INVALID_FILE_MESSAGE);
+      }
+      headerScanner.next();
+      try {
+        variableAmount = headerScanner.nextInt();
+      } catch (NoSuchElementException e) {
+        throw new ParsingException(INVALID_FILE_MESSAGE);
+      }
+      try {
+        clauseAmount = headerScanner.nextInt();
+      } catch (NoSuchElementException e) {
+        throw new ParsingException(INVALID_FILE_MESSAGE);
+      }
+      if (headerScanner.hasNext()) {
+        throw new ParsingException(INVALID_FILE_MESSAGE);
+      }
+    }
   }
 
   @Override
@@ -51,8 +70,8 @@ public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
   }
 
   @Override
-  public void close() throws IOException {
-    in.close();
+  public void close() {
+    scanner.close();
   }
 
 }

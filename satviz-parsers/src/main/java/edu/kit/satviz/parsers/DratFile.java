@@ -1,20 +1,17 @@
 package edu.kit.satviz.parsers;
 
 import edu.kit.satviz.sat.ClauseUpdate;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Scanner;
 
 public class DratFile implements Iterable<ClauseUpdate>, AutoCloseable {
 
-  private final InputStream in;
+  private final Scanner scanner;
   private final ClauseParsingIterator parsingIterator;
 
   public DratFile(InputStream in) {
-    this.in = in;
-    Scanner scanner = new Scanner(in);
-    scanner.useDelimiter("\n");
+    scanner = new Scanner(in);
     parsingIterator = new DratParsingIterator(scanner);
   }
 
@@ -24,8 +21,8 @@ public class DratFile implements Iterable<ClauseUpdate>, AutoCloseable {
   }
 
   @Override
-  public void close() throws IOException {
-    in.close();
+  public void close() {
+    scanner.close();
   }
 
 }
