@@ -1,7 +1,6 @@
 package edu.kit.satviz.parsers;
 
 import edu.kit.satviz.sat.ClauseUpdate;
-
 import java.util.Scanner;
 
 public class DimacsParsingIterator extends ClauseParsingIterator {
@@ -12,7 +11,11 @@ public class DimacsParsingIterator extends ClauseParsingIterator {
 
   @Override
   protected ClauseUpdate.Type readType(String updateString) {
-    return null;
+    if (updateString.matches("(-?[1-9][0-9]*[ \t]+)*0")) { // might overflow?
+      return ClauseUpdate.Type.ADD;
+    } else {
+      throw new ParsingException("Invalid clause.");
+    }
   }
 
 }
