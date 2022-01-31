@@ -1,11 +1,9 @@
 package edu.kit.satviz.parsers;
 
 import edu.kit.satviz.sat.ClauseUpdate;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class DratFile implements Iterable<ClauseUpdate>, AutoCloseable {
@@ -15,17 +13,19 @@ public class DratFile implements Iterable<ClauseUpdate>, AutoCloseable {
 
   public DratFile(InputStream in) {
     this.in = in;
-    this.parsingIterator = new DimacsParsingIterator(new Scanner(in));
+    Scanner scanner = new Scanner(in);
+    scanner.useDelimiter("\n");
+    parsingIterator = new DratParsingIterator(scanner);
   }
 
   @Override
   public Iterator<ClauseUpdate> iterator() {
-    return this.parsingIterator;
+    return parsingIterator;
   }
 
   @Override
   public void close() throws IOException {
-    this.in.close();
+    in.close();
   }
 
 }
