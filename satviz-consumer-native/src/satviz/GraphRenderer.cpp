@@ -5,6 +5,7 @@ namespace satviz {
 namespace video {
 
 #define UNIFORM_WORLD_TO_VIEW 0
+#define UNIFORM_NODE_SIZE     1
 
 #define ATTR_NODE_POSITION 0
 #define ATTR_NODE_HEAT     1
@@ -145,6 +146,7 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
   // Draw nodes
   glUseProgram(resources.node_prog);
   glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
+  glUniform2f(UNIFORM_NODE_SIZE, 10.0f / (float) width, 10.0f / (float) height);
   glBindVertexArray(node_state);
   glBindTexture(GL_TEXTURE_1D, heat_palette);
   glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, node_count);
