@@ -28,6 +28,7 @@ class StringMapTest {
     map.put("a==b", "c==d");
     map.put("Hello\nWorld", "How\nare\nyou?");
     map.put("int i =", "5");
+    map.put("\\ \\", "\\ \\");
     assertDoesNotThrow(() -> testSingleMap(map));
   }
 
