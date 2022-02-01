@@ -106,7 +106,12 @@ public class GeneralConfigController extends ConfigController {
 
   @FXML
   private void setLiveVisualization() {
-
+    if (showLiveVisualizationCheckBox.isSelected()) {
+      recordFromStartCheckBox.setDisable(false);
+    } else {
+      recordFromStartCheckBox.setDisable(true);
+      recordFromStartCheckBox.setSelected(true);
+    }
   }
 
   @FXML

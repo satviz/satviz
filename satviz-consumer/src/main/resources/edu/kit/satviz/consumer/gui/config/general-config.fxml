@@ -72,7 +72,7 @@
                                     </Label>
                                  </children>
                               </HBox>
-                                      <CheckBox mnemonicParsing="false" selected="true" text="Show Live Visualization" fx:id="showLiveVisualizationCheckBox"/>
+                                      <CheckBox mnemonicParsing="false" selected="true" text="Show Live Visualization" fx:id="showLiveVisualizationCheckBox" onAction="#setLiveVisualization"/>
                                       <CheckBox mnemonicParsing="false" prefHeight="22.0" prefWidth="190.0" text="Record Animation From Start" fx:id="recordFromStartCheckBox"/>
                            </children>
                            <padding>
