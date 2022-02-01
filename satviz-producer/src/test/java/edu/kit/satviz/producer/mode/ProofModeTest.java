@@ -48,7 +48,7 @@ class ProofModeTest {
       var source = mode.createSource(params);
       assertTrue(source instanceof ProofSource);
     } catch (SourceException e) {
-      fail("valid source couldn't be created", e);
+      fail(e);
     }
     Files.delete(proof);
   }
