@@ -7,7 +7,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
 /**
- * A class defining the command line {@code ArgumentParser} used by this application.
+ * A utility class defining the command line {@code ArgumentParser} used by this application.
  */
 public final class ProducerCli {
 

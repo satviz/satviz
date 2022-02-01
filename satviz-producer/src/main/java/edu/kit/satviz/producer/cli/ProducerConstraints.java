@@ -10,9 +10,23 @@ import edu.kit.satviz.producer.ProducerMode;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A utility class containing a function to obtain an instance of {@code Constraint} that validates
+ * producer parameter input.
+ */
+public final class ProducerConstraints {
 
-public class ProducerConstraints {
+  private ProducerConstraints() {
 
+  }
+
+  /**
+   * Creates a constraint that ensures that a given instance of {@link ProducerParameters}
+   * is valid.
+   *
+   * @param supportedModes The modes supported by this application.
+   * @return A {@code Constraint<ProducerParameters>}.
+   */
   public static Constraint<ProducerParameters> paramConstraints(
       List<? extends ProducerMode> supportedModes
   ) {
@@ -23,11 +37,6 @@ public class ProducerConstraints {
         oneOf(isNull, fileExists()).on(ProducerParameters::getProofFile),
         oneOf(isNull, fileExists()).on(ProducerParameters::getSolverFile)
     );
-  }
-
-
-  public static void validate(ProducerParameters parameters) throws ConstraintValidationException {
-
   }
 
 }
