@@ -1,17 +1,13 @@
 package edu.kit.satviz.producer.mode;
 
-import edu.kit.satviz.producer.ResourceHelper;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.source.SolverSource;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static edu.kit.satviz.producer.ResourceHelper.extractResource;

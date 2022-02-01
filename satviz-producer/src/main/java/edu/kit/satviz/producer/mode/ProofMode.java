@@ -6,11 +6,13 @@ import edu.kit.satviz.producer.ProducerMode;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.source.ProofSource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+/**
+ * A mode for when the producer should get its clauses from a DRAT proof.
+ */
 public class ProofMode implements ProducerMode {
   @Override
   public boolean isSet(ProducerParameters parameters) {

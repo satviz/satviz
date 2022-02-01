@@ -1,10 +1,8 @@
 package edu.kit.satviz.producer.mode;
 
-import edu.kit.satviz.producer.ResourceHelper;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.source.ProofSource;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

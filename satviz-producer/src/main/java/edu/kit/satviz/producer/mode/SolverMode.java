@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * A mode for when the producer should get its clauses from a CDCL/ipasir-compliant solver.
+ */
 public class SolverMode implements ProducerMode {
   @Override
   public boolean isSet(ProducerParameters parameters) {
