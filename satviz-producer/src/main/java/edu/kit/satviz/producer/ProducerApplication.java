@@ -34,7 +34,7 @@ public class ProducerApplication {
     try {
       ClauseSource source = selectedMode.createSource(parameters);
       ProducerConnection connection = new ProducerConnection(); // TODO: 29/01/2022 host, port
-      connection.register(new ConnectionListener(connection, source));
+      connection.register(new SourceControlConnectionListener(connection, source));
       // TODO: 29/01/2022
       connection.establish(new ProducerId(null, null, null, false, 0));
     } catch (SourceException e) {
