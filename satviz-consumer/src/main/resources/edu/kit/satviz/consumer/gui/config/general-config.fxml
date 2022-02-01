@@ -173,7 +173,7 @@
                                     <Insets right="10.0" />
                                  </HBox.margin>
                                       </Label>
-                                      <ChoiceBox prefHeight="0.0" prefWidth="132.0" fx:id="modeChoiceBox"/>
+                                      <ChoiceBox prefHeight="0.0" prefWidth="132.0" fx:id="modeChoiceBox" onAction="#updateMode"/>
                            </children>
                            <padding>
                               <Insets top="10.0" />
@@ -181,7 +181,7 @@
                         </HBox>
                      </children>
                   </VBox>
-                        <VBox fx:id="modeConfig" prefHeight="104.0" prefWidth="415.0" style="-fx-border-color: black;">
+                        <VBox fx:id="modeVBox" prefHeight="104.0" prefWidth="415.0" style="-fx-border-color: black;">
                             <children>
                                 <fx:include source="external-config.fxml" />
                             </children>

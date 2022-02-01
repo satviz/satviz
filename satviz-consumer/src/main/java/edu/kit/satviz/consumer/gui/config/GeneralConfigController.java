@@ -6,6 +6,7 @@ import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -13,7 +14,10 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+
+import java.io.IOException;
 
 public class GeneralConfigController extends ConfigController {
 
@@ -46,8 +50,14 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private ChoiceBox<ConsumerMode> modeChoiceBox;
   @FXML
+  private VBox modeVBox;
+  @FXML
   private Button runButton;
 
+
+  // ATTRIBUTES (OTHER)
+
+  private ConfigController modeConfigController;
 
   // METHODS (FXML)
 
@@ -121,7 +131,18 @@ public class GeneralConfigController extends ConfigController {
 
   @FXML
   private void updateMode() {
-
+    // retrieve name of new fxml-file for mode specific input
+    String modeString = modeChoiceBox.getValue().toString().toLowerCase() + "-config.fxml";
+    // set vbox content to fxml-file for mode specific input
+    FXMLLoader loader = new FXMLLoader(getClass().getResource(modeString));
+    modeVBox.getChildren().clear();
+    try {
+      modeVBox.getChildren().add(loader.load());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    // remember controller of current mode
+    modeConfigController = loader.getController();
   }
 
   @Override
