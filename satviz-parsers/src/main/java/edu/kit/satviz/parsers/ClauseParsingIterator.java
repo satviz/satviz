@@ -2,7 +2,7 @@ package edu.kit.satviz.parsers;
 
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -12,9 +12,8 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
   private static final String NO_CLAUSES_LEFT_MESSAGE = "No clause updates left.";
   private static final String INVALID_FILE_MESSAGE = "File is invalid.";
 
-  private final Scanner scanner;
+  final Scanner scanner;
   private ClauseUpdate nextUpdate;
-  private String buffer = "";
 
   private boolean isDone = false;
   private boolean isInvalidFile = false;
@@ -24,43 +23,36 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
   }
 
   private ClauseUpdate getNextUpdate() {
-    String updateString;
-    if (buffer.equals("")) {
-      do {
-        if (scanner.hasNext()) {
-          updateString = scanner.next();
-        } else {
-          isDone = true;
-          throw new NoSuchElementException(NO_CLAUSES_LEFT_MESSAGE);
-        }
-      } while (updateString.startsWith("c "));
-    } else {
-      updateString = buffer;
+    // Skip all comment-lines
+    while (scanner.hasNext("c")) {
+      scanner.nextLine();
+    }
+    // If no lines are left, no more clause can be returned
+    if (!scanner.hasNext()) {
+      isDone = true;
+      throw new NoSuchElementException(NO_CLAUSES_LEFT_MESSAGE);
     }
 
-    final ClauseUpdate.Type type = readType(updateString);
+    final ClauseUpdate.Type type = readType();
 
-    int endIndex;
-    StringBuilder builder = new StringBuilder(updateString);
-    while ((endIndex = updateString.indexOf(" 0")) == -1
-                    && (endIndex = updateString.indexOf("\t0")) == -1) {
-      if (scanner.hasNext()) {
-        builder.append(" ");
-        builder.append(scanner.next());
+    // Clause parsing starts here
+    ArrayList<Integer> list = new ArrayList<>();
+    while (!scanner.hasNext("0")) {
+      if (scanner.hasNextInt()) {
+        list.add(scanner.nextInt());
       } else {
         isInvalidFile = true;
         throw new ParsingException(INVALID_FILE_MESSAGE);
       }
     }
-    updateString = builder.toString();
+    // In case the file ends before the clause is finished with a 0
+    if (!scanner.hasNext()) {
+      isInvalidFile = true;
+      throw new ParsingException(INVALID_FILE_MESSAGE);
+    }
+    scanner.next();
 
-    buffer = updateString.substring(endIndex + 1).trim();
-    updateString = updateString.substring(0, endIndex + 1).trim();
-    Clause clause = new Clause(
-            Arrays.stream(
-                    updateString.split(" *") // dieser Split könnte immernoch falsch sein!
-            ).mapToInt(Integer::parseInt).toArray()
-    );
+    Clause clause = new Clause(list.stream().mapToInt(i -> i).toArray());
     return new ClauseUpdate(clause, type);
   }
 
@@ -79,7 +71,7 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
       } catch (ParsingException e) {
         isInvalidFile = true;
         nextUpdate = null;
-        return false;
+        throw e;
       }
     }
     return true;
@@ -97,6 +89,6 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
     return next;
   }
 
-  protected abstract ClauseUpdate.Type readType(String updateString);
+  protected abstract ClauseUpdate.Type readType();
 
 }

@@ -28,7 +28,12 @@ public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
     if (!scanner.hasNext()) {
       throw new ParsingException(INVALID_FILE_MESSAGE);
     }
-    String header = scanner.nextLine();
+
+    String header;
+    do {
+      header = scanner.nextLine();
+    } while (header.isBlank());
+
     try (Scanner headerScanner = new Scanner(header)) {
       headerScanner.useDelimiter(" ");
 

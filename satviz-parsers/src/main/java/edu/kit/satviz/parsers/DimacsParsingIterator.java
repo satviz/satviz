@@ -10,12 +10,8 @@ public class DimacsParsingIterator extends ClauseParsingIterator {
   }
 
   @Override
-  protected ClauseUpdate.Type readType(String updateString) {
-    if (updateString.matches("(-?[1-9][0-9]*[ \t]+)*0")) { // might overflow?
-      return ClauseUpdate.Type.ADD;
-    } else {
-      throw new ParsingException("Invalid clause.");
-    }
+  protected ClauseUpdate.Type readType() {
+    return ClauseUpdate.Type.ADD;
   }
 
 }
