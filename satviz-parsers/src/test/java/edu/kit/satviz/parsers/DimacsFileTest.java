@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class DimacsFileTest {
 
   InputStream simpleFileStream;
+  InputStream longFileStream;
   ClauseUpdate[] simpleFileUpdates = {
           new ClauseUpdate(new Clause(new int[]{1, -3}), ClauseUpdate.Type.ADD),
           new ClauseUpdate(new Clause(new int[]{2, 3, -1}), ClauseUpdate.Type.ADD)
@@ -21,6 +22,7 @@ class DimacsFileTest {
   @BeforeEach
   void setUp() {
     simpleFileStream = DimacsFileTest.class.getResourceAsStream("/dimacs_ex/simple_v3_c2.cnf");
+    longFileStream = DimacsFileTest.class.getResourceAsStream("/dimacs_ex/aim-100-1_6-no-1.cnf");
   }
 
   @Test
@@ -39,8 +41,22 @@ class DimacsFileTest {
   void iterator_test() {
     DimacsFile dimacsFile = new DimacsFile(simpleFileStream);
     Iterator<ClauseUpdate> iterator = dimacsFile.iterator();
-    assertTrue(iterator.hasNext());
-    assertEquals(simpleFileUpdates[0], iterator.next());
+    for (int i = 0; i < dimacsFile.getClauseAmount(); i++) {
+      assertTrue(iterator.hasNext());
+      assertEquals(simpleFileUpdates[i], iterator.next());
+    }
+    assertFalse(iterator.hasNext());
+    assertThrows(NoSuchElementException.class, iterator::next);
+  }
+
+  @Test
+  void iterator_long_test() {
+    DimacsFile dimacsFile = new DimacsFile(longFileStream);
+    Iterator<ClauseUpdate> iterator = dimacsFile.iterator();
+    for (int i = 0; i < dimacsFile.getClauseAmount(); i++) {
+      assertTrue(iterator.hasNext());
+      iterator.next();
+    }
     assertFalse(iterator.hasNext());
     assertThrows(NoSuchElementException.class, iterator::next);
   }
