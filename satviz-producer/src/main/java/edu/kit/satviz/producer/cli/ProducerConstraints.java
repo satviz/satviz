@@ -7,6 +7,7 @@ import static edu.kit.satviz.common.FileExistsConstraint.fileExists;
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
 import edu.kit.satviz.producer.ProducerMode;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,11 +32,12 @@ public final class ProducerConstraints {
       List<? extends ProducerMode> supportedModes
   ) {
     Constraint<Object> isNull = Constraint.checking(Objects::isNull, "Is not null");
+    Constraint<Path> fileConstraint = oneOf(isNull, fileExists());
     return allOf(
         new SingleModeConstraint(supportedModes),
-        oneOf(isNull, fileExists()).on(ProducerParameters::getInstanceFile),
-        oneOf(isNull, fileExists()).on(ProducerParameters::getProofFile),
-        oneOf(isNull, fileExists()).on(ProducerParameters::getSolverFile)
+        fileConstraint.on(ProducerParameters::getInstanceFile),
+        fileConstraint.on(ProducerParameters::getProofFile),
+        fileConstraint.on(ProducerParameters::getSolverFile)
     );
   }
 

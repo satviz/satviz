@@ -1,10 +1,12 @@
 package edu.kit.satviz.producer.cli;
 
-import net.sourceforge.argparse4j.annotation.Arg;
-
 import java.nio.file.Path;
 import java.util.Objects;
+import net.sourceforge.argparse4j.annotation.Arg;
 
+/**
+ * A data class representing the parameters which can be used to configure the producer application.
+ */
 public final class ProducerParameters {
 
   @Arg(dest = "instance")
