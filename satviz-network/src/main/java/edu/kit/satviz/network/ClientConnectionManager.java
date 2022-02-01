@@ -61,7 +61,7 @@ public class ClientConnectionManager {
         ctx.close(abnormal);
       }
       state = abnormal ? State.FAILED : State.FINISHED;
-      if (state == State.FAILED) {
+      if (state == State.FAILED && lsFail != null) {
         lsFail.accept("fail");
       }
     }
@@ -76,7 +76,9 @@ public class ClientConnectionManager {
    * @return whether it has finished or not
    */
   public boolean isClosed() {
-    return state == State.FINISHED || state == State.FAILED;
+    synchronized (syncState) {
+      return state == State.FINISHED || state == State.FAILED;
+    }
   }
 
   private boolean doRead() {
@@ -108,6 +110,8 @@ public class ClientConnectionManager {
           return;
         }
       }
+
+      lsConnect.accept(ctx.getCid());
     }
 
     while (state == State.OPEN) {
@@ -140,6 +144,10 @@ public class ClientConnectionManager {
         return;
       }
 
+      if (state != State.STARTED && state != State.OPEN) {
+        return;
+      }
+
       state = State.FINISHING;
       while (state != State.FAILED && state != State.FINISHED) {
         syncState.wait();
@@ -147,22 +155,25 @@ public class ClientConnectionManager {
     }
   }
 
-  void registerAccept(Consumer<ConnectionId> ls) {
+  public void registerConnect(Consumer<ConnectionId> ls) {
     this.lsConnect = ls;
   }
 
-  void registerGlobalFail(Consumer<String> ls) {
+  public void registerGlobalFail(Consumer<String> ls) {
     this.lsFail = ls;
   }
 
-  void register(BiConsumer<ConnectionId, NetworkMessage> ls) {
+  public void register(BiConsumer<ConnectionId, NetworkMessage> ls) {
     ctx.setListener(ls);
   }
 
   public void send(ConnectionId cid, Byte type, Object obj) throws IOException {
+    /*
     if (!ctx.getChannel().isConnected()) {
       throw new IOException("no socket open for this connection ID");
     }
+    */
+    // TODO check omitted for now
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     byteOut.write(type);
     try {

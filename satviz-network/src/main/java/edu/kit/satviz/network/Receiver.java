@@ -16,7 +16,7 @@ public class Receiver {
   private byte type;
   private SerialBuilder<?> builder = null;
 
-  private boolean failed = true;
+  private boolean failed = false;
 
   /**
    * Creates a new empty receiver.

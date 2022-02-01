@@ -141,6 +141,38 @@ class ReceiverTest {
   }
 
   @Test
+  void testInterrupted() throws IOException {
+    ByteBuffer bb = ByteBuffer.allocate(5);
+    ByteBufferOutputStream bbOut = new ByteBufferOutputStream(bb);
+
+    bbOut.write(INT_MSG_NUM);
+    is.serialize(123456789, bbOut);
+    bb.flip();
+
+    ByteBuffer bb1 = ByteBuffer.allocate(3);
+    ByteBuffer bb2 = ByteBuffer.allocate(2);
+    bb1.put(bb.get());
+    bb1.put(bb.get());
+    bb1.put(bb.get());
+    bb2.put(bb.get());
+    bb2.put(bb.get());
+    bb1.flip();
+    bb2.flip();
+
+    NetworkMessage msg;
+    msg = r.receive(bb1);
+    assertNull(msg);
+    assertFalse(bb1.hasRemaining());
+    msg = r.receive(bb2);
+    assertNotNull(msg);
+    assertFalse(bb2.hasRemaining());
+
+    assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+    assertEquals(INT_MSG_NUM, msg.getType());
+    assertEquals(123456789, (Integer) msg.getObject());
+  }
+
+  @Test
   void failOnUnexpected() {
     // read a type byte that doesn't have a corresponding serializer
     ByteBuffer bb = ByteBuffer.allocate(1);
@@ -149,6 +181,6 @@ class ReceiverTest {
 
     NetworkMessage msg = r.receive(bb);
     assertNotNull(msg);
-    assertEquals(msg.getState(), NetworkMessage.State.FAIL);
+    assertEquals(NetworkMessage.State.FAIL, msg.getState());
   }
 }

@@ -12,13 +12,12 @@ import java.util.function.BiConsumer;
 /**
  * A Collection of objects related to a network connection.
  *
- * @apiNote this class is thread-safe
+ * @apiNote thread-safe
  * @author luwae
  */
 public class ConnectionContext {
   private enum State {
     NEW,
-    STARTED,
     CONNECTED,
     FAILED,
     FINISHED
@@ -29,7 +28,7 @@ public class ConnectionContext {
   private final Receiver recv;
   private BiConsumer<ConnectionId, NetworkMessage> ls;
 
-  private State state;
+  private State state; // volatile?
 
   /**
    * Creates a new connection context without a socket.
@@ -74,13 +73,13 @@ public class ConnectionContext {
   }
 
   /**
-   * Gets the socket channel of this connection.
-   * May be null if the channel has not been opened.
+   * Checks if this context was created with the specified channel.
    *
-   * @return the socket channel
+   * @param chan the socket channel
+   * @return true if this context's channel is equal to <code>chan</code>, false otherwise
    */
-  public SocketChannel getChannel() {
-    return chan;
+  public boolean containsChannel(SocketChannel chan) {
+    return this.chan == chan;
   }
 
   /**
@@ -99,22 +98,9 @@ public class ConnectionContext {
   }
 
   /**
-   * Sets the listener of this connection if no listener was registered before.
-   *
-   * @param ls the listener
-   * @return true if the assignment was successful, false otherwise
-   */
-  public synchronized boolean trySetListener(BiConsumer<ConnectionId, NetworkMessage> ls) {
-    if (this.ls == null) {
-      setListener(ls);
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * Closes the connection context, including the socket channel.
    * Sends either a fail or termination message to the listener.
+   * Returns immediately if this context is already closed.
    *
    * @param abnormal whether the close is abnormal or planned
    */
@@ -123,15 +109,16 @@ public class ConnectionContext {
       return;
     }
 
-    if (state == State.STARTED || state == State.CONNECTED) {
+    if (state == State.CONNECTED) {
       try {
         chan.close();
       } catch (IOException e) {
         // if the channel doesn't want to be closed that's not our problem
       }
     }
-    callListener(abnormal ? NetworkMessage.createFail() : NetworkMessage.createTerm());
+
     state = (abnormal ? State.FAILED : State.FINISHED);
+    callListener(abnormal ? NetworkMessage.createFail() : NetworkMessage.createTerm());
   }
 
   /**
@@ -144,18 +131,15 @@ public class ConnectionContext {
    * @throws IOException if any I/O error occurs
    */
   public synchronized boolean tryConnect() throws IOException {
-    if (state == State.NEW) {
-      try {
-        chan = SocketChannel.open();
-      } catch (IOException e) {
-        close(true);
-        throw e;
-      }
-      state = State.STARTED;
+    if (state != State.NEW) {
+      throw new AlreadyConnectedException();
     }
 
-    if (state != State.STARTED) {
-      throw new AlreadyConnectedException();
+    try {
+      chan = SocketChannel.open(); // blocking by default
+    } catch (IOException e) {
+      close(true);
+      throw e;
     }
 
     try {
@@ -163,18 +147,18 @@ public class ConnectionContext {
         chan.finishConnect(); // was in non-blocking mode
       }
     } catch (ConnectException e) {
-      // server not yet online
+      // server not yet online; socket was closed
       return false;
     } catch (IOException e) {
       close(true);
       throw e;
     }
+
     state = State.CONNECTED;
     return true;
   }
 
-  private void callListener(NetworkMessage msg) {
-    // not synchronized since every other method is
+  private synchronized void callListener(NetworkMessage msg) {
     if (ls != null) {
       ls.accept(cid, msg);
     }
@@ -188,25 +172,29 @@ public class ConnectionContext {
    * The buffer is cleared before and after using it.
    *
    * @param bb the buffer to use for reading and writing
+   * @return the number of bytes read, -1 if end-of-stream
    * @throws NotYetConnectedException if the socket is not connected
-   * @throws IOException if some other socket or messaging
+   * @throws IOException if some other socket or messaging error occurs
    */
-  public synchronized void read(ByteBuffer bb) throws IOException {
+  public int read(ByteBuffer bb) throws IOException {
     if (state != State.CONNECTED) {
       throw new NotYetConnectedException();
     }
 
     bb.clear();
+    int numRead;
     try {
-      if (chan.read(bb) == -1) {
-        // stream closed?
-        close(false);
-        return;
-      }
+      numRead = chan.read(bb);
     } catch (IOException e) {
       close(true);
       throw e;
     }
+    if (numRead == -1) {
+      // stream closed?
+      close(false);
+      return -1;
+    }
+
     bb.flip();
     while (bb.hasRemaining()) {
       NetworkMessage msg = recv.receive(bb);
@@ -219,20 +207,24 @@ public class ConnectionContext {
       }
     }
     bb.clear();
+    return numRead;
   }
 
   /**
    * Writes the specified data to this socket channel.
+   * The behaviour is the same for synchronous and asynchronous sockets.
    *
    * @param bb the buffer holding the data
+   * @return the number of bytes written
    * @throws NotYetConnectedException if the socket is not connected
    * @throws IOException if the channel is not connected or a write error occurs
    */
-  public synchronized void write(ByteBuffer bb) throws IOException {
+  public int write(ByteBuffer bb) throws IOException {
     if (state != State.CONNECTED) {
       throw new NotYetConnectedException();
     }
 
+    int remaining = bb.remaining();
     while (bb.hasRemaining()) { // force synchronous
       try {
         chan.write(bb);
@@ -241,5 +233,6 @@ public class ConnectionContext {
         throw e;
       }
     }
+    return remaining;
   }
 }

@@ -279,7 +279,7 @@ public class ConnectionManager {
 
   private ConnectionContext getContextFrom(SocketChannel chan) {
     for (ConnectionContext ctx : contexts) {
-      if (ctx.getChannel() == chan) {
+      if (ctx.containsChannel(chan)) {
         return ctx;
       }
     }
@@ -303,9 +303,12 @@ public class ConnectionManager {
       // this shouldn't be possible, as we don't remove old contexts
       throw new IOException("invalid connection ID");
     }
+    /*
     if (!ctx.getChannel().isConnected()) {
       throw new IOException("no socket open for this connection ID");
     }
+    */
+    // TODO removed check for now
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     byteOut.write(type);
     try {
