@@ -6,8 +6,14 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
+/**
+ * A class defining the command line {@code ArgumentParser} used by this application.
+ */
 public final class ProducerCli {
 
+  /**
+   * The {@code ArgumentParser}.
+   */
   public static final ArgumentParser PARSER;
 
   static {
@@ -41,6 +47,18 @@ public final class ProducerCli {
         .help("Do not wait for a connection to be established, start solving immediately");
   }
 
+  private ProducerCli() {
+
+  }
+
+  /**
+   * Parses some arguments given as a string array to an instance of {@link ProducerParameters}
+   * using the {@code ArgumentParser} defined by this class.
+   *
+   * @param args The command line args.
+   * @return The parsed arguments as a {@link ProducerParameters} instance.
+   * @throws ArgumentParserException if the underlying {@code ArgumentParser} throws.
+   */
   public static ProducerParameters parseArgs(String[] args) throws ArgumentParserException {
     ProducerParameters params = new ProducerParameters();
     PARSER.parseArgs(args, params);
