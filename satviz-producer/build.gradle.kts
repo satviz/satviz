@@ -4,11 +4,11 @@ plugins {
 }
 
 repositories {
-    maven("https://repo.devcord.club/snapshots")
+    maven("https://repo.devcord.club/releases")
 }
 
 dependencies {
-    implementation("edu.kit:ipasir4j:0.1.0-SNAPSHOT")
+    implementation("edu.kit:ipasir4j:0.1.0")
     implementation(project(":satviz-common"))
     implementation(project(":satviz-network"))
     implementation(project(":satviz-parsers"))
