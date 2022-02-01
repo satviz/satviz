@@ -13,3 +13,13 @@ dependencies {
     implementation(project(":satviz-network"))
     implementation(project(":satviz-parsers"))
 }
+
+tasks {
+    getByName<JavaCompile>("compileTestJava") {
+        options.compilerArgs = listOf("--add-modules", "jdk.incubator.foreign")
+    }
+
+    getByName<Test>("test") {
+        jvmArgs = listOf("--add-modules", "jdk.incubator.foreign", "--enable-native-access=ALL-UNNAMED")
+    }
+}
