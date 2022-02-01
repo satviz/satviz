@@ -8,8 +8,13 @@ import edu.kit.satviz.producer.ClauseSource;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
+import java.util.function.Consumer;
 import jdk.incubator.foreign.MemoryAddress;
 
+/**
+ * An implementation of {@link ClauseSource} representing a CDCL solver emitting the clauses it
+ * learns while solving a SAT instance.
+ */
 public class SolverSource extends ClauseSource {
 
   private final Solver solver;
@@ -17,6 +22,15 @@ public class SolverSource extends ClauseSource {
 
   private volatile boolean shouldTerminate;
 
+  /**
+   * Creates a source from an ipasir4j {@code Solver} and the amount of variables the corresponding
+   * instance contains.
+   *
+   * @param solver a {@code Solver} which is already configured with a SAT instance, i.e. all the
+   *               clauses have been added already. If learn or terminate callbacks are set, they
+   *               will be overwritten.
+   * @param varCount The amount of variables contained in the SAT instance the solver is solving.
+   */
   public SolverSource(Solver solver, int varCount) {
     this.solver = solver;
     this.varCount = varCount;
@@ -25,6 +39,16 @@ public class SolverSource extends ClauseSource {
     solver.setTerminate(MemoryAddress.NULL, new TerminateCallback());
   }
 
+  /**
+   * Opens the source by starting the solver. A clause will be emitted by the solver when it learns
+   * one.
+   *
+   * <p>When done, either calls the function set by {@link #whenSolved(Consumer)} if the solver has
+   * found a solution or the function set by {@link #whenRefuted(Runnable)} if the solver has found
+   * that there is no solution.
+   *
+   * <p>This method closes the underlying solver.
+   */
   @Override
   public void open() {
     Solver.Result result = solver.solve();
@@ -52,6 +76,9 @@ public class SolverSource extends ClauseSource {
     shouldTerminate = true;
   }
 
+  /**
+   * ipasir terminate callback for solver sources, for internal use.
+   */
   public class TerminateCallback extends AbstractTerminateCallback<NullData> {
 
     @Override
@@ -65,6 +92,9 @@ public class SolverSource extends ClauseSource {
     }
   }
 
+  /**
+   * ipasir learn callback for solver sources, for internal use.
+   */
   public class LearnCallback extends AbstractLearnCallback<NullData> {
 
     @Override

@@ -35,6 +35,8 @@ public abstract class ClauseSource implements AutoCloseable {
    * <p>This method is <strong>blocking</strong> until the source has been drained or a
    * {@link #close()} call has come through.
    *
+   * <p>This method may only be called <strong>once</strong> per source.
+   *
    * @throws SourceException If there is an exception while opening the source or
    *                         producing the clauses
    */
@@ -75,5 +77,18 @@ public abstract class ClauseSource implements AutoCloseable {
   public void whenSolved(Consumer<? super SatAssignment> action) {
     solvedListener = Objects.requireNonNull(action);
   }
+
+  /**
+   * Signals to the source that it should be closed, i.e. stop emitting clause updates.
+   *
+   * <p>This method can - and, practically, must - be called from a
+   * different thread than {@link #open()} (because {@code open} blocks until the source
+   * is done emitting clause updates, thus closed).
+   *
+   * <p>Due to the blocking semantics of {@link #open()} mentioned above as well as implementation
+   * details of the different sources, there is no guarantee that calling this method will result
+   * in an immediate end of clause emission.
+   */
+  public abstract void close();
 
 }
