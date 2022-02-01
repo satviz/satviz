@@ -42,7 +42,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
       } catch (Exception e) {
         e.printStackTrace();
       }
-    }, "ClauseSource").start();
+    }, "ClauseSource-" + Integer.toHexString(source.hashCode())).start();
   }
 
   /*
