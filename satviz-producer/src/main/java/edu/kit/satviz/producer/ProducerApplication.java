@@ -9,19 +9,27 @@ import edu.kit.satviz.producer.cli.ProducerConstraints;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.mode.ProofMode;
 import edu.kit.satviz.producer.mode.SolverMode;
-import net.sourceforge.argparse4j.inf.ArgumentParserException;
-
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
+/**
+ * The main class of the producer application.
+ */
 public class ProducerApplication {
 
   private static final Logger logger = Logger.getLogger("Producer");
 
+  // new modes can be added to this list
   private static final List<ProducerMode> SUPPORTED_MODES
       = List.of(new ProofMode(), new SolverMode());
 
+  /**
+   * The entry point of the application.
+   *
+   * @param args The command line args, as defined by the CLI specification.
+   */
   public static void main(String[] args) {
 
     ProducerParameters parameters = parseArgs(args);
