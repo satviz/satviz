@@ -2,8 +2,6 @@ package edu.kit.satviz.producer;
 
 import edu.kit.satviz.network.ProducerConnection;
 import edu.kit.satviz.network.ProducerConnectionListener;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * The {@code ProducerConnectionListener} used by this application.<br>
@@ -11,8 +9,6 @@ import java.util.concurrent.Executors;
  * forward updates in the {@code source} to the network connection.
  */
 public class SourceControlConnectionListener implements ProducerConnectionListener {
-
-  private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
   private final ProducerConnection connection;
   private final ClauseSource source;
@@ -37,7 +33,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
    */
   @Override
   public void onConnect() {
-    executor.submit(() -> {
+    new Thread(null, () -> {
       try (source) {
         source.open();
       } catch (SourceException e) {
@@ -46,8 +42,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
       } catch (Exception e) {
         e.printStackTrace();
       }
-    });
-
+    }, "ClauseSource").start();
   }
 
   /*
