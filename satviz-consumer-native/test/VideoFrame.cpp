@@ -9,12 +9,16 @@ using namespace ::satviz::video;
  * Test whether VideoFrame::fromImage() correctly converts images to video frames.
  */
 TEST(VideoFrame, FromImage) {
-  const int width  = 1;
-  const int height = 4;
+  const int width  = 2;
+  const int height = 3;
   // RGBA pixel colors in HTML encoding
   // We use strings instead of literals integer constants to avoid endianness problems
   const char *colors[width * height] = {
+      // the first three colors help making sure that color runs are interpreted correctly
       "#FF000000",
+      "#FF000000",
+      "#FF000000",
+      // the following colors help making sure that the components are interpreted the right way around
       "#FFFF0000",
       "#00FFFF00",
       "#FF0000A0",
