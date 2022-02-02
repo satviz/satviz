@@ -6,21 +6,28 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StringTest {
 
   private final StringSerializer serial = new StringSerializer();
 
   @Test
-  void testSimpleAscii() {
-    assertDoesNotThrow(() -> testSingleString("Hello, World!\n\nHow are you?"));
+  void testSimpleAscii() throws IOException {
+    try {
+      testSingleString("Hello, World!\n\nHow are you?");
+    } catch (SerializationException e) {
+      fail(e);
+    }
   }
 
   @Test
-  void testUnicode() {
-    assertDoesNotThrow(() -> testSingleString("༼ つ ◕_◕ ༽つ"));
+  void testUnicode() throws IOException {
+    try {
+      testSingleString("༼ つ ◕_◕ ༽つ");
+    } catch (SerializationException e) {
+      fail(e);
+    }
   }
 
   void testSingleString(String s) throws IOException, SerializationException {

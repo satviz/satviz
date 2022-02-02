@@ -14,7 +14,7 @@ class ClauseTest {
   ClauseSerializer serial = new ClauseSerializer();
 
   @Test
-  void testSingleLiteral() throws IOException, SerializationException {
+  void testSingleLiteral() throws IOException {
     int[] lits = new int[1];
     lits[0] = 1000000000;
     Clause c = new Clause(lits);
@@ -33,18 +33,27 @@ class ClauseTest {
     assertEquals(b[5], (byte) 0x00);
 
     ByteArrayInputStream byteIn = new ByteArrayInputStream(b);
-    Clause cNew = serial.deserialize(byteIn);
-    assertEquals(1, cNew.literals().length);
-    assertEquals(cNew.literals()[0], lits[0]);
+    Clause result = null;
+    try {
+      result = serial.deserialize(byteIn);
+    } catch (SerializationException e) {
+      fail(e);
+    }
+    assertEquals(1, result.literals().length);
+    assertEquals(result.literals()[0], lits[0]);
   }
 
   @Test
-  void testClauses() throws SerializationException, IOException {
-    testClause(new int[]{1,2,3,4,5,6});
-    testClause(new int[]{-20, 10, 10, 20});
-    testClause(new int[0]);
-    testClause(new int[]{-1000000, 1000000});
-    testClause(new int[]{-1, 1, -2, 2, -3, 3, -4, 4, -5, 5});
+  void testClauses() throws IOException {
+    try {
+      testClause(new int[]{1, 2, 3, 4, 5, 6});
+      testClause(new int[]{-20, 10, 10, 20});
+      testClause(new int[0]);
+      testClause(new int[]{-1000000, 1000000});
+      testClause(new int[]{-1, 1, -2, 2, -3, 3, -4, 4, -5, 5});
+    } catch (SerializationException e) {
+      fail(e);
+    }
   }
 
   void testClause(int[] lits) throws IOException, SerializationException {

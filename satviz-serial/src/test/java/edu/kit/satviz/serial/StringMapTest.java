@@ -8,38 +8,49 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StringMapTest {
 
   private final StringMapSerializer serial = new StringMapSerializer();
 
   @Test
-  void testSimpleAscii() {
+  void testSimpleAscii() throws IOException {
     Map<String, String> map = new HashMap<>();
     map.put("Hello", "World!");
     map.put("Weather", "Sunny");
     map.put("...", "...?");
-    assertDoesNotThrow(() -> testSingleMap(map));
+    try {
+      testSingleMap(map);
+    } catch (SerializationException e) {
+      fail(e);
+    }
   }
 
   @Test
-  void testEscape() {
+  void testEscape() throws IOException {
     Map<String, String> map = new HashMap<>();
     map.put("a==b", "c==d");
     map.put("Hello\nWorld", "How\nare\nyou?");
     map.put("int i =", "5");
     map.put("\\ \\", "\\ \\");
-    assertDoesNotThrow(() -> testSingleMap(map));
+    try {
+      testSingleMap(map);
+    } catch (SerializationException e) {
+      fail(e);
+    }
   }
 
   @Test
-  void testUnicode() {
+  void testUnicode() throws IOException {
     Map<String, String> map = new HashMap<>();
     map.put("༼ つ  ͡° ͜ʖ ͡° ༽つ", "༼ つ ಥ_ಥ ༽つ");
     map.put("こんにちは", "नमस्ते");
-    assertDoesNotThrow(() -> testSingleMap(map));
+    try {
+      testSingleMap(map);
+    } catch (SerializationException e) {
+      fail(e);
+    }
   }
 
   void testSingleMap(Map<String, String> map) throws IOException, SerializationException {

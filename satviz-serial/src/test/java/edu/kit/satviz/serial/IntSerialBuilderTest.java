@@ -15,10 +15,14 @@ class IntSerialBuilderTest {
   private IntSerializer serial = new IntSerializer();
 
   @Test
-  void testSomeInts() {
+  void testSomeInts() throws IOException {
     int[] ints = new int[]{0, 1, -1, 2, 3, 4, 5, 42, 100, 200, -3333, 1000000000, -1000000000};
     for (int i : ints) {
-      assertDoesNotThrow(() -> testSingleInt(i));
+      try {
+        testSingleInt(i);
+      } catch (SerializationException e) {
+        fail(e);
+      }
     }
   }
 
