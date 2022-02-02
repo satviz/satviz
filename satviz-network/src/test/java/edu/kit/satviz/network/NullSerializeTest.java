@@ -4,80 +4,49 @@ import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class NullSerializeTest {
-  private static class ByteArrayInputStream extends InputStream {
-    private final byte[] b;
-    private int readpos = 0;
 
-    public ByteArrayInputStream(byte[] b) {
-      this.b = b;
-    }
-
-    @Override
-    public int read() {
-      if (readpos == b.length) {
-        return -1;
-      }
-      return b[readpos++];
-    }
-  }
-
-  private static class ByteArrayOutputStream extends OutputStream {
-    private final byte[] b;
-    private int writepos = 0;
-
-    public ByteArrayOutputStream(byte[] b) {
-      this.b = b;
-    }
-
-    @Override
-    public void write(int i) throws IOException {
-      if (writepos == b.length) {
-        throw new IOException("stream finished");
-      }
-      b[writepos++] = (byte) i;
-    }
-  }
-
-  private static final NullSerializer ns = new NullSerializer();
+  private static final NullSerializer serial = new NullSerializer();
 
   @Test
   void nullSerializeWorks() throws IOException {
-    byte[] b = new byte[8];
-    b[0] = (byte) 0x88; // some random value
-    b[1] = (byte) 0x88;
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     try {
-      ns.serialize(null, new ByteArrayOutputStream(b));
+      serial.serialize(null, byteOut);
     } catch (SerializationException e) {
-      fail(); // should not happen
+      fail();
     }
-    assertEquals(b[0], (byte) 0);
-    assertEquals(b[1], (byte) 0x88); // make sure we only write one byte
+
+    byte[] bytes = byteOut.toByteArray();
+    assertEquals(1, bytes.length);
+    assertEquals(0, bytes[0]);
   }
 
   @Test
   void nullDeserializeWorks() throws IOException, SerializationException {
-    byte[] b = new byte[8];
-    assertNull(ns.deserialize(new ByteArrayInputStream(b)));
+    byte[] b = new byte[1];
+    assertNull(serial.deserialize(new ByteArrayInputStream(b)));
   }
 
   @Test
   void nullDeserializeCatchesWrongData() {
-    byte[] b = new byte[8];
+    byte[] b = new byte[1];
     b[0] = (byte) 0x88; // some random value
-    assertThrows(SerializationException.class, () -> ns.deserialize(new ByteArrayInputStream(b)));
+    ByteArrayInputStream byteIn = new ByteArrayInputStream(b);
+    assertThrows(SerializationException.class, () -> serial.deserialize(byteIn));
   }
 
   @Test
   void nullBuilderWorks() throws SerializationException {
-    SerialBuilder<Object> nb = ns.getBuilder();
-    assertTrue(nb.addByte((byte) 0));
-    assertThrows(SerializationException.class, () -> nb.addByte((byte) 0));
+    NullSerialBuilder builder = new NullSerialBuilder();
+    assertTrue(builder.addByte((byte) 0));
+    assertThrows(SerializationException.class, () -> builder.addByte((byte) 0));
+
+    builder.reset();
+    assertThrows(SerializationException.class, () -> builder.addByte((byte) 0x88));
   }
 }
