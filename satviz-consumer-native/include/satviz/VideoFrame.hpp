@@ -25,10 +25,10 @@ struct VideoFrame {
    * Create a VideoFrame from an 8-bit-per-channel RGBA image.
    * @param width  the width of the image
    * @param height the height of the image
-   * @param pixels the pixels values of the image
+   * @param data   the pixels values of the image
    * @return       a new VideoFrame
    */
-  static VideoFrame fromImage(int width, int height, unsigned char *pixels);
+  static VideoFrame fromImage(int width, int height, const void *pixels);
 };
 
 } // namespace video

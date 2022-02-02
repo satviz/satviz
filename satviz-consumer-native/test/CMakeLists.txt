@@ -8,7 +8,7 @@ include(GoogleTest)
 add_executable(
   native-test
   Test.cpp
-  YCbCr.cpp)
+  YCbCr.cpp VideoFrame.cpp)
 
 target_link_libraries(
   native-test
