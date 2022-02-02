@@ -11,19 +11,31 @@ namespace video {
 
 inline int rgbToY(int R, int G, int B) {
   int Y;
-  Y = 16 + (((R<<6) + (R<<1) + (G<<7) + G + (B<<4) + (B<<3) + B) >> 8);
+  Y   = (R<<6) + (R<<1);
+  Y  += (G<<7) + G;
+  Y  += (B<<4) + (B<<3) + B;
+  Y >>= 8;
+  Y  += 16;
   return Y;
 }
 
 inline int rgbToCb(int R, int G, int B) {
-  int Cb;
-  Cb = 128 + ((-((R<<5) + (R<<2) + (R<<1)) - ((G<<6) + (G<<3) + (G<<1)) + (B<<7) - (B<<4)) >> 8);
+  int Cb = 0;
+  Cb  -= (R<<5) + (R<<2) + (R<<1);
+  Cb  -= (G<<6) + (G<<3) + (G<<1);
+  Cb  += (B<<7) - (B<<4);
+  Cb >>= 8;
+  Cb  += 128;
   return Cb;
 }
 
 inline int rgbToCr(int R, int G, int B) {
   int Cr;
-  Cr = 128 + (((R<<7) - (R<<4) - ((G<<6) + (G<<5) - (G<<1)) - ((B << 4) + (B << 1))) >> 8);
+  Cr   = (R<<7) - (R<<4);
+  Cr  -= (G<<6) + (G<<5) - (G<<1);
+  Cr  -= (B<<4) + (B<<1);
+  Cr >>= 8;
+  Cr  += 128;
   return Cr;
 }
 
