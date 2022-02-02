@@ -1,22 +1,20 @@
 package edu.kit.satviz.network;
 
+import edu.kit.satviz.serial.IntSerializer;
 import edu.kit.satviz.serial.Serializer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.nio.ReadOnlyBufferException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ReceiverTest {
-  /*
 
   private static final byte INT_MSG_NUM = 3;
   private static NetworkBlueprint bp;
@@ -26,7 +24,7 @@ class ReceiverTest {
   @BeforeAll
   static void initAll() {
     Map<Byte, Serializer<?>> m = new HashMap<>();
-    m.put(INT_MSG_NUM, new IntSerializer());
+    m.put(INT_MSG_NUM, serial);
     bp = new NetworkBlueprint(m);
   }
 
@@ -38,32 +36,34 @@ class ReceiverTest {
   @Test
   void testReadMultipleAtOnce() throws IOException {
     // receive data from three different integers.
-    ByteBuffer bb = ByteBuffer.allocate(15);
-    ByteBufferOutputStream bbOut = new ByteBufferOutputStream(bb);
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 
-    bbOut.write(INT_MSG_NUM);
-    serial.serialize(5, bbOut);
-    bbOut.write(INT_MSG_NUM);
-    serial.serialize(42, bbOut);
-    bbOut.write(INT_MSG_NUM);
-    serial.serialize(30000, bbOut);
-    bb.flip();
+    byteOut.write(INT_MSG_NUM);
+    serial.serialize(5, byteOut);
+    byteOut.write(INT_MSG_NUM);
+    serial.serialize(42, byteOut);
+    byteOut.write(INT_MSG_NUM);
+    serial.serialize(30000, byteOut);
+    ByteBuffer bb = ByteBuffer.wrap(byteOut.toByteArray());
 
     NetworkMessage msg;
 
     msg = r.receive(bb);
+    assertEquals(10, bb.remaining());
     assertNotNull(msg);
     assertEquals(NetworkMessage.State.PRESENT, msg.getState());
     assertEquals(INT_MSG_NUM, msg.getType());
     assertEquals(5, (Integer) msg.getObject());
 
     msg = r.receive(bb);
+    assertEquals(5, bb.remaining());
     assertNotNull(msg);
     assertEquals(NetworkMessage.State.PRESENT, msg.getState());
     assertEquals(INT_MSG_NUM, msg.getType());
     assertEquals(42, (Integer) msg.getObject());
 
     msg = r.receive(bb);
+    assertEquals(0, bb.remaining());
     assertNotNull(msg);
     assertEquals(NetworkMessage.State.PRESENT, msg.getState());
     assertEquals(INT_MSG_NUM, msg.getType());
@@ -74,12 +74,11 @@ class ReceiverTest {
 
   @Test
   void testInterrupted() throws IOException {
-    ByteBuffer bb = ByteBuffer.allocate(5);
-    ByteBufferOutputStream bbOut = new ByteBufferOutputStream(bb);
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 
-    bbOut.write(INT_MSG_NUM);
-    serial.serialize(123456789, bbOut);
-    bb.flip();
+    byteOut.write(INT_MSG_NUM);
+    serial.serialize(123456789, byteOut);
+    ByteBuffer bb = ByteBuffer.wrap(byteOut.toByteArray());
 
     ByteBuffer bb1 = ByteBuffer.allocate(3);
     ByteBuffer bb2 = ByteBuffer.allocate(2);
@@ -108,13 +107,11 @@ class ReceiverTest {
   void failOnUnexpected() {
     // read a type byte that doesn't have a corresponding serializer
     ByteBuffer bb = ByteBuffer.allocate(1);
-    bb.put((byte) 42);
+    bb.put((byte) (INT_MSG_NUM + 1));
     bb.flip();
 
     NetworkMessage msg = r.receive(bb);
     assertNotNull(msg);
     assertEquals(NetworkMessage.State.FAIL, msg.getState());
   }
-
-  */
 }
