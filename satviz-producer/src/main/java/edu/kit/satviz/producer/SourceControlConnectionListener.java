@@ -13,6 +13,8 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
   private final ProducerConnection connection;
   private final ClauseSource source;
 
+  private Thread sourceThread;
+
   /**
    * Creates a new {@code SourceControlConnectionListener}.
    *
@@ -33,7 +35,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
    */
   @Override
   public void onConnect() {
-    new Thread(null, () -> {
+    sourceThread = new Thread(null, () -> {
       try (source) {
         source.open();
       } catch (SourceException e) {
@@ -42,7 +44,8 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
       } catch (Exception e) {
         e.printStackTrace();
       }
-    }, "ClauseSource-" + Integer.toHexString(source.hashCode())).start();
+    }, "ClauseSource-" + Integer.toHexString(source.hashCode()));
+    sourceThread.start();
   }
 
   /*
@@ -55,5 +58,9 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public Thread getSourceThread() {
+    return sourceThread;
   }
 }
