@@ -1,6 +1,7 @@
 package edu.kit.satviz.producer.mode;
 
 import static edu.kit.satviz.producer.ResourceHelper.extractResource;
+import static edu.kit.satviz.producer.SolverParams.solverParams;
 import static org.junit.jupiter.api.Assertions.*;
 
 import edu.kit.satviz.producer.ResourceHelper;
@@ -81,13 +82,5 @@ class SolverModeTest {
     }
   }
 
-  private ProducerParameters solverParams(String solverLib, String instanceFile) throws IOException {
-    var solver = extractResource(solverLib);
-    var instance = extractResource(instanceFile);
-    var params = new ProducerParameters();
-    params.setHost("example.com");
-    params.setSolverFile(solver);
-    params.setInstanceFile(instance);
-    return params;
-  }
+
 }
