@@ -76,6 +76,7 @@ class SourceControlConnectionListenerTest {
     listener.onConnect();
     listener.getSourceThread().join();
     PROOF_UPDATES.forEach(update -> verify(connection).sendClauseUpdate(update));
+    verify(connection, times(PROOF_UPDATES.size())).sendClauseUpdate(notNull());
     verify(connection).terminateRefuted();
   }
 
