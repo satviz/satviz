@@ -7,8 +7,6 @@ import java.io.OutputStream;
 /**
  * A {@link Serializer} for SAT clauses.
  * This class uses the variable-length binary DRAT format.
- *
- * @author luwae
  */
 public class ClauseSerializer extends Serializer<Clause> {
 

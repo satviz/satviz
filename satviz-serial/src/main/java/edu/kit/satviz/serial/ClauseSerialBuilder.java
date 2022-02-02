@@ -5,8 +5,6 @@ import edu.kit.satviz.sat.Clause;
 /**
  * A {@link SerialBuilder} for SAT clauses.
  * This class uses the variable-length binary DRAT format.
- *
- * @author luwae
  */
 public class ClauseSerialBuilder extends SerialBuilder<Clause> {
   /** Default capacity for the growing literal array. */

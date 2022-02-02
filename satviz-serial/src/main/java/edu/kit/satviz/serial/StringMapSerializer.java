@@ -9,8 +9,6 @@ import java.util.Map;
 /**
  * A {@link Serializer} for string key-value maps.
  * Uses UTF-8 to serialize strings.
- *
- * @author luwae
  */
 public class StringMapSerializer extends Serializer<Map<String, String>> {
   private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();

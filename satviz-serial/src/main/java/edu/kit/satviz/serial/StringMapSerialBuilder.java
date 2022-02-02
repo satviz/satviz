@@ -5,8 +5,6 @@ import java.util.Map;
 
 /**
  * A {@link SerialBuilder} for string key-value maps.
- *
- * @author luwae
  */
 public class StringMapSerialBuilder extends SerialBuilder<Map<String, String>> {
   private final StringSerialBuilder builder = new StringSerialBuilder();

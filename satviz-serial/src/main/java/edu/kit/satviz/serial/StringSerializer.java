@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 /**
  * A {@link Serializer} for strings.
  * Uses UTF-8 to serialize strings.
- *
- * @author luwae
  */
 public class StringSerializer extends Serializer<String> {
 

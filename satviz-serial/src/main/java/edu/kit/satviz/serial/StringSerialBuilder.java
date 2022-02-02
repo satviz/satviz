@@ -6,8 +6,6 @@ import java.nio.charset.StandardCharsets;
 /**
  * A {@link SerialBuilder} for strings.
  * Uses UTF-8 to deserialize strings.
- *
- * @author luwae
  */
 public class StringSerialBuilder extends SerialBuilder<String> {
   private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();

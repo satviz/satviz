@@ -8,8 +8,6 @@ import java.io.OutputStream;
 /**
  * A {@link Serializer} for SAT assignments.
  * This class uses a bitmap to store the variable assignments.
- *
- * @author quorty
  */
 public class SatAssignmentSerializer extends Serializer<SatAssignment> {
 

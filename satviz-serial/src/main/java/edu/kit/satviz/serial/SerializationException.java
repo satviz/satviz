@@ -3,8 +3,6 @@ package edu.kit.satviz.serial;
 /**
  * An exception that is thrown whenever an object cannot be serialized or deserialized
  *     from the given data.
- *
- * @author luwae
  */
 public class SerializationException extends Exception {
   /**

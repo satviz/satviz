@@ -4,8 +4,6 @@ import edu.kit.satviz.sat.SatAssignment;
 
 /**
  * A {@link SerialBuilder} for SAT assignments.
- *
- * @author quorty
  */
 public class SatAssignmentSerialBuilder extends SerialBuilder<SatAssignment> {
   private final IntSerialBuilder intBuilder = new IntSerialBuilder();

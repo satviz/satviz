@@ -10,8 +10,6 @@ import java.util.Arrays;
  * then the integer stored will be <code>-varID</code>.
  * If the clause contains <code>n</code> literals, the array size is exactly <code>n</code>.
  * No trailing zero is stored.
- *
- * @author quorty
  */
 public record Clause(int[] literals) {
 

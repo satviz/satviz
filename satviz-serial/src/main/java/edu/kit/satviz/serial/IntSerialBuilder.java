@@ -3,8 +3,6 @@ package edu.kit.satviz.serial;
 /**
  * A {@link SerialBuilder} for integers.
  * Uses little endian format.
- *
- * @author luwae
  */
 public class IntSerialBuilder extends SerialBuilder<Integer> {
   int acc = 0;

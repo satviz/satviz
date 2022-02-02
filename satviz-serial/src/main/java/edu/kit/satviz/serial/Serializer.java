@@ -8,8 +8,6 @@ import java.io.OutputStream;
  * An abstract class for serializing and deserializing objects.
  *
  * @param <T> the type of object that gets serialized
- * @author luwae
- * @author quorty
  */
 public abstract class Serializer<T> {
 
