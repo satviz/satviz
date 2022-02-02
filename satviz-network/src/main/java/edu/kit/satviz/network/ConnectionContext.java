@@ -1,10 +1,8 @@
 package edu.kit.satviz.network;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.function.BiConsumer;
@@ -28,13 +26,13 @@ public class ConnectionContext {
   private final Receiver recv;
   private BiConsumer<ConnectionId, NetworkMessage> ls;
 
-  private State state; // volatile?
+  private State state; // TODO volatile?
 
   /**
    * Creates a new connection context without a socket.
    * A socket can be opened and connected with <code>tryConnect</code>.
    *
-   * @param cid the ID of this connection
+   * @param cid the ID of this connection, including remote address
    * @param recv the receiver
    * @param ls the listener
    */
@@ -47,20 +45,37 @@ public class ConnectionContext {
   }
 
   /**
-   * Creates a new connection context with previously opened socket.
+   * Creates a new connection context with previously opened and connected socket.
    *
-   * @param cid the ID of this connection
    * @param chan the socket channel
    * @param recv the receiver
    * @param ls the listener
+   * @throws IllegalArgumentException if the channel is closed or not connected
    */
-  public ConnectionContext(ConnectionId cid, SocketChannel chan, Receiver recv,
-      BiConsumer<ConnectionId, NetworkMessage> ls) {
-    this.cid = cid;
+  public ConnectionContext(SocketChannel chan, Receiver recv,
+      BiConsumer<ConnectionId, NetworkMessage> ls) throws IllegalArgumentException {
+    InetSocketAddress remote;
+    try {
+      remote = (InetSocketAddress) chan.getRemoteAddress();
+    } catch (IOException e) {
+      throw new IllegalArgumentException(e);
+    }
+    if (remote == null) {
+      throw new IllegalArgumentException("socket is not connected");
+    }
+
+    this.cid = new ConnectionId(remote);
     this.chan = chan;
     this.recv = recv;
     this.ls = ls;
     this.state = State.CONNECTED;
+  }
+
+  public ConnectionContext(ServerSocketChannel serverChan, Receiver recv,
+      BiConsumer<ConnectionId, NetworkMessage> ls) {
+    // TODO accept from server socket
+    this.cid = null;
+    this.recv = null;
   }
 
   /**
@@ -76,9 +91,10 @@ public class ConnectionContext {
    * Checks if this context was created with the specified channel.
    *
    * @param chan the socket channel
-   * @return true if this context's channel is equal to <code>chan</code>, false otherwise
+   * @return true if this context's channel is <code>chan</code>, false otherwise
    */
-  public boolean containsChannel(SocketChannel chan) {
+  public boolean usesChannel(SocketChannel chan) {
+    // we use this to identify contexts without having to use a getter for chan
     return this.chan == chan;
   }
 
@@ -109,7 +125,7 @@ public class ConnectionContext {
       return;
     }
 
-    if (state == State.CONNECTED) {
+    if (chan != null) {
       try {
         chan.close();
       } catch (IOException e) {
@@ -118,6 +134,7 @@ public class ConnectionContext {
     }
 
     state = (abnormal ? State.FAILED : State.FINISHED);
+    // TODO only call listener if state changes have been made (avoid re-entry)
     callListener(abnormal ? NetworkMessage.createFail() : NetworkMessage.createTerm());
   }
 

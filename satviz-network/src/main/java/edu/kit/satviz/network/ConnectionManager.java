@@ -123,7 +123,6 @@ public class ConnectionManager {
       newChan.configureBlocking(false);
       newChan.register(select, SelectionKey.OP_READ);
       newCtx = new ConnectionContext(
-          new ConnectionId((InetSocketAddress) newChan.getRemoteAddress()),
           newChan,
           new Receiver(bp::getBuilder),
           null
@@ -279,7 +278,7 @@ public class ConnectionManager {
 
   private ConnectionContext getContextFrom(SocketChannel chan) {
     for (ConnectionContext ctx : contexts) {
-      if (ctx.containsChannel(chan)) {
+      if (ctx.usesChannel(chan)) {
         return ctx;
       }
     }

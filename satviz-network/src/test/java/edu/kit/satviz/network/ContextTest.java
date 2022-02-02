@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ContextTest {
   private static final int PORT = 35124;
+  private static final byte NULL_SERIALIZE_BYTE = 5;
 
   private static NetworkBlueprint bp;
 
@@ -30,7 +31,7 @@ class ContextTest {
   @BeforeAll
   static void initAll() {
     Map<Byte, Serializer<?>> m = new HashMap<>();
-    m.put((byte) 1, new NullSerializer());
+    m.put(NULL_SERIALIZE_BYTE, new NullSerializer());
     bp = new NetworkBlueprint(m);
   }
 
@@ -74,18 +75,39 @@ class ContextTest {
         ContextTest::defaultListener
     );
 
-    assertFalse(ctx.tryConnect());
+    ServerSocketChannel serverChan = null;
+    SocketChannel chan = null;
+    ByteBuffer message = ByteBuffer.allocate(2);
+    try {
+      assertFalse(ctx.tryConnect());
 
-    ServerSocketChannel serverChan = ServerSocketChannel.open();
-    serverChan.bind(remote);
+      serverChan = ServerSocketChannel.open();
+      serverChan.bind(remote);
 
-    assertTrue(ctx.tryConnect());
-    SocketChannel chan = serverChan.accept();
+      assertTrue(ctx.tryConnect());
+      chan = serverChan.accept();
 
-    ctx.close(false);
+      message.put(NULL_SERIALIZE_BYTE);
+      message.put((byte) 0);
+      message.flip();
+      int numWritten = ctx.write(message);
+      assertEquals(2, numWritten);
 
-    assertThrows(AlreadyConnectedException.class, ctx::tryConnect);
+      message.clear();
+      int numRead = chan.read(message);
+      message.flip();
+      assertEquals(2, numRead);
+      assertEquals(NULL_SERIALIZE_BYTE, message.get());
+      assertEquals(0, message.get());
 
-    serverChan.close();
+    } finally {
+      if (serverChan != null) {
+        serverChan.close();
+      }
+      if (chan != null) {
+        chan.close();
+      }
+      ctx.close(false);
+    }
   }
 }
