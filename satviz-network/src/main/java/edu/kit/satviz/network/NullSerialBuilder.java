@@ -5,34 +5,26 @@ import edu.kit.satviz.serial.SerializationException;
 
 /**
  * A {@link SerialBuilder} for a <code>null</code> object.
- * @see NullSerializer
  *
  * @author luwae
  */
 public class NullSerialBuilder extends SerialBuilder<Object> {
-  private boolean done = false;
 
   @Override
-  public boolean addByte(int i) throws SerializationException {
-    if (done) {
-      throw new SerializationException("done");
+  protected void processAddByte(byte b) throws SerializationException {
+    if (b != 0) {
+      fail("unexpected byte");
     }
-
-    done = true;
-    if (i == 0) {
-      return true;
-    } else {
-      throw new SerializationException("unexpected byte");
-    }
+    finish();
   }
 
   @Override
-  public boolean objectFinished() {
-    return done;
-  }
-
-  @Override
-  public Object getObject() {
+  protected Object processGetObject() {
     return null;
+  }
+
+  @Override
+  protected void processReset() {
+    // nothing to reset here
   }
 }

@@ -52,7 +52,11 @@ class NullSerializeTest {
     byte[] b = new byte[8];
     b[0] = (byte) 0x88; // some random value
     b[1] = (byte) 0x88;
-    ns.serialize(null, new ByteArrayOutputStream(b));
+    try {
+      ns.serialize(null, new ByteArrayOutputStream(b));
+    } catch (SerializationException e) {
+      fail(); // should not happen
+    }
     assertEquals(b[0], (byte) 0);
     assertEquals(b[1], (byte) 0x88); // make sure we only write one byte
   }
@@ -73,7 +77,7 @@ class NullSerializeTest {
   @Test
   void nullBuilderWorks() throws SerializationException {
     SerialBuilder<Object> nb = ns.getBuilder();
-    assertTrue(nb.addByte(0));
-    assertThrows(SerializationException.class, () -> nb.addByte(0));
+    assertTrue(nb.addByte((byte) 0));
+    assertThrows(SerializationException.class, () -> nb.addByte((byte) 0));
   }
 }

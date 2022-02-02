@@ -16,14 +16,17 @@ public class NullSerializer extends Serializer<Object> {
 
   /**
    * Serializes a <code>null</code> object.
-   * It contains of a single null-byte.
+   * Writes a single null-byte.
    *
    * @param o ignored
    * @param out the stream to write to
    * @throws IOException if the stream can't be used
    */
   @Override
-  public void serialize(Object o, OutputStream out) throws IOException {
+  public void serialize(Object o, OutputStream out) throws IOException, SerializationException {
+    if (o != null) {
+      throw new SerializationException("can only serialize null objects");
+    }
     out.write(0);
   }
 
@@ -50,7 +53,6 @@ public class NullSerializer extends Serializer<Object> {
 
   /**
    * Returns a {@link SerialBuilder} for <code>null</code> objects.
-   * @see NullSerialBuilder
    *
    * @return new builder
    */
