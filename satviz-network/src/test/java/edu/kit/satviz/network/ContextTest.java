@@ -87,6 +87,7 @@ class ContextTest {
       assertTrue(ctx.tryConnect());
       chan = serverChan.accept();
 
+      // write to context, read from other socket
       message.put(NULL_SERIALIZE_BYTE);
       message.put((byte) 0);
       message.flip();
@@ -99,6 +100,22 @@ class ContextTest {
       assertEquals(2, numRead);
       assertEquals(NULL_SERIALIZE_BYTE, message.get());
       assertEquals(0, message.get());
+
+      // write to other socket, read from context
+      message.clear();
+      message.put(NULL_SERIALIZE_BYTE);
+      message.put((byte) 0);
+      message.flip();
+      numWritten = chan.write(message);
+      assertEquals(2, numWritten);
+
+      message.clear(); // for safety
+      assertEquals(0, received.size());
+      ctx.read(message);
+      assertEquals(1, received.size());
+      NetworkMessage msg = received.get(0);
+      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+      assertEquals(NULL_SERIALIZE_BYTE, msg.getType());
 
     } finally {
       if (serverChan != null) {
