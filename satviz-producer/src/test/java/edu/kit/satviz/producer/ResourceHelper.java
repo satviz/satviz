@@ -14,6 +14,7 @@ public class ResourceHelper {
 
   public static void deleteTempDir() throws IOException {
     Files.walkFileTree(tempDir, new DeletingVisitor());
+    tempDir = null;
   }
 
   public static Path extractResource(String name) throws IOException {
