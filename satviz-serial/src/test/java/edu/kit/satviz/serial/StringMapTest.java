@@ -2,6 +2,8 @@ package edu.kit.satviz.serial;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,11 +43,10 @@ class StringMapTest {
   }
 
   void testSingleMap(Map<String, String> map) throws IOException, SerializationException {
-    byte[] bytes = new byte[map.size() * 128]; // random upper bound
-    ByteArrayInputStream byteIn = new ByteArrayInputStream(bytes);
-    ByteArrayOutputStream byteOut = new ByteArrayOutputStream(bytes);
-
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     serial.serialize(map, byteOut);
+
+    ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
     Map<String, String> result = serial.deserialize(byteIn);
 
     assertEquals(map.size(), result.size());

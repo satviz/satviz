@@ -3,6 +3,8 @@ package edu.kit.satviz.serial;
 import edu.kit.satviz.sat.SatAssignment;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -28,12 +30,12 @@ class SatAssignmentTest {
   }
 
   void testSingleAssignment(SatAssignment assign) throws IOException, SerializationException {
-    byte[] bytes = new byte[assign.getVarCount()]; // quick upper bound, doesn't matter
-    ByteArrayInputStream byteIn = new ByteArrayInputStream(bytes);
-    ByteArrayOutputStream byteOut = new ByteArrayOutputStream(bytes);
-
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     serial.serialize(assign, byteOut);
+
+    ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
     SatAssignment result = serial.deserialize(byteIn);
+
     assertEquals(result, assign); // .equals() implemented in SatAssignment
   }
 }

@@ -2,6 +2,8 @@ package edu.kit.satviz.serial;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -22,11 +24,10 @@ class StringTest {
   }
 
   void testSingleString(String s) throws IOException, SerializationException {
-    byte[] bytes = new byte[s.length() * 8]; // quick upper bound
-    ByteArrayInputStream byteIn = new ByteArrayInputStream(bytes);
-    ByteArrayOutputStream byteOut = new ByteArrayOutputStream(bytes);
-
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     serial.serialize(s, byteOut);
+
+    ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
     assertEquals(s, serial.deserialize(byteIn));
   }
 }
