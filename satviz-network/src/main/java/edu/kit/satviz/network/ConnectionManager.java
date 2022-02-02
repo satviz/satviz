@@ -28,7 +28,7 @@ public class ConnectionManager {
   }
 
   private final Object syncState = new Object();
-  private volatile State state = State.NEW;
+  private volatile State state = State.NEW; // TODO volatile?
 
   private final InetSocketAddress serverAddress;
   private ServerSocketChannel serverChan = null;
@@ -61,24 +61,28 @@ public class ConnectionManager {
         return;
       }
 
-      if (state == State.OPEN || state == State.FINISHING) {
+      if (serverChan != null) {
         try {
           serverChan.close();
         } catch (IOException e) {
           // not our problem
         }
+      }
+      if (select != null) {
         try {
           select.close();
         } catch (IOException e) {
           // not our problem
         }
-        for (ConnectionContext ctx : contexts) {
-          ctx.close(abnormal);
-        }
+      }
+      for (ConnectionContext ctx : contexts) {
+        // TODO assure that no new context is added during this close
+        // TODO perhaps move state change to above and use that
+        ctx.close(abnormal);
       }
       state = abnormal ? State.FAILED : State.FINISHED;
       if (state == State.FAILED) {
-        lsFail.accept("fail");
+        lsFail.accept("fail"); // TODO better message, perhaps as argument
       }
     }
   }
@@ -113,7 +117,7 @@ public class ConnectionManager {
   }
 
   private boolean acceptNew() {
-    ConnectionContext newCtx = null;
+    ConnectionContext newCtx;
     try {
       SocketChannel newChan = serverChan.accept();
       if (newChan == null) { // only call this function with acceptable event

@@ -138,6 +138,10 @@ public class ConnectionContext {
     callListener(abnormal ? NetworkMessage.createFail() : NetworkMessage.createTerm());
   }
 
+  public synchronized boolean isClosed() { // TODO synchronized necessary?
+    return state == State.FINISHED || state == State.FAILED;
+  }
+
   /**
    * Tries to connect the socket channel.
    * The behaviour is the same for blocking and non-blocking sockets.
