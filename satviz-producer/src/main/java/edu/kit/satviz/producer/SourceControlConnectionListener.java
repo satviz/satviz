@@ -60,6 +60,11 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
     }
   }
 
+  /**
+   * Returns the thread on which the {@link ClauseSource} was opened.
+   *
+   * @return the source thread or {@code null} if {@link #onConnect()} has not been called yet
+   */
   public Thread getSourceThread() {
     return sourceThread;
   }

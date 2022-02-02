@@ -1,10 +1,19 @@
 package edu.kit.satviz.producer;
 
+import edu.kit.satviz.sat.Clause;
+import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
 public class ResourceHelper {
+
+  public static List<ClauseUpdate> PROOF_UPDATES = List.of(
+      new ClauseUpdate(new Clause(new int[] {1, 2, 3}), ClauseUpdate.Type.ADD),
+      new ClauseUpdate(new Clause(new int[] {3, -4}), ClauseUpdate.Type.REMOVE),
+      new ClauseUpdate(new Clause(new int[] {2, -1}), ClauseUpdate.Type.ADD)
+  );
 
   private static Path tempDir;
 

@@ -1,5 +1,6 @@
 package edu.kit.satviz.producer.source;
 
+import static edu.kit.satviz.producer.ResourceHelper.PROOF_UPDATES;
 import static edu.kit.satviz.producer.ResourceHelper.extractResource;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,13 +47,8 @@ class ProofSourceTest {
     var source = mode.createSource(params);
     List<ClauseUpdate> updates = new ArrayList<>();
     source.subscribe(updates::add);
-    var expected = List.of(
-        new ClauseUpdate(new Clause(new int[] {1, 2, 3}), ClauseUpdate.Type.ADD),
-        new ClauseUpdate(new Clause(new int[] {3, -4}), ClauseUpdate.Type.REMOVE),
-        new ClauseUpdate(new Clause(new int[] {2, -1}), ClauseUpdate.Type.ADD)
-    );
     source.open();
-    assertEquals(expected, updates);
+    assertEquals(PROOF_UPDATES, updates);
   }
 
 }
