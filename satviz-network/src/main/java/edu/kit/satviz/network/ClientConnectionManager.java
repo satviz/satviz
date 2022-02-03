@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.NotYetConnectedException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -36,6 +37,7 @@ public class ClientConnectionManager {
 
   /**
    * Creates a new client connection with specified address and port, and message type mapping.
+   * No socket is opened until <code>start()</code> is called.
    *
    * @param address the address to connect to
    * @param port the port to connect to
@@ -55,11 +57,9 @@ public class ClientConnectionManager {
       if (state == State.FINISHED || state == State.FAILED) {
         return;
       }
-
-      if (state == State.STARTED || state == State.FINISHING) {
-        ctx.close(abnormal);
-      }
       state = abnormal ? State.FAILED : State.FINISHED;
+
+      ctx.close(abnormal);
       if (state == State.FAILED && lsFail != null) {
         lsFail.accept("fail");
       }
@@ -67,6 +67,7 @@ public class ClientConnectionManager {
   }
 
   // TODO make sure a handler calling a method can't do anything stupid (it holds some locks!)
+  // this also affects the calls to ctx
 
 
   /**
@@ -92,7 +93,7 @@ public class ClientConnectionManager {
 
   private void doStart() {
     synchronized (syncState) {
-      while (state != State.OPEN) {
+      while (state == State.STARTED) {
         try {
           if (ctx.tryConnect()) {
             state = State.OPEN;
@@ -103,6 +104,7 @@ public class ClientConnectionManager {
         }
         try {
           syncState.wait(1000);
+          // state might change in the meantime
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
           terminateGlobal(true);
@@ -110,11 +112,15 @@ public class ClientConnectionManager {
         }
       }
 
-      lsConnect.accept(ctx.getCid());
+      if (state == State.OPEN && lsConnect != null) {
+        lsConnect.accept(ctx.getCid());
+      }
     }
 
     while (state == State.OPEN) {
-      doRead();
+      if (!doRead()) {
+        terminateGlobal(true);
+      }
     }
 
     terminateGlobal(false);
@@ -123,6 +129,12 @@ public class ClientConnectionManager {
     }
   }
 
+  /**
+   * Starts this client connection.
+   * A new thread is created that opens the socket and reads data.
+   *
+   * @return true if the new thread was created, false if it already existed
+   */
   public boolean start() {
     synchronized (syncState) { // start() should be called at most once
       if (state != State.NEW) {
@@ -135,9 +147,16 @@ public class ClientConnectionManager {
     return true;
   }
 
+  /**
+   * Stops this client connection.
+   * Waits on the reading thread to finish and close all resources.
+   *
+   * @throws InterruptedException if the waiting gets interrupted
+   */
   public void stop() throws InterruptedException {
     synchronized (syncState) {
       if (state == State.NEW) {
+        // other thread was not started yet
         state = State.FINISHED;
         ctx.close(false);
         return;
@@ -149,30 +168,52 @@ public class ClientConnectionManager {
 
       state = State.FINISHING;
       while (state != State.FAILED && state != State.FINISHED) {
+        // while loop to catch spurious wakeup
         syncState.wait();
       }
     }
   }
 
+  /**
+   * Registers a listener that is called when the connection has been established.
+   *
+   * @param ls the listener
+   */
   public void registerConnect(Consumer<ConnectionId> ls) {
     this.lsConnect = ls;
   }
 
+  /**
+   * Registers a listener that is called when the manager fails unexpectedly.
+   *
+   * @param ls the listener
+   */
   public void registerGlobalFail(Consumer<String> ls) {
     this.lsFail = ls;
   }
 
+  /**
+   * Registers a listener that is called when network messages arrive from the server.
+   *
+   * @param ls the listener
+   */
   public void register(BiConsumer<ConnectionId, NetworkMessage> ls) {
     ctx.setListener(ls);
   }
 
-  public void send(ConnectionId cid, Byte type, Object obj) throws IOException {
-    /*
-    if (!ctx.getChannel().isConnected()) {
-      throw new IOException("no socket open for this connection ID");
+  /**
+   * Sends a message with an object to the server.
+   *
+   * @param type the message type
+   * @param obj the object to transport with this message
+   * @throws NotYetConnectedException if the socket is not yet connected
+   * @throws IOException if the socket is closed or the serialization fails
+   */
+  public void send(Byte type, Object obj) throws IOException {
+    if (ctx.isClosed()) {
+      throw new IOException("socket is closed");
     }
-    */
-    // TODO check omitted for now
+
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     byteOut.write(type);
     try {
@@ -186,9 +227,10 @@ public class ClientConnectionManager {
     }
     try {
       ctx.write(ByteBuffer.wrap(byteOut.toByteArray()));
+    } catch (NotYetConnectedException e) {
+      throw e; // don't terminate; avoid being caught by next block
     } catch (IOException e) {
-      // fail this connection
-      ctx.close(true);
+      terminateGlobal(true);
       throw e;
     }
   }

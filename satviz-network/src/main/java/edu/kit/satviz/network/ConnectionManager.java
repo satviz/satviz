@@ -27,7 +27,7 @@ public class ConnectionManager {
   }
 
   private final Object syncState = new Object();
-  private volatile State state = State.NEW; // TODO volatile?
+  private volatile State state = State.NEW;
 
   private final InetSocketAddress serverAddress;
   private ServerSocketChannel serverChan = null;
@@ -54,11 +54,12 @@ public class ConnectionManager {
     this.bp = bp;
   }
 
-  private void terminateGlobal(boolean abnormal) {
+  private void terminateGlobal(boolean abnormal, String reason) {
     synchronized (syncState) {
       if (state == State.FINISHED || state == State.FAILED) {
         return;
       }
+      state = abnormal ? State.FAILED : State.FINISHED;
 
       if (serverChan != null) {
         try {
@@ -76,12 +77,10 @@ public class ConnectionManager {
       }
       for (ConnectionContext ctx : contexts) {
         // TODO assure that no new context is added during this close
-        // TODO perhaps move state change to above and use that
         ctx.close(abnormal);
       }
-      state = abnormal ? State.FAILED : State.FINISHED;
       if (state == State.FAILED) {
-        lsFail.accept("fail"); // TODO better message, perhaps as argument
+        lsFail.accept(reason);
       }
     }
   }
@@ -98,7 +97,7 @@ public class ConnectionManager {
         select = Selector.open();
         serverChan.register(select, SelectionKey.OP_ACCEPT);
       } catch (IOException e) {
-        terminateGlobal(true);
+        terminateGlobal(true, "unable to create server socket");
         return;
       }
       state = State.OPEN;
@@ -120,7 +119,7 @@ public class ConnectionManager {
     try {
       SocketChannel newChan = serverChan.accept();
       if (newChan == null) { // only call this function with acceptable event
-        terminateGlobal(true);
+        terminateGlobal(true, "error accepting new connection");
         return false;
       }
       newChan.configureBlocking(false);
@@ -132,7 +131,7 @@ public class ConnectionManager {
       );
     } catch (IOException e) {
       // we take this as a fatal condition
-      terminateGlobal(true);
+      terminateGlobal(true, "error accepting new connection");
       return false;
     }
     contexts.add(newCtx);
@@ -161,7 +160,7 @@ public class ConnectionManager {
     try {
       select.select();
     } catch (IOException e) {
-      terminateGlobal(true);
+      terminateGlobal(true, "error selecting socket events");
       return;
     }
     Iterator<SelectionKey> iter = select.selectedKeys().iterator();
@@ -186,7 +185,7 @@ public class ConnectionManager {
       pollAll();
     }
 
-    terminateGlobal(false);
+    terminateGlobal(false, "finished");
     synchronized (syncState) {
       syncState.notifyAll(); // thread is done
     }
@@ -301,16 +300,9 @@ public class ConnectionManager {
    */
   public void send(ConnectionId cid, Byte type, Object obj) throws IOException {
     ConnectionContext ctx = getContextFrom(cid);
-    if (ctx == null) {
-      // this shouldn't be possible, as we don't remove old contexts
-      throw new IOException("invalid connection ID");
-    }
-    /*
-    if (!ctx.getChannel().isConnected()) {
+    if (ctx == null || ctx.isClosed()) {
       throw new IOException("no socket open for this connection ID");
     }
-    */
-    // TODO removed check for now
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     byteOut.write(type);
     try {
@@ -325,6 +317,8 @@ public class ConnectionManager {
     }
     try {
       ctx.write(ByteBuffer.wrap(byteOut.toByteArray()));
+    } catch (NotYetConnectedException e) {
+      throw e;
     } catch (IOException e) {
       // fail this connection
       ctx.close(true);
