@@ -19,4 +19,24 @@ public class DratParsingIterator extends ClauseParsingIterator {
     }
   }
 
+  @Override
+  protected boolean isValidVariable(int variable) {
+    return true;
+  }
+
+  @Override
+  protected boolean isValidClauseUpdate(ClauseUpdate clause) {
+    return true;
+  }
+
+  @Override
+  protected boolean isFinalClauseUpdate(ClauseUpdate clauseUpdate) {
+    return clauseUpdate.clause().literals().length == 0;
+  }
+
+  @Override
+  protected boolean isPrematureEndOfFile() {
+    return true;
+  }
+
 }

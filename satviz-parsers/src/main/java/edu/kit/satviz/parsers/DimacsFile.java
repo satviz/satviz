@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
 
-  private static final String INVALID_FILE_MESSAGE = "File is invalid.";
+  private static final String INVALID_HEADER_MESSAGE = "The header is invalid.";
 
   private final Scanner scanner;
   private final ClauseParsingIterator parsingIterator;
@@ -18,7 +18,7 @@ public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
   public DimacsFile(InputStream in) {
     scanner = new Scanner(in);
     parseHeader();
-    parsingIterator = new DimacsParsingIterator(scanner);
+    parsingIterator = new DimacsParsingIterator(scanner, variableAmount, clauseAmount);
   }
 
   private void parseHeader() {
@@ -26,7 +26,7 @@ public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
       scanner.nextLine();
     }
     if (!scanner.hasNext()) {
-      throw new ParsingException(INVALID_FILE_MESSAGE);
+      throw new ParsingException(INVALID_HEADER_MESSAGE);
     }
 
     String header;
@@ -38,25 +38,25 @@ public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
       headerScanner.useDelimiter(" ");
 
       if (!headerScanner.hasNext("p")) {
-        throw new ParsingException(INVALID_FILE_MESSAGE);
+        throw new ParsingException(INVALID_HEADER_MESSAGE);
       }
       headerScanner.next();
       if (!headerScanner.hasNext("cnf")) {
-        throw new ParsingException(INVALID_FILE_MESSAGE);
+        throw new ParsingException(INVALID_HEADER_MESSAGE);
       }
       headerScanner.next();
       try {
         variableAmount = headerScanner.nextInt();
       } catch (NoSuchElementException e) {
-        throw new ParsingException(INVALID_FILE_MESSAGE);
+        throw new ParsingException(INVALID_HEADER_MESSAGE);
       }
       try {
         clauseAmount = headerScanner.nextInt();
       } catch (NoSuchElementException e) {
-        throw new ParsingException(INVALID_FILE_MESSAGE);
+        throw new ParsingException(INVALID_HEADER_MESSAGE);
       }
       if (headerScanner.hasNext()) {
-        throw new ParsingException(INVALID_FILE_MESSAGE);
+        throw new ParsingException(INVALID_HEADER_MESSAGE);
       }
     }
   }
