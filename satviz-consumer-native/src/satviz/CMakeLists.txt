@@ -17,7 +17,7 @@ set(SRC_SATVIZ_FILES
   GlUtils.cpp
   Camera.cpp
   VideoController.cpp
-)
+  VideoFrame.cpp)
 
 add_library(
   satviz-consumer-native SHARED

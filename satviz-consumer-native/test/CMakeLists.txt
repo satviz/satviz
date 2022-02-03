@@ -8,14 +8,12 @@ include(GoogleTest)
 add_executable(
   native-test
   Test.cpp
-)
+  YCbCr.cpp VideoFrame.cpp)
 
 target_link_libraries(
   native-test
   gtest gtest_main
-  OGDF
-  sfml-window
-  ${THEORA_LIBRARIES}
+  satviz-consumer-native
 )
 
 target_include_directories(
