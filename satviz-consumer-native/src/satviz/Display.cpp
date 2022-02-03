@@ -28,5 +28,13 @@ void Display::endFrame() {
   displayFrame();
 }
 
+VideoFrame Display::grabFrame() {
+  unsigned char *pixels = new unsigned char[4 * (size_t) width * (size_t) height];
+  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  VideoFrame frame = VideoFrame::fromImage(width, height, pixels);
+  delete[] pixels;
+  return frame;
+}
+
 } // namespace video
 } // namespace satviz
