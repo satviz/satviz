@@ -5,8 +5,7 @@
 namespace satviz {
 namespace video {
 
-sf::ContextSettings Display::makeContextSettings()
-{
+sf::ContextSettings Display::makeContextSettings() {
   sf::ContextSettings settings;
   settings.attributeFlags |= sf::ContextSettings::Core;
   settings.attributeFlags |= sf::ContextSettings::Debug;
@@ -15,13 +14,11 @@ sf::ContextSettings Display::makeContextSettings()
   return settings;
 }
 
-void Display::loadGlExtensions()
-{
+void Display::loadGlExtensions() {
   gladLoaderLoadGL();
 }
 
-void Display::startFrame()
-{
+void Display::startFrame() {
   glViewport(0, 0, width, height);
   glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);

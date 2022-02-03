@@ -4,17 +4,14 @@ namespace satviz {
 namespace video {
 
 OffscreenDisplay::OffscreenDisplay(int w, int h)
-  : Display(w, h), context(makeContextSettings(), w, h)
-{
+  : Display(w, h), context(makeContextSettings(), w, h) {
   loadGlExtensions();
 }
 
-OffscreenDisplay::~OffscreenDisplay()
-{
+OffscreenDisplay::~OffscreenDisplay() {
 }
 
-void OffscreenDisplay::activateContext()
-{
+void OffscreenDisplay::activateContext() {
   context.setActive(true);
 }
 
