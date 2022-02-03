@@ -24,5 +24,9 @@ void Display::startFrame() {
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
+void Display::endFrame() {
+  displayFrame();
+}
+
 } // namespace video
 } // namespace satviz

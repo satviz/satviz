@@ -36,6 +36,11 @@ protected:
    */
   virtual void activateContext() = 0;
 
+  /**
+   * Put the newly drawn frame on the screen.
+   */
+  virtual void displayFrame() = 0;
+
 public:
   virtual ~Display() {}
 
@@ -48,7 +53,7 @@ public:
    * Prepare the OpenGL state to draw a new frame.
    */
   void startFrame();
-  void drawFrame();
+  void endFrame();
   VideoFrame grabFrame();
 
   /**
@@ -58,11 +63,6 @@ public:
    */
   virtual bool pollEvent(sf::Event &event) = 0;
   virtual void lockSize(bool lock) = 0;
-
-  /**
-   * Put the newly drawn frame on the screen.
-   */
-  virtual void displayFrame() = 0;
 };
 
 } // namespace video

@@ -64,7 +64,7 @@ void VideoController::nextFrame() {
   }
   display->startFrame();
   renderer->draw(camera, display->getWidth(), display->getHeight());
-  display->displayFrame();
+  display->endFrame();
 }
 
 bool VideoController::startRecording(const char *filename, VideoEncoder *enc) {
