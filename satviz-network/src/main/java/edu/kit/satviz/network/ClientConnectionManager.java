@@ -12,7 +12,6 @@ import java.util.function.Consumer;
  * A client to connect to a {@link ConnectionManager}.
  *
  * @apiNote thread-safe
- * @author luwae
  */
 public class ClientConnectionManager {
   private enum State {

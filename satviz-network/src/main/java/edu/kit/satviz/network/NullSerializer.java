@@ -9,8 +9,6 @@ import java.io.OutputStream;
 
 /**
  * A {@link Serializer} for non-existent objects (<code>null</code>).
- *
- * @author luwae
  */
 public class NullSerializer extends Serializer<Object> {
 

@@ -5,7 +5,6 @@ package edu.kit.satviz.serial;
  * The deserialization process can be done in several steps, as individual bytes are added.
  *
  * @param <T> the type of deserialized objects
- * @author luwae
  */
 public abstract class SerialBuilder<T> {
   private boolean failed = false;

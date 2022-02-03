@@ -5,8 +5,6 @@ import edu.kit.satviz.serial.SerializationException;
 
 /**
  * A {@link SerialBuilder} for a <code>null</code> object.
- *
- * @author luwae
  */
 public class NullSerialBuilder extends SerialBuilder<Object> {
 

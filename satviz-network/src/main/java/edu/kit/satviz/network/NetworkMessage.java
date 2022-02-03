@@ -4,8 +4,6 @@ package edu.kit.satviz.network;
  * A message transmitted over network.
  * Each message has a type, which denotes the information this message carries.
  * Additionally, each message can carry an object.
- *
- * @author luwae
  */
 public class NetworkMessage {
   /**

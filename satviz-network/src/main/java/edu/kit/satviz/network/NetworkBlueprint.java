@@ -11,8 +11,6 @@ import java.util.Map;
 /**
  * A mapping of message types to transmitted objects.
  * This class maps bytes (encoding the message type) to {@link Serializer}s.
- *
- * @author luwae
  */
 public class NetworkBlueprint {
   private final Map<Byte, Serializer<?>> typeMap;

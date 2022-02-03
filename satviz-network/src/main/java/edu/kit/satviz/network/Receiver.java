@@ -8,8 +8,6 @@ import java.util.function.IntFunction;
 /**
  * Transforms a byte stream into a network message stream.
  * Messages are deserialized based on given {@link SerialBuilder}s.
- *
- * @author luwae
  */
 public class Receiver {
   private final IntFunction<SerialBuilder<?>> gen;

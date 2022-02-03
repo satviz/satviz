@@ -5,7 +5,5 @@ import java.net.InetSocketAddress;
 /**
  * An ID for an internet connection.
  * This is simply a wrapper for an {@link InetSocketAddress}, but might be extended.
- *
- * @author luwae
  */
 public record ConnectionId(InetSocketAddress address) {}

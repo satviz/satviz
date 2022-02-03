@@ -11,7 +11,6 @@ import java.util.function.BiConsumer;
  * A Collection of objects related to a network connection.
  *
  * @apiNote thread-safe
- * @author luwae
  */
 public class ConnectionContext {
   private enum State {

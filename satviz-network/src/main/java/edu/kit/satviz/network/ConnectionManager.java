@@ -15,7 +15,6 @@ import java.util.function.Consumer;
  * A server servicing multiple {@link ClientConnectionManager}s.
  *
  * @apiNote thread-safe
- * @author luwae
  */
 public class ConnectionManager {
   private enum State {

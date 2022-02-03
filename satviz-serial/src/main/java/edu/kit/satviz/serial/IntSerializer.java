@@ -7,8 +7,6 @@ import java.io.OutputStream;
 /**
  * A {@link Serializer} for integers.
  * Uses little endian format.
- *
- * @author luwae
  */
 public class IntSerializer extends Serializer<Integer> {
 
