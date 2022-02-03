@@ -139,7 +139,7 @@ public abstract class AbstractConnectionManager {
   public final void send(ConnectionId cid, Byte type, Object obj) throws IOException {
     ConnectionContext ctx = getContextFrom(cid);
     if (ctx == null || ctx.isClosed()) {
-      throw new IOException("no socket open for this connection ID");
+      throw new NotYetConnectedException();
     }
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     byteOut.write(type);

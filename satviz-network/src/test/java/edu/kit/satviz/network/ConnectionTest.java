@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +20,13 @@ class ConnectionTest {
   private static NetworkBlueprint bp;
   private static ByteBuffer data;
 
-  private static List<NetworkMessage> received;
-  private static List<ConnectionId> accepted;
-  private static boolean connectedListened;
-  private static String failListened;
+  private static final Map<ConnectionId, List<NetworkMessage>> received = new HashMap<>();
+  private static final List<NetworkMessage> receivedClient = new ArrayList<>();
+  private static final List<ConnectionId> accepted = new ArrayList<>();
+  private static final List<ConnectionId> connected = new ArrayList<>();
+  private static String failListenedClient;
+  private static String failListenedServer;
+  private static final Object syncNewConnections = new Object();
 
   @BeforeAll
   static void initAll() {
@@ -30,15 +34,16 @@ class ConnectionTest {
     m.put((byte) 1, new NullSerializer());
     m.put((byte) 2, new NullSerializer());
     bp = new NetworkBlueprint(m);
-    data = ByteBuffer.allocate(16);
   }
 
   @BeforeEach
   void init() {
-    received = new ArrayList<>();
-    accepted = new ArrayList<>();
-    connectedListened = false;
-    failListened = null;
+    received.clear();
+    receivedClient.clear();
+    accepted.clear();
+    connected.clear();
+    failListenedClient = null;
+    failListenedServer = null;
   }
 
   @Test
@@ -48,17 +53,18 @@ class ConnectionTest {
 
     System.out.println("initialized");
 
-    server.registerAccept(ConnectionTest::defaultListenerAccept);
-    server.registerGlobalFail(ConnectionTest::defaultListenerFail);
+    server.registerConnect(ConnectionTest::defaultListenerAccept);
+    server.registerGlobalFail(ConnectionTest::defaultListenerFailServer);
     client.registerConnect(ConnectionTest::defaultListenerConnect);
-    client.registerGlobalFail(ConnectionTest::defaultListenerFail);
+    client.registerGlobalFail(ConnectionTest::defaultListenerFailClient);
 
     System.out.println("registered");
 
     assertEquals(0, received.size());
     assertEquals(0, accepted.size());
-    assertFalse(connectedListened);
-    assertNull(failListened);
+    assertEquals(0, connected.size());
+    assertNull(failListenedClient);
+    assertNull(failListenedServer);
 
     try {
       assertTrue(client.start());
@@ -66,28 +72,59 @@ class ConnectionTest {
 
       System.out.println("client started");
 
-      assertFalse(connectedListened);
-      assertNull(failListened);
+      assertTrue(server.start());
+      assertFalse(server.start());
 
+      System.out.println("server started");
+
+      synchronized (syncNewConnections) {
+        while (connected.isEmpty()) {
+          syncNewConnections.wait();
+        }
+      }
+
+      System.out.println("connected");
+      try {
+        System.out.println("connected: " + connected.get(0).address());
+        System.out.println("accepted: " + accepted.get(0).address());
+      } catch (IndexOutOfBoundsException e) {
+        fail("no connections received");
+      }
     } finally {
+      System.out.println("cleanup");
       client.stop();
       server.stop();
     }
   }
 
   static void defaultListener(ConnectionId cid, NetworkMessage msg) {
-    received.add(msg);
+    List<NetworkMessage> l = received.computeIfAbsent(cid, k -> new ArrayList<>());
+    l.add(msg);
   }
 
   static void defaultListenerAccept(ConnectionId newCid) {
-    accepted.add(newCid);
+    synchronized (syncNewConnections) {
+      accepted.add(newCid);
+      if (connected.size() == accepted.size()) {
+        syncNewConnections.notifyAll();
+      }
+    }
   }
 
   static void defaultListenerConnect(ConnectionId newCid) {
-    connectedListened = true;
+    synchronized (syncNewConnections) {
+      connected.add(newCid);
+      if (connected.size() == accepted.size()) {
+        syncNewConnections.notifyAll();
+      }
+    }
   }
 
-  static void defaultListenerFail(String reason) {
-    failListened = reason;
+  static void defaultListenerFailClient(String reason) {
+    failListenedClient = reason;
+  }
+
+  static void defaultListenerFailServer(String reason) {
+    failListenedServer = reason;
   }
 }
