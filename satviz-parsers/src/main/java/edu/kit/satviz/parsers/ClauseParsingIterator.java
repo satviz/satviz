@@ -30,30 +30,34 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
 
   @Override
   public boolean hasNext() {
+    if (nextUpdate != null) {
+      return true;
+    }
     if (isDone || isInvalidFile) {
       return false;
     }
-    if (nextUpdate == null) {
-      try {
-        nextUpdate = getNextUpdate();
-      } catch (NoSuchElementException | ParsingException e) {
-        nextUpdate = null;
-        return false;
-      }
+    try {
+      nextUpdate = getNextUpdate();
+    } catch (NoSuchElementException | ParsingException e) {
+      nextUpdate = null;
+      return false;
     }
     return true;
   }
 
   @Override
   public ClauseUpdate next() {
+    if (nextUpdate != null) {
+      ClauseUpdate next = nextUpdate;
+      nextUpdate = null;
+      return next;
+    }
     if (isDone) {
       throw new NoSuchElementException(NO_CLAUSES_LEFT_MESSAGE);
     } else if (isInvalidFile) {
       throw new ParsingException(unexpectedMessage);
     }
-    ClauseUpdate next = (nextUpdate != null) ? nextUpdate : getNextUpdate();
-    nextUpdate = null;
-    return next;
+    return getNextUpdate();
   }
 
   /**
