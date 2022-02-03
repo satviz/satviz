@@ -1,7 +1,6 @@
 package edu.kit.satviz.network;
 
 import edu.kit.satviz.serial.SerializationException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -25,11 +24,10 @@ public abstract class AbstractConnectionManager {
     FAILED
   }
 
-  // TODO check these access rights
-  private final Object syncState = new Object();
-  private volatile State state = State.NEW;
+  protected final Object syncState = new Object();
+  protected volatile State state = State.NEW;
 
-  private final NetworkBlueprint bp;
+  protected final NetworkBlueprint bp;
   private final ByteBuffer readBuf = ByteBuffer.allocate(1024);
 
   private Consumer<ConnectionId> lsConnect;
@@ -61,7 +59,7 @@ public abstract class AbstractConnectionManager {
   }
 
   public final boolean start() {
-    synchronized (syncState) { // start() should be called at most once
+    synchronized (syncState) {
       if (state != State.NEW) {
         return false;
       }
@@ -80,6 +78,8 @@ public abstract class AbstractConnectionManager {
       if (state == State.NEW) {
         // thread has not been created
         processStopNew();
+        state = State.FINISHED;
+        return;
       }
 
       state = State.FINISHING; // let reader thread handle terminating
@@ -88,6 +88,19 @@ public abstract class AbstractConnectionManager {
         syncState.wait();
       }
     }
+  }
+
+  protected boolean doRead(ConnectionContext ctx) {
+    if (ctx == null) {
+      return false;
+    }
+    try {
+      ctx.read(readBuf);
+    } catch (IOException e) {
+      ctx.close(true);
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -115,6 +128,14 @@ public abstract class AbstractConnectionManager {
     }
   }
 
+  protected final boolean callConnect(ConnectionId cid) {
+    if (lsConnect != null) {
+      lsConnect.accept(cid);
+      return true;
+    }
+    return false;
+  }
+
   public final void send(ConnectionId cid, Byte type, Object obj) throws IOException {
     ConnectionContext ctx = getContextFrom(cid);
     if (ctx == null || ctx.isClosed()) {
@@ -135,7 +156,7 @@ public abstract class AbstractConnectionManager {
     try {
       ctx.write(ByteBuffer.wrap(byteOut.toByteArray()));
     } catch (NotYetConnectedException e) {
-      throw e; // don't terminate; avoid being caught by next block
+      throw e; // don't terminate
     } catch (IOException e) {
       ctx.close(true);
       throw e;
