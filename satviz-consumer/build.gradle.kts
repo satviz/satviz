@@ -15,3 +15,31 @@ dependencies {
 javafx {
     modules("javafx.controls", "javafx.fxml")
 }
+
+val nativeModuleDir = rootProject.file("satviz-consumer-native")
+val nativeBuildDir = nativeModuleDir.resolve("build")
+val sharedLibFile = nativeBuildDir.resolve("src/satviz/libsatviz-consumer-native.so")
+
+tasks {
+    register<Exec>("cmake") {
+        group = "native"
+        outputs.dir(nativeBuildDir)
+        doFirst {
+            nativeBuildDir.mkdir()
+        }
+        workingDir = nativeBuildDir
+        commandLine = listOf("cmake", "..")
+    }
+
+    register<Exec>("make") {
+        group = "native"
+        dependsOn.add("cmake")
+        workingDir = nativeBuildDir
+        commandLine = listOf("make")
+    }
+
+    clean {
+        delete.add(nativeBuildDir)
+    }
+
+}
