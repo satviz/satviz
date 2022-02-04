@@ -36,15 +36,14 @@ void Display::endFrame() {
 
 void Display::transferFrame() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, transfer_object);
-  // TODO use GL_BGRA encoded images since it's likely a lot faster
-  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void *) 0);
+  glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, (void *) 0);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
 VideoFrame Display::grabFrame() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, transfer_object);
   void *pixels = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-  VideoFrame frame = VideoFrame::fromImage(width, height, pixels);
+  VideoFrame frame = VideoFrame::fromBgraImage(width, height, pixels);
   glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
   return frame;

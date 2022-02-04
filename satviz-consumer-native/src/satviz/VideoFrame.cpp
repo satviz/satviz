@@ -20,7 +20,7 @@ VideoFrame::~VideoFrame() {
   delete[] Cr;
 }
 
-VideoFrame VideoFrame::fromImage(int width, int height, const void *data) {
+VideoFrame VideoFrame::fromBgraImage(int width, int height, const void *data) {
   VideoFrame frame(width, height);
   const uint32_t *pixels = (const uint32_t *) data;
   size_t num_pixels = (size_t) width * (size_t) height;
@@ -33,9 +33,9 @@ VideoFrame VideoFrame::fromImage(int width, int height, const void *data) {
       frame.Cb[i] = frame.Cb[i-1];
       frame.Cr[i] = frame.Cr[i-1];
     } else {
-      unsigned R = (pixel >>  0) & 0xFF;
+      unsigned B = (pixel >>  0) & 0xFF;
       unsigned G = (pixel >>  8) & 0xFF;
-      unsigned B = (pixel >> 16) & 0xFF;
+      unsigned R = (pixel >> 16) & 0xFF;
       frame.Y [i] = (unsigned char) rgbToY (R, G, B);
       frame.Cb[i] = (unsigned char) rgbToCb(R, G, B);
       frame.Cr[i] = (unsigned char) rgbToCr(R, G, B);
