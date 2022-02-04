@@ -65,11 +65,11 @@ public interface Constraint<T> {
   }
 
   /**
-   * Produces a constraint that combines all given constraints. In other words, the resulting
-   * constraint is the logical <em>AND</em> of the given constraints.
+   * Produces a constraint that is the intersection of all given constraints.
+   * In other words, the resulting constraint is the logical <em>AND</em> of the given constraints.
    *
    * <p>The new constraint will validate the given constraints in order and fail immediately
-   * with the provided exception when one of them fails.
+   * with the provided exception if one of them fails.
    *
    * @param constraints The constraints to combine
    * @param <T> The type of the constraints
@@ -80,6 +80,37 @@ public interface Constraint<T> {
     return obj -> {
       for (Constraint<? super T> constraint : constraints) {
         constraint.validate(obj);
+      }
+    };
+  }
+
+  /**
+   * Produces a constraint that is the union of all given constraints.
+   * In other words, the resulting constraint is the logical <em>OR</em> of the given constraints.
+   *
+   * <p>The new constraint will validate the given constraints in order and fail with the last
+   * constraint's exception if all of them fail, but will succeed immediately
+   * if any one of them does <em>not</em> fail.
+   *
+   * @param constraints The constraints to combine
+   * @param <T> The type of the constraints
+   * @return A constraint representing "constraint1 || constraint2 || ..."
+   */
+  @SafeVarargs
+  static <T> Constraint<T> oneOf(Constraint<? super T>... constraints) {
+    return obj -> {
+      ConstraintValidationException exception = null;
+      for (Constraint<? super T> constraint : constraints) {
+        try {
+          constraint.validate(obj);
+          exception = null;
+          break;
+        } catch (ConstraintValidationException e) {
+          exception = e;
+        }
+      }
+      if (exception != null) {
+        throw exception;
       }
     };
   }

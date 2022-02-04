@@ -1,0 +1,12 @@
+{
+  "bufferSize": 100,
+  "heatmapColors": {
+    "fromColor": 16034815,
+    "toColor": 2334
+  },
+  "modeConfig": {
+    "mode": "EMBEDDED"
+  },
+  "instancePath": "../instance.cnf",
+  "videoTemplatePath": "Videos/video-%s.mp4"
+}

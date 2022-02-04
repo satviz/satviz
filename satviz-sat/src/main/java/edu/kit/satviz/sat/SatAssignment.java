@@ -4,8 +4,6 @@ import java.util.Arrays;
 
 /**
  * This class holds a truth assignment for the variables of a SAT-instance.
- *
- * @author quorty, luwae
  */
 public class SatAssignment {
 

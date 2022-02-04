@@ -8,8 +8,8 @@ import java.util.Arrays;
  * <code>varID</code>. In case that variable within the clause is used as a positive literal,
  * the integer stored for it will be <code>varID</code>, and if it's used as a negative literal,
  * then the integer stored will be <code>-varID</code>.
- *
- * @author quorty
+ * If the clause contains <code>n</code> literals, the array size is exactly <code>n</code>.
+ * No trailing zero is stored.
  */
 public record Clause(int[] literals) {
 
