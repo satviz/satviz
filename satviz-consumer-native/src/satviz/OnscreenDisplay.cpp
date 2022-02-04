@@ -23,6 +23,7 @@ bool OnscreenDisplay::pollEvent(sf::Event &event) {
     if (event.type == sf::Event::Resized) {
       width  = event.size.width;
       height = event.size.height;
+      onResize();
     }
     return true;
   } else {

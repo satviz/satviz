@@ -16,12 +16,20 @@ sf::ContextSettings Display::makeContextSettings() {
 
 void Display::loadGlExtensions() {
   gladLoaderLoadGL();
-  glGenBuffers(1, &transfer_object);
-  // TODO glBufferData on every resize
+  glGenBuffers(NUM_PBOS, pbos);
+  onResize();
+}
+
+void Display::onResize() {
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_IN_PROGRESS]);
+  glBufferData(GL_PIXEL_PACK_BUFFER, 4 * width * height, NULL, GL_STREAM_READ);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_READY]);
+  glBufferData(GL_PIXEL_PACK_BUFFER, 4 * width * height, NULL, GL_STREAM_READ);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
 Display::~Display() {
-  glDeleteBuffers(1, &transfer_object);
+  glDeleteBuffers(NUM_PBOS, pbos);
 }
 
 void Display::startFrame() {
@@ -31,17 +39,23 @@ void Display::startFrame() {
 }
 
 void Display::endFrame() {
+  // Switch PBOs
+  {
+    unsigned temp = pbos[PBO_READY];
+    pbos[PBO_READY] = pbos[PBO_IN_PROGRESS];
+    pbos[PBO_IN_PROGRESS] = temp;
+  }
   displayFrame();
 }
 
 void Display::transferFrame() {
-  glBindBuffer(GL_PIXEL_PACK_BUFFER, transfer_object);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_IN_PROGRESS]);
   glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, (void *) 0);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
 VideoFrame Display::grabFrame() {
-  glBindBuffer(GL_PIXEL_PACK_BUFFER, transfer_object);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_READY]);
   void *pixels = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
   VideoFrame frame = VideoFrame::fromBgraImage(width, height, pixels);
   glUnmapBuffer(GL_PIXEL_PACK_BUFFER);

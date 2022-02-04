@@ -16,9 +16,15 @@ namespace video {
  */
 class Display {
 protected:
+  enum {
+    PBO_IN_PROGRESS,
+    PBO_READY,
+    NUM_PBOS
+  };
+
   int width;
   int height;
-  unsigned transfer_object; // GL pixel buffer object
+  unsigned pbos[NUM_PBOS];
 
   Display(int w, int h) : width(w), height(h) {}
 
@@ -41,6 +47,8 @@ protected:
    * Put the newly drawn frame on the screen.
    */
   virtual void displayFrame() = 0;
+
+  void onResize();
 
 public:
   virtual ~Display();
