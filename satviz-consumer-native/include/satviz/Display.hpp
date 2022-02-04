@@ -18,6 +18,7 @@ class Display {
 protected:
   int width;
   int height;
+  unsigned transfer_object; // GL pixel buffer object
 
   Display(int w, int h) : width(w), height(h) {}
 
@@ -42,7 +43,7 @@ protected:
   virtual void displayFrame() = 0;
 
 public:
-  virtual ~Display() {}
+  virtual ~Display();
 
   inline int getWidth() { return width; }
   inline int getHeight() { return height; }
@@ -54,6 +55,7 @@ public:
    */
   void startFrame();
   void endFrame();
+  void transferFrame();
   VideoFrame grabFrame();
 
   /**

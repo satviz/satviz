@@ -16,6 +16,12 @@ sf::ContextSettings Display::makeContextSettings() {
 
 void Display::loadGlExtensions() {
   gladLoaderLoadGL();
+  glGenBuffers(1, &transfer_object);
+  // TODO glBufferData on every resize
+}
+
+Display::~Display() {
+  glDeleteBuffers(1, &transfer_object);
 }
 
 void Display::startFrame() {
@@ -28,11 +34,19 @@ void Display::endFrame() {
   displayFrame();
 }
 
+void Display::transferFrame() {
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, transfer_object);
+  // TODO use GL_BGRA encoded images since it's likely a lot faster
+  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void *) 0);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+}
+
 VideoFrame Display::grabFrame() {
-  unsigned char *pixels = new unsigned char[4 * (size_t) width * (size_t) height];
-  glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, transfer_object);
+  void *pixels = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
   VideoFrame frame = VideoFrame::fromImage(width, height, pixels);
-  delete[] pixels;
+  glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
   return frame;
 }
 
