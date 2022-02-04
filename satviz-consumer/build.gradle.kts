@@ -39,6 +39,11 @@ tasks {
         commandLine = listOf("make")
     }
 
+    processResources {
+        dependsOn.add("make")
+        from(sharedLibFile)
+    }
+
     clean {
         delete.add(nativeBuildDir)
     }
