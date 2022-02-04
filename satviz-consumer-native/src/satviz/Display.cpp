@@ -23,7 +23,7 @@ void Display::loadGlExtensions()
 void Display::startFrame()
 {
   glViewport(0, 0, width, height);
-  glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
+  glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 }
 

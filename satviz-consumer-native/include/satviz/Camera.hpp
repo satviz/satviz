@@ -13,9 +13,12 @@ private:
   float zoom;
 
 public:
-  Camera() : position{0.0f, 0.0f}, zoom(1.0f) {}
+  Camera() : position{0.0f, 0.0f}, zoom(2.0f) {}
 
-  // TODO Position Getters & Setters
+  inline float getX() { return position[0]; }
+  inline void setX(float v) { position[0] = v; }
+  inline float getY() { return position[1]; }
+  inline void setY(float v) { position[1] = v; }
   inline float getZoom() { return zoom; }
   inline void setZoom(float z) { zoom = z; }
 

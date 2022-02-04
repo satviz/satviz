@@ -17,6 +17,7 @@ set(SRC_SATVIZ_FILES
   GlUtils.cpp
   Camera.cpp
   VideoController.cpp
+  Graph.cpp
   VideoFrame.cpp)
 
 add_library(
