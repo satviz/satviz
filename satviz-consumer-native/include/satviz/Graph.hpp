@@ -5,6 +5,7 @@
 #include <tuple>
 #include <sstream>
 
+#include <satviz/info.h>
 #include <ogdf/basic/Graph.h>
 #include <ogdf/basic/GraphAttributes.h>
 
@@ -12,19 +13,6 @@ namespace satviz {
 namespace graph {
 
 class GraphObserver;
-
-struct NodeInfo {
-  int index;
-  int heat;
-  float x;
-  float y;
-};
-
-struct EdgeInfo {
-  int index1;
-  int index2;
-  float weight;
-};
 
 struct WeightUpdate {
   std::vector<std::tuple<int, int, float> > values;

@@ -5,18 +5,7 @@
 extern "C" {
 #endif
 
-typedef struct CNodeInfo {
-  int index;
-  int heat;
-  float x;
-  float y;
-} CNodeInfo;
-
-typedef struct CEdgeInfo {
-  int index1;
-  int index2;
-  float weight;
-} CEdgeInfo;
+#include <satviz/info.h>
 
 typedef struct CWeightUpdate {
   size_t n;
@@ -39,8 +28,8 @@ void satviz_recalculate_layout(void *);
 void satviz_adapt_layout(void *);
 char *satviz_serialize(void *);
 void satviz_deserialize(void *, const char *);
-CNodeInfo satviz_query_node(void *, int index);
-CEdgeInfo satviz_query_edge(void *, int index1, int index2);
+NodeInfo satviz_query_node(void *, int index);
+EdgeInfo satviz_query_edge(void *, int index1, int index2);
 
 
 #ifdef __cplusplus

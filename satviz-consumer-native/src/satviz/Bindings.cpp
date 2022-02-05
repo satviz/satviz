@@ -1,8 +1,6 @@
-#include <sstream>
 #include <vector>
 
 #include <satviz/Graph.hpp>
-
 
 using namespace satviz::graph;
 
@@ -31,7 +29,7 @@ void satviz_adapt_layout(void *graph) {
 char *satviz_serialize(void *graph) {
   // TODO not implemented yet
   (void) graph;
-  return NULL;
+  return nullptr;
   //return reinterpret_cast<Graph*>(graph)->serialize().str().c_str();
 }
 
@@ -46,7 +44,7 @@ void satviz_deserialize(void *graph, const char *str) {
 void satviz_submit_weight_update(void *graph, CWeightUpdate *update) {
   std::vector<std::tuple<int, int, float>> values { update->n };
   for (size_t i = 0; i < update->n; i++) {
-    values.push_back(std::make_tuple(update->from[i], update->to[i], update->weight[i]));
+    values.emplace_back(update->from[i], update->to[i], update->weight[i]);
   }
   WeightUpdate realUpdate { values };
   // TODO not implemented yet
@@ -58,7 +56,7 @@ void satviz_submit_weight_update(void *graph, CWeightUpdate *update) {
 void satviz_submit_heat_update(void *graph, CHeatUpdate *update) {
   std::vector<std::tuple<int, int>> values { update->n };
   for (size_t i = 0; i < update->n; i++) {
-    values.push_back(std::make_tuple(update->index[i], update->heat[i]));
+    values.emplace_back(update->index[i], update->heat[i]);
   }
   HeatUpdate realUpdate { values };
   // TODO not implemented yet
@@ -67,12 +65,13 @@ void satviz_submit_heat_update(void *graph, CHeatUpdate *update) {
   //reinterpret_cast<Graph*>(graph)->submitHeatUpdate(realUpdate);
 }
 
-CNodeInfo satviz_query_node(void *graph, int index) {
+NodeInfo satviz_query_node(void *graph, int index) {
   (void) graph;
   (void) index;
   // TODO not implemented yet
   //NodeInfo node = reinterpret_cast<Graph*>(graph)->queryNode(index);
   //return CNodeInfo { node.index, node.heat, node.x, node.y }
+  return NodeInfo {};
 }
 
 }
