@@ -29,18 +29,16 @@ typedef struct CHeatUpdate {
   int *heat;
 } CHeatUpdate;
 
-typedef struct CGraph CGraph;
-
-CGraph *satviz_new_graph(unsigned int nodes);
-void satviz_release_graph(CGraph *);
-void satviz_submit_weight_update(CGraph *, CWeightUpdate *);
-void satviz_submit_heat_update(CGraph *, CHeatUpdate *);
-void satviz_recalculate_layout(CGraph *);
-void satviz_adapt_layout(CGraph *);
-char *satviz_serialize(CGraph *);
-void satviz_deserialize(CGraph *, char *);
-CNodeInfo satviz_query_node(CGraph *, int index);
-CEdgeInfo satviz_query_edge(CGraph *, int index1, int index2);
+void *satviz_new_graph(unsigned int nodes);
+void satviz_release_graph(void *);
+void satviz_submit_weight_update(void *, CWeightUpdate *);
+void satviz_submit_heat_update(void *, CHeatUpdate *);
+void satviz_recalculate_layout(void *);
+void satviz_adapt_layout(void *);
+char *satviz_serialize(void *);
+void satviz_deserialize(void *, char *);
+CNodeInfo satviz_query_node(void *, int index);
+CEdgeInfo satviz_query_edge(void *, int index1, int index2);
 
 
 #ifdef __cplusplus

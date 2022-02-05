@@ -6,11 +6,11 @@ extern "C" {
 
 #include <satviz/Bindings.h>
 
-CGraph *satviz_new_graph(unsigned int nodes) {
-  return (CGraph*) new Graph{nodes};
+void *satviz_new_graph(unsigned int nodes) {
+  return new Graph{nodes};
 }
 
-void satviz_release_graph(CGraph *graph) {
+void satviz_release_graph(void *graph) {
   delete (Graph*) graph;
 }
 
