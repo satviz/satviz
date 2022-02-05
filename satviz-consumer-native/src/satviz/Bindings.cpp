@@ -69,9 +69,17 @@ NodeInfo satviz_query_node(void *graph, int index) {
   (void) graph;
   (void) index;
   // TODO not implemented yet
-  //NodeInfo node = reinterpret_cast<Graph*>(graph)->queryNode(index);
-  //return CNodeInfo { node.index, node.heat, node.x, node.y }
+  // return reinterpret_cast<Graph*>(graph)->queryNode(index);
   return NodeInfo {};
+}
+
+EdgeInfo satviz_query_edge(void *graph, int index1, int index2) {
+  (void) graph;
+  (void) index1;
+  (void) index2;
+  // TODO not implemented yet
+  //return reinterpret_cast<Graph*>(graph)->queryEdge(index1, index2);
+  return EdgeInfo {};
 }
 
 }
