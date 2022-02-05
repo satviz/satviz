@@ -10,6 +10,10 @@ import java.util.Objects;
  */
 public class ExternalModeConfig extends ConsumerModeConfig {
 
+  public static final int MIN_PORT_NUMBER = 1;
+  public static final int MAX_PORT_NUMBER = 65535;
+  public static final int DEFAULT_PORT_NUMBER = 34321;
+
   private int port;
 
   /**
