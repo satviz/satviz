@@ -6,13 +6,20 @@
 namespace satviz {
 namespace video {
 
+struct TheoraStream;
+
 /**
  *
  */
 class TheoraEncoder : VideoEncoder {
+private:
+  TheoraStream *stream;
+
 public:
   TheoraEncoder();
   ~TheoraEncoder();
+  bool startRecording(const char *filename, int width, int height);
+  void submitFrame(VideoFrame &frame, bool last);
 };
 
 } // namespace video

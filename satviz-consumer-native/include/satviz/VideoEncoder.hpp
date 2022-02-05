@@ -12,12 +12,13 @@ namespace video {
  *
  */
 class VideoEncoder {
+protected:
   std::ofstream file;
   int width;
   int height;
-  bool recording;
 
 public:
+  virtual ~VideoEncoder() {}
   virtual bool startRecording(const char *filename, int width, int height) = 0;
   virtual void submitFrame(VideoFrame &frame, bool last) = 0;
 };

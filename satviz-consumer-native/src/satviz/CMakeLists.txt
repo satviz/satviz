@@ -18,7 +18,7 @@ set(SRC_SATVIZ_FILES
   Camera.cpp
   VideoController.cpp
   Graph.cpp
-  VideoFrame.cpp)
+  VideoFrame.cpp TheoraEncoder.cpp)
 
 add_library(
   satviz-consumer-native SHARED
