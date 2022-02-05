@@ -103,6 +103,7 @@ public interface Constraint<T> {
       for (Constraint<? super T> constraint : constraints) {
         try {
           constraint.validate(obj);
+          exception = null;
           break;
         } catch (ConstraintValidationException e) {
           exception = e;

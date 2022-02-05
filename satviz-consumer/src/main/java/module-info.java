@@ -11,5 +11,6 @@ module edu.kit.satviz.consumer {
   exports edu.kit.satviz.consumer.gui.config to javafx.graphics;
 
   opens edu.kit.satviz.consumer.gui.config to javafx.fxml;
+  opens edu.kit.satviz.consumer.config to com.google.gson;
 
 }

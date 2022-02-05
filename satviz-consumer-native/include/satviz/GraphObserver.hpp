@@ -11,9 +11,9 @@ namespace graph {
  */
 class GraphObserver {
 protected:
-  Graph *my_graph;
+  Graph &my_graph;
 
-  GraphObserver(Graph *gr) : my_graph(gr) {}
+  GraphObserver(Graph &gr) : my_graph(gr) {}
 
 public:
   virtual void onWeightUpdate(WeightUpdate &update) { (void) update; }

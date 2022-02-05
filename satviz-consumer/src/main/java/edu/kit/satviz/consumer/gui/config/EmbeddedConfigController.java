@@ -21,7 +21,6 @@ public class EmbeddedConfigController extends ConfigController {
   @FXML
   private void initialize() {
     producerModeChoiceBox.setItems(FXCollections.observableArrayList(EmbeddedModeSource.values()));
-    // TODO: add constant in EmbeddedModeConfig
     producerModeChoiceBox.setValue(EmbeddedModeConfig.DEFAULT_EMBEDDED_MODE_SOURCE);
   }
 

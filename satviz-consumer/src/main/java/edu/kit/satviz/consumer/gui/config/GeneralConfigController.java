@@ -59,6 +59,7 @@ public class GeneralConfigController extends ConfigController {
 
   private ConfigController modeConfigController;
 
+
   // METHODS (FXML)
 
   @FXML
@@ -68,7 +69,6 @@ public class GeneralConfigController extends ConfigController {
     weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
     weightFactorChoiceBox.setValue(ConsumerConfig.DEFAULT_WEIGHT_FACTOR);
 
-    // TODO: add constants in ConsumerConfig
     SpinnerValueFactory<Integer> windowSizeSpinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(
         ConsumerConfig.MIN_WINDOW_SIZE, ConsumerConfig.MAX_WINDOW_SIZE, ConsumerConfig.DEFAULT_WINDOW_SIZE);
     windowSizeSpinnerValueFactory.valueProperty().addListener((observableValue, oldValue, newValue) -> {
@@ -95,7 +95,6 @@ public class GeneralConfigController extends ConfigController {
     hotColorColorPicker.setValue(parseColor(HeatmapColors.DEFAULT_TO_COLOR));
 
     modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
-    // TODO: add constant in ConsumerConfig
     modeChoiceBox.setValue(ConsumerConfig.DEFAULT_CONSUMER_MODE);
   }
 

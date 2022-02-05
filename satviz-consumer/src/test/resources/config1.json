@@ -1,0 +1,12 @@
+{
+  "noGui": false,
+  "videoTemplatePath": "Videos/video-%s.mp4",
+  "bufferSize": 100,
+  "windowSize": 1000,
+  "modeConfig": {
+    "port": 12345,
+    "mode": "EXTERNAL"
+  },
+  "instancePath": "foo/bar/instance.cnf",
+  "recordImmediately": false
+}

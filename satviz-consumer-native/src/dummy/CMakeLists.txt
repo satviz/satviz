@@ -15,6 +15,7 @@ target_include_directories(
 target_link_libraries(
   dummy
   PRIVATE satviz-consumer-native
+  PRIVATE OGDF
 )
 
 target_compile_options(
