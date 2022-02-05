@@ -7,7 +7,7 @@ extern "C" {
 
 typedef struct CNodeInfo {
   int index;
-  int head;
+  int heat;
   float x;
   float y;
 } CNodeInfo;

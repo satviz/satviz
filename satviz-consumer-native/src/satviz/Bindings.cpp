@@ -67,4 +67,12 @@ void satviz_submit_heat_update(void *graph, CHeatUpdate *update) {
   //reinterpret_cast<Graph*>(graph)->submitHeatUpdate(realUpdate);
 }
 
+CNodeInfo satviz_query_node(void *graph, int index) {
+  (void) graph;
+  (void) index;
+  // TODO not implemented yet
+  //NodeInfo node = reinterpret_cast<Graph*>(graph)->queryNode(index);
+  //return CNodeInfo { node.index, node.heat, node.x, node.y }
+}
+
 }
