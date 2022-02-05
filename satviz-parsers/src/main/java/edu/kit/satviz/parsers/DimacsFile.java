@@ -9,14 +9,12 @@ import java.util.Scanner;
 /**
  * This class is used to parse an <code>InputStream</code> that complies with the DIMACS CNF format.
  */
-public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
+public class DimacsFile extends ClauseFile {
 
   private static final String INVALID_HEADER_MESSAGE =
           "The header doesn't comply with the DIMACS CNF format.";
   private static final String NO_HEADER_MESSAGE = "No header was found.";
 
-  private final Scanner scanner;
-  private final ClauseParsingIterator parsingIterator;
   private int variableAmount;
   private int clauseAmount;
 
@@ -28,15 +26,11 @@ public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
    * @throws ParsingException In case no header or only an invalid header is found.
    */
   public DimacsFile(InputStream in) {
-    scanner = new Scanner(in);
-    parseHeader();
-    parsingIterator = new DimacsParsingIterator(scanner, variableAmount, clauseAmount);
+    super(in);
   }
 
-  /**
-   * This method parses the header of the file to get the variable and clause amount.
-   */
-  private void parseHeader() {
+  @Override
+  protected void parseHeader() {
     while (scanner.hasNext("c")) {
       scanner.nextLine();
     }
@@ -81,7 +75,7 @@ public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
 
   @Override
   public Iterator<ClauseUpdate> iterator() {
-    return parsingIterator;
+    return new DimacsParsingIterator(scanner, variableAmount, clauseAmount);
   }
 
   /**
@@ -100,11 +94,6 @@ public class DimacsFile implements Iterable<ClauseUpdate>, AutoCloseable {
    */
   public int getClauseAmount() {
     return clauseAmount;
-  }
-
-  @Override
-  public void close() {
-    scanner.close();
   }
 
 }
