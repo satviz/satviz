@@ -3,10 +3,9 @@ package edu.kit.satviz.consumer.bindings;
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.FunctionDescriptor;
-import jdk.incubator.foreign.MemoryAddress;
-import jdk.incubator.foreign.SymbolLookup;
+import java.util.ArrayList;
+import java.util.List;
+import jdk.incubator.foreign.*;
 
 public abstract class NativeObject implements AutoCloseable {
 
@@ -33,6 +32,27 @@ public abstract class NativeObject implements AutoCloseable {
     var address = SymbolLookup.loaderLookup().lookup(fullName)
         .orElseThrow(() -> new UnsatisfiedLinkError("Could not find C function " + fullName));
     return CLinker.getInstance().downcallHandle(address, methodType, descriptor);
+  }
+
+  public static MemoryLayout withPadding(MemoryLayout... fields) {
+    long offset = 0;
+    List<MemoryLayout> alignedFields = new ArrayList<>();
+    for (MemoryLayout field : fields) {
+      long size = field.byteSize();
+      long r = offset % field.byteAlignment();
+      if (r > 0) {
+        offset += size - r;
+        alignedFields.add(MemoryLayout.paddingLayout(size - r));
+      }
+      offset += size;
+      alignedFields.add(field);
+    }
+    long strongestAlignment = MemoryLayout.structLayout(fields).byteAlignment();
+    long r = offset % strongestAlignment;
+    if (r > 0) {
+      alignedFields.add(MemoryLayout.paddingLayout(strongestAlignment - r));
+    }
+    return MemoryLayout.structLayout(alignedFields.toArray(new MemoryLayout[0]));
   }
 
 
