@@ -45,6 +45,7 @@ tasks {
 
     clean {
         delete.add(nativeBuildDir)
+        delete.add(nativeModuleDir.resolve("cmake-build-debug"))
     }
 
 }
