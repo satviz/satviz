@@ -5,10 +5,11 @@ namespace video {
 
 OffscreenDisplay::OffscreenDisplay(int w, int h)
   : Display(w, h), context(makeContextSettings(), w, h) {
-  loadGlExtensions();
+  initializeGl();
 }
 
 OffscreenDisplay::~OffscreenDisplay() {
+  deinitializeGl();
 }
 
 void OffscreenDisplay::activateContext() {

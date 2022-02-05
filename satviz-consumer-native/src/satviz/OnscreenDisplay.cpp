@@ -7,10 +7,11 @@ OnscreenDisplay::OnscreenDisplay(int w, int h)
   : Display(w, h) {
   sf::ContextSettings settings = makeContextSettings();
   window.create(sf::VideoMode(w, h), "satviz", sf::Style::Default, settings);
-  loadGlExtensions();
+  initializeGl();
 }
 
 OnscreenDisplay::~OnscreenDisplay() {
+  deinitializeGl();
   window.close();
 }
 

@@ -43,9 +43,24 @@ public:
    */
   void nextFrame();
 
+  /**
+   * Start recording the visualization as a video.
+   * @param filename where the recording should be written to
+   * @param enc the video encoder that should be used
+   * @return false if any errors occur, true otherwise
+   */
   bool startRecording(const char *filename, VideoEncoder *enc);
+  /**
+   * Temporarily stop the recording.
+   */
   void stopRecording();
+  /**
+   * Resume recording if it has been stopped.
+   */
   void resumeRecording();
+  /**
+   * Finish recording altogether and finalize the generated video file.
+   */
   void finishRecording();
 };
 

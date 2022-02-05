@@ -14,10 +14,14 @@ sf::ContextSettings Display::makeContextSettings() {
   return settings;
 }
 
-void Display::loadGlExtensions() {
+void Display::initializeGl() {
   gladLoaderLoadGL();
   glGenBuffers(NUM_PBOS, pbos);
   onResize();
+}
+
+void Display::deinitializeGl() {
+  glDeleteBuffers(NUM_PBOS, pbos);
 }
 
 void Display::onResize() {
@@ -26,10 +30,6 @@ void Display::onResize() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_READY]);
   glBufferData(GL_PIXEL_PACK_BUFFER, 4 * width * height, NULL, GL_STREAM_READ);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-}
-
-Display::~Display() {
-  glDeleteBuffers(NUM_PBOS, pbos);
 }
 
 void Display::startFrame() {
@@ -48,13 +48,13 @@ void Display::endFrame() {
   displayFrame();
 }
 
-void Display::transferFrame() {
+void Display::transferCurrentFrame() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_IN_PROGRESS]);
   glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, (void *) 0);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
-VideoFrame Display::grabFrame() {
+VideoFrame Display::grabPreviousFrame() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_READY]);
   void *pixels = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
   VideoFrame frame = VideoFrame::fromBgraImage(width, height, pixels);

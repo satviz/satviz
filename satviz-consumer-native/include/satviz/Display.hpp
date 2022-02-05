@@ -32,39 +32,46 @@ protected:
    * @return our preferred OpenGL context settings
    */
   static sf::ContextSettings makeContextSettings();
-  /**
-   * Load OpenGL function pointers.
-   *
-   * This is done at object construction time.
-   */
-  void loadGlExtensions();
+  void initializeGl();
+  void deinitializeGl();
+  void onResize();
+
   /**
    * Switch to this Displays OpenGL context.
    */
   virtual void activateContext() = 0;
-
   /**
    * Put the newly drawn frame on the screen.
    */
   virtual void displayFrame() = 0;
 
-  void onResize();
-
 public:
-  virtual ~Display();
+  virtual ~Display() {}
 
   inline int getWidth() { return width; }
   inline int getHeight() { return height; }
-
-  // TODO Camera
 
   /**
    * Prepare the OpenGL state to draw a new frame.
    */
   void startFrame();
+  /**
+   * Stop rendering the current frame and display it on the screen.
+   */
   void endFrame();
-  void transferFrame();
-  VideoFrame grabFrame();
+  /**
+   * Initiate the transfer of the currently drawn frame into RAM.
+   *
+   * The actual transfer will take place asynchronously during the next frame.
+   */
+  void transferCurrentFrame();
+  /**
+   * Convert the previously transferred frame to a VideoFrame.
+   *
+   * (This data is from *two* invocations of transferCurrentFrame() ago!)
+   * @return the VideoFrame
+   */
+  VideoFrame grabPreviousFrame();
 
   /**
    * Poll for user input events.

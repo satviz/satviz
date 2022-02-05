@@ -70,10 +70,10 @@ void VideoController::nextFrame() {
   display->startFrame();
   renderer->draw(camera, display->getWidth(), display->getHeight());
   if (recording_state == REC_ON || recording_state == REC_WINDUP) {
-    display->transferFrame();
+    display->transferCurrentFrame();
   }
   if (recording_state == REC_ON || recording_state == REC_WINDDOWN) {
-    VideoFrame frame = display->grabFrame();
+    VideoFrame frame = display->grabPreviousFrame();
   }
   if (recording_state == REC_WINDUP) {
     recording_state = REC_ON;
