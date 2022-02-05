@@ -1,9 +1,10 @@
 #include <sstream>
+#include <vector>
 
 #include <satviz/Graph.hpp>
 
 
-using satviz::graph::Graph;
+using namespace satviz::graph;
 
 extern "C" {
 
@@ -40,6 +41,18 @@ void satviz_deserialize(void *graph, const char *str) {
   (void) graph;
   (void) buf;
   //reinterpret_cast<Graph*>(graph)->deserialize(buf);
+}
+
+void satviz_submit_weight_update(void *graph, CWeightUpdate *update) {
+  std::vector<std::tuple<int, int, float>> values { update->n };
+  for (size_t i = 0; i < update->n; i++) {
+    values.push_back(std::tuple<int, int, float> { update->from[i], update->to[i], update->weight[i] });
+  }
+  WeightUpdate realUpdate { values };
+  // TODO not implemented yet
+  (void) graph;
+  (void) realUpdate;
+  //reinterpret_cast<Graph*>(graph)->submitWeightUpdate(realUpdate);
 }
 
 }
