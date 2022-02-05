@@ -5,7 +5,11 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.List;
-import jdk.incubator.foreign.*;
+import jdk.incubator.foreign.CLinker;
+import jdk.incubator.foreign.FunctionDescriptor;
+import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.MemoryLayout;
+import jdk.incubator.foreign.SymbolLookup;
 
 public abstract class NativeObject implements AutoCloseable {
 
