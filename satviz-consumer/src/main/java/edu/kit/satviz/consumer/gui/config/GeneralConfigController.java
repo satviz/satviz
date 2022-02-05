@@ -16,6 +16,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.util.StringConverter;
 
 import java.io.IOException;
 
@@ -69,14 +70,34 @@ public class GeneralConfigController extends ConfigController {
     weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
     weightFactorChoiceBox.setValue(ConsumerConfig.DEFAULT_WEIGHT_FACTOR);
 
+    initializeWindowSizeSpinner();
+
+    coldColorColorPicker.setValue(parseColor(HeatmapColors.DEFAULT_FROM_COLOR));
+    hotColorColorPicker.setValue(parseColor(HeatmapColors.DEFAULT_TO_COLOR));
+
+    modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
+    modeChoiceBox.setValue(ConsumerConfig.DEFAULT_CONSUMER_MODE);
+  }
+
+  private void initializeWindowSizeSpinner() {
     SpinnerValueFactory<Integer> windowSizeSpinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(
         ConsumerConfig.MIN_WINDOW_SIZE, ConsumerConfig.MAX_WINDOW_SIZE, ConsumerConfig.DEFAULT_WINDOW_SIZE);
-    windowSizeSpinnerValueFactory.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-      // prevent exception for value being null (allow spinner to be empty)
-      if (newValue == null) {
-        // do nothing
+
+    // catch exception when (value is null & (enter/arrow up/arrow down) is pressed)
+    windowSizeSpinnerValueFactory.setConverter(new StringConverter<>() {
+      @Override
+      public String toString(Integer object) {
+        return object.toString() ;
       }
-      // TODO: catch exception when (value is null & enter is pressed) -> display error message
+
+      @Override
+      public Integer fromString(String string) {
+        try {
+          return Integer.parseInt(string);
+        } catch (NumberFormatException e) {
+          return ConsumerConfig.DEFAULT_WINDOW_SIZE;
+        }
+      }
     });
 
     windowSizeSpinner.setValueFactory(windowSizeSpinnerValueFactory);
@@ -90,12 +111,6 @@ public class GeneralConfigController extends ConfigController {
         }
       }
     });
-
-    coldColorColorPicker.setValue(parseColor(HeatmapColors.DEFAULT_FROM_COLOR));
-    hotColorColorPicker.setValue(parseColor(HeatmapColors.DEFAULT_TO_COLOR));
-
-    modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
-    modeChoiceBox.setValue(ConsumerConfig.DEFAULT_CONSUMER_MODE);
   }
 
   @FXML
