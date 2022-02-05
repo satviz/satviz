@@ -31,7 +31,7 @@ typedef struct CHeatUpdate {
   int *heat;
 } CHeatUpdate;
 
-void *satviz_new_graph(unsigned int nodes);
+void *satviz_new_graph(size_t nodes);
 void satviz_release_graph(void *);
 void satviz_submit_weight_update(void *, CWeightUpdate *);
 void satviz_submit_heat_update(void *, CHeatUpdate *);

@@ -9,7 +9,7 @@ extern "C" {
 
 #include <satviz/Bindings.h>
 
-void *satviz_new_graph(unsigned int nodes) {
+void *satviz_new_graph(size_t nodes) {
   return new Graph { nodes };
 }
 
