@@ -98,6 +98,17 @@ public class ConnectionContext {
   }
 
   /**
+   * Registers the socket channel of this context to a selector.
+   *
+   * @param sel the selector
+   * @param ops the operations to listen on
+   * @throws ClosedChannelException if the channel is closed
+   */
+  public void register(Selector sel, int ops) throws ClosedChannelException {
+    chan.register(sel, ops);
+  }
+
+  /**
    * Sets the listener of this connection.
    * Sends the corresponding message if the connection has already failed or terminated.
    *
@@ -157,6 +168,7 @@ public class ConnectionContext {
 
     try {
       chan = SocketChannel.open(); // blocking by default
+      chan.configureBlocking(false); // for non-blocking read calls
     } catch (IOException e) {
       close(true);
       throw e;

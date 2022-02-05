@@ -72,6 +72,7 @@ public abstract class AbstractConnectionManager {
 
   public final void stop() throws InterruptedException {
     synchronized (syncState) {
+      System.out.println("stop: got lock");
       if (state == State.FINISHED || state == State.FAILED) {
         return;
       }
@@ -83,11 +84,13 @@ public abstract class AbstractConnectionManager {
       }
 
       state = State.FINISHING; // let reader thread handle terminating
+      System.out.println("set state to FINISHING");
       while (state != State.FAILED && state != State.FINISHED) {
         // while loop to catch spurious wakeup
         syncState.wait();
       }
     }
+    System.out.println("stop done");
   }
 
   protected boolean doRead(ConnectionContext ctx) {

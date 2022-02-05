@@ -90,10 +90,14 @@ class ConnectionTest {
       } catch (IndexOutOfBoundsException e) {
         fail("no connections received");
       }
+
+      Thread.sleep(4000);
     } finally {
-      System.out.println("cleanup");
+      System.out.println("cleanup client");
       client.stop();
+      System.out.println("cleanup server");
       server.stop();
+      System.out.println("cleanup done");
     }
   }
 

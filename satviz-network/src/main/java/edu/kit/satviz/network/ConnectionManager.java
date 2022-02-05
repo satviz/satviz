@@ -26,6 +26,7 @@ public class ConnectionManager extends AbstractConnectionManager {
 
   @Override
   protected void processTerminateGlobal(boolean abnormal, String reason) {
+    System.out.println("Server: processTerminateGlobal");
     if (serverChan != null) {
       try {
         serverChan.close();
@@ -40,13 +41,16 @@ public class ConnectionManager extends AbstractConnectionManager {
         // not our problem
       }
     }
+    System.out.println("Server: processTerminateGlobal: close contexts");
     for (ConnectionContext ctx : contexts) {
       // TODO assure that no new context is added during this close
       ctx.close(abnormal);
     }
+    System.out.println("Server: processTerminateGlobal: close contexts done");
   }
 
   private void open() {
+    System.out.println("Server: open");
     synchronized (syncState) {
       if (state != State.STARTED) { // someone already terminated
         return;
@@ -63,9 +67,11 @@ public class ConnectionManager extends AbstractConnectionManager {
       }
       state = State.OPEN;
     }
+    System.out.println("Server: open successful");
   }
 
   private boolean acceptNew() {
+    System.out.println("Server: acceptNew");
     synchronized (syncState) {
       if (state != State.OPEN) {
         return true;
@@ -93,23 +99,28 @@ public class ConnectionManager extends AbstractConnectionManager {
       contexts.add(newCtx);
       callConnect(newCtx.getCid());
     }
+    System.out.println("Server: acceptNew successful");
     return true;
   }
 
   private void pollAll() {
+    System.out.println("Server: pollAll");
     synchronized (syncState) {
+      System.out.println("Server: pollAll: got lock");
       if (state != State.OPEN) {
+        System.out.println("Server: pollAll: state not open before selecting");
         return;
       }
 
       try {
-        select.select();
+        select.select(1000);
       } catch (IOException e) {
+        System.out.println("Server: selection error");
         terminateGlobal(true, "error selecting socket events");
         return;
       }
     }
-
+    System.out.println("Server: pollAll: selected");
     Iterator<SelectionKey> iter = select.selectedKeys().iterator();
     while (iter.hasNext()) {
       SelectionKey key = iter.next();
@@ -120,24 +131,29 @@ public class ConnectionManager extends AbstractConnectionManager {
         }
       }
       if (key.isReadable()) {
+        System.out.println("Server: pollAll: read event");
         doRead(getContextFrom((SocketChannel) key.channel()));
       }
       iter.remove();
     }
+    System.out.println("Server: pollAll successful");
   }
 
   @Override
   protected void processStart() {
+    System.out.println("Server: processStart");
     open();
 
     while (state == State.OPEN) {
       pollAll();
     }
+    System.out.println("Server: processStart: done with state == State.OPEN; closing");
 
     terminateGlobal(false, "finished");
     synchronized (syncState) {
       syncState.notifyAll(); // thread is done
     }
+    System.out.println("Server: processStart done");
   }
 
   @Override
