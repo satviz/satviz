@@ -7,6 +7,7 @@ module edu.kit.satviz.consumer {
   requires javafx.base;
   requires javafx.fxml;
   requires javafx.controls;
+  requires jdk.incubator.foreign;
 
   opens edu.kit.satviz.consumer.config to com.google.gson;
 
