@@ -7,23 +7,34 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+/**
+ * This abstract class is used to parse CNF and DRAT files (and maybe other filetypes in the future)
+ * into instances of the <code>ClauseUpdate</code> class by implementing the
+ * <code>Iterator</code> interface.
+ */
 public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
 
   private static final String COMMENT_LINE_TOKEN = "c";
   private static final String CLAUSE_END_TOKEN = "0";
 
   private static final String NO_CLAUSES_LEFT_MESSAGE = "No clause updates left.";
-  private static final String UNEXPECTED_VARIABLE_MESSAGE = "The variable %s is illegal.";
+  private static final String UNEXPECTED_CHAR_MESSAGE = "\"%s\" contains illegal characters.";
+  private static final String UNEXPECTED_VARIABLE_MESSAGE = "The variable \"%s\" is invalid.";
   private static final String UNEXPECTED_CLAUSE_MESSAGE = "There is an unexpected clause.";
   private static final String UNEXPECTED_END_MESSAGE = "Unexpected end of file.";
   private String unexpectedMessage;
 
-  final Scanner scanner;
+  protected final Scanner scanner;
   private ClauseUpdate nextUpdate;
 
   private boolean isDone = false;
   private boolean isInvalidFile = false;
 
+  /**
+   * This constructor creates an instance of the <code>ClauseParsingIterator</code> class.
+   *
+   * @param scanner The scanner, which scans through the file that should be parsed.
+   */
   protected ClauseParsingIterator(Scanner scanner) {
     this.scanner = scanner;
   }
@@ -114,7 +125,7 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
       }
       // in case the next variable is not an integer.
       if (!scanner.hasNextInt()) {
-        throwParsingException(UNEXPECTED_VARIABLE_MESSAGE, scanner.next());
+        throwParsingException(UNEXPECTED_CHAR_MESSAGE, scanner.next());
       }
       variable = scanner.nextInt();
       // in case the next variable is invalid.
@@ -128,17 +139,34 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
     return new Clause(list.stream().mapToInt(i -> i).toArray());
   }
 
+  /**
+   * This method throws a <code>ParsingException</code> with the entered message,
+   * while setting <code>isInvalidFile</code> to <code>true</code>.
+   *
+   * @param message The error message that should be displayed for the
+   *                <code>ParsingException</code>.
+   */
   private void throwParsingException(String message) {
     isInvalidFile = true;
     unexpectedMessage = message;
     throw new ParsingException(message);
   }
 
+  /**
+   * This method throws a <code>ParsingException</code> with the entered message,
+   * while setting <code>isInvalidFile</code> to <code>true</code>.<br>
+   * To make the message dynamic <code>String.format(message, unexpectedToken)</code> is used.
+   *
+   * @param message The error message that should be displayed for the
+   *                <code>ParsingException</code>.
+   */
   private void throwParsingException(String message, String unexpectedToken) {
     isInvalidFile = true;
     unexpectedMessage = String.format(message, unexpectedToken);
     throw new ParsingException(unexpectedMessage);
   }
+
+
 
   /**
    * This method determines the specific type of clause update.<br>
