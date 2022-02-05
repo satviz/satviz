@@ -34,6 +34,8 @@ public abstract class NativeObject implements AutoCloseable {
     return CLinker.getInstance().downcallHandle(address, methodType, descriptor);
   }
 
+  // courtesy of my friend Joshua:
+  // https://github.com/IGJoshua/coffi/blob/master/src/clj/coffi/layout.clj
   public static MemoryLayout withPadding(MemoryLayout... fields) {
     long offset = 0;
     List<MemoryLayout> alignedFields = new ArrayList<>();
