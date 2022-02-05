@@ -19,12 +19,14 @@ typedef struct CEdgeInfo {
 } CEdgeInfo;
 
 typedef struct CWeightUpdate {
+  size_t n;
   int *from;
   int *to;
   float *weight;
 } CWeightUpdate;
 
 typedef struct CHeatUpdate {
+  size_t n;
   int *index;
   int *heat;
 } CHeatUpdate;
