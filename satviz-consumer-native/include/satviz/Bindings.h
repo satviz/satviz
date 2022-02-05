@@ -20,16 +20,25 @@ typedef struct CHeatUpdate {
   int *heat;
 } CHeatUpdate;
 
+// Graph
 void *satviz_new_graph(size_t nodes);
-void satviz_release_graph(void *);
-void satviz_submit_weight_update(void *, CWeightUpdate *);
-void satviz_submit_heat_update(void *, CHeatUpdate *);
-void satviz_recalculate_layout(void *);
-void satviz_adapt_layout(void *);
-char *satviz_serialize(void *);
-void satviz_deserialize(void *, const char *);
-NodeInfo satviz_query_node(void *, int index);
-EdgeInfo satviz_query_edge(void *, int index1, int index2);
+void satviz_release_graph(void *graph);
+void satviz_submit_weight_update(void *graph, CWeightUpdate *);
+void satviz_submit_heat_update(void *graph, CHeatUpdate *);
+void satviz_recalculate_layout(void *graph);
+void satviz_adapt_layout(void *graph);
+char *satviz_serialize(void *graph);
+void satviz_deserialize(void *graph, const char *);
+NodeInfo satviz_query_node(void *graph, int index);
+EdgeInfo satviz_query_edge(void *graph, int index1, int index2);
+
+// VideoController
+void *satviz_new_video_controller(void *graph, void *display);
+void satviz_release_video_controller(void *controller);
+int satviz_start_recording(void *controller, const char *filename, void *encoder);
+void satviz_stop_recording(void *controller);
+void satviz_resume_recording(void *controller);
+void satviz_finish_recording(void *controller);
 
 
 #ifdef __cplusplus
