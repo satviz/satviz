@@ -46,13 +46,25 @@ void satviz_deserialize(void *graph, const char *str) {
 void satviz_submit_weight_update(void *graph, CWeightUpdate *update) {
   std::vector<std::tuple<int, int, float>> values { update->n };
   for (size_t i = 0; i < update->n; i++) {
-    values.push_back(std::tuple<int, int, float> { update->from[i], update->to[i], update->weight[i] });
+    values.push_back(std::make_tuple(update->from[i], update->to[i], update->weight[i]));
   }
   WeightUpdate realUpdate { values };
   // TODO not implemented yet
   (void) graph;
   (void) realUpdate;
   //reinterpret_cast<Graph*>(graph)->submitWeightUpdate(realUpdate);
+}
+
+void satviz_submit_heat_update(void *graph, CHeatUpdate *update) {
+  std::vector<std::tuple<int, int>> values { update->n };
+  for (size_t i = 0; i < update->n; i++) {
+    values.push_back(std::make_tuple(update->index[i], update->heat[i]));
+  }
+  HeatUpdate realUpdate { values };
+  // TODO not implemented yet
+  (void) graph;
+  (void) realUpdate;
+  //reinterpret_cast<Graph*>(graph)->submitHeatUpdate(realUpdate);
 }
 
 }
