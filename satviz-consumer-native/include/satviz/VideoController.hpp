@@ -14,10 +14,21 @@ namespace video {
  */
 class VideoController {
 private:
+  enum RecState {
+    REC_OFF,
+    REC_ON,
+    REC_PAUSED,
+    REC_WINDUP,
+    REC_WINDDOWN,
+  };
+
   graph::Graph &graph;
   Display *display;
   GraphRenderer *renderer;
   Camera camera;
+  enum RecState recording_state;
+
+  void processEvent(sf::Event &event);
 
 public:
   bool wantToClose;
