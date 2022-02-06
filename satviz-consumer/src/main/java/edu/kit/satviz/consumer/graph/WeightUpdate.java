@@ -6,8 +6,16 @@ import java.lang.invoke.MethodType;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.MemoryLayout;
 
 public class WeightUpdate implements GraphUpdate {
+
+  private static final MemoryLayout LAYOUT = NativeObject.paddedStruct(
+      CLinker.C_INT.withName("n"),
+      CLinker.C_POINTER.withName("from"),
+      CLinker.C_POINTER.withName("to"),
+      CLinker.C_POINTER.withName("weight")
+  );
 
   private static final MethodHandle SUBMIT_WEIGHT_UPDATE = NativeObject.lookupFunction(
       "submit_weight_update",
