@@ -147,10 +147,10 @@ public class GeneralConfigController extends ConfigController {
     FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Shared Libraries", "*.so");
     fileChooser.getExtensionFilters().add(filter);
 
-    File satInstanceFile = fileChooser.showOpenDialog(null);
-    if (satInstanceFile != null) {
-      this.satInstanceFile = satInstanceFile;
-      satInstanceFileLabel.setText(satInstanceFile.getName());
+    File file = fileChooser.showOpenDialog(null);
+    if (file != null) {
+      this.satInstanceFile = file;
+      satInstanceFileLabel.setText(file.getName());
     }
   }
 
