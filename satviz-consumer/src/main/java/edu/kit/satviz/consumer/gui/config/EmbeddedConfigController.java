@@ -37,11 +37,6 @@ public class EmbeddedConfigController extends ConfigController {
   }
 
   @FXML
-  private void updateProducerMode() {
-
-  }
-
-  @FXML
   private void selectProducerModeFile() {
 
   }
