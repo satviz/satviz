@@ -72,6 +72,9 @@ public class VideoController extends NativeObject {
       int res = (int) START_RECORDING.invokeExact(getPointer(),
           CLinker.toCString(fileName, local),
           CLinker.toCString(encoder, local));
+      if (res == -1) {
+        throw new IllegalArgumentException("Unsupported encoder " + encoder);
+      }
       return res != 0;
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while starting a recording", e);
