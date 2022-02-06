@@ -64,4 +64,7 @@ public abstract class NativeObject implements AutoCloseable {
   public MemoryAddress getPointer() {
     return pointer;
   }
+
+  @Override
+  public abstract void close();
 }
