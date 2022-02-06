@@ -16,8 +16,10 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
+import java.io.File;
 import java.io.IOException;
 
 public class GeneralConfigController extends ConfigController {
@@ -59,6 +61,7 @@ public class GeneralConfigController extends ConfigController {
   // ATTRIBUTES (OTHER)
 
   private ConfigController modeConfigController;
+  private File satInstanceFile;
 
 
   // METHODS (FXML)
@@ -87,7 +90,7 @@ public class GeneralConfigController extends ConfigController {
     windowSizeSpinnerValueFactory.setConverter(new StringConverter<>() {
       @Override
       public String toString(Integer object) {
-        return object.toString() ;
+        return object.toString();
       }
 
       @Override
@@ -140,7 +143,15 @@ public class GeneralConfigController extends ConfigController {
 
   @FXML
   private void selectSatInstanceFile() {
+    FileChooser fileChooser = new FileChooser();
+    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Shared Libraries", "*.so");
+    fileChooser.getExtensionFilters().add(filter);
 
+    File satInstanceFile = fileChooser.showOpenDialog(null);
+    if (satInstanceFile != null) {
+      this.satInstanceFile = satInstanceFile;
+      satInstanceFileLabel.setText(satInstanceFile.getName());
+    }
   }
 
   @FXML
