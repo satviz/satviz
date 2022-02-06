@@ -2,8 +2,11 @@ package edu.kit.satviz.consumer.graph;
 
 import edu.kit.satviz.consumer.bindings.NativeObject;
 import java.lang.invoke.VarHandle;
-import jdk.incubator.foreign.*;
+import jdk.incubator.foreign.CLinker;
+import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.MemoryLayout;
 import jdk.incubator.foreign.MemoryLayout.PathElement;
+import jdk.incubator.foreign.MemorySegment;
 
 public final class NodeInfo extends NativeObject {
 

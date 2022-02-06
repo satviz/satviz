@@ -2,11 +2,15 @@ package edu.kit.satviz.consumer.graph;
 
 import edu.kit.satviz.consumer.bindings.NativeInvocationException;
 import edu.kit.satviz.consumer.bindings.NativeObject;
-import java.io.*;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.nio.charset.*;
-import jdk.incubator.foreign.*;
+import java.nio.charset.StandardCharsets;
+import jdk.incubator.foreign.CLinker;
+import jdk.incubator.foreign.FunctionDescriptor;
+import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.ResourceScope;
 
 public class Graph extends NativeObject {
 
