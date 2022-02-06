@@ -1,4 +1,7 @@
 #include <vector>
+#include <string>
+#include <memory>
+#include <unordered_map>
 
 #include <satviz/Graph.hpp>
 #include <satviz/Display.hpp>
@@ -9,6 +12,7 @@
 #include <satviz/TheoraEncoder.hpp>
 
 using namespace satviz::graph;
+using namespace satviz::video;
 
 extern "C" {
 
@@ -91,19 +95,46 @@ EdgeInfo satviz_query_edge(void *graph, int index1, int index2) {
 void *satviz_new_video_controller(void *graph, int display_type) {
   static const int width = 800;
   static const int height = 600;
-  satviz::video::Display *display;
+  Display *display;
   switch (display_type) {
     case 0:
-      display = new satviz::video::OffscreenDisplay { width, height };
+      display = new OffscreenDisplay { width, height };
       break;
     case 1:
-      display = new satviz::video::OnscreenDisplay { width, height };
+      display = new OnscreenDisplay { width, height };
       break;
     default:
       return nullptr;
   }
 
-  return new satviz::video::VideoController { *reinterpret_cast<Graph*>(graph), display };
+  return new VideoController { *reinterpret_cast<Graph*>(graph), display };
+}
+
+void satviz_release_video_controller(void *controller) {
+  delete (VideoController*) controller;
+}
+
+int satviz_start_recording(void *controller, const char *filename, const char *encoder_name) {
+  (void) controller;
+  (void) filename;
+  (void) encoder_name;
+  // TODO not implemented yet
+  //static std::unordered_map<std::string, VideoEncoder*> encoders = {{"OGGTheora", new TheoraEncoder}};
+  //auto encoder = encoders[std::string { encoder_name }];
+  //return reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder);
+  return 0;
+}
+
+void satviz_stop_recording(void *controller) {
+  reinterpret_cast<VideoController*>(controller)->stopRecording();
+}
+
+void satviz_resume_recording(void *controller) {
+  reinterpret_cast<VideoController*>(controller)->resumeRecording();
+}
+
+void satviz_finish_recording(void *controller) {
+  reinterpret_cast<VideoController*>(controller)->finishRecording();
 }
 
 }
