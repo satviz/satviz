@@ -23,13 +23,13 @@ public abstract class NativeObject implements AutoCloseable {
     }
   }
 
-  protected final MemoryAddress pointer;
+  private final MemoryAddress pointer;
 
   protected NativeObject(MemoryAddress pointer) {
     this.pointer = pointer;
   }
 
-  protected static MethodHandle lookupFunction(
+  public static MethodHandle lookupFunction(
       String name, MethodType methodType, FunctionDescriptor descriptor
   ) {
     String fullName = PREFIX + name;
@@ -40,7 +40,7 @@ public abstract class NativeObject implements AutoCloseable {
 
   // courtesy of my friend Joshua:
   // https://github.com/IGJoshua/coffi/blob/master/src/clj/coffi/layout.clj
-  public static MemoryLayout withPadding(MemoryLayout... fields) {
+  public static MemoryLayout paddedStruct(MemoryLayout... fields) {
     long offset = 0;
     List<MemoryLayout> alignedFields = new ArrayList<>();
     for (MemoryLayout field : fields) {
@@ -61,5 +61,7 @@ public abstract class NativeObject implements AutoCloseable {
     return MemoryLayout.structLayout(alignedFields.toArray(new MemoryLayout[0]));
   }
 
-
+  public MemoryAddress getPointer() {
+    return pointer;
+  }
 }

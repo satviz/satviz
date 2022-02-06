@@ -1,5 +1,6 @@
-package edu.kit.satviz.consumer.bindings;
+package edu.kit.satviz.consumer.graph;
 
+import edu.kit.satviz.consumer.bindings.NativeObject;
 import java.lang.invoke.VarHandle;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.MemoryLayout;
@@ -8,7 +9,7 @@ import jdk.incubator.foreign.MemorySegment;
 
 public class EdgeInfo extends NativeObject {
 
-  public static final MemoryLayout LAYOUT = withPadding(
+  public static final MemoryLayout LAYOUT = paddedStruct(
       CLinker.C_INT.withName("index1"),
       CLinker.C_INT.withName("index2"),
       CLinker.C_FLOAT.withName("weight")
@@ -46,6 +47,6 @@ public class EdgeInfo extends NativeObject {
 
   @Override
   public void close() {
-    CLinker.freeMemory(pointer);
+    CLinker.freeMemory(getPointer());
   }
 }

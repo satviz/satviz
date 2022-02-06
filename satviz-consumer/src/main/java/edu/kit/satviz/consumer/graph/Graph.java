@@ -1,7 +1,11 @@
-package edu.kit.satviz.consumer.bindings;
+package edu.kit.satviz.consumer.graph;
 
+import edu.kit.satviz.consumer.bindings.NativeInvocationException;
+import edu.kit.satviz.consumer.bindings.NativeObject;
+import java.io.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.nio.charset.*;
 import jdk.incubator.foreign.*;
 
 public class Graph extends NativeObject {
@@ -68,7 +72,7 @@ public class Graph extends NativeObject {
 
   public void recalculateLayout() {
     try {
-      RECALCULATE_LAYOUT.invokeExact(pointer);
+      RECALCULATE_LAYOUT.invokeExact(getPointer());
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while recalculating layout", e);
     }
@@ -76,35 +80,41 @@ public class Graph extends NativeObject {
 
   public void adaptLayout() {
     try {
-      ADAPT_LAYOUT.invokeExact(pointer);
+      ADAPT_LAYOUT.invokeExact(getPointer());
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while adapting layout", e);
     }
   }
 
-  public String serialize() {
+  public void serialize(OutputStream stream) {
     try {
-      return CLinker.toJavaString((MemoryAddress) SERIALIZE.invokeExact(pointer));
+      String s = CLinker.toJavaString((MemoryAddress) SERIALIZE.invokeExact(getPointer()));
+      stream.write(s.getBytes(StandardCharsets.UTF_8));
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while serializing graph", e);
     }
   }
 
-  public void deserialize(String string) {
+  public void deserialize(InputStream stream) {
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
-      DESERIALIZE.invokeExact(pointer, CLinker.toCString(string, local));
+      String string = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+      DESERIALIZE.invokeExact(getPointer(), CLinker.toCString(string, local));
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while deserializing graph representation", e);
     }
 
   }
 
-  @Override
-  public void close() {
+  public void destroy() {
     try {
-      RELEASE_GRAPH.invokeExact(pointer);
+      RELEASE_GRAPH.invokeExact(getPointer());
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while releasing graph", e);
     }
+  }
+
+  @Override
+  public void close() {
+    destroy();
   }
 }
