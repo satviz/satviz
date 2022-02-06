@@ -17,6 +17,38 @@ public class VideoController extends NativeObject {
       FunctionDescriptor.of(CLinker.C_POINTER, CLinker.C_POINTER, CLinker.C_INT)
   );
 
+  private static final MethodHandle RELEASE = lookupFunction(
+      "release_video_controller",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
+  private static final MethodHandle START_RECORDING = lookupFunction(
+      "start_recording",
+      MethodType.methodType(int.class, MemoryAddress.class,
+          MemoryAddress.class, MemoryAddress.class),
+      FunctionDescriptor.of(CLinker.C_INT, CLinker.C_POINTER,
+          CLinker.C_POINTER, CLinker.C_POINTER)
+  );
+
+  private static final MethodHandle STOP_RECORDING = lookupFunction(
+      "stop_recording",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
+  private static final MethodHandle RESUME_RECORDING = lookupFunction(
+      "resume_recording",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
+  private static final MethodHandle FINISH_RECORDING = lookupFunction(
+      "finish_recording",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
   private VideoController(MemoryAddress pointer) {
     super(pointer);
   }
