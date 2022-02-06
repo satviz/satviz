@@ -153,7 +153,7 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void selectSatInstanceFile() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Shared Libraries", "*.so");
+    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("SAT Instance", "*.cnf");
     fileChooser.getExtensionFilters().add(filter);
 
     File file = fileChooser.showOpenDialog(null);
