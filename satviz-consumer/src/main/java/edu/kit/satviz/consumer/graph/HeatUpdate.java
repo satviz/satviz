@@ -6,8 +6,15 @@ import java.lang.invoke.MethodType;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.MemoryLayout;
 
 public class HeatUpdate implements GraphUpdate {
+
+  private static final MemoryLayout LAYOUT = NativeObject.paddedStruct(
+      CLinker.C_INT.withName("n"),
+      CLinker.C_POINTER.withName("index"),
+      CLinker.C_POINTER.withName("heat")
+  );
 
   private static final MethodHandle SUBMIT_HEAT_UPDATE = NativeObject.lookupFunction(
       "submit_heat_update",
