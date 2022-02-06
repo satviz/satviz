@@ -26,6 +26,7 @@ public class Graph extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
 
+  // TODO move these to WeightUpdate/HeatUpdate
   private static final MethodHandle SUBMIT_WEIGHT_UPDATE = lookupFunction(
       "submit_weight_update",
       MethodType.methodType(void.class, MemoryAddress.class, MemoryAddress.class),
@@ -101,6 +102,7 @@ public class Graph extends NativeObject {
 
   public void deserialize(InputStream stream) {
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
+      // TODO make sure we're actually supposed to read the entire stream
       String string = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
       DESERIALIZE.invokeExact(getPointer(), CLinker.toCString(string, local));
     } catch (Throwable e) {
