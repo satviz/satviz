@@ -8,6 +8,7 @@ import java.lang.invoke.MethodType;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.ResourceScope;
 
 public class VideoController extends NativeObject {
 
@@ -63,8 +64,51 @@ public class VideoController extends NativeObject {
     }
   }
 
+  public boolean startRecording(String fileName, String encoder) {
+    try (ResourceScope local = ResourceScope.newConfinedScope()) {
+      int res = (int) START_RECORDING.invokeExact(getPointer(),
+          CLinker.toCString(fileName, local),
+          CLinker.toCString(encoder, local));
+      return res != 0;
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while starting a recording", e);
+    }
+  }
+
+  public void stopRecording() {
+    try {
+      STOP_RECORDING.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while stopping a recording", e);
+    }
+  }
+
+  public void resumeRecording() {
+    try {
+      RESUME_RECORDING.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while resuming a recording", e);
+    }
+  }
+
+  public void finishRecording() {
+    try {
+      FINISH_RECORDING.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while finishing a recording", e);
+    }
+  }
+
+  public void destroy() {
+    try {
+      RELEASE.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while destroying video controller", e);
+    }
+  }
+
   @Override
   public void close() {
-
+    destroy();
   }
 }
