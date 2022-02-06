@@ -120,8 +120,12 @@ int satviz_start_recording(void *controller, const char *filename, const char *e
   (void) encoder_name;
   // TODO not implemented yet
   //static std::unordered_map<std::string, VideoEncoder*> encoders = {{"OGGTheora", new TheoraEncoder}};
-  //auto encoder = encoders[std::string { encoder_name }];
-  //return reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder);
+  //auto encoder = encoders.find(std::string { encoder_name });
+  //if (encoder == encoders.end()) {
+  //  return -1;
+  //} else {
+  //  return reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder->second);
+  //}
   return 0;
 }
 
