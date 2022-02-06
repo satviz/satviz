@@ -61,6 +61,7 @@ public class GeneralConfigController extends ConfigController {
   // ATTRIBUTES (OTHER)
 
   private ConfigController modeConfigController;
+  private String recordingFile;
   private File satInstanceFile;
 
 
@@ -128,7 +129,15 @@ public class GeneralConfigController extends ConfigController {
 
   @FXML
   private void selectRecordingFile() {
+    FileChooser fileChooser = new FileChooser();
+    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Video Files", "*.ogv");
+    fileChooser.getExtensionFilters().add(filter);
 
+    File file = fileChooser.showSaveDialog(null);
+    if (file != null) {
+      recordingFile = file.getAbsolutePath();
+      recordingFileLabel.setText(file.getName());
+    }
   }
 
   @FXML

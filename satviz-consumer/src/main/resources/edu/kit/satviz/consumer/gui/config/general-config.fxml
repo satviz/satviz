@@ -60,7 +60,7 @@
                                           <Insets right="10.0" />
                                        </padding>
                                     </Label>
-                                    <Button mnemonicParsing="false" prefHeight="21.0" prefWidth="61.0" text="Select File" fx:id="recordingFileButton">
+                                    <Button mnemonicParsing="false" prefHeight="21.0" prefWidth="61.0" text="Select File" fx:id="recordingFileButton" onAction="#selectRecordingFile">
                                        <font>
                                           <Font size="10.0" />
                                        </font>
