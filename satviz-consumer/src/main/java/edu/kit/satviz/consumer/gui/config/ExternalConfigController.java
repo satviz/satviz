@@ -47,7 +47,7 @@ public class ExternalConfigController extends ConfigController {
   }
 
   @Override
-  protected void run() {
+  protected void run() throws ConfigArgumentException {
 
   }
 

@@ -6,7 +6,7 @@ public abstract class ConfigController {
 
   private ConsumerConfig config;
 
-  protected abstract void run();
+  protected abstract void run() throws ConfigArgumentException;
 
   protected void setConsumerConfig(ConsumerConfig config) {
     this.config = config;

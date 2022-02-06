@@ -158,7 +158,7 @@ public class GeneralConfigController extends ConfigController {
 
     File file = fileChooser.showOpenDialog(null);
     if (file != null) {
-      this.satInstanceFile = file;
+      satInstanceFile = file;
       satInstanceFileLabel.setText(file.getName());
     }
   }
@@ -179,13 +179,17 @@ public class GeneralConfigController extends ConfigController {
     modeConfigController = loader.getController();
   }
 
-  @Override
   @FXML
-  protected void run() {
+  private void createConsumerConfig() {
 
   }
 
   // METHODS (OTHER)
+
+  @Override
+  protected void run() throws ConfigArgumentException {
+
+  }
 
   private Color parseColor(int color) {
     int red = color >>> (4 * 4);
