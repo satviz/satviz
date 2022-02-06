@@ -4,6 +4,7 @@ import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.util.StringConverter;
 
 public class ExternalConfigController extends ConfigController {
 
@@ -12,15 +13,24 @@ public class ExternalConfigController extends ConfigController {
 
   @FXML
   private void initialize() {
-    // TODO: add constants in ExternalModeConfig
     SpinnerValueFactory<Integer> portSpinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(
         ExternalModeConfig.MIN_PORT_NUMBER, ExternalModeConfig.MAX_PORT_NUMBER, ExternalModeConfig.DEFAULT_PORT_NUMBER);
-    portSpinnerValueFactory.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-      // prevent exception for value being null (allow spinner to be empty)
-      if (newValue == null) {
-        // do nothing
+
+    // catch exception when (value is null & (enter/arrow up/arrow down) is pressed)
+    portSpinnerValueFactory.setConverter(new StringConverter<>() {
+      @Override
+      public String toString(Integer object) {
+        return object.toString();
       }
-      // TODO: catch exception when (value is null & enter is pressed) -> display error message ?
+
+      @Override
+      public Integer fromString(String string) {
+        try {
+          return Integer.parseInt(string);
+        } catch (NumberFormatException e) {
+          return ExternalModeConfig.DEFAULT_PORT_NUMBER;
+        }
+      }
     });
 
     portSpinner.setValueFactory(portSpinnerValueFactory);
