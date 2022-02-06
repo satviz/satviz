@@ -17,6 +17,7 @@ public class DimacsFile extends ClauseFile {
 
   private int variableAmount;
   private int clauseAmount;
+  private final DimacsParsingIterator dimacsParsingIterator;
 
   /**
    * This constructor creates an instance of the <code>DimacsFile</code> class,
@@ -27,6 +28,7 @@ public class DimacsFile extends ClauseFile {
    */
   public DimacsFile(InputStream in) {
     super(in);
+    dimacsParsingIterator = new DimacsParsingIterator(scanner, variableAmount, clauseAmount);
   }
 
   @Override
@@ -75,7 +77,7 @@ public class DimacsFile extends ClauseFile {
 
   @Override
   public Iterator<ClauseUpdate> iterator() {
-    return new DimacsParsingIterator(scanner, variableAmount, clauseAmount);
+    return dimacsParsingIterator;
   }
 
   /**

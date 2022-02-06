@@ -9,6 +9,8 @@ import java.util.Iterator;
  */
 public class DratFile extends ClauseFile {
 
+  private final DratParsingIterator dratParsingIterator;
+
   /**
    * This constructor creates an instance of the <code>DratFile</code> class.
    *
@@ -16,6 +18,7 @@ public class DratFile extends ClauseFile {
    */
   public DratFile(InputStream in) {
     super(in);
+    dratParsingIterator = new DratParsingIterator(scanner);
   }
 
   @Override
@@ -25,7 +28,7 @@ public class DratFile extends ClauseFile {
 
   @Override
   public Iterator<ClauseUpdate> iterator() {
-    return new DratParsingIterator(scanner);
+    return dratParsingIterator;
   }
 
 }
