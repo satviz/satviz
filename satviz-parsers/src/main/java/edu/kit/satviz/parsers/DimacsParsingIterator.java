@@ -3,6 +3,9 @@ package edu.kit.satviz.parsers;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.util.Scanner;
 
+/**
+ * This class is used to validate a file in the CNF format.
+ */
 public class DimacsParsingIterator extends ClauseParsingIterator {
 
   private final int variableAmount;
@@ -10,6 +13,13 @@ public class DimacsParsingIterator extends ClauseParsingIterator {
 
   private int counter = 0;
 
+  /**
+   * This constructor creates an instance of the <code>DimacsParsingIterator</code> class.
+   *
+   * @param scanner The scanner, that scans the CNF file.
+   * @param variableAmount The variable amount, that is read in the header of the file.
+   * @param clauseAmount The clause amount, that is read in the header of the file.
+   */
   protected DimacsParsingIterator(Scanner scanner, int variableAmount, int clauseAmount) {
     super(scanner);
     this.variableAmount = variableAmount;
@@ -27,7 +37,7 @@ public class DimacsParsingIterator extends ClauseParsingIterator {
   }
 
   @Override
-  protected boolean isValidClauseUpdate(ClauseUpdate clause) {
+  protected boolean isValidClauseUpdate(ClauseUpdate clauseUpdate) {
     return ++counter <= clauseAmount;
   }
 
@@ -38,7 +48,7 @@ public class DimacsParsingIterator extends ClauseParsingIterator {
 
   @Override
   protected boolean isPrematureEndOfFile() {
-    return false;
+    return counter < clauseAmount;
   }
 
 }
