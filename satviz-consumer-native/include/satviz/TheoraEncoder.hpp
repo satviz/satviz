@@ -11,9 +11,9 @@ struct TheoraStream;
 /**
  *
  */
-class TheoraEncoder : VideoEncoder {
+class TheoraEncoder : public VideoEncoder {
 private:
-  TheoraStream *stream;
+  TheoraStream *stream = nullptr;
 
 public:
   TheoraEncoder();

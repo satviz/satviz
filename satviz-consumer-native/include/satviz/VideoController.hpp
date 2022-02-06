@@ -26,12 +26,13 @@ private:
   Display *display;
   GraphRenderer *renderer;
   Camera camera;
-  enum RecState recording_state;
+  enum RecState recording_state = REC_OFF;
+  VideoEncoder *video_encoder = nullptr;
 
   void processEvent(sf::Event &event);
 
 public:
-  bool wantToClose;
+  bool wantToClose = false;
 
   VideoController(graph::Graph &gr, Display *dpy);
   ~VideoController();

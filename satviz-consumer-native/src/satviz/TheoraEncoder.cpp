@@ -3,6 +3,8 @@
 #include <fstream>
 #include <theora/theoraenc.h>
 
+#include <iostream>
+
 namespace satviz {
 namespace video {
 
@@ -43,6 +45,8 @@ bool TheoraEncoder::startRecording(const char *filename, int w, int h) {
 
   stream->file = std::ofstream(filename, std::ofstream::binary);
   if (!stream->file.is_open()) {
+    delete stream;
+    stream = nullptr;
     return false;
   }
 
@@ -66,7 +70,7 @@ bool TheoraEncoder::startRecording(const char *filename, int w, int h) {
   info.colorspace         = TH_CS_UNSPECIFIED;
   info.pixel_fmt          = TH_PF_444;
   info.target_bitrate     = 0;
-  info.quality            = 31; /* Between 0 and 63 inclusive */
+  info.quality            = 63; /* Between 0 and 63 inclusive */
   info.fps_numerator      = 30;
   info.fps_denominator    = 1;
   info.aspect_numerator   = 1;
@@ -118,8 +122,10 @@ void TheoraEncoder::submitFrame(VideoFrame &frame, bool last) {
   }
 
   if (last) {
+    std::cout << "<encoding last frame>" << std::endl;
     stream->flushPage();
     delete stream;
+    stream = nullptr;
   }
 }
 

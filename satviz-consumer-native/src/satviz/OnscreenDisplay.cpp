@@ -6,7 +6,7 @@ namespace video {
 OnscreenDisplay::OnscreenDisplay(int w, int h)
   : Display(w, h) {
   sf::ContextSettings settings = makeContextSettings();
-  window.create(sf::VideoMode(w, h), "satviz", sf::Style::Default, settings);
+  window.create(sf::VideoMode(w, h), "satviz", sf::Style::Close | sf::Style::Titlebar, settings);
   initializeGl();
 }
 
