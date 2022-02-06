@@ -8,14 +8,14 @@ extern "C" {
 #include <satviz/info.h>
 
 typedef struct CWeightUpdate {
-  size_t n;
+  unsigned int n;
   int *from;
   int *to;
   float *weight;
 } CWeightUpdate;
 
 typedef struct CHeatUpdate {
-  size_t n;
+  unsigned int n;
   int *index;
   int *heat;
 } CHeatUpdate;
