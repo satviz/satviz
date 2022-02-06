@@ -24,27 +24,29 @@ VideoFrame::~VideoFrame() {
 VideoFrame VideoFrame::fromBgraImage(const VideoGeometry &geom, const void *data) {
   VideoFrame frame(geom);
   const uint32_t *pixels = (const uint32_t *) data;
-  size_t row_start = geom.view_offset_x + geom.view_offset_y * geom.padded_width;
-  unsigned prev = ~pixels[0];
+  unsigned prev_pixel   = ~pixels[0];
+  size_t   prev_out_idx = -1;
   for (unsigned r = 0; r < geom.view_height; r++) {
     for (unsigned c = 0; c < geom.view_width; c++) {
-      size_t i = row_start + c;
-      unsigned pixel = pixels[i];
-      if (pixel == prev) {
+      size_t in_idx  = r * geom.view_width + c;
+      size_t out_idx = (r + geom.view_offset_y) * geom.padded_width + (c + geom.view_offset_x);
+      unsigned pixel = pixels[in_idx];
+      if (pixel == prev_pixel) {
         // Optimization: encoding runs of the same color without having to constantly re-convert
-        frame.Y [i] = frame.Y [i - 1];
-        frame.Cb[i] = frame.Cb[i - 1];
-        frame.Cr[i] = frame.Cr[i - 1];
+        frame.Y [out_idx] = frame.Y [prev_out_idx];
+        frame.Cb[out_idx] = frame.Cb[prev_out_idx];
+        frame.Cr[out_idx] = frame.Cr[prev_out_idx];
       } else {
         unsigned B = (pixel >>  0) & 0xFF;
         unsigned G = (pixel >>  8) & 0xFF;
         unsigned R = (pixel >> 16) & 0xFF;
-        frame.Y [i] = (unsigned char) rgbToY (R, G, B);
-        frame.Cb[i] = (unsigned char) rgbToCb(R, G, B);
-        frame.Cr[i] = (unsigned char) rgbToCr(R, G, B);
+        frame.Y [out_idx] = (unsigned char) rgbToY (R, G, B);
+        frame.Cb[out_idx] = (unsigned char) rgbToCb(R, G, B);
+        frame.Cr[out_idx] = (unsigned char) rgbToCr(R, G, B);
       }
+      prev_pixel   = pixel;
+      prev_out_idx = out_idx;
     }
-    row_start += geom.padded_width;
   }
   return frame;
 }
