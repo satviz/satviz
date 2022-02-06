@@ -26,19 +26,6 @@ public class Graph extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
 
-  // TODO move these to WeightUpdate/HeatUpdate
-  private static final MethodHandle SUBMIT_WEIGHT_UPDATE = lookupFunction(
-      "submit_weight_update",
-      MethodType.methodType(void.class, MemoryAddress.class, MemoryAddress.class),
-      FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER)
-  );
-
-  private static final MethodHandle SUBMIT_HEAT_UPDATE = lookupFunction(
-      "submit_heat_update",
-      MethodType.methodType(void.class, MemoryAddress.class, MemoryAddress.class),
-      FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER)
-  );
-
   private static final MethodHandle RECALCULATE_LAYOUT = lookupFunction(
       "recalculate_layout",
       MethodType.methodType(void.class, MemoryAddress.class),
