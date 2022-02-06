@@ -58,6 +58,9 @@ public class VideoController extends NativeObject {
     try {
       MemoryAddress controllerAddr = (MemoryAddress) NEW_CONTROLLER
           .invokeExact(graph.getPointer(), displayType.ordinal());
+      if (MemoryAddress.NULL.equals(controllerAddr)) {
+        throw new AssertionError("invalid display type provided");
+      }
       return new VideoController(controllerAddr);
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while creating video controller", e);
