@@ -2,10 +2,8 @@ package edu.kit.satviz.consumer.graph;
 
 import edu.kit.satviz.consumer.bindings.NativeObject;
 import java.lang.invoke.VarHandle;
-import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.MemoryLayout;
+import jdk.incubator.foreign.*;
 import jdk.incubator.foreign.MemoryLayout.PathElement;
-import jdk.incubator.foreign.MemorySegment;
 
 public final class NodeInfo extends NativeObject {
 
@@ -36,6 +34,14 @@ public final class NodeInfo extends NativeObject {
     this.heat = (int) HEAT_HANDLE.get(segment);
     this.x = (float) X_HANDLE.get(segment);
     this.y = (float) Y_HANDLE.get(segment);
+  }
+
+  public NodeInfo(int index, int heat, float x, float y) {
+    super(MemoryAddress.NULL);
+    this.index = index;
+    this.heat = heat;
+    this.x = x;
+    this.y = y;
   }
 
   public int getIndex() {
