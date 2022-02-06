@@ -56,6 +56,14 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
     return true;
   }
 
+  /**
+   * This method parses the next clause update.
+   *
+   * @return An instance of the <code>ClauseUpdate</code> class.
+   * @throws ParsingException In case the given file is invalid.
+   *         <i>Validation is partly implemented in the subclasses.</i>
+   * @throws NoSuchElementException In case there are no clause updates left to read in the file.
+   */
   @Override
   public ClauseUpdate next() {
     if (nextUpdate != null) {
@@ -71,14 +79,6 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
     return getNextUpdate();
   }
 
-  /**
-   * This method parses the next clause update.
-   *
-   * @return An instance of the <code>ClauseUpdate</code> class.
-   * @throws ParsingException In case the given file is invalid.
-   *         <i>Validation is partly implemented in the subclasses.</i>
-   * @throws NoSuchElementException In case there are no clause updates left to read in the file.
-   */
   private ClauseUpdate getNextUpdate() {
     skipCommentLines();
     final ClauseUpdate.Type type = readType();
