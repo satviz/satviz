@@ -2,10 +2,8 @@ package edu.kit.satviz.consumer.graph;
 
 import edu.kit.satviz.consumer.bindings.NativeObject;
 import java.lang.invoke.VarHandle;
-import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.MemoryLayout;
+import jdk.incubator.foreign.*;
 import jdk.incubator.foreign.MemoryLayout.PathElement;
-import jdk.incubator.foreign.MemorySegment;
 
 public class EdgeInfo extends NativeObject {
 
@@ -31,6 +29,13 @@ public class EdgeInfo extends NativeObject {
     this.index1 = (int) INDEX1_HANDLE.get(segment);
     this.index2 = (int) INDEX2_HANDLE.get(segment);
     this.weight = (float) WEIGHT_HANDLE.get(segment);
+  }
+
+  public EdgeInfo(int index1, int index2, float weight) {
+    super(MemoryAddress.NULL);
+    this.index1 = index1;
+    this.index2 = index2;
+    this.weight = weight;
   }
 
   public int getIndex1() {
