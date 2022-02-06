@@ -54,10 +54,10 @@ void Display::transferCurrentFrame() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
-VideoFrame Display::grabPreviousFrame() {
+VideoFrame Display::grabPreviousFrame(const VideoGeometry &geom) {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_READY]);
   void *pixels = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-  VideoFrame frame = VideoFrame::fromBgraImage(width, height, pixels);
+  VideoFrame frame = VideoFrame::fromBgraImage(geom, pixels);
   glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
   return frame;

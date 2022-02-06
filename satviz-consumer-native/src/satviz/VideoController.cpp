@@ -88,7 +88,7 @@ void VideoController::nextFrame() {
     display->transferCurrentFrame();
   }
   if (recording_state == REC_ON || recording_state == REC_WINDDOWN) {
-    VideoFrame frame = display->grabPreviousFrame();
+    VideoFrame frame = display->grabPreviousFrame(video_encoder->getGeometry());
     video_encoder->submitFrame(frame, recording_state == REC_WINDDOWN);
   }
   if (recording_state == REC_WINDUP) {

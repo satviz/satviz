@@ -38,9 +38,7 @@ TheoraEncoder::~TheoraEncoder() {
   delete stream;
 }
 
-bool TheoraEncoder::startRecording(const char *filename, int w, int h) {
-  width  = w;
-  height = h;
+bool TheoraEncoder::startRecording(const char *filename, int width, int height) {
   stream = new TheoraStream;
 
   stream->file = std::ofstream(filename, std::ofstream::binary);
@@ -50,23 +48,24 @@ bool TheoraEncoder::startRecording(const char *filename, int w, int h) {
     return false;
   }
 
-  int frame_w, frame_h, pic_x, pic_y;
+  geom.view_width  = width;
+  geom.view_height = height;
   /* Theora has a divisible-by-sixteen restriction for the encoded frame size */
   /* scale the picture size up to the nearest /16 and calculate offsets */
-  frame_w = (width  + 15) & ~0xF;
-  frame_h = (height + 15) & ~0xF;
+  geom.padded_width  = (width  + 15) & ~0xF;
+  geom.padded_height = (height + 15) & ~0xF;
   /*Force the offsets to be even so that chroma samples line up like we expect.*/
-  pic_x = ((frame_w - width)  >> 1) & ~1;
-  pic_y = ((frame_h - height) >> 1) & ~1;
+  geom.view_offset_x = ((geom.padded_width  - width)  >> 1) & ~1;
+  geom.view_offset_y = ((geom.padded_height - height) >> 1) & ~1;
 
   th_info info;
   th_info_init(&info);
-  info.frame_width        = frame_w;
-  info.frame_height       = frame_h;
-  info.pic_width          = width;
-  info.pic_height         = height;
-  info.pic_x              = pic_x;
-  info.pic_y              = pic_y;
+  info.frame_width        = geom.padded_width;
+  info.frame_height       = geom.padded_height;
+  info.pic_width          = geom.view_width;
+  info.pic_height         = geom.view_height;
+  info.pic_x              = geom.view_offset_x;
+  info.pic_y              = geom.view_offset_y;
   info.colorspace         = TH_CS_UNSPECIFIED;
   info.pixel_fmt          = TH_PF_444;
   info.target_bitrate     = 0;
@@ -96,19 +95,19 @@ bool TheoraEncoder::startRecording(const char *filename, int w, int h) {
 void TheoraEncoder::submitFrame(VideoFrame &frame, bool last) {
   th_ycbcr_buffer buf;
 
-  buf[0].width  = frame.width;
-  buf[0].height = frame.height;
-  buf[0].stride = frame.stride;
+  buf[0].width  = geom.padded_width;
+  buf[0].height = geom.padded_height;
+  buf[0].stride = frame.getStride();
   buf[0].data   = frame.Y;
 
-  buf[1].width  = frame.width;
-  buf[1].height = frame.height;
-  buf[1].stride = frame.stride;
+  buf[1].width  = geom.padded_width;
+  buf[1].height = geom.padded_height;
+  buf[1].stride = frame.getStride();
   buf[1].data   = frame.Cb;
 
-  buf[2].width  = frame.width;
-  buf[2].height = frame.height;
-  buf[2].stride = frame.stride;
+  buf[2].width  = geom.padded_width;
+  buf[2].height = geom.padded_height;
+  buf[2].stride = frame.getStride();
   buf[2].data   = frame.Cr;
 
   th_encode_ycbcr_in(stream->enc, buf);

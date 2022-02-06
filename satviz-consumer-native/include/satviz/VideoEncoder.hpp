@@ -14,13 +14,13 @@ namespace video {
 class VideoEncoder {
 protected:
   std::ofstream file;
-  int width;
-  int height;
+  VideoGeometry geom;
 
 public:
   virtual ~VideoEncoder() {}
   virtual bool startRecording(const char *filename, int width, int height) = 0;
   virtual void submitFrame(VideoFrame &frame, bool last) = 0;
+  const VideoGeometry &getGeometry() { return geom; }
 };
 
 } // namespace video

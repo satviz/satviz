@@ -69,9 +69,10 @@ public:
    * Convert the previously transferred frame to a VideoFrame.
    *
    * (This data is from *two* invocations of transferCurrentFrame() ago!)
+   * @param geom TODO
    * @return the VideoFrame
    */
-  VideoFrame grabPreviousFrame();
+  VideoFrame grabPreviousFrame(const VideoGeometry &geom);
 
   /**
    * Poll for user input events.
