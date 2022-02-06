@@ -1,6 +1,12 @@
 #include <vector>
 
 #include <satviz/Graph.hpp>
+#include <satviz/Display.hpp>
+#include <satviz/OnscreenDisplay.hpp>
+#include <satviz/OffscreenDisplay.hpp>
+#include <satviz/VideoController.hpp>
+#include <satviz/VideoEncoder.hpp>
+#include <satviz/TheoraEncoder.hpp>
 
 using namespace satviz::graph;
 
@@ -80,6 +86,24 @@ EdgeInfo satviz_query_edge(void *graph, int index1, int index2) {
   // TODO not implemented yet
   //return reinterpret_cast<Graph*>(graph)->queryEdge(index1, index2);
   return EdgeInfo {};
+}
+
+void *satviz_new_video_controller(void *graph, int display_type) {
+  static const int width = 800;
+  static const int height = 600;
+  satviz::video::Display *display;
+  switch (display_type) {
+    case 0:
+      display = new satviz::video::OffscreenDisplay { width, height };
+      break;
+    case 1:
+      display = new satviz::video::OnscreenDisplay { width, height };
+      break;
+    default:
+      return nullptr;
+  }
+
+  return new satviz::video::VideoController { *reinterpret_cast<Graph*>(graph), display };
 }
 
 }
