@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,7 @@ public class ClauseCoordinator implements AutoCloseable {
 
   public ClauseCoordinator(Graph graph, Path tempDir) throws IOException {
     this.tempDir = tempDir;
+
     this.snapshots = new TreeMap<>();
     this.processors = new ArrayList<>();
     this.changeListener = () -> {
@@ -69,8 +71,8 @@ public class ClauseCoordinator implements AutoCloseable {
   }
 
   public void takeSnapshot() throws IOException {
-    long current = currentUpdate();
     synchronized (snapshots) {
+      long current = currentUpdate();
       Path snapshotFile = Files.createTempFile(tempDir, "satviz-snapshot", null);
       try (var stream = new BufferedOutputStream(Files.newOutputStream(snapshotFile))) {
         for (ClauseUpdateProcessor processor : processors) {
