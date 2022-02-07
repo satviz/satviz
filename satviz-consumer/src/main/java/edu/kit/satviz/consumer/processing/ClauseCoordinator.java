@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ClauseCoordinator implements AutoCloseable {
 
@@ -29,7 +30,7 @@ public class ClauseCoordinator implements AutoCloseable {
     this.tempDir = tempDir;
 
     this.snapshots = new TreeMap<>();
-    this.processors = new ArrayList<>();
+    this.processors = new CopyOnWriteArrayList<>();
     this.changeListener = () -> {
     };
     this.currentUpdate = 0;
