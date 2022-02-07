@@ -63,7 +63,7 @@ public class EmbeddedConfigController extends ConfigController {
     modeConfig.setSource(producerModeChoiceBox.getValue());
     if (producerModeFile == null) {
       throw new ConfigArgumentException("Please select a valid "
-          + producerModeChoiceBox.getValue().name() + " file");
+          + producerModeChoiceBox.getValue().name() + " file.");
     }
     modeConfig.setSourcePath(producerModeFile.toPath());
 

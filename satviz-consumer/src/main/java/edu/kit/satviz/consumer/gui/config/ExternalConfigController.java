@@ -28,6 +28,7 @@ public class ExternalConfigController extends ConfigController {
         try {
           return Integer.parseInt(string);
         } catch (NumberFormatException e) {
+          portSpinner.getEditor().setText("" + ExternalModeConfig.DEFAULT_PORT_NUMBER);
           return ExternalModeConfig.DEFAULT_PORT_NUMBER;
         }
       }

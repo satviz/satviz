@@ -99,6 +99,7 @@ public class GeneralConfigController extends ConfigController {
         try {
           return Integer.parseInt(string);
         } catch (NumberFormatException e) {
+          windowSizeSpinner.getEditor().setText("" + ConsumerConfig.DEFAULT_WINDOW_SIZE);
           return ConsumerConfig.DEFAULT_WINDOW_SIZE;
         }
       }
