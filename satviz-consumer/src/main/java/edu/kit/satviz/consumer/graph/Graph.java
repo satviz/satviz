@@ -68,6 +68,9 @@ public class Graph extends NativeObject {
   }
 
   public static Graph create(long nodes) {
+    if (nodes < 0) {
+      throw new IllegalArgumentException("Graph must have a non-negative amount of nodes");
+    }
     try {
       return new Graph((MemoryAddress) NEW_GRAPH.invokeExact(nodes));
     } catch (Throwable e) {
