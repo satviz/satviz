@@ -13,6 +13,8 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class stores ClauseUpdates in a temporary file. It allows random access
@@ -23,8 +25,8 @@ public class ExternalClauseBuffer implements AutoCloseable {
 
   private static final ClauseUpdateSerializer updateSerializer = new ClauseUpdateSerializer();
 
-  private final Object outputLock;
-  private final Object readLock;
+  private final Lock outputLock;
+  private final Lock readLock;
   private final RandomAccessFile clauseLookupReadFile;
   private final OutputStream clauseLookupOutStream;
   private final RandomAccessFile clauseReadFile;
@@ -34,8 +36,8 @@ public class ExternalClauseBuffer implements AutoCloseable {
   private long nextClauseBegin;
 
   public ExternalClauseBuffer(Path dir) throws IOException {
-    this.outputLock = new Object();
-    this.readLock = new Object();
+    this.outputLock = new ReentrantLock();
+    this.readLock = new ReentrantLock();
     Path lookupFile = Files.createTempFile(dir, "satviz-clause-lookup", null);
     Path clauseFile = Files.createTempFile(dir, "satviz-clauses", null);
 
@@ -57,29 +59,37 @@ public class ExternalClauseBuffer implements AutoCloseable {
     }
 
     byte[] bytes = byteArrayStream.toByteArray();
-    synchronized (outputLock) {
+    ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
+    outputLock.lock();
+    try {
       long clauseBegin = nextClauseBegin;
+      buf.putLong(clauseBegin);
       nextClauseBegin += bytes.length;
       clauseOutStream.write(bytes);
-      ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
-      buf.putLong(clauseBegin);
       clauseLookupOutStream.write(buf.array());
       size++;
+    } finally {
+      outputLock.unlock();
     }
   }
 
   public ClauseUpdate[] getClauseUpdates(long index, int numUpdates)
       throws IOException, SerializationException {
-    synchronized (outputLock) {
+    outputLock.lock();
+    try {
       flush();
+    } finally {
+      outputLock.unlock();
     }
-    synchronized (readLock) {
-      int actualUpdates = (int) Math.min(numUpdates, size - index);
+
+    readLock.lock();
+    try {
+      int actualNumUpdates = (int) Math.min(numUpdates, size - index);
       long beginningByte = getBeginningByte(index);
       clauseReadFile.seek(beginningByte);
-      ClauseUpdate[] updates = new ClauseUpdate[actualUpdates];
+      ClauseUpdate[] updates = new ClauseUpdate[actualNumUpdates];
       SerialBuilder<ClauseUpdate> builder = updateSerializer.getBuilder();
-      for (int i = 0; i < actualUpdates; i++) {
+      for (int i = 0; i < actualNumUpdates; i++) {
         while (!builder.finished()) {
           builder.addByte(clauseReadFile.readByte());
         }
@@ -87,6 +97,8 @@ public class ExternalClauseBuffer implements AutoCloseable {
         builder.reset();
       }
       return updates;
+    } finally {
+      readLock.unlock();
     }
   }
 
@@ -108,14 +120,16 @@ public class ExternalClauseBuffer implements AutoCloseable {
 
   @Override
   public void close() throws IOException {
-    synchronized (outputLock) {
+    outputLock.lock();
+    readLock.lock();
+    try {
       clauseLookupOutStream.close();
       clauseOutStream.close();
-    }
-
-    synchronized (readLock) {
       clauseLookupReadFile.close();
       clauseReadFile.close();
+    } finally {
+      readLock.unlock();
+      outputLock.unlock();
     }
   }
 
