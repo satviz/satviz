@@ -16,8 +16,9 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * This class stores ClauseUpdates in a temporary file. It allows random access of clause updates at
- * specific indexes with the method <code>getClauseUpdate()</code> and adding updates to the end of the file by
+ * This class stores ClauseUpdates in a temporary file. It allows random access
+ * of clause updates at specific indices with the method <code>getClauseUpdate()</code> and adding
+ * updates to the end of the file with the method <code>addClauseUpdate()</code>.
  */
 public class ExternalClauseBuffer implements AutoCloseable {
 
