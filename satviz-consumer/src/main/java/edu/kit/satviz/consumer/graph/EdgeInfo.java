@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.graph;
 
 import edu.kit.satviz.consumer.bindings.NativeObject;
 import java.lang.invoke.VarHandle;
+import java.util.Objects;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemoryLayout;
@@ -51,6 +52,25 @@ public class EdgeInfo extends NativeObject {
 
   public float getWeight() {
     return weight;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    EdgeInfo edgeInfo = (EdgeInfo) o;
+    return index1 == edgeInfo.index1
+        && index2 == edgeInfo.index2
+        && Float.compare(edgeInfo.weight, weight) == 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(index1, index2, weight);
   }
 
   @Override

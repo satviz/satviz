@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.graph;
 
 import edu.kit.satviz.consumer.bindings.NativeObject;
 import java.lang.invoke.VarHandle;
+import java.util.Objects;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemoryLayout;
@@ -61,6 +62,26 @@ public final class NodeInfo extends NativeObject {
 
   public float getY() {
     return y;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    NodeInfo nodeInfo = (NodeInfo) o;
+    return index == nodeInfo.index
+        && heat == nodeInfo.heat
+        && Float.compare(nodeInfo.x, x) == 0
+        && Float.compare(nodeInfo.y, y) == 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(index, heat, x, y);
   }
 
   @Override
