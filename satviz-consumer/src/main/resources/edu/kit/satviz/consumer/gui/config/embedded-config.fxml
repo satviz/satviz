@@ -17,14 +17,14 @@
         </Label>
       <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
          <children>
-            <HBox alignment="CENTER" prefHeight="0.0" prefWidth="367.0" spacing="5.0">
+            <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="367.0" spacing="5.0">
                <children>
                   <ChoiceBox prefHeight="25.0" prefWidth="80.0" fx:id="producerModeChoiceBox">
                      <HBox.margin>
                         <Insets left="5.0" />
                      </HBox.margin>
                   </ChoiceBox>
-                  <Button mnemonicParsing="false" text="Select File" fx:id="producerModeFileButton"/>
+                  <Button mnemonicParsing="false" text="Select File" fx:id="producerModeFileButton" onAction="#selectProducerModeFile"/>
                   <Label fx:id="producerModeFileLabel"/>
                </children>
                <VBox.margin>

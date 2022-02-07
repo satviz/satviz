@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.util.List;
 
 public class EmbeddedConfigController extends ConfigController {
 
@@ -38,7 +39,20 @@ public class EmbeddedConfigController extends ConfigController {
 
   @FXML
   private void selectProducerModeFile() {
+    FileChooser fileChooser = new FileChooser();
 
+    List<String> fileExtensions = producerModeChoiceBox.getValue().getFileExtensions()
+        .stream().map(s -> "*" + s).toList();
+    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(
+        producerModeChoiceBox.getValue().name(), fileExtensions);
+
+    fileChooser.getExtensionFilters().add(filter);
+
+    File file = fileChooser.showOpenDialog(null);
+    if (file != null) {
+      producerModeFile = file;
+      producerModeFileLabel.setText(file.getName());
+    }
   }
 
   // METHODS (OTHER)
