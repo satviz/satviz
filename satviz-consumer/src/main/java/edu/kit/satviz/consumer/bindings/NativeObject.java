@@ -23,7 +23,7 @@ public abstract class NativeObject implements AutoCloseable {
       // to add windows support, select the correct shared library here
       NativeLibraryLoader.loadLibrary("/libsatviz-consumer-native.so");
     } catch (IOException e) {
-      throw new InitializationError("Could not load required native library", e);
+      throw new NativeInitializationError("Could not load required native library", e);
     }
   }
 
