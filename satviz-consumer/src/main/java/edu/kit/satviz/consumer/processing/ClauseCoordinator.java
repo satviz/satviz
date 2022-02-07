@@ -9,12 +9,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class ClauseCoordinator implements AutoCloseable {
 
@@ -22,9 +20,9 @@ public class ClauseCoordinator implements AutoCloseable {
   private final TreeMap<Long, Path> snapshots;
   private final List<ClauseUpdateProcessor> processors;
   private final Graph graph;
-  private final AtomicLong currentUpdate;
   private final ExternalClauseBuffer buffer;
 
+  private volatile long currentUpdate;
   private Runnable changeListener;
 
   public ClauseCoordinator(Graph graph, Path tempDir) throws IOException {
@@ -34,7 +32,7 @@ public class ClauseCoordinator implements AutoCloseable {
     this.processors = new ArrayList<>();
     this.changeListener = () -> {
     };
-    this.currentUpdate = new AtomicLong(0);
+    this.currentUpdate = 0;
     this.graph = graph;
     this.buffer = new ExternalClauseBuffer(tempDir);
     takeSnapshot();
@@ -49,16 +47,16 @@ public class ClauseCoordinator implements AutoCloseable {
     if (numUpdates < 1) {
       return;
     }
-    ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate.get(), numUpdates);
+    ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
     for (ClauseUpdateProcessor processor : processors) {
       processor.process(updates, graph);
     }
-    currentUpdate.addAndGet(updates.length);
+    currentUpdate += updates.length;
     changeListener.run();
   }
 
   public long currentUpdate() {
-    return currentUpdate.get();
+    return currentUpdate;
   }
 
   public synchronized void seekToUpdate(long index) throws IOException, SerializationException {
@@ -66,7 +64,7 @@ public class ClauseCoordinator implements AutoCloseable {
       throw new IllegalArgumentException("Index must not be negative: " + index);
     }
     long closestSnapshotIndex = loadClosestSnapshot(index);
-    currentUpdate.set(closestSnapshotIndex);
+    currentUpdate = closestSnapshotIndex;
     advanceVisualization((int) (index - closestSnapshotIndex));
   }
 
