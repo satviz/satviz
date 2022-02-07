@@ -3,6 +3,8 @@ package edu.kit.satviz.consumer.gui.config;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
+import java.io.File;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -10,8 +12,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 
-import java.io.File;
-import java.util.List;
 
 public class EmbeddedConfigController extends ConfigController {
 
