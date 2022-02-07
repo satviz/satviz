@@ -3,7 +3,9 @@ package edu.kit.satviz.consumer.processing;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.sat.ClauseUpdate;
-import edu.kit.satviz.serial.Serializer;
+
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class Heatmap implements ClauseUpdateProcessor {
 
@@ -24,8 +26,13 @@ public class Heatmap implements ClauseUpdateProcessor {
   }
 
   @Override
-  public Serializer<Heatmap> serializer() {
-    return null;
+  public void serialize(OutputStream out) {
+
+  }
+
+  @Override
+  public void deserialize(InputStream in) {
+
   }
 
 }
