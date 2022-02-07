@@ -13,9 +13,6 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class stores ClauseUpdates in a temporary file. It allows random access
@@ -32,8 +29,9 @@ public class ExternalClauseBuffer implements AutoCloseable {
   private final OutputStream clauseLookupOutStream;
   private final RandomAccessFile clauseReadFile;
   private final OutputStream clauseOutStream;
-  private final AtomicLong size;
-  private final AtomicLong nextClauseBegin;
+
+  private volatile long size;
+  private long nextClauseBegin;
 
   public ExternalClauseBuffer(Path dir) throws IOException {
     this.outputLock = new Object();
@@ -45,8 +43,8 @@ public class ExternalClauseBuffer implements AutoCloseable {
     this.clauseLookupOutStream = new BufferedOutputStream(Files.newOutputStream(lookupFile));
     this.clauseReadFile = new RandomAccessFile(clauseFile.toFile(), "r");
     this.clauseOutStream = new BufferedOutputStream(Files.newOutputStream(clauseFile));
-    this.size = new AtomicLong(0);
-    this.nextClauseBegin = new AtomicLong(0);
+    this.size = 0;
+    this.nextClauseBegin = 0;
   }
 
   public void addClauseUpdate(ClauseUpdate update) throws IOException {
@@ -60,12 +58,13 @@ public class ExternalClauseBuffer implements AutoCloseable {
 
     byte[] bytes = byteArrayStream.toByteArray();
     synchronized (outputLock) {
-      long clauseBegin = nextClauseBegin.getAndAdd(bytes.length);
+      long clauseBegin = nextClauseBegin;
+      nextClauseBegin += bytes.length;
       clauseOutStream.write(bytes);
       ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
       buf.putLong(clauseBegin);
       clauseLookupOutStream.write(buf.array());
-      size.incrementAndGet();
+      size++;
     }
   }
 
@@ -75,7 +74,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
       flush();
     }
     synchronized (readLock) {
-      int actualUpdates = (int) Math.min(numUpdates, size() - index);
+      int actualUpdates = (int) Math.min(numUpdates, size - index);
       long beginningByte = getBeginningByte(index);
       clauseReadFile.seek(beginningByte);
       ClauseUpdate[] updates = new ClauseUpdate[actualUpdates];
@@ -104,7 +103,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
   }
 
   public long size() {
-    return size.get();
+    return size;
   }
 
   @Override
