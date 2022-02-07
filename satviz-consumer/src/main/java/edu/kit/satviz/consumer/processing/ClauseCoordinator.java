@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ClauseCoordinator implements AutoCloseable {
 
@@ -17,10 +18,8 @@ public class ClauseCoordinator implements AutoCloseable {
   private final List<ClauseUpdateProcessor> processors;
   private final Graph graph;
 
-
   private Runnable changeListener;
-  private long currentUpdate;
-
+  private AtomicLong currentUpdate;
   private ExternalClauseBuffer buffer;
 
   public ClauseCoordinator(Graph graph, Path tempDir) throws IOException {
@@ -28,7 +27,7 @@ public class ClauseCoordinator implements AutoCloseable {
     this.snapshots = new TreeMap<>();
     this.processors = new ArrayList<>();
     this.changeListener = () -> {};
-    this.currentUpdate = 0;
+    this.currentUpdate = new AtomicLong(0);
     this.graph = graph;
     this.buffer = new ExternalClauseBuffer(tempDir);
   }
@@ -37,20 +36,22 @@ public class ClauseCoordinator implements AutoCloseable {
     processors.add(processor);
   }
 
-  public void advanceVisualization(int numUpdates) throws IOException, SerializationException {
-    ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
+  public synchronized void advanceVisualization(int numUpdates)
+      throws IOException, SerializationException {
+    ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate.get(), numUpdates);
     for (ClauseUpdateProcessor processor : processors) {
       processor.process(updates, graph);
     }
+    currentUpdate.addAndGet(updates.length);
     changeListener.run();
   }
 
   public long currentUpdate() {
-    return currentUpdate;
+    return currentUpdate.get();
   }
 
-  public void seekToUpdate(long index) {
-    currentUpdate = index;
+  public synchronized void seekToUpdate(long index) {
+    currentUpdate.set(index);
   }
 
   public void takeSnapshot() {
