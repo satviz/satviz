@@ -13,6 +13,10 @@ import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 
+/**
+ * The graph model used by satviz. Every instance of this class is bound to a
+ * {@code satviz::graph::Graph} instance in C++.
+ */
 public class Graph extends NativeObject {
 
   private static final MethodHandle NEW_GRAPH = lookupFunction(
@@ -67,6 +71,12 @@ public class Graph extends NativeObject {
     super(pointer);
   }
 
+  /**
+   * Initialize a graph with the given, fixed amount of nodes.
+   *
+   * @param nodes The amount of nodes/vertices. Must be non-negative.
+   * @return a new {@code Graph} without any edges.
+   */
   public static Graph create(long nodes) {
     if (nodes < 0) {
       throw new IllegalArgumentException("Graph must have a non-negative amount of nodes");
@@ -78,10 +88,19 @@ public class Graph extends NativeObject {
     }
   }
 
+  /**
+   * Submit a {@link GraphUpdate} to this graph.
+   *
+   * @param update The update to submit.
+   * @implNote {@code update.submitTo(this);}
+   */
   public void submitUpdate(GraphUpdate update) {
     update.submitTo(this);
   }
 
+  /**
+   * Recalculate the graph layout.
+   */
   public void recalculateLayout() {
     try {
       RECALCULATE_LAYOUT.invokeExact(getPointer());
@@ -90,6 +109,9 @@ public class Graph extends NativeObject {
     }
   }
 
+  /**
+   * Adapt the graph layout.
+   */
   public void adaptLayout() {
     try {
       ADAPT_LAYOUT.invokeExact(getPointer());
@@ -98,6 +120,12 @@ public class Graph extends NativeObject {
     }
   }
 
+  /**
+   * Serialize this graph to an {@code OutputStream}.
+   *
+   * @param stream The {@code OutputStream} this graph's data should be written to.
+   * @see #deserialize(InputStream)
+   */
   public void serialize(OutputStream stream) {
     try {
       String s = CLinker.toJavaString((MemoryAddress) SERIALIZE.invokeExact(getPointer()));
@@ -107,6 +135,12 @@ public class Graph extends NativeObject {
     }
   }
 
+  /**
+   * Deserialize a graph from an {@code InputStream} and store its data in this instance.
+   *
+   * @param stream The stream the graph data should be read from.
+   * @see #serialize(OutputStream)
+   */
   public void deserialize(InputStream stream) {
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
       // TODO make sure we're actually supposed to read the entire stream
@@ -118,6 +152,12 @@ public class Graph extends NativeObject {
 
   }
 
+  /**
+   * Retrieve information about a node in this graph.
+   *
+   * @param index The index of the node to find.
+   * @return A {@link NodeInfo} object detailing information about the node.
+   */
   public NodeInfo queryNode(int index) {
     try {
       MemorySegment segment = (MemorySegment) QUERY_NODE.invokeExact(getPointer(), index);
@@ -127,6 +167,13 @@ public class Graph extends NativeObject {
     }
   }
 
+  /**
+   * Retrieve information about an edge in this graph.
+   *
+   * @param index1 The first end of the edge, a node index.
+   * @param index2 The second end of the edge, a node index.
+   * @return A {@link EdgeInfo} object detailing information about the edge.
+   */
   public EdgeInfo queryEdge(int index1, int index2) {
     try {
       MemorySegment segment = (MemorySegment) QUERY_EDGE.invokeExact(getPointer(), index1, index2);
@@ -136,6 +183,10 @@ public class Graph extends NativeObject {
     }
   }
 
+  /**
+   * Delete the underlying native object.<br>
+   * To clean up {@code Graph} instances, you should generally use {@link #close()} instead.
+   */
   public void destroy() {
     try {
       RELEASE_GRAPH.invokeExact(getPointer());
