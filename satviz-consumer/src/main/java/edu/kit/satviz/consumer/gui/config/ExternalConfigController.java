@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.gui.config;
 
+import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
@@ -49,7 +50,13 @@ public class ExternalConfigController extends ConfigController {
 
   @Override
   protected void run() throws ConfigArgumentException {
+    ExternalModeConfig modeConfig = new ExternalModeConfig();
+    modeConfig.setPort(portSpinner.getValue());
 
+    ConsumerConfig config = new ConsumerConfig();
+    config.setModeConfig(modeConfig);
+
+    setConsumerConfig(config);
   }
 
 }
