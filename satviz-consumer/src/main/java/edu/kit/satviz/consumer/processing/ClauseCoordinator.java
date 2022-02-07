@@ -44,6 +44,9 @@ public class ClauseCoordinator implements AutoCloseable {
 
   public synchronized void advanceVisualization(int numUpdates)
       throws IOException, SerializationException {
+    if (numUpdates < 1) {
+      return;
+    }
     ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate.get(), numUpdates);
     for (ClauseUpdateProcessor processor : processors) {
       processor.process(updates, graph);
