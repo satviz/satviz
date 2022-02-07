@@ -4,6 +4,9 @@ import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import java.io.File;
+import java.io.IOException;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,9 +21,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
-
-import java.io.File;
-import java.io.IOException;
 
 public class GeneralConfigController extends ConfigController {
 
@@ -53,7 +53,9 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private ChoiceBox<ConsumerMode> modeChoiceBox;
   @FXML
-  private VBox modeVBox;
+  private VBox modeVbox;
+  @FXML
+  private Label errorLabel;
   @FXML
   private Button runButton;
 
@@ -63,6 +65,8 @@ public class GeneralConfigController extends ConfigController {
   private ConfigController modeConfigController;
   private String recordingFile;
   private File satInstanceFile;
+
+  private ConsumerConfig config;
 
 
   // METHODS (FXML)
@@ -170,9 +174,9 @@ public class GeneralConfigController extends ConfigController {
     String modeString = modeChoiceBox.getValue().toString().toLowerCase() + "-config.fxml";
     // set vbox content to fxml-file for mode specific input
     FXMLLoader loader = new FXMLLoader(getClass().getResource(modeString));
-    modeVBox.getChildren().clear();
+    modeVbox.getChildren().clear();
     try {
-      modeVBox.getChildren().add(loader.load());
+      modeVbox.getChildren().add(loader.load());
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -181,15 +185,20 @@ public class GeneralConfigController extends ConfigController {
   }
 
   @FXML
-  private void createConsumerConfig() {
-
+  private void run() {
+    try {
+      config = createConsumerConfig();
+      Platform.exit();
+    } catch (ConfigArgumentException e) {
+      errorLabel.setText(e.getMessage());
+    }
   }
 
   // METHODS (OTHER)
 
   @Override
-  protected void run() throws ConfigArgumentException {
-
+  protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {
+    return null;
   }
 
   private Color parseColor(int color) {
@@ -197,6 +206,10 @@ public class GeneralConfigController extends ConfigController {
     int green = (color >>> (2 * 4)) % (int) Math.pow(2.0, 2.0 * 4.0);
     int blue = color % (int) Math.pow(2.0, 2.0 * 4.0);
     return new Color(red / 255.0, green / 255.0, blue / 255.0, 1.0);
+  }
+
+  public ConsumerConfig getConsumerConfig() {
+    return config;
   }
 
 }

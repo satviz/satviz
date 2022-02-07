@@ -31,7 +31,12 @@
                 </ToolBar>
             </top>
             <bottom>
-                <Button mnemonicParsing="false" text="Run" BorderPane.alignment="CENTER" fx:id="runButton"/>
+                <VBox>
+                    <Label fx:id="errorLabel" textFill="#ff0000"/>
+                    <VBox alignment="CENTER">
+                        <Button mnemonicParsing="false" text="Run" BorderPane.alignment="CENTER" fx:id="runButton" onAction="#run"/>
+                    </VBox>
+                </VBox>
             </bottom>
             <center>
                 <VBox prefHeight="429.0" prefWidth="0.0" BorderPane.alignment="CENTER">
@@ -181,7 +186,7 @@
                         </HBox>
                      </children>
                   </VBox>
-                        <VBox fx:id="modeVBox" prefHeight="104.0" prefWidth="415.0" style="-fx-border-color: black;">
+                        <VBox fx:id="modeVbox" prefHeight="104.0" prefWidth="415.0" style="-fx-border-color: black;">
                             <children>
                                 <fx:include source="external-config.fxml" />
                             </children>

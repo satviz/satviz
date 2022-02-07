@@ -58,7 +58,7 @@ public class EmbeddedConfigController extends ConfigController {
   // METHODS (OTHER)
 
   @Override
-  protected void run() throws ConfigArgumentException {
+  protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {
     EmbeddedModeConfig modeConfig = new EmbeddedModeConfig();
     modeConfig.setSource(producerModeChoiceBox.getValue());
     if (producerModeFile == null) {
@@ -70,7 +70,7 @@ public class EmbeddedConfigController extends ConfigController {
     ConsumerConfig config = new ConsumerConfig();
     config.setModeConfig(modeConfig);
 
-    setConsumerConfig(config);
+    return config;
   }
 
 }

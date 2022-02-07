@@ -49,14 +49,14 @@ public class ExternalConfigController extends ConfigController {
   }
 
   @Override
-  protected void run() throws ConfigArgumentException {
+  protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {
     ExternalModeConfig modeConfig = new ExternalModeConfig();
     modeConfig.setPort(portSpinner.getValue());
 
     ConsumerConfig config = new ConsumerConfig();
     config.setModeConfig(modeConfig);
 
-    setConsumerConfig(config);
+    return config;
   }
 
 }
