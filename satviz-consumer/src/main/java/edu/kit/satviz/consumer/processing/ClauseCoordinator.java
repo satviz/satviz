@@ -3,6 +3,7 @@ package edu.kit.satviz.consumer.processing;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.serial.SerializationException;
+import edu.kit.satviz.serial.Serializer;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,7 +65,10 @@ public class ClauseCoordinator implements AutoCloseable {
     synchronized (snapshots) {
       Path snapshotFile = Files.createTempFile(tempDir, "satviz-snapshot", null);
       try (var stream = new BufferedOutputStream(Files.newOutputStream(snapshotFile))) {
-
+        for (ClauseUpdateProcessor processor : processors) {
+          processor.serialize(stream);
+        }
+        graph.serialize(stream);
       }
       snapshots.put(current, snapshotFile);
     }
