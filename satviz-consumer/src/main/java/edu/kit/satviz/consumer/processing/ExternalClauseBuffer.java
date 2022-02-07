@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class stores ClauseUpdates in a temporary file. It allows random access
@@ -49,7 +51,6 @@ public class ExternalClauseBuffer implements AutoCloseable {
 
   public void addClauseUpdate(ClauseUpdate update) throws IOException {
     Objects.requireNonNull(update);
-    size.incrementAndGet();
     ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
     try {
       updateSerializer.serialize(update, byteArrayStream);
@@ -58,21 +59,25 @@ public class ExternalClauseBuffer implements AutoCloseable {
     }
 
     byte[] bytes = byteArrayStream.toByteArray();
-    long clauseBegin = nextClauseBegin.addAndGet(bytes.length);
     synchronized (outputLock) {
+      long clauseBegin = nextClauseBegin.getAndAdd(bytes.length);
       clauseOutStream.write(bytes);
       ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
       buf.putLong(clauseBegin);
       clauseLookupOutStream.write(buf.array());
+      size.incrementAndGet();
     }
   }
 
-  public ClauseUpdate[] getClauseUpdates(long index, int numUpdates) throws IOException, SerializationException {
-    flush();
+  public ClauseUpdate[] getClauseUpdates(long index, int numUpdates)
+      throws IOException, SerializationException {
+    synchronized (outputLock) {
+      flush();
+    }
     synchronized (readLock) {
+      int actualUpdates = (int) Math.min(numUpdates, size() - index);
       long beginningByte = getBeginningByte(index);
       clauseReadFile.seek(beginningByte);
-      int actualUpdates = (int) Math.min(numUpdates, size() - index);
       ClauseUpdate[] updates = new ClauseUpdate[actualUpdates];
       SerialBuilder<ClauseUpdate> builder = updateSerializer.getBuilder();
       for (int i = 0; i < actualUpdates; i++) {
@@ -87,10 +92,8 @@ public class ExternalClauseBuffer implements AutoCloseable {
   }
 
   private void flush() throws IOException {
-    synchronized (outputLock) {
-      clauseLookupOutStream.flush();
-      clauseOutStream.flush();
-    }
+    clauseLookupOutStream.flush();
+    clauseOutStream.flush();
   }
 
   private long getBeginningByte(long index) throws IOException {
