@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 
 public class Graph extends NativeObject {
@@ -50,6 +51,18 @@ public class Graph extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER)
   );
 
+  private static final MethodHandle QUERY_NODE = lookupFunction(
+      "query_node",
+      MethodType.methodType(MemorySegment.class, MemoryAddress.class, int.class),
+      FunctionDescriptor.of(NodeInfo.LAYOUT, CLinker.C_POINTER, CLinker.C_INT)
+  );
+
+  private static final MethodHandle QUERY_EDGE = lookupFunction(
+      "query_edge",
+      MethodType.methodType(MemorySegment.class, MemoryAddress.class, int.class, int.class),
+      FunctionDescriptor.of(EdgeInfo.LAYOUT, CLinker.C_POINTER, CLinker.C_INT, CLinker.C_INT)
+  );
+
   private Graph(MemoryAddress pointer) {
     super(pointer);
   }
@@ -60,6 +73,10 @@ public class Graph extends NativeObject {
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while creating graph", e);
     }
+  }
+
+  public void submitUpdate(GraphUpdate update) {
+    update.submitTo(this);
   }
 
   public void recalculateLayout() {
@@ -96,6 +113,24 @@ public class Graph extends NativeObject {
       throw new NativeInvocationException("Error while deserializing graph representation", e);
     }
 
+  }
+
+  public NodeInfo queryNode(int index) {
+    try {
+      MemorySegment segment = (MemorySegment) QUERY_NODE.invokeExact(getPointer(), index);
+      return new NodeInfo(segment);
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while querying node", e);
+    }
+  }
+
+  public EdgeInfo queryEdge(int index1, int index2) {
+    try {
+      MemorySegment segment = (MemorySegment) QUERY_EDGE.invokeExact(getPointer(), index1, index2);
+      return new EdgeInfo(segment);
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while querying edge", e);
+    }
   }
 
   public void destroy() {
