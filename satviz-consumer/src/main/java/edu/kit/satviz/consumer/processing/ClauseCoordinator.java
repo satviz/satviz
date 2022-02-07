@@ -49,9 +49,39 @@ public class ClauseCoordinator implements AutoCloseable {
 
   public void advanceVisualization(int numUpdates)
       throws IOException, SerializationException {
+    if (stateLock.isHeldByCurrentThread()) {
+      return;
+    }
+    advance(numUpdates);
+  }
+
+  public long currentUpdate() {
+    return currentUpdate;
+  }
+
+  public void seekToUpdate(long index) throws IOException, SerializationException {
+    if (index < 0) {
+      throw new IllegalArgumentException("Index must not be negative: " + index);
+    }
+    if (stateLock.isHeldByCurrentThread()) {
+      return;
+    }
+
+    stateLock.lock();
+    try {
+      long closestSnapshotIndex = loadClosestSnapshot(index);
+      currentUpdate = closestSnapshotIndex;
+      advance((int) (index - closestSnapshotIndex));
+    } finally {
+      stateLock.unlock();
+    }
+  }
+
+  private void advance(int numUpdates) throws SerializationException, IOException {
     if (numUpdates < 1) {
       return;
     }
+
     stateLock.lock();
     try {
       ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
@@ -63,25 +93,6 @@ public class ClauseCoordinator implements AutoCloseable {
       stateLock.unlock();
     }
     changeListener.run();
-  }
-
-  public long currentUpdate() {
-    return currentUpdate;
-  }
-
-  public void seekToUpdate(long index) throws IOException, SerializationException {
-    if (index < 0) {
-      throw new IllegalArgumentException("Index must not be negative: " + index);
-    }
-    stateLock.lock();
-    try {
-      long closestSnapshotIndex = loadClosestSnapshot(index);
-      currentUpdate = closestSnapshotIndex;
-      advanceVisualization((int) (index - closestSnapshotIndex));
-    } finally {
-      stateLock.unlock();
-    }
-
   }
 
   public void takeSnapshot() throws IOException {
