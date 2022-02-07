@@ -8,12 +8,12 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ClauseCoordinator implements AutoCloseable {
 
@@ -23,12 +23,14 @@ public class ClauseCoordinator implements AutoCloseable {
   private final Graph graph;
   private final ExternalClauseBuffer buffer;
 
+  private final ReentrantLock snapshotLock;
+  private final ReentrantLock stateLock;
+
   private volatile long currentUpdate;
   private Runnable changeListener;
 
   public ClauseCoordinator(Graph graph, Path tempDir) throws IOException {
     this.tempDir = tempDir;
-
     this.snapshots = new TreeMap<>();
     this.processors = new CopyOnWriteArrayList<>();
     this.changeListener = () -> {
@@ -36,6 +38,8 @@ public class ClauseCoordinator implements AutoCloseable {
     this.currentUpdate = 0;
     this.graph = graph;
     this.buffer = new ExternalClauseBuffer(tempDir);
+    this.snapshotLock = new ReentrantLock();
+    this.stateLock = new ReentrantLock();
     takeSnapshot();
   }
 
@@ -43,16 +47,21 @@ public class ClauseCoordinator implements AutoCloseable {
     processors.add(processor);
   }
 
-  public synchronized void advanceVisualization(int numUpdates)
+  public void advanceVisualization(int numUpdates)
       throws IOException, SerializationException {
     if (numUpdates < 1) {
       return;
     }
-    ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
-    for (ClauseUpdateProcessor processor : processors) {
-      processor.process(updates, graph);
+    stateLock.lock();
+    try {
+      ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
+      for (ClauseUpdateProcessor processor : processors) {
+        processor.process(updates, graph);
+      }
+      currentUpdate += updates.length;
+    } finally {
+      stateLock.unlock();
     }
-    currentUpdate += updates.length;
     changeListener.run();
   }
 
@@ -60,17 +69,27 @@ public class ClauseCoordinator implements AutoCloseable {
     return currentUpdate;
   }
 
-  public synchronized void seekToUpdate(long index) throws IOException, SerializationException {
+  public void seekToUpdate(long index) throws IOException, SerializationException {
     if (index < 0) {
       throw new IllegalArgumentException("Index must not be negative: " + index);
     }
-    long closestSnapshotIndex = loadClosestSnapshot(index);
-    currentUpdate = closestSnapshotIndex;
-    advanceVisualization((int) (index - closestSnapshotIndex));
+    stateLock.lock();
+    try {
+      long closestSnapshotIndex = loadClosestSnapshot(index);
+      currentUpdate = closestSnapshotIndex;
+      advanceVisualization((int) (index - closestSnapshotIndex));
+    } finally {
+      stateLock.unlock();
+    }
+
   }
 
   public void takeSnapshot() throws IOException {
-    synchronized (snapshots) {
+    if (snapshotLock.isHeldByCurrentThread()) {
+      return;
+    }
+    snapshotLock.lock();
+    try {
       long current = currentUpdate();
       Path snapshotFile = Files.createTempFile(tempDir, "satviz-snapshot", null);
       try (var stream = new BufferedOutputStream(Files.newOutputStream(snapshotFile))) {
@@ -80,7 +99,10 @@ public class ClauseCoordinator implements AutoCloseable {
         graph.serialize(stream);
       }
       snapshots.put(current, snapshotFile);
+    } finally {
+      snapshotLock.unlock();
     }
+
   }
 
   public void addClauseUpdate(ClauseUpdate clauseUpdate) throws IOException {
@@ -92,16 +114,21 @@ public class ClauseCoordinator implements AutoCloseable {
   }
 
   private long loadClosestSnapshot(long index) throws IOException {
-    synchronized (snapshots) {
+    snapshotLock.lock();
+    try {
       Map.Entry<Long, Path> entry = snapshots.floorEntry(index);
       Path snapshot = entry.getValue();
       try (var stream = new BufferedInputStream(Files.newInputStream(snapshot))) {
+        stateLock.lock();
         for (ClauseUpdateProcessor processor : processors) {
           processor.deserialize(stream);
         }
         graph.deserialize(stream);
       }
       return entry.getKey();
+    } finally {
+      stateLock.unlock();
+      snapshotLock.unlock();
     }
   }
 
