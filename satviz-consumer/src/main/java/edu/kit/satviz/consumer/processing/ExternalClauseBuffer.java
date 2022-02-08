@@ -47,6 +47,10 @@ public class ExternalClauseBuffer implements AutoCloseable {
     this.clauseOutStream = new BufferedOutputStream(Files.newOutputStream(clauseFile));
     this.size = 0;
     this.nextClauseBegin = 0;
+    writeInitialClauseBegin();
+  }
+
+  private void writeInitialClauseBegin() throws IOException {
     clauseLookupOutStream.write(new byte[Long.BYTES]);
   }
 
