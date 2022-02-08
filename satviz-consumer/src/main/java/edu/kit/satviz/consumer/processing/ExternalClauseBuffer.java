@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.serial.ClauseUpdateSerializer;
+import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -89,23 +90,68 @@ public class ExternalClauseBuffer implements AutoCloseable {
     readLock.lock();
     try {
       int actualNumUpdates = (int) Math.min(numUpdates, size - index);
-      byte[] bytePositions = new byte[(actualNumUpdates + 1) * Long.BYTES];
-      clauseLookupReadFile.seek(index * Long.BYTES);
-      clauseLookupReadFile.read(bytePositions);
-      ByteBuffer buffer = ByteBuffer.wrap(bytePositions);
       ClauseUpdate[] updates = new ClauseUpdate[actualNumUpdates];
-      for (int i = 1; i <= actualNumUpdates; i++) {
-        long beginningByte = buffer.getLong(i - 1);
-        long endingByte = buffer.getLong(i);
-        int clauseSize = (int) (endingByte - beginningByte);
-        byte[] clauseBuf = new byte[clauseSize];
-        clauseReadFile.seek(beginningByte);
-        clauseReadFile.read(clauseBuf);
-        updates[i - 1] = updateSerializer.deserialize(new ByteArrayInputStream(clauseBuf));
-      }
+      // TODO: 08/02/2022 pick strategy
+      readUpdatesBufferless(index, updates);
       return updates;
     } finally {
       readLock.unlock();
+    }
+  }
+
+  // read clause updates from the given index byte by byte, without any buffering.
+  private void readUpdatesBufferless(long index, ClauseUpdate[] updates)
+      throws IOException, SerializationException {
+    clauseLookupReadFile.seek(index * Long.BYTES);
+    byte[] array = new byte[Long.BYTES];
+    clauseLookupReadFile.read(array);
+    long beginningByte = ByteBuffer.wrap(array).getLong();
+    clauseReadFile.seek(beginningByte);
+    SerialBuilder<ClauseUpdate> builder = updateSerializer.getBuilder();
+    for (int i = 0; i < updates.length; i++) {
+      while (!builder.finished()) {
+        builder.addByte(clauseReadFile.readByte());
+      }
+      updates[i] = builder.getObject();
+      builder.reset();
+    }
+  }
+
+  // read clause updates from given index, reading each entire clause at once
+  private void readUpdatesWithEphemeralBuffers(long index, ClauseUpdate[] updates)
+      throws IOException, SerializationException {
+    byte[] bytePositions = new byte[(updates.length + 1) * Long.BYTES];
+    clauseLookupReadFile.seek(index * Long.BYTES);
+    clauseLookupReadFile.read(bytePositions);
+    ByteBuffer buffer = ByteBuffer.wrap(bytePositions);
+    for (int i = 1; i <= updates.length; i++) {
+      long beginningByte = buffer.getLong(i - 1);
+      long endingByte = buffer.getLong(i);
+      int clauseSize = (int) (endingByte - beginningByte);
+      byte[] clauseBuf = new byte[clauseSize];
+      clauseReadFile.seek(beginningByte);
+      clauseReadFile.read(clauseBuf);
+      updates[i - 1] = updateSerializer.deserialize(new ByteArrayInputStream(clauseBuf));
+    }
+  }
+
+  // read clause updates from given index, reading the entire data all at once
+  private void readUpdatesWithBigBuffer(long index, ClauseUpdate[] updates)
+      throws IOException, SerializationException {
+    byte[] byteRange = new byte[2 * Long.BYTES];
+    clauseLookupReadFile.seek(index * Long.BYTES);
+    clauseLookupReadFile.read(byteRange, 0, Long.BYTES);
+    clauseLookupReadFile.seek((index + updates.length) * Long.BYTES);
+    clauseLookupReadFile.read(byteRange, Long.BYTES, 2 * Long.BYTES);
+    ByteBuffer buffer = ByteBuffer.wrap(byteRange);
+    long beginningByte = buffer.getLong();
+    long endingByte = buffer.getLong();
+    byte[] clauseUpdateBytes = new byte[(int) (endingByte - beginningByte)];
+    clauseReadFile.seek(beginningByte);
+    clauseReadFile.read(clauseUpdateBytes);
+    ByteArrayInputStream stream = new ByteArrayInputStream(clauseUpdateBytes);
+    for (int i = 0; i < updates.length; i++) {
+      updates[i] = updateSerializer.deserialize(stream);
     }
   }
 
