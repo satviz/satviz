@@ -15,7 +15,7 @@ import jdk.incubator.foreign.MemoryLayout;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 
-public class HeatUpdate implements GraphUpdate {
+public final class HeatUpdate implements GraphUpdate {
 
   private static final Struct STRUCT = Struct.builder()
       .field("n", int.class, CLinker.C_INT)
