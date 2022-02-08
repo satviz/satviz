@@ -30,7 +30,6 @@ public class NetworkBlueprint {
    * @param type the type
    * @param obj the object to serialize
    * @param out the stream to write to
-   * @return whether the operation succeeded or not
    * @throws IOException if the stream cannot be used
    * @throws SerializationException if the serialization didn't work
    * @throws ClassCastException if the type is invalid or unknown
@@ -40,8 +39,9 @@ public class NetworkBlueprint {
     Serializer<?> serial = typeMap.get(type);
     if (serial != null) {
       serial.serializeUnsafe(obj, out);
+    } else {
+      throw new ClassCastException("unknown type");
     }
-    throw new ClassCastException("unknown type");
   }
 
   /**

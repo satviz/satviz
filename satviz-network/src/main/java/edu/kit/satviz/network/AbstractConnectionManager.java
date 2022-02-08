@@ -289,7 +289,7 @@ public abstract class AbstractConnectionManager {
     } catch (SerializationException | ClassCastException e) {
       // fail this connection, but not the whole manager
       ctx.close(true);
-      throw new IOException("serialization error");
+      throw new IOException("serialization error:" + e);
     } catch (IOException e) {
       ctx.close(true);
       throw e;

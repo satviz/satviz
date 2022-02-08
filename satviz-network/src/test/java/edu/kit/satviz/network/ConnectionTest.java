@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,25 +97,53 @@ class ConnectionTest {
         fail("no connections received");
       }
 
-      Thread.sleep(5000);
-      /*
+      //
+      // send from client to server
+      //
       try {
         client.send(connected.get(0), (byte) 2, null);
+        client.send(connected.get(0), (byte) 1, null);
       } catch (IOException e) {
         fail("client send did not work:" + e);
       }
       synchronized (receivedServer) {
-        while (receivedServer.get(accepted.get(0)) == null || receivedServer.get(accepted.get(0)).isEmpty()) {
+        while (receivedServer.get(accepted.get(0)) == null || receivedServer.get(accepted.get(0)).size() != 2) {
           receivedServer.wait();
         }
       }
       List<NetworkMessage> l = receivedServer.get(accepted.get(0));
-      assertEquals(1, l.size());
+      assertEquals(2, l.size());
       NetworkMessage msg = l.get(0);
       assertNotNull(msg);
       assertEquals(NetworkMessage.State.PRESENT, msg.getState());
       assertEquals(2, msg.getType());
-       */
+      msg = l.get(1);
+      assertNotNull(msg);
+      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+      assertEquals(1, msg.getType());
+
+      //
+      // send from server to client
+      //
+      try {
+        server.send(accepted.get(0), (byte) 2, null);
+        server.send(accepted.get(0), (byte) 1, null);
+      } catch (IOException e) {
+        fail ("server send did not work:" + e);
+      }
+      synchronized (receivedClient) {
+        while(receivedClient.size() != 2) {
+          receivedClient.wait();
+        }
+      }
+      assertEquals(2, receivedClient.size());
+      msg = receivedClient.get(0);
+      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+      assertEquals(2, msg.getType());
+      msg = receivedClient.get(1);
+      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+      assertEquals(1, msg.getType());
+
     } finally {
       System.out.println("cleanup client");
       client.stop();
@@ -126,16 +153,25 @@ class ConnectionTest {
     }
   }
 
-  static void defaultListener(ConnectionId cid, NetworkMessage msg) {
+  static void defaultListenerServer(ConnectionId cid, NetworkMessage msg) {
     synchronized (receivedServer) {
-      System.out.println("received");
+      System.out.println("received server");
       List<NetworkMessage> l = receivedServer.computeIfAbsent(cid, k -> new ArrayList<>());
       l.add(msg);
+      receivedServer.notifyAll();
+    }
+  }
+
+  static void defaultListenerClient(ConnectionId cid, NetworkMessage msg) {
+    synchronized(receivedClient) {
+      System.out.println("received client");
+      receivedClient.add(msg);
+      receivedClient.notifyAll();
     }
   }
 
   static void defaultListenerAccept(ConnectionId newCid) {
-    server.register(newCid, ConnectionTest::defaultListener);
+    server.register(newCid, ConnectionTest::defaultListenerServer);
     synchronized (syncNewConnections) {
       accepted.add(newCid);
       if (connected.size() == accepted.size()) {
@@ -145,6 +181,7 @@ class ConnectionTest {
   }
 
   static void defaultListenerConnect(ConnectionId newCid) {
+    client.register(newCid, ConnectionTest::defaultListenerClient);
     synchronized (syncNewConnections) {
       connected.add(newCid);
       if (connected.size() == accepted.size()) {
