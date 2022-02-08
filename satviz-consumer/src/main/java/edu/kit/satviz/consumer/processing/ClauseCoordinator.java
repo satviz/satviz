@@ -152,6 +152,7 @@ public class ClauseCoordinator implements AutoCloseable {
         graph.serialize(stream);
       }
 
+      // TODO: 08/02/2022 Rethink ClauseUpdateProcessor: don't restore old ones, but rather reset the ones that didn't exist before
       // if the processor list has changed since the last snapshot, create a new snapshot array.
       // otherwise, reuse the processors snapshot from the most recent snapshot
       ClauseUpdateProcessor[] processorsSnapshot = processorsChanged
