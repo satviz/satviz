@@ -3,6 +3,9 @@ package edu.kit.satviz.serial;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 
+/**
+ * The {@link SerialBuilder} corresponding to {@link ClauseUpdateSerializer}.
+ */
 public class ClauseUpdateSerialBuilder extends SerialBuilder<ClauseUpdate> {
 
   // small optimisation because values() has horrible performance characteristics
