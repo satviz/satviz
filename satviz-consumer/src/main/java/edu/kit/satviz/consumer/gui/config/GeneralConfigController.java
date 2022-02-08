@@ -80,8 +80,8 @@ public class GeneralConfigController extends ConfigController {
 
     initializeWindowSizeSpinner();
 
-    coldColorColorPicker.setValue(parseColor(HeatmapColors.DEFAULT_FROM_COLOR));
-    hotColorColorPicker.setValue(parseColor(HeatmapColors.DEFAULT_TO_COLOR));
+    coldColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
+    hotColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_TO_COLOR));
 
     modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
     modeChoiceBox.setValue(ConsumerConfig.DEFAULT_CONSUMER_MODE);
@@ -201,15 +201,22 @@ public class GeneralConfigController extends ConfigController {
     return null;
   }
 
-  private Color parseColor(int color) {
-    int red = color >>> (4 * 4);
-    int green = (color >>> (2 * 4)) % (int) Math.pow(2.0, 2.0 * 4.0);
-    int blue = color % (int) Math.pow(2.0, 2.0 * 4.0);
+  public ConsumerConfig getConsumerConfig() {
+    return config;
+  }
+
+  private Color intToColor(int color) {
+    int red = (color >>> 16) & 0xFF;
+    int green = (color >>> 8) & 0xFF;
+    int blue = color & 0xFF;
     return new Color(red / 255.0, green / 255.0, blue / 255.0, 1.0);
   }
 
-  public ConsumerConfig getConsumerConfig() {
-    return config;
+  private int colorToInt(Color color) {
+    int red = (int) Math.round(color.getRed() * 255);
+    int green = (int) Math.round(color.getGreen() * 255);
+    int blue = (int) Math.round(color.getBlue() * 255);
+    return (red << 16) | (green << 8) | blue;
   }
 
 }
