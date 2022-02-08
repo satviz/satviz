@@ -11,18 +11,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ClauseCoordinator implements AutoCloseable {
 
   private final Path tempDir;
   private final Path snapshotDir;
-  private final TreeMap<Long, Path> snapshots;
+  private final TreeMap<Long, Snapshot> snapshots;
   private final List<ClauseUpdateProcessor> processors;
   private final Graph graph;
   private final ExternalClauseBuffer buffer;
@@ -31,6 +33,9 @@ public class ClauseCoordinator implements AutoCloseable {
   private final ReentrantLock snapshotLock;
   // stateLock provides mutual exclusion and consistency for operations that modify currentUpdate
   private final ReentrantLock stateLock;
+  // processorLock provides mutual exclusion for addProcessor and takeSnapshot to coordinate
+  // change detection in the list of processors. it is not needed to access the list elsewhere.
+  private final Lock processorLock;
 
   // currentUpdate is volatile, even though the stateLock prevents concurrent modification already.
   // this is because while updates to currentUpdate need to be consistent and coordinated,
@@ -38,6 +43,7 @@ public class ClauseCoordinator implements AutoCloseable {
   // therefore marked volatile.
   private volatile long currentUpdate;
   private Runnable changeListener;
+  private boolean processorsChanged;
 
   public ClauseCoordinator(Graph graph, Path tempDir) throws IOException {
     this.tempDir = tempDir;
@@ -51,11 +57,20 @@ public class ClauseCoordinator implements AutoCloseable {
     this.buffer = new ExternalClauseBuffer(tempDir);
     this.snapshotLock = new ReentrantLock();
     this.stateLock = new ReentrantLock();
+    this.processorLock = new ReentrantLock();
+    this.processorsChanged = true; // set to true so the first snapshot has something to save
+    // take initial snapshot to have a baseline in the snapshots TreeMap
     takeSnapshot();
   }
 
   public void addProcessor(ClauseUpdateProcessor processor) {
-    processors.add(processor);
+    processorLock.lock();
+    try {
+      processors.add(processor);
+      processorsChanged = true;
+    } finally {
+      processorLock.unlock();
+    }
   }
 
   public void advanceVisualization(int numUpdates)
@@ -125,6 +140,8 @@ public class ClauseCoordinator implements AutoCloseable {
     // snapshots are locked to prevent overlapping snapshot creation and to synchronise access
     // to the snapshots TreeMap
     snapshotLock.lock();
+    // processors are locked so that updates happen either before or after taking the snapshot
+    processorLock.lock();
     try {
       long current = currentUpdate();
       Path snapshotFile = Files.createTempFile(snapshotDir, "snapshot", null);
@@ -134,8 +151,16 @@ public class ClauseCoordinator implements AutoCloseable {
         }
         graph.serialize(stream);
       }
-      snapshots.put(current, snapshotFile);
+
+      // if the processor list has changed since the last snapshot, create a new snapshot array.
+      // otherwise, reuse the processors snapshot from the most recent snapshot
+      ClauseUpdateProcessor[] processorsSnapshot = processorsChanged
+          ? this.processors.toArray(new ClauseUpdateProcessor[0])
+          : snapshots.floorEntry(current).getValue().processors();
+      processorsChanged = false;
+      snapshots.put(current, new Snapshot(snapshotFile, processorsSnapshot));
     } finally {
+      processorLock.unlock();
       snapshotLock.unlock();
     }
 
@@ -155,19 +180,28 @@ public class ClauseCoordinator implements AutoCloseable {
     snapshotLock.lock();
     try {
       // find nearest snapshot to index
-      Map.Entry<Long, Path> entry = snapshots.floorEntry(index);
-      Path snapshot = entry.getValue();
-      try (var stream = new BufferedInputStream(Files.newInputStream(snapshot))) {
+      Map.Entry<Long, Snapshot> entry = snapshots.floorEntry(index);
+      Snapshot snapshot = entry.getValue();
+      ClauseUpdateProcessor[] snapshotProcessors = snapshot.processors();
+      try (var stream = new BufferedInputStream(Files.newInputStream(snapshot.file()))) {
         // lock state to ensure consistent graph and processor views for advance()
         stateLock.lock();
-        for (ClauseUpdateProcessor processor : processors) {
+        // restore processor and graph state
+        for (ClauseUpdateProcessor processor : snapshotProcessors) {
           processor.deserialize(stream);
         }
         graph.deserialize(stream);
       }
+      // lock processors so processor updates don't interleave
+      processorLock.lock();
+      // restore processors list
+      this.processors.clear();
+      this.processors.addAll(Arrays.asList(snapshotProcessors));
+      processorsChanged = false;
       return entry.getKey();
     } finally {
       stateLock.unlock();
+      processorLock.unlock();
       snapshotLock.unlock();
     }
   }
@@ -192,6 +226,10 @@ public class ClauseCoordinator implements AutoCloseable {
         return FileVisitResult.CONTINUE;
       }
     });
+  }
+
+  private record Snapshot(Path file, ClauseUpdateProcessor[] processors) {
+
   }
 
 }
