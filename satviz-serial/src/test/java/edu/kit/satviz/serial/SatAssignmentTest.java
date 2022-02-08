@@ -43,6 +43,6 @@ class SatAssignmentTest {
     ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
     SatAssignment result = serial.deserialize(byteIn);
 
-    assertEquals(result, assign); // .equals() implemented in SatAssignment
+    assertEquals(assign, result); // .equals() implemented in SatAssignment
   }
 }
