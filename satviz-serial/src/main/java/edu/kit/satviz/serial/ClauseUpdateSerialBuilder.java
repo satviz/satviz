@@ -15,6 +15,9 @@ public class ClauseUpdateSerialBuilder extends SerialBuilder<ClauseUpdate> {
   @Override
   protected void processAddByte(byte b) throws SerializationException {
     if (type == null) {
+      if (Byte.compareUnsigned(b, (byte) TYPES.length) >= 0) {
+        fail("Unknown ClausUpdate type ordinal " + b);
+      }
       type = TYPES[b];
     } else {
       clauseSerialBuilder.processAddByte(b);
