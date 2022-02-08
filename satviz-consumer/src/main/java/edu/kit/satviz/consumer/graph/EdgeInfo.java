@@ -24,30 +24,25 @@ public class EdgeInfo extends NativeObject {
   private static final VarHandle WEIGHT_HANDLE = LAYOUT.varHandle(float.class,
       PathElement.groupElement("weight"));
 
-  private final int index1;
-  private final int index2;
+  private final Edge edge;
   private final float weight;
 
   public EdgeInfo(MemorySegment segment) {
     super(segment.address());
-    this.index1 = (int) INDEX1_HANDLE.get(segment);
-    this.index2 = (int) INDEX2_HANDLE.get(segment);
+    int index1 = (int) INDEX1_HANDLE.get(segment);
+    int index2 = (int) INDEX2_HANDLE.get(segment);
+    this.edge = new Edge(index1, index2);
     this.weight = (float) WEIGHT_HANDLE.get(segment);
   }
 
-  public EdgeInfo(int index1, int index2, float weight) {
+  public EdgeInfo(Edge edge, float weight) {
     super(MemoryAddress.NULL);
-    this.index1 = index1;
-    this.index2 = index2;
+    this.edge = edge;
     this.weight = weight;
   }
 
-  public int getIndex1() {
-    return index1;
-  }
-
-  public int getIndex2() {
-    return index2;
+  public Edge getEdge() {
+    return edge;
   }
 
   public float getWeight() {
@@ -63,14 +58,13 @@ public class EdgeInfo extends NativeObject {
       return false;
     }
     EdgeInfo edgeInfo = (EdgeInfo) o;
-    return index1 == edgeInfo.index1
-        && index2 == edgeInfo.index2
+    return Objects.equals(edgeInfo.edge, edge)
         && Float.compare(edgeInfo.weight, weight) == 0;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(index1, index2, weight);
+    return Objects.hash(edge, weight);
   }
 
   @Override

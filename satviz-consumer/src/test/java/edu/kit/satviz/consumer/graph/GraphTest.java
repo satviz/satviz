@@ -36,7 +36,7 @@ class GraphTest {
     update.add(0, 1, 1.0f);
     graph.submitUpdate(update);
     var edge = graph.queryEdge(0, 1);
-    assertEquals(new EdgeInfo(0, 1, 1), edge);
+    assertEquals(new EdgeInfo(new Edge(0, 1), 1), edge);
   }
 
   @Test
