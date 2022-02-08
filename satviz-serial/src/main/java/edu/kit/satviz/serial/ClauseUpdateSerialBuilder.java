@@ -23,7 +23,9 @@ public class ClauseUpdateSerialBuilder extends SerialBuilder<ClauseUpdate> {
       }
       type = TYPES[b];
     } else {
-      clauseSerialBuilder.processAddByte(b);
+      if (clauseSerialBuilder.addByte(b)) {
+        finish();
+      }
     }
   }
 
