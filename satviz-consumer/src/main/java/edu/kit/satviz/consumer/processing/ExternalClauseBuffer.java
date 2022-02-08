@@ -2,9 +2,9 @@ package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.serial.ClauseUpdateSerializer;
-import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,6 +47,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
     this.clauseOutStream = new BufferedOutputStream(Files.newOutputStream(clauseFile));
     this.size = 0;
     this.nextClauseBegin = 0;
+    clauseLookupOutStream.write(new byte[Long.BYTES]);
   }
 
   public void addClauseUpdate(ClauseUpdate update) throws IOException {
@@ -62,10 +63,9 @@ public class ExternalClauseBuffer implements AutoCloseable {
     ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
     outputLock.lock();
     try {
-      long clauseBegin = nextClauseBegin;
-      buf.putLong(clauseBegin);
-      nextClauseBegin += bytes.length;
       clauseOutStream.write(bytes);
+      buf.putLong(nextClauseBegin);
+      nextClauseBegin += bytes.length;
       clauseLookupOutStream.write(buf.array());
       size++;
     } finally {
@@ -85,16 +85,19 @@ public class ExternalClauseBuffer implements AutoCloseable {
     readLock.lock();
     try {
       int actualNumUpdates = (int) Math.min(numUpdates, size - index);
-      long beginningByte = getBeginningByte(index);
-      clauseReadFile.seek(beginningByte);
+      byte[] bytePositions = new byte[(actualNumUpdates + 1) * Long.BYTES];
+      clauseLookupReadFile.seek(index * Long.BYTES);
+      clauseLookupReadFile.read(bytePositions);
+      ByteBuffer buffer = ByteBuffer.wrap(bytePositions);
       ClauseUpdate[] updates = new ClauseUpdate[actualNumUpdates];
-      SerialBuilder<ClauseUpdate> builder = updateSerializer.getBuilder();
-      for (int i = 0; i < actualNumUpdates; i++) {
-        while (!builder.finished()) {
-          builder.addByte(clauseReadFile.readByte());
-        }
-        updates[i] = builder.getObject();
-        builder.reset();
+      for (int i = 1; i <= actualNumUpdates; i++) {
+        long beginningByte = buffer.getLong(i - 1);
+        long endingByte = buffer.getLong(i);
+        int clauseSize = (int) (endingByte - beginningByte);
+        byte[] clauseBuf = new byte[clauseSize];
+        clauseReadFile.seek(beginningByte);
+        clauseReadFile.read(clauseBuf);
+        updates[i - 1] = updateSerializer.deserialize(new ByteArrayInputStream(clauseBuf));
       }
       return updates;
     } finally {
@@ -105,13 +108,6 @@ public class ExternalClauseBuffer implements AutoCloseable {
   private void flush() throws IOException {
     clauseLookupOutStream.flush();
     clauseOutStream.flush();
-  }
-
-  private long getBeginningByte(long index) throws IOException {
-    clauseLookupReadFile.seek(index * Long.BYTES);
-    byte[] array = new byte[Long.BYTES];
-    clauseLookupReadFile.read(array);
-    return ByteBuffer.wrap(array).getLong();
   }
 
   public long size() {
