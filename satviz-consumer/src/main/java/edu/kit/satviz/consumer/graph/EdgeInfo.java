@@ -1,6 +1,7 @@
 package edu.kit.satviz.consumer.graph;
 
 import edu.kit.satviz.consumer.bindings.NativeObject;
+import edu.kit.satviz.consumer.bindings.Struct;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
 import jdk.incubator.foreign.CLinker;
@@ -10,6 +11,12 @@ import jdk.incubator.foreign.MemoryLayout.PathElement;
 import jdk.incubator.foreign.MemorySegment;
 
 public class EdgeInfo extends NativeObject {
+
+  public static final Struct STRUCT = Struct.builder()
+      .field("index1", int.class, CLinker.C_INT)
+      .field("index2", int.class, CLinker.C_INT)
+      .field("weight", float.class, CLinker.C_FLOAT)
+      .build();
 
   public static final MemoryLayout LAYOUT = paddedStruct(
       CLinker.C_INT.withName("index1"),
@@ -29,10 +36,10 @@ public class EdgeInfo extends NativeObject {
 
   public EdgeInfo(MemorySegment segment) {
     super(segment.address());
-    int index1 = (int) INDEX1_HANDLE.get(segment);
-    int index2 = (int) INDEX2_HANDLE.get(segment);
+    int index1 = (int) STRUCT.varHandle("index1").get(segment);
+    int index2 = (int) STRUCT.varHandle("index2").get(segment);
     this.edge = new Edge(index1, index2);
-    this.weight = (float) WEIGHT_HANDLE.get(segment);
+    this.weight = (float) STRUCT.varHandle("weight").get(segment);
   }
 
   public EdgeInfo(Edge edge, float weight) {

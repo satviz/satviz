@@ -58,13 +58,14 @@ public class Graph extends NativeObject {
   private static final MethodHandle QUERY_NODE = lookupFunction(
       "query_node",
       MethodType.methodType(MemorySegment.class, MemoryAddress.class, int.class),
-      FunctionDescriptor.of(NodeInfo.LAYOUT, CLinker.C_POINTER, CLinker.C_INT)
+      FunctionDescriptor.of(NodeInfo.STRUCT.getLayout(), CLinker.C_POINTER, CLinker.C_INT)
   );
 
   private static final MethodHandle QUERY_EDGE = lookupFunction(
       "query_edge",
       MethodType.methodType(MemorySegment.class, MemoryAddress.class, int.class, int.class),
-      FunctionDescriptor.of(EdgeInfo.LAYOUT, CLinker.C_POINTER, CLinker.C_INT, CLinker.C_INT)
+      FunctionDescriptor.of(EdgeInfo.STRUCT.getLayout(),
+          CLinker.C_POINTER, CLinker.C_INT, CLinker.C_INT)
   );
 
   private Graph(MemoryAddress pointer) {

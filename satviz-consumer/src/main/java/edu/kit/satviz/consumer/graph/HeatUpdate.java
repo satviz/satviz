@@ -23,12 +23,6 @@ public class HeatUpdate implements GraphUpdate {
       .field("heat", MemoryAddress.class, CLinker.C_POINTER)
       .build();
 
-  private static final MemoryLayout LAYOUT = NativeObject.paddedStruct(
-      CLinker.C_INT.withName("n"),
-      CLinker.C_POINTER.withName("index"),
-      CLinker.C_POINTER.withName("heat")
-  );
-
   private static final MethodHandle SUBMIT_HEAT_UPDATE = NativeObject.lookupFunction(
       "submit_heat_update",
       MethodType.methodType(void.class, MemoryAddress.class, MemoryAddress.class),
