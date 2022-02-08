@@ -12,8 +12,8 @@ public class WeightUpdate implements GraphUpdate {
 
   private static final MemoryLayout LAYOUT = NativeObject.paddedStruct(
       CLinker.C_INT.withName("n"),
-      CLinker.C_POINTER.withName("from"),
-      CLinker.C_POINTER.withName("to"),
+      CLinker.C_POINTER.withName("index1"),
+      CLinker.C_POINTER.withName("index2"),
       CLinker.C_POINTER.withName("weight")
   );
 

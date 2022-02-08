@@ -9,8 +9,8 @@ extern "C" {
 
 typedef struct CWeightUpdate {
   unsigned int n;
-  int *from;
-  int *to;
+  int *index1;
+  int *index2;
   float *weight;
 } CWeightUpdate;
 
