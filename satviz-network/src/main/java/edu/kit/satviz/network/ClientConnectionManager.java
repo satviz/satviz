@@ -9,13 +9,14 @@ import java.util.Set;
 
 public class ClientConnectionManager extends AbstractConnectionManager {
 
+  private final ConnectionId cid;
   private final ConnectionContext ctx;
-  private Selector select = null;
 
   public ClientConnectionManager(String address, int port, NetworkBlueprint bp) {
     super(bp);
+    this.cid = new ConnectionId(new InetSocketAddress(address, port));
     this.ctx = new ConnectionContext(
-        new ConnectionId(new InetSocketAddress(address, port)),
+        cid,
         new Receiver(bp::getBuilder),
         null
     );
@@ -24,31 +25,18 @@ public class ClientConnectionManager extends AbstractConnectionManager {
   @Override
   protected void processTerminateGlobal(boolean abnormal, String reason) {
     System.out.println("Client: processTerminateGlobal");
-    if (select != null) {
-      try {
-        select.close();
-      } catch (IOException e) {
-        // not our problem
-      }
-    }
-    ctx.close(abnormal);
+    // nothing to do
   }
 
   @Override
   protected void processStart() {
     System.out.println("Client: processStart");
     synchronized (syncState) {
-      try {
-        select = Selector.open();
-      } catch (IOException e) {
-        terminateGlobal(true, "error creating selector");
-      }
       while (state == State.STARTED) {
         System.out.println("Client: tryConnect");
         try {
           if (ctx.tryConnect()) {
             state = State.OPEN;
-            ctx.register(select, SelectionKey.OP_READ);
             break;
           }
         } catch (IOException e) {
@@ -65,6 +53,9 @@ public class ClientConnectionManager extends AbstractConnectionManager {
           return;
         }
       }
+      if (!addContext(ctx)) {
+        terminateGlobal(true, "could not create single client context");
+      }
 
       if (state == State.OPEN) {
         callConnect(ctx.getCid());
@@ -72,41 +63,10 @@ public class ClientConnectionManager extends AbstractConnectionManager {
     }
 
     System.out.println("Client: tryConnect done");
-
-    while (state == State.OPEN) {
-      System.out.println("Client: processStart: read");
-      try {
-        select.select(1000);
-      } catch (IOException e) {
-        System.out.println("Client: selection error");
-        terminateGlobal(true, "error selecting socket events");
-        return;
-      }
-      Set<SelectionKey> keys = select.selectedKeys();
-      if (!keys.isEmpty()) {
-        // got an event; know it has to be our only socket
-        keys.clear();
-        doRead(ctx);
-      }
-    }
-    // fall through as soon as state is State.FINISHING
-    // clean up and terminate
-
-    System.out.println("Client: processStart: done with state == OPEN; closing");
-    terminateGlobal(false, "finished");
-    synchronized (syncState) {
-      syncState.notifyAll(); // thread is done
-    }
-    System.out.println("Client: processStart: finished");
   }
 
   @Override
-  protected void processStopNew() {
-    ctx.close(false);
-  }
-
-  @Override
-  protected ConnectionContext getContextFrom(ConnectionId cid) {
-    return ctx.getCid() == cid ? ctx : null;
+  protected void processSelectAcceptable(SelectionKey key) {
+    // nothing to do
   }
 }

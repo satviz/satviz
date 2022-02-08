@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
@@ -20,13 +21,16 @@ class ConnectionTest {
   private static NetworkBlueprint bp;
   private static ByteBuffer data;
 
-  private static final Map<ConnectionId, List<NetworkMessage>> received = new HashMap<>();
+  private static final Map<ConnectionId, List<NetworkMessage>> receivedServer = new HashMap<>();
   private static final List<NetworkMessage> receivedClient = new ArrayList<>();
   private static final List<ConnectionId> accepted = new ArrayList<>();
   private static final List<ConnectionId> connected = new ArrayList<>();
   private static String failListenedClient;
   private static String failListenedServer;
   private static final Object syncNewConnections = new Object();
+
+  private static ConnectionManager server;
+  private static ClientConnectionManager client;
 
   @BeforeAll
   static void initAll() {
@@ -38,7 +42,9 @@ class ConnectionTest {
 
   @BeforeEach
   void init() {
-    received.clear();
+    server = null;
+    client = null;
+    receivedServer.clear();
     receivedClient.clear();
     accepted.clear();
     connected.clear();
@@ -48,8 +54,8 @@ class ConnectionTest {
 
   @Test
   void testConnection() throws InterruptedException {
-    ConnectionManager server = new ConnectionManager(PORT, bp);
-    ClientConnectionManager client = new ClientConnectionManager("localhost", PORT, bp);
+    server = new ConnectionManager(PORT, bp);
+    client = new ClientConnectionManager("localhost", PORT, bp);
 
     System.out.println("initialized");
 
@@ -60,7 +66,8 @@ class ConnectionTest {
 
     System.out.println("registered");
 
-    assertEquals(0, received.size());
+    assertEquals(0, receivedServer.size());
+    assertEquals(0, receivedClient.size());
     assertEquals(0, accepted.size());
     assertEquals(0, connected.size());
     assertNull(failListenedClient);
@@ -91,7 +98,25 @@ class ConnectionTest {
         fail("no connections received");
       }
 
-      Thread.sleep(4000);
+      Thread.sleep(5000);
+      /*
+      try {
+        client.send(connected.get(0), (byte) 2, null);
+      } catch (IOException e) {
+        fail("client send did not work:" + e);
+      }
+      synchronized (receivedServer) {
+        while (receivedServer.get(accepted.get(0)) == null || receivedServer.get(accepted.get(0)).isEmpty()) {
+          receivedServer.wait();
+        }
+      }
+      List<NetworkMessage> l = receivedServer.get(accepted.get(0));
+      assertEquals(1, l.size());
+      NetworkMessage msg = l.get(0);
+      assertNotNull(msg);
+      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
+      assertEquals(2, msg.getType());
+       */
     } finally {
       System.out.println("cleanup client");
       client.stop();
@@ -102,11 +127,15 @@ class ConnectionTest {
   }
 
   static void defaultListener(ConnectionId cid, NetworkMessage msg) {
-    List<NetworkMessage> l = received.computeIfAbsent(cid, k -> new ArrayList<>());
-    l.add(msg);
+    synchronized (receivedServer) {
+      System.out.println("received");
+      List<NetworkMessage> l = receivedServer.computeIfAbsent(cid, k -> new ArrayList<>());
+      l.add(msg);
+    }
   }
 
   static void defaultListenerAccept(ConnectionId newCid) {
+    server.register(newCid, ConnectionTest::defaultListener);
     synchronized (syncNewConnections) {
       accepted.add(newCid);
       if (connected.size() == accepted.size()) {
