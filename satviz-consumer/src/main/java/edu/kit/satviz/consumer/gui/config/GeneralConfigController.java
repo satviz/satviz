@@ -16,11 +16,9 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
-import javafx.util.StringConverter;
 
 public class GeneralConfigController extends ConfigController {
 
@@ -66,14 +64,15 @@ public class GeneralConfigController extends ConfigController {
   private String recordingFile;
   private File satInstanceFile;
 
-  private ConsumerConfig config;
+  private ConsumerConfig consumerConfig;
 
 
   // METHODS (FXML)
 
   @FXML
   private void initialize() {
-    recordingFileLabel.setText(ConsumerConfig.DEFAULT_VIDEO_TEMPLATE_PATH);
+    recordingFile = ConsumerConfig.DEFAULT_VIDEO_TEMPLATE_PATH;
+    recordingFileLabel.setText(recordingFile.substring(recordingFile.lastIndexOf("/") + 1));
 
     weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
     weightFactorChoiceBox.setValue(ConsumerConfig.DEFAULT_WEIGHT_FACTOR);
@@ -126,7 +125,7 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void selectSatInstanceFile() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("SAT Instance", "*.cnf");
+    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("SAT Instances", "*.cnf");
     fileChooser.getExtensionFilters().add(filter);
 
     File file = fileChooser.showOpenDialog(null);
@@ -155,7 +154,7 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void run() {
     try {
-      config = createConsumerConfig();
+      consumerConfig = createConsumerConfig();
       Platform.exit();
     } catch (ConfigArgumentException e) {
       errorLabel.setText(e.getMessage());
@@ -166,11 +165,34 @@ public class GeneralConfigController extends ConfigController {
 
   @Override
   protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {
-    return null;
+    // creates config where ConsumerModeConfig has already been set
+    ConsumerConfig config = modeConfigController.createConsumerConfig();
+
+    if (satInstanceFile == null) {
+      throw new ConfigArgumentException("Please select a SAT instance file.");
+    }
+    config.setInstancePath(satInstanceFile.toPath());
+
+    config.setNoGui(!showLiveVisualizationCheckBox.isSelected());
+
+    config.setVideoTemplatePath(recordingFile);
+
+    config.setRecordImmediately(recordFromStartCheckBox.isSelected());
+
+    config.setWeightFactor(weightFactorChoiceBox.getValue());
+
+    config.setWindowSize(windowSizeSpinner.getValue());
+
+    HeatmapColors colors = new HeatmapColors();
+    colors.setFromColor(colorToInt(coldColorColorPicker.getValue()));
+    colors.setToColor(colorToInt(hotColorColorPicker.getValue()));
+    config.setHeatmapColors(colors);
+
+    return config;
   }
 
   public ConsumerConfig getConsumerConfig() {
-    return config;
+    return consumerConfig;
   }
 
   private Color intToColor(int color) {
