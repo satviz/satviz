@@ -14,38 +14,10 @@ public class ExternalConfigController extends ConfigController {
 
   @FXML
   private void initialize() {
-    SpinnerValueFactory<Integer> portSpinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(
-        ExternalModeConfig.MIN_PORT_NUMBER, ExternalModeConfig.MAX_PORT_NUMBER, ExternalModeConfig.DEFAULT_PORT_NUMBER);
-
-    // catch exception when (value is null & (enter/arrow up/arrow down) is pressed)
-    portSpinnerValueFactory.setConverter(new StringConverter<>() {
-      @Override
-      public String toString(Integer object) {
-        return object.toString();
-      }
-
-      @Override
-      public Integer fromString(String string) {
-        try {
-          return Integer.parseInt(string);
-        } catch (NumberFormatException e) {
-          portSpinner.getEditor().setText("" + ExternalModeConfig.DEFAULT_PORT_NUMBER);
-          return ExternalModeConfig.DEFAULT_PORT_NUMBER;
-        }
-      }
-    });
-
-    portSpinner.setValueFactory(portSpinnerValueFactory);
-
-    portSpinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-      if (!newValue.equals("")) {
-        try {
-          Integer.parseInt(newValue);
-        } catch (NumberFormatException e) {
-          portSpinner.getEditor().setText(oldValue);
-        }
-      }
-    });
+    initializeIntegerSpinner(portSpinner,
+        ExternalModeConfig.MIN_PORT_NUMBER,
+        ExternalModeConfig.MAX_PORT_NUMBER,
+        ExternalModeConfig.DEFAULT_PORT_NUMBER);
   }
 
   @Override

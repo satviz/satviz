@@ -78,48 +78,16 @@ public class GeneralConfigController extends ConfigController {
     weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
     weightFactorChoiceBox.setValue(ConsumerConfig.DEFAULT_WEIGHT_FACTOR);
 
-    initializeWindowSizeSpinner();
+    initializeIntegerSpinner(windowSizeSpinner,
+        ConsumerConfig.MIN_WINDOW_SIZE,
+        ConsumerConfig.MAX_WINDOW_SIZE,
+        ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
     coldColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
     hotColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_TO_COLOR));
 
     modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
     modeChoiceBox.setValue(ConsumerConfig.DEFAULT_CONSUMER_MODE);
-  }
-
-  private void initializeWindowSizeSpinner() {
-    SpinnerValueFactory<Integer> windowSizeSpinnerValueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(
-        ConsumerConfig.MIN_WINDOW_SIZE, ConsumerConfig.MAX_WINDOW_SIZE, ConsumerConfig.DEFAULT_WINDOW_SIZE);
-
-    // catch exception when (value is null & (enter/arrow up/arrow down) is pressed)
-    windowSizeSpinnerValueFactory.setConverter(new StringConverter<>() {
-      @Override
-      public String toString(Integer object) {
-        return object.toString();
-      }
-
-      @Override
-      public Integer fromString(String string) {
-        try {
-          return Integer.parseInt(string);
-        } catch (NumberFormatException e) {
-          windowSizeSpinner.getEditor().setText("" + ConsumerConfig.DEFAULT_WINDOW_SIZE);
-          return ConsumerConfig.DEFAULT_WINDOW_SIZE;
-        }
-      }
-    });
-
-    windowSizeSpinner.setValueFactory(windowSizeSpinnerValueFactory);
-
-    windowSizeSpinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-      if (!newValue.equals("")) {
-        try {
-          Integer.parseInt(newValue);
-        } catch (NumberFormatException e) {
-          windowSizeSpinner.getEditor().setText(oldValue);
-        }
-      }
-    });
   }
 
   @FXML
