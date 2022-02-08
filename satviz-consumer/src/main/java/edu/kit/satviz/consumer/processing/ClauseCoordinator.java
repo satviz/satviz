@@ -27,9 +27,15 @@ public class ClauseCoordinator implements AutoCloseable {
   private final Graph graph;
   private final ExternalClauseBuffer buffer;
 
+  // snapshotLock provides mutual exclusion for snapshot creation and loading
   private final ReentrantLock snapshotLock;
+  // stateLock provides mutual exclusion and consistency for operations that modify currentUpdate
   private final ReentrantLock stateLock;
 
+  // currentUpdate is volatile, even though the stateLock prevents concurrent modification already.
+  // this is because while updates to currentUpdate need to be consistent and coordinated,
+  // concurrent reads are legal. to ensure a consistent and up-to-date view of currentUpdate, it is
+  // therefore marked volatile.
   private volatile long currentUpdate;
   private Runnable changeListener;
 
@@ -54,6 +60,7 @@ public class ClauseCoordinator implements AutoCloseable {
 
   public void advanceVisualization(int numUpdates)
       throws IOException, SerializationException {
+    // to prevent alien call processor.process from looping back
     if (stateLock.isHeldByCurrentThread()) {
       return;
     }
@@ -68,6 +75,7 @@ public class ClauseCoordinator implements AutoCloseable {
     if (index < 0) {
       throw new IllegalArgumentException("Index must not be negative: " + index);
     }
+    // to prevent alien calls from looping back
     if (stateLock.isHeldByCurrentThread()) {
       return;
     }
@@ -87,23 +95,35 @@ public class ClauseCoordinator implements AutoCloseable {
       return;
     }
 
+    // the state needs to be locked to synchronise advancements.
+    // snapshots need to be locked to prevent snapshot creation of half-updated graphs
+    snapshotLock.lock();
     stateLock.lock();
     try {
       ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
       for (ClauseUpdateProcessor processor : processors) {
         processor.process(updates, graph);
       }
+      // this operation is not atomic although currentUpdate is volatile.
+      // However, this is no problem because write access to currentUpdate is always coordinated
+      // using stateLock.
       currentUpdate += updates.length;
     } finally {
       stateLock.unlock();
+      snapshotLock.unlock();
     }
+    // the change listener may run concurrently again
     changeListener.run();
   }
 
   public void takeSnapshot() throws IOException {
+    // prevent alien calls from looping back
     if (snapshotLock.isHeldByCurrentThread()) {
       return;
     }
+
+    // snapshots are locked to prevent overlapping snapshot creation and to synchronise access
+    // to the snapshots TreeMap
     snapshotLock.lock();
     try {
       long current = currentUpdate();
@@ -130,11 +150,15 @@ public class ClauseCoordinator implements AutoCloseable {
   }
 
   private long loadClosestSnapshot(long index) throws IOException {
+    // snapshots need to be locked - we don't want to create a snapshot while in the middle of
+    // restoring some previous state.
     snapshotLock.lock();
     try {
+      // find nearest snapshot to index
       Map.Entry<Long, Path> entry = snapshots.floorEntry(index);
       Path snapshot = entry.getValue();
       try (var stream = new BufferedInputStream(Files.newInputStream(snapshot))) {
+        // lock state to ensure consistent graph and processor views for advance()
         stateLock.lock();
         for (ClauseUpdateProcessor processor : processors) {
           processor.deserialize(stream);
@@ -151,6 +175,7 @@ public class ClauseCoordinator implements AutoCloseable {
   @Override
   public void close() throws IOException {
     buffer.close();
+    // delete tempDir
     Files.walkFileTree(tempDir, new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
