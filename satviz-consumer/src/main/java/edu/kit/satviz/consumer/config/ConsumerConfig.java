@@ -12,7 +12,7 @@ public class ConsumerConfig {
 
   public static final boolean DEFAULT_NO_GUI = false;
   // DEFINITELY NEED TO CHANGE!
-  public static final String DEFAULT_VIDEO_TEMPLATE_PATH = "/cool/yes";
+  public static final String DEFAULT_VIDEO_TEMPLATE_PATH = "/cool/yes.ogv";
   public static final boolean DEFAULT_RECORD_IMMEDIATELY = false;
   public static final int DEFAULT_BUFFER_SIZE = 100;
   public static final WeightFactor DEFAULT_WEIGHT_FACTOR = WeightFactor.RECIPROCAL;
