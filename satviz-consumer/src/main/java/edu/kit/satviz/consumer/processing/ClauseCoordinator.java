@@ -18,6 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ClauseCoordinator implements AutoCloseable {
 
   private final Path tempDir;
+  private final Path snapshotDir;
   private final TreeMap<Long, Path> snapshots;
   private final List<ClauseUpdateProcessor> processors;
   private final Graph graph;
@@ -31,6 +32,7 @@ public class ClauseCoordinator implements AutoCloseable {
 
   public ClauseCoordinator(Graph graph, Path tempDir) throws IOException {
     this.tempDir = tempDir;
+    this.snapshotDir = Files.createTempDirectory(tempDir, "satviz-snapshots");
     this.snapshots = new TreeMap<>();
     this.processors = new CopyOnWriteArrayList<>();
     this.changeListener = () -> {
@@ -102,7 +104,7 @@ public class ClauseCoordinator implements AutoCloseable {
     snapshotLock.lock();
     try {
       long current = currentUpdate();
-      Path snapshotFile = Files.createTempFile(tempDir, "satviz-snapshot", null);
+      Path snapshotFile = Files.createTempFile(snapshotDir, "snapshot", null);
       try (var stream = new BufferedOutputStream(Files.newOutputStream(snapshotFile))) {
         for (ClauseUpdateProcessor processor : processors) {
           processor.serialize(stream);
