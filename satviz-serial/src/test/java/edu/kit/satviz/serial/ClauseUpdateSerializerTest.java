@@ -31,7 +31,7 @@ class ClauseUpdateSerializerTest {
     } catch (SerializationException e) {
       fail(e);
     }
-    assertEquals(ClauseUpdate.Type.ADD.ordinal(), out.toByteArray()[0]);
+    assertEquals(ClauseUpdate.Type.ADD.getId(), out.toByteArray()[0]);
   }
 
   @Test
