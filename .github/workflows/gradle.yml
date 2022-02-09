@@ -34,7 +34,7 @@ jobs:
         path: odgf
         key: ${{ runner.os }}-deps
     - name: Install native dependencies
-      run: sudo apt-get install libtheora-dev googletest libsfml-dev
+      run: sudo apt-get install -y libtheora-dev libgtest-dev libsfml-dev
     - name: Unit tests
       uses: gradle/gradle-build-action@v2
       with:
