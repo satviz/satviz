@@ -37,6 +37,14 @@ jobs:
           key: ${{ runner.os }}-deps
       - name: Install native dependencies
         run: sudo apt-get install -y libtheora-dev libgtest-dev libsfml-dev
+      - name: Build natives
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: make
+      - name: Build java
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: compileJava compileTestJava
       - name: Unit tests
         uses: gradle/gradle-build-action@v2
         with:
