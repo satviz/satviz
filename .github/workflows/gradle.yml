@@ -27,6 +27,11 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+    - name: Cache native dependencies
+      uses: actions/cache@v2
+      with:
+        path: odgf
+        key: ${{ runner.os }}-deps
     - name: Install native dependencies
       run: sudo apt-get install libtheora-dev googletest libsfml-dev
     - name: Unit tests
