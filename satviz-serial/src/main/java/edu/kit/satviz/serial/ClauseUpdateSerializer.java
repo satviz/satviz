@@ -16,7 +16,7 @@ public class ClauseUpdateSerializer extends Serializer<ClauseUpdate> {
   @Override
   public void serialize(ClauseUpdate clauseUpdate, OutputStream out)
       throws IOException, SerializationException {
-    out.write(clauseUpdate.type().ordinal());
+    out.write(clauseUpdate.type().getId());
     clauseSerializer.serialize(clauseUpdate.clause(), out);
   }
 

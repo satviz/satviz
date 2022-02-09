@@ -2,14 +2,12 @@ package edu.kit.satviz.serial;
 
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
+import java.util.NoSuchElementException;
 
 /**
  * The {@link SerialBuilder} corresponding to {@link ClauseUpdateSerializer}.
  */
 public class ClauseUpdateSerialBuilder extends SerialBuilder<ClauseUpdate> {
-
-  // small optimisation because values() has horrible performance characteristics
-  private static final ClauseUpdate.Type[] TYPES = ClauseUpdate.Type.values();
 
   private final SerialBuilder<Clause> clauseSerialBuilder = new ClauseSerialBuilder();
 
@@ -18,10 +16,11 @@ public class ClauseUpdateSerialBuilder extends SerialBuilder<ClauseUpdate> {
   @Override
   protected void processAddByte(byte b) throws SerializationException {
     if (type == null) {
-      if (Byte.compareUnsigned(b, (byte) TYPES.length) >= 0) {
-        fail("Unknown ClausUpdate type ordinal " + b);
+      try {
+        type = ClauseUpdate.Type.getById(b);
+      } catch (NoSuchElementException e) {
+        fail("Unknown clause update type " + b);
       }
-      type = TYPES[b];
     } else {
       if (clauseSerialBuilder.addByte(b)) {
         finish();
