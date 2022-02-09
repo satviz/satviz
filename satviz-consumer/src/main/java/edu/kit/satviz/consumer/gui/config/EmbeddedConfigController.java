@@ -1,6 +1,7 @@
 package edu.kit.satviz.consumer.gui.config;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
+import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import java.io.File;
@@ -13,7 +14,7 @@ import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 
 
-public class EmbeddedConfigController extends ConfigController {
+public class EmbeddedConfigController extends ModeConfigController {
 
   // ATTRIBUTES (FXML)
 
@@ -76,6 +77,16 @@ public class EmbeddedConfigController extends ConfigController {
     config.setModeConfig(modeConfig);
 
     return config;
+  }
+
+  @Override
+  protected void loadSettings(ConsumerModeConfig config) {
+    EmbeddedModeConfig embeddedModeConfig = (EmbeddedModeConfig) config;
+
+    producerModeChoiceBox.setValue(embeddedModeConfig.getSource());
+
+    producerModeFile = embeddedModeConfig.getSourcePath().toFile();
+    producerModeFileLabel.setText(producerModeFile.getName());
   }
 
 }
