@@ -1,7 +1,7 @@
 package edu.kit.satviz.network;
 
 /**
- * A bunch of methods for a listener on a producer connection.
+ * Callback methods for the producer side listening on a consumer connection.
  */
 public interface ProducerConnectionListener {
 
