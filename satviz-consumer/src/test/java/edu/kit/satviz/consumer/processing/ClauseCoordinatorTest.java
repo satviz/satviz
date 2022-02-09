@@ -1,37 +1,40 @@
 package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.consumer.graph.Graph;
-import edu.kit.satviz.consumer.graph.GraphUpdate;
-import edu.kit.satviz.consumer.graph.HeatUpdate;
-import edu.kit.satviz.consumer.graph.WeightUpdate;
-import edu.kit.satviz.consumer.processing.mockups.MockupGraph;
-import edu.kit.satviz.consumer.processing.mockups.MockupProcessor;
-import edu.kit.satviz.consumer.processing.mockups.MockupUpdate;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.serial.SerializationException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ClauseCoordinatorTest {
 
   private static final int VARIABLE_AMOUNT = 10;
   private static final Path tempDir = (new File("src/test/resources/temp")).toPath();
 
-  private MockupGraph graph;
-  private GraphUpdate update;
   private ClauseCoordinator coordinator;
-  private List<ClauseUpdateProcessor> processors;
-  private ClauseUpdate[] clauseUpdates = new ClauseUpdate[]{
+
+  @Mock
+  private Graph graph = mock(Graph.class);
+
+  @Mock
+  private ClauseUpdateProcessor processor1;
+
+  @Mock
+  private ClauseUpdateProcessor processor2;
+
+  private final ClauseUpdate[] clauseUpdates = new ClauseUpdate[]{
           new ClauseUpdate(new Clause(new int[]{6, 1}), ClauseUpdate.Type.ADD),
           new ClauseUpdate(new Clause(new int[]{6, 2}), ClauseUpdate.Type.ADD),
           new ClauseUpdate(new Clause(new int[]{6, 3}), ClauseUpdate.Type.ADD),
@@ -49,58 +52,46 @@ class ClauseCoordinatorTest {
 
   @BeforeEach
   void setUp() throws IOException {
-    processors = new ArrayList<>();
-    graph = MockupGraph.create(VARIABLE_AMOUNT);
     coordinator = new ClauseCoordinator(graph, tempDir);
+    coordinator.addProcessor(processor1);
+    coordinator.addProcessor(processor2);
   }
 
   @Test
   void advanceVisualization() throws IOException, SerializationException {
-    /**for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
       coordinator.addClauseUpdate(clauseUpdates[i]);
     }
-    coordinator.advanceVisualization(3);**/
-    processors.add(new Heatmap());
-    process(Arrays.copyOfRange(clauseUpdates, 0, 2));
-    process(Arrays.copyOfRange(clauseUpdates, 2, 3));
-    process(Arrays.copyOfRange(clauseUpdates, 3, 5));
-    processors.add(new VariableInteractionGraph());
-    process(Arrays.copyOfRange(clauseUpdates, 5, 15));
-    ByteArrayOutputStream  out = new ByteArrayOutputStream();
-    graph.serialize(out);
-    ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    graph.deserialize(in);
-    Map<String, Integer> counter = graph.getUpdateCounter();
-    String heatmapName = Heatmap.class.getName();
-    String vigName = VariableInteractionGraph.class.getName();
-    assertEquals(4, counter.get(HeatUpdate.class.getName()));
-    assertEquals(1, counter.get(WeightUpdate.class.getName()));
-  }
-
-  private void process(ClauseUpdate[] array) {
-    for (ClauseUpdateProcessor processor : processors) {
-      graph.submitUpdate(processor.process(array, graph));
+    assertEquals(0, coordinator.currentUpdate());
+    coordinator.advanceVisualization(3);
+    assertEquals(3, coordinator.currentUpdate());
+    for (int i = 4; i < 8; i++) {
+      coordinator.addClauseUpdate(clauseUpdates[i]);
     }
+    assertEquals(3, coordinator.currentUpdate());
+    coordinator.advanceVisualization(3);
+    assertEquals(6, coordinator.currentUpdate());
+    for (int i = 4; i < 12; i++) {
+      coordinator.addClauseUpdate(clauseUpdates[i]);
+    }
+    assertEquals(6, coordinator.currentUpdate());
+    coordinator.advanceVisualization(3);
+    assertEquals(9, coordinator.currentUpdate());
+    for (int i = 12; i < 13; i++) {
+      coordinator.addClauseUpdate(clauseUpdates[i]);
+    }
+    assertEquals(9, coordinator.currentUpdate());
+    coordinator.advanceVisualization(3);
+    assertEquals(12, coordinator.currentUpdate());
+    coordinator.advanceVisualization(3);
+    assertEquals(13, coordinator.currentUpdate());
   }
 
-  @Test
-  void currentUpdate() {
-  }
-
-  @Test
-  void seekToUpdate() {
-  }
-
-  @Test
-  void takeSnapshot() {
-  }
-
-  @Test
-  void addClauseUpdate() {
-  }
-
-  @Test
-  void registerChangeListener() {
+  @AfterEach
+  public static void clean() {
+    for (File file : tempDir.toFile().listFiles()) {
+      file.delete();
+    }
   }
 
 }
