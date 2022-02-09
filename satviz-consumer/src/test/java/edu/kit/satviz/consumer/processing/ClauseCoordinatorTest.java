@@ -25,14 +25,11 @@ class ClauseCoordinatorTest {
 
   private ClauseCoordinator coordinator;
 
-  @Mock
   private Graph graph = mock(Graph.class);
 
-  @Mock
-  private ClauseUpdateProcessor processor1;
+  private ClauseUpdateProcessor processor1 = mock(ClauseUpdateProcessor.class);
 
-  @Mock
-  private ClauseUpdateProcessor processor2;
+  private ClauseUpdateProcessor processor2 = mock(ClauseUpdateProcessor.class);
 
   private final ClauseUpdate[] clauseUpdates = new ClauseUpdate[]{
           new ClauseUpdate(new Clause(new int[]{6, 1}), ClauseUpdate.Type.ADD),
@@ -88,7 +85,7 @@ class ClauseCoordinatorTest {
   }
 
   @AfterEach
-  public static void clean() {
+  void clean() {
     for (File file : tempDir.toFile().listFiles()) {
       file.delete();
     }
