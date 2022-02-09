@@ -16,8 +16,15 @@ namespace video {
  */
 class Display {
 protected:
+  enum {
+    PBO_IN_PROGRESS,
+    PBO_READY,
+    NUM_PBOS
+  };
+
   int width;
   int height;
+  unsigned pbos[NUM_PBOS];
 
   Display(int w, int h) : width(w), height(h) {}
 
@@ -25,16 +32,18 @@ protected:
    * @return our preferred OpenGL context settings
    */
   static sf::ContextSettings makeContextSettings();
-  /**
-   * Load OpenGL function pointers.
-   *
-   * This is done at object construction time.
-   */
-  void loadGlExtensions();
+  void initializeGl();
+  void deinitializeGl();
+  void onResize();
+
   /**
    * Switch to this Displays OpenGL context.
    */
   virtual void activateContext() = 0;
+  /**
+   * Put the newly drawn frame on the screen.
+   */
+  virtual void displayFrame() = 0;
 
 public:
   virtual ~Display() {}
@@ -42,14 +51,27 @@ public:
   inline int getWidth() { return width; }
   inline int getHeight() { return height; }
 
-  // TODO Camera
-
   /**
    * Prepare the OpenGL state to draw a new frame.
    */
   void startFrame();
-  void drawFrame();
-  VideoFrame grabFrame();
+  /**
+   * Stop rendering the current frame and display it on the screen.
+   */
+  void endFrame();
+  /**
+   * Initiate the transfer of the currently drawn frame into RAM.
+   *
+   * The actual transfer will take place asynchronously during the next frame.
+   */
+  void transferCurrentFrame();
+  /**
+   * Convert the previously transferred frame to a VideoFrame.
+   *
+   * (This data is from *two* invocations of transferCurrentFrame() ago!)
+   * @return the VideoFrame
+   */
+  VideoFrame grabPreviousFrame();
 
   /**
    * Poll for user input events.
@@ -58,11 +80,6 @@ public:
    */
   virtual bool pollEvent(sf::Event &event) = 0;
   virtual void lockSize(bool lock) = 0;
-
-  /**
-   * Put the newly drawn frame on the screen.
-   */
-  virtual void displayFrame() = 0;
 };
 
 } // namespace video
