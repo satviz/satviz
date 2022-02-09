@@ -19,13 +19,16 @@ javafx {
 
 val nativeBuildDir = project.buildDir.resolve("cmake-build")
 val consumerLib = nativeBuildDir.resolve("satviz-consumer-native/src/satviz/libsatviz-consumer-native.so")
-val ogdfLib = rootProject.projectDir.resolve(".ogdf-build/libOGDF.so")
-val coinLib = rootProject.projectDir.resolve(".ogdf-build/libCOIN.so")
+val ogdfBuild = rootProject.projectDir.resolve(".ogdf-build")
+val ogdfLib = ogdfBuild.resolve("libOGDF.so")
+val coinLib = ogdfBuild.resolve("libCOIN.so")
 
 tasks {
     register<Exec>("cmake") {
         group = "native"
-        outputs.dir(nativeBuildDir)
+        inputs.dir("../satviz-consumer-native")
+        outputs.dir(nativeBuildDir.absoluteFile)
+        outputs.dir(ogdfBuild.absoluteFile)
         doFirst {
             nativeBuildDir.mkdir()
         }
