@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -152,7 +153,6 @@ public class ClauseCoordinator implements AutoCloseable {
         graph.serialize(stream);
       }
 
-      // TODO: 08/02/2022 Rethink ClauseUpdateProcessor: don't restore old ones, but rather reset the ones that didn't exist before
       // if the processor list has changed since the last snapshot, create a new snapshot array.
       // otherwise, reuse the processors snapshot from the most recent snapshot
       ClauseUpdateProcessor[] processorsSnapshot = processorsChanged
@@ -183,7 +183,8 @@ public class ClauseCoordinator implements AutoCloseable {
       // find nearest snapshot to index
       Map.Entry<Long, Snapshot> entry = snapshots.floorEntry(index);
       Snapshot snapshot = entry.getValue();
-      ClauseUpdateProcessor[] snapshotProcessors = snapshot.processors();
+      List<ClauseUpdateProcessor> snapshotProcessors = Arrays.asList(snapshot.processors());
+
       try (var stream = new BufferedInputStream(Files.newInputStream(snapshot.file()))) {
         // lock state to ensure consistent graph and processor views for advance()
         stateLock.lock();
@@ -193,11 +194,24 @@ public class ClauseCoordinator implements AutoCloseable {
         }
         graph.deserialize(stream);
       }
+
       // lock processors so processor updates don't interleave
       processorLock.lock();
-      // restore processors list
+      List<ClauseUpdateProcessor> nonSnapshotProcessors = new ArrayList<>(this.processors);
+      nonSnapshotProcessors.removeAll(snapshotProcessors);
+
+      // reset processors that were added later
+      for (ClauseUpdateProcessor processor : nonSnapshotProcessors) {
+        processor.reset();
+      }
+
+      List<ClauseUpdateProcessor> newProcessors = new ArrayList<>();
+      newProcessors.addAll(snapshotProcessors); // first the processors that exist in the snapshot
+      newProcessors.addAll(nonSnapshotProcessors); // then the processors that were added afterwards
+
+      // set new processor list
       this.processors.clear();
-      this.processors.addAll(Arrays.asList(snapshotProcessors));
+      this.processors.addAll(newProcessors);
       processorsChanged = false;
       return entry.getKey();
     } finally {

@@ -11,8 +11,16 @@ public interface ClauseUpdateProcessor {
 
   GraphUpdate process(ClauseUpdate[] clauseUpdates, Graph graph);
 
-  void serialize(OutputStream out);
+  default void serialize(OutputStream out) {
 
-  void deserialize(InputStream in);
+  }
+
+  default void deserialize(InputStream in) {
+
+  }
+
+  default void reset() {
+
+  }
 
 }
