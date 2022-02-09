@@ -4,6 +4,8 @@ import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.serial.SerializationException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,8 +23,8 @@ import static org.mockito.Mockito.when;
 class ClauseCoordinatorTest {
 
   private static final int VARIABLE_AMOUNT = 10;
-  private static final Path tempDir = (new File("src/test/resources/temp")).toPath();
 
+  private Path tempDir;
   private ClauseCoordinator coordinator;
 
   private Graph graph = mock(Graph.class);
@@ -49,6 +51,7 @@ class ClauseCoordinatorTest {
 
   @BeforeEach
   void setUp() throws IOException {
+    tempDir = Files.createDirectory(Paths.get("src/test"));
     coordinator = new ClauseCoordinator(graph, tempDir);
     coordinator.addProcessor(processor1);
     coordinator.addProcessor(processor2);
@@ -68,7 +71,7 @@ class ClauseCoordinatorTest {
     assertEquals(3, coordinator.currentUpdate());
     coordinator.advanceVisualization(3);
     assertEquals(6, coordinator.currentUpdate());
-    for (int i = 4; i < 12; i++) {
+    for (int i = 8; i < 12; i++) {
       coordinator.addClauseUpdate(clauseUpdates[i]);
     }
     assertEquals(6, coordinator.currentUpdate());
@@ -85,10 +88,8 @@ class ClauseCoordinatorTest {
   }
 
   @AfterEach
-  void clean() {
-    for (File file : tempDir.toFile().listFiles()) {
-      file.delete();
-    }
+  void clean() throws IOException {
+    coordinator.close();
   }
 
 }
