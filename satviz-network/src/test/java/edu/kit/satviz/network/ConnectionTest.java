@@ -146,9 +146,9 @@ class ConnectionTest {
 
     } finally {
       System.out.println("cleanup client");
-      client.stop();
+      client.finishStop();
       System.out.println("cleanup server");
-      server.stop();
+      server.finishStop();
       System.out.println("cleanup done");
     }
   }

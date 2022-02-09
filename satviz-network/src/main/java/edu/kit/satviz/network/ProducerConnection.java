@@ -2,7 +2,6 @@ package edu.kit.satviz.network;
 
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
-
 import java.io.IOException;
 import java.nio.channels.NotYetConnectedException;
 import java.util.HashMap;
@@ -16,27 +15,86 @@ public class ProducerConnection {
 
   private final ClientConnectionManager conman;
   private ConnectionId cid = null;
+  private ProducerId pid;
 
+  private volatile boolean startReceived = false;
   private ProducerConnectionListener ls = null;
-  private Consumer<String> lsFail = null;
 
   public ProducerConnection(String address, int port) {
     this.conman = new ClientConnectionManager(address, port, MessageTypes.satvizBlueprint);
   }
 
-  private void close(boolean abnormal, String reason) throws InterruptedException {
-    conman.stop();
-    if (lsFail != null) {
-      lsFail.accept(reason);
+  public boolean establish(ProducerId pid) {
+    synchronized (conman) {
+      if (this.pid == null) {
+        this.pid = pid;
+        conman.registerConnect(this::connectListener);
+        conman.start();
+        return true;
+      }
+      return false;
     }
   }
 
-  public void establish(ProducerId pid) {
-    conman.registerConnect(this::connectListener);
-    conman.registerGlobalFail(this::globalFailListener);
-    conman.start();
+  private void sendOrTerminate(byte type, Object obj) throws NotYetConnectedException {
+    if (!startReceived) { // offer packet not yet through
+      throw new NotYetConnectedException();
+    }
+    try {
+      conman.send(cid, type, obj);
+    } catch (NotYetConnectedException e) {
+      // throw again
+      throw e;
+    } catch (IOException e) {
+      conman.stop();
+    }
+  }
 
-    assert (cid != null);
+  private void sendAndTerminate(byte type, Object obj) throws InterruptedException {
+    try {
+      conman.send(cid, type, obj);
+    } catch (NotYetConnectedException | IOException e) {
+      // nothing more we can do
+    }
+    conman.finishStop();
+  }
+
+  public void sendClauseUpdate(ClauseUpdate c) throws NotYetConnectedException {
+    sendOrTerminate(
+        c.type() == ClauseUpdate.Type.ADD ? MessageTypes.CLAUSE_ADD : MessageTypes.CLAUSE_DEL,
+        c.clause()
+    );
+  }
+
+  public void terminateSolved(SatAssignment assign) throws NotYetConnectedException,
+      InterruptedException {
+    sendAndTerminate(MessageTypes.TERM_SOLVE, assign);
+  }
+
+  public void terminateRefuted() throws NotYetConnectedException, InterruptedException {
+    sendAndTerminate(MessageTypes.TERM_REFUTE, null);
+  }
+
+  public void terminateFailed(String reason) throws NotYetConnectedException,
+      InterruptedException {
+    sendAndTerminate(MessageTypes.TERM_FAIL, reason);
+  }
+
+  public void register(ProducerConnectionListener ls) {
+    this.ls = ls;
+  }
+
+  public void registerGlobalFail(Consumer<String> ls) {
+    conman.registerGlobalFail(ls);
+  }
+
+
+
+
+  private void connectListener(ConnectionId cid) {
+    this.cid = cid;
+    conman.register(cid, this::messageListener);
+
     Map<String, String> offerData = new HashMap<>();
     offerData.put("version", "1");
     if (pid.type() == OfferType.SOLVER) {
@@ -50,80 +108,45 @@ public class ProducerConnection {
     sendOrTerminate(MessageTypes.OFFER, offerData);
   }
 
-  private void sendOrTerminate(byte type, Object obj) throws NotYetConnectedException {
-    try {
-      conman.send(cid, type, obj);
-    } catch (NotYetConnectedException e) {
-      // throw again
-      throw e;
-    } catch (IOException e) {
-      try {
-        close(true, "send fail");
-      } catch (InterruptedException ie) {
-        Thread.currentThread().interrupt();
-      }
+  private void callOnConnect() {
+    if (ls != null) {
+      ls.onConnect();
     }
   }
 
-  public void sendClauseUpdate(ClauseUpdate c) throws NotYetConnectedException {
-    sendOrTerminate(
-        c.type() == ClauseUpdate.Type.ADD ? MessageTypes.CLAUSE_ADD : MessageTypes.CLAUSE_DEL,
-        c.clause()
-    );
-  }
-
-  public void terminateSolved(SatAssignment assign) throws NotYetConnectedException {
-    // TODO
-  }
-
-  public void terminateRefuted() throws NotYetConnectedException {
-    // TODO
-  }
-
-  public void terminateFailed(String reason) throws NotYetConnectedException {
-
-  }
-
-  public void register(ProducerConnectionListener ls) {
-    this.ls = ls;
-  }
-
-  public void registerGlobalFail(Consumer<String> ls) {
-    this.lsFail = lsFail;
-  }
-
-
-
-
-  private void connectListener(ConnectionId cid) {
-    this.cid = cid;
-    conman.register(cid, this::messageListener);
-  }
-
-  private void globalFailListener(String reason) {
-    try {
-      close(true, reason);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+  private void callOnDisconnect(String reason) {
+    if (ls != null) {
+      ls.onDisconnect(reason);
     }
   }
 
   private void messageListener(ConnectionId cid, NetworkMessage msg) {
     // ignore cid because there is only one
     switch (msg.getState()) {
-      case PRESENT -> {
+      case PRESENT:
         switch (msg.getType()) {
-          case MessageTypes.START -> {/*TODO*/}
-          case MessageTypes.STOP -> {/*TODO*/}
-          default -> {/*TODO*/}
+          case MessageTypes.START -> {
+            startReceived = true;
+            callOnConnect();
+          }
+          case MessageTypes.STOP -> {
+            conman.stop();
+            callOnDisconnect("stop");
+          }
+          default -> { /* ignore */ }
         }
-      }
-      case TERM -> {
-        /*TODO*/
-      }
-      case FAIL -> {
-        /*TODO*/
-      }
+        break;
+      case TERM:
+        conman.stop();
+        callOnDisconnect("term");
+        break;
+      case FAIL:
+        conman.stop();
+        callOnDisconnect("fail");
+        break;
+      default:
+        // ignore
+        break;
     }
   }
 }

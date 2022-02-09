@@ -152,10 +152,10 @@ public abstract class AbstractConnectionManager {
     return true;
   }
 
-  public final void stop() throws InterruptedException {
+  public final void stop() {
     synchronized (syncState) {
       System.out.println("stop: got lock");
-      if (state == State.FINISHED || state == State.FAILED) {
+      if (state == State.FINISHING || state == State.FINISHED || state == State.FAILED) {
         return;
       }
       if (state == State.NEW) {
@@ -167,12 +167,16 @@ public abstract class AbstractConnectionManager {
       state = State.FINISHING; // let reader thread handle terminating
       // even if reader thread has already failed at this point, it still terminates
       System.out.println("set state to FINISHING");
+    }
+  }
+
+  public final void finishStop() throws InterruptedException {
+    stop();
+    synchronized (syncState) {
       while (state != State.FAILED && state != State.FINISHED) {
-        // while loop to catch spurious wakeup
         syncState.wait();
       }
     }
-    System.out.println("stop done");
   }
 
   // blocking for blocking sockets; only use on previously selected
