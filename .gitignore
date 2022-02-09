@@ -6,3 +6,4 @@ build
 
 .idea
 
+/satviz-consumer/src/test/resources/temp/

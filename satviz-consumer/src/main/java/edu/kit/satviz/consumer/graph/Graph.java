@@ -7,7 +7,8 @@ import jdk.incubator.foreign.MemoryAddress;
 
 public class Graph extends NativeObject {
 
-  private Graph(MemoryAddress pointer) {
+  // Only protected because of mockup
+  protected Graph(MemoryAddress pointer) {
     super(pointer);
   }
 
