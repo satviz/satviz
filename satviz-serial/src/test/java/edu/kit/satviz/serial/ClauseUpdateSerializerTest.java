@@ -1,7 +1,6 @@
 package edu.kit.satviz.serial;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
@@ -33,6 +32,12 @@ class ClauseUpdateSerializerTest {
       fail(e);
     }
     assertEquals(ClauseUpdate.Type.ADD.ordinal(), out.toByteArray()[0]);
+  }
+
+  @Test
+  void testUnknownType() {
+    var in = new ByteArrayInputStream(new byte[] {3, 0});
+    assertThrows(SerializationException.class, () -> serializer.deserialize(in));
   }
 
   @Test
