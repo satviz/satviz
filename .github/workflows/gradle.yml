@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            odgf
+            ogdf
             .ogdf-build
           key: ${{ runner.os }}-deps
       - name: Install native dependencies
