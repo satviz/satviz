@@ -17,9 +17,10 @@ javafx {
     modules("javafx.controls", "javafx.fxml")
 }
 
-val nativeModuleDir = rootProject.file("satviz-consumer-native")
-val nativeBuildDir = nativeModuleDir.resolve("build")
-val sharedLibFile = nativeBuildDir.resolve("src/satviz/libsatviz-consumer-native.so")
+val nativeBuildDir = project.buildDir.resolve("cmake-build")
+val consumerLib = nativeBuildDir.resolve("satviz-consumer-native/src/satviz/libsatviz-consumer-native.so")
+val ogdfLib = nativeBuildDir.resolve("ogdf/libOGDF.so")
+val coinLib = nativeBuildDir.resolve("ogdf/libCOIN.so")
 
 tasks {
     register<Exec>("cmake") {
@@ -29,24 +30,21 @@ tasks {
             nativeBuildDir.mkdir()
         }
         workingDir = nativeBuildDir
-        commandLine = listOf("cmake", "..")
+        commandLine = listOf("cmake", "../../..")
     }
 
     register<Exec>("make") {
         group = "native"
         dependsOn.add("cmake")
         workingDir = nativeBuildDir
-        commandLine = listOf("make")
+        commandLine = listOf("make", "-j", "6")
     }
 
     processResources {
         dependsOn.add("make")
-        from(sharedLibFile)
-    }
-
-    clean {
-        delete.add(nativeBuildDir)
-        delete.add(nativeModuleDir.resolve("cmake-build-debug"))
+        from(consumerLib)
+        from(ogdfLib)
+        from(coinLib)
     }
 
 }
