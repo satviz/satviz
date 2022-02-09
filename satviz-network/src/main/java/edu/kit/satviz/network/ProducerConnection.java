@@ -80,6 +80,10 @@ public class ProducerConnection {
     sendAndTerminate(MessageTypes.TERM_FAIL, reason);
   }
 
+  public void stop() throws InterruptedException {
+    conman.finishStop();
+  }
+
   public void register(ProducerConnectionListener ls) {
     this.ls = ls;
   }
