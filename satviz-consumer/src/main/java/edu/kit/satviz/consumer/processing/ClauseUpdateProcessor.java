@@ -19,4 +19,8 @@ public interface ClauseUpdateProcessor {
 
   }
 
+  default void reset() {
+
+  }
+
 }
