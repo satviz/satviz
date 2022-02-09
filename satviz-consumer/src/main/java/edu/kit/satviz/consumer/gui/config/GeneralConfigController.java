@@ -1,11 +1,22 @@
 package edu.kit.satviz.consumer.gui.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerMode;
+import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+
+import edu.kit.satviz.consumer.config.json.ModeConfigAdapterFactory;
+import edu.kit.satviz.consumer.config.json.PathAdapter;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -60,7 +71,8 @@ public class GeneralConfigController extends ConfigController {
 
   // ATTRIBUTES (OTHER)
 
-  private ConfigController modeConfigController;
+  private Gson gson;
+  private ModeConfigController modeConfigController;
   private String recordingFile;
   private File satInstanceFile;
 
@@ -83,7 +95,48 @@ public class GeneralConfigController extends ConfigController {
 
   @FXML
   private void loadSettings() {
+    FileChooser fileChooser = new FileChooser();
+    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
+    fileChooser.getExtensionFilters().add(filter);
 
+    File file = fileChooser.showOpenDialog(null);
+    if (file == null) {
+      return;
+    }
+
+    ConsumerConfig config = null;
+    try {
+      config = getGson().fromJson(new FileReader(file), ConsumerConfig.class);
+    } catch (FileNotFoundException e) {
+      errorLabel.setText("The settings file could not be found.");
+      return;
+    } catch (JsonSyntaxException | JsonIOException e) {
+      errorLabel.setText("The settings file could not be read.");
+      return;
+    }
+
+    setDefaultValues();
+
+    ConsumerModeConfig modeConfig = config.getModeConfig();
+    if (modeConfig != null) {
+      modeChoiceBox.setValue(modeConfig.getMode());
+      updateMode();
+      modeConfigController.loadSettings(modeConfig);
+    }
+
+    config.getInstancePath();
+
+    config.isNoGui();
+
+    config.getVideoTemplatePath();
+
+    config.isRecordImmediately();
+
+    config.getWeightFactor();
+
+    config.getWindowSize();
+
+    config.getHeatmapColors();
   }
 
   @FXML
@@ -209,6 +262,17 @@ public class GeneralConfigController extends ConfigController {
 
   public ConsumerConfig getConsumerConfig() {
     return consumerConfig;
+  }
+
+  private Gson getGson() {
+    if (gson == null) {
+      gson = new GsonBuilder()
+          .setPrettyPrinting()
+          .registerTypeAdapterFactory(new ModeConfigAdapterFactory())
+          .registerTypeHierarchyAdapter(Path.class, new PathAdapter())
+          .create();
+    }
+    return gson;
   }
 
   private Color intToColor(int color) {
