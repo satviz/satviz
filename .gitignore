@@ -4,5 +4,8 @@
 # Ignore Gradle build output directory
 build
 
+# Ignore cmake build output directory
+cmake-build-*
+
 .idea
 
