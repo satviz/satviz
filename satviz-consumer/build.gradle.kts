@@ -19,8 +19,8 @@ javafx {
 
 val nativeBuildDir = project.buildDir.resolve("cmake-build")
 val consumerLib = nativeBuildDir.resolve("satviz-consumer-native/src/satviz/libsatviz-consumer-native.so")
-val ogdfLib = nativeBuildDir.resolve("ogdf/libOGDF.so")
-val coinLib = nativeBuildDir.resolve("ogdf/libCOIN.so")
+val ogdfLib = rootProject.projectDir.resolve(".ogdf-build/libOGDF.so")
+val coinLib = rootProject.projectDir.resolve(".ogdf-build/libCOIN.so")
 
 tasks {
     register<Exec>("cmake") {
@@ -31,6 +31,13 @@ tasks {
         }
         workingDir = nativeBuildDir
         commandLine = listOf("cmake", "../../..")
+    }
+
+    register<Exec>("ctest") {
+        group = "native"
+        dependsOn.add("cmake")
+        workingDir = nativeBuildDir
+        commandLine = listOf("ctest")
     }
 
     register<Exec>("make") {
@@ -47,4 +54,7 @@ tasks {
         from(coinLib)
     }
 
+    test {
+        dependsOn.add("ctest")
+    }
 }

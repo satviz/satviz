@@ -7,4 +7,4 @@ add_subdirectory(satviz-consumer-native)
 
 option(BUILD_SHARED_LIBS "" ON)
 option(CMAKE_BUILD_TYPE  "" Release)
-add_subdirectory(ogdf)
+add_subdirectory(ogdf ${CMAKE_SOURCE_DIR}/.ogdf-build)
