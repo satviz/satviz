@@ -20,8 +20,6 @@ public class EmbeddedConfigController extends ConfigController {
   @FXML
   private ChoiceBox<EmbeddedModeSource> producerModeChoiceBox;
   @FXML
-  private Button producerModeFileButton;
-  @FXML
   private Label producerModeFileLabel;
 
   // ATTRIBUTES (OTHER)
@@ -31,10 +29,9 @@ public class EmbeddedConfigController extends ConfigController {
 
   // METHODS (FXML)
 
-  @FXML
-  private void initialize() {
+  @Override
+  protected void initializeComponents() {
     producerModeChoiceBox.setItems(FXCollections.observableArrayList(EmbeddedModeSource.values()));
-    producerModeChoiceBox.setValue(EmbeddedModeConfig.DEFAULT_EMBEDDED_MODE_SOURCE);
   }
 
   @FXML
@@ -56,6 +53,14 @@ public class EmbeddedConfigController extends ConfigController {
   }
 
   // METHODS (OTHER)
+
+  @Override
+  protected void setDefaultValues() {
+    producerModeChoiceBox.setValue(EmbeddedModeConfig.DEFAULT_EMBEDDED_MODE_SOURCE);
+
+    producerModeFile = null;
+    producerModeFileLabel.setText("");
+  }
 
   @Override
   protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {

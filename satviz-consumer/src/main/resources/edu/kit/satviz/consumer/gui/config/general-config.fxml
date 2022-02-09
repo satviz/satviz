@@ -77,7 +77,7 @@
                                     </Label>
                                  </children>
                               </HBox>
-                                      <CheckBox mnemonicParsing="false" selected="true" text="Show Live Visualization" fx:id="showLiveVisualizationCheckBox" onAction="#setLiveVisualization"/>
+                                      <CheckBox mnemonicParsing="false" text="Show Live Visualization" fx:id="showLiveVisualizationCheckBox" onAction="#setLiveVisualization"/>
                                       <CheckBox mnemonicParsing="false" prefHeight="22.0" prefWidth="190.0" text="Record Animation From Start" fx:id="recordFromStartCheckBox"/>
                            </children>
                            <padding>
@@ -187,9 +187,6 @@
                      </children>
                   </VBox>
                         <VBox fx:id="modeVbox" prefHeight="104.0" prefWidth="415.0" style="-fx-border-color: black;">
-                            <children>
-                                <fx:include source="external-config.fxml" />
-                            </children>
                             <VBox.margin>
                                 <Insets top="10.0" />
                             </VBox.margin>

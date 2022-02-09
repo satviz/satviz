@@ -69,24 +69,16 @@ public class GeneralConfigController extends ConfigController {
 
   // METHODS (FXML)
 
-  @FXML
-  private void initialize() {
-    recordingFile = ConsumerConfig.DEFAULT_VIDEO_TEMPLATE_PATH;
-    recordingFileLabel.setText(recordingFile.substring(recordingFile.lastIndexOf("/") + 1));
-
+  @Override
+  protected void initializeComponents() {
     weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
-    weightFactorChoiceBox.setValue(ConsumerConfig.DEFAULT_WEIGHT_FACTOR);
 
     initializeIntegerSpinner(windowSizeSpinner,
         ConsumerConfig.MIN_WINDOW_SIZE,
         ConsumerConfig.MAX_WINDOW_SIZE,
         ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
-    coldColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
-    hotColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_TO_COLOR));
-
     modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
-    modeChoiceBox.setValue(ConsumerConfig.DEFAULT_CONSUMER_MODE);
   }
 
   @FXML
@@ -162,6 +154,30 @@ public class GeneralConfigController extends ConfigController {
   }
 
   // METHODS (OTHER)
+
+  @Override
+  protected void setDefaultValues() {
+    recordingFile = ConsumerConfig.DEFAULT_VIDEO_TEMPLATE_PATH;
+    recordingFileLabel.setText(recordingFile.substring(recordingFile.lastIndexOf("/") + 1));
+
+    showLiveVisualizationCheckBox.setSelected(!ConsumerConfig.DEFAULT_NO_GUI);
+
+    recordFromStartCheckBox.setSelected(ConsumerConfig.DEFAULT_RECORD_IMMEDIATELY);
+
+    weightFactorChoiceBox.setValue(ConsumerConfig.DEFAULT_WEIGHT_FACTOR);
+
+    windowSizeSpinner.getValueFactory().setValue(ConsumerConfig.DEFAULT_WINDOW_SIZE);
+
+    coldColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
+
+    hotColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_TO_COLOR));
+
+    satInstanceFile = null;
+    satInstanceFileLabel.setText("");
+
+    modeChoiceBox.setValue(ConsumerConfig.DEFAULT_CONSUMER_MODE);
+    updateMode();
+  }
 
   @Override
   protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {

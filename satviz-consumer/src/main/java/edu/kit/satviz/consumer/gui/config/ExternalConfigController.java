@@ -4,20 +4,28 @@ import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.util.StringConverter;
 
 public class ExternalConfigController extends ConfigController {
 
   @FXML
   private Spinner<Integer> portSpinner;
 
-  @FXML
-  private void initialize() {
+
+  // METHODS (FXML)
+
+  @Override
+  protected void initializeComponents() {
     initializeIntegerSpinner(portSpinner,
         ExternalModeConfig.MIN_PORT_NUMBER,
         ExternalModeConfig.MAX_PORT_NUMBER,
         ExternalModeConfig.DEFAULT_PORT_NUMBER);
+  }
+
+  // METHODS (OTHER)
+
+  @Override
+  protected void setDefaultValues() {
+    portSpinner.getValueFactory().setValue(ExternalModeConfig.DEFAULT_PORT_NUMBER);
   }
 
   @Override

@@ -1,11 +1,25 @@
 package edu.kit.satviz.consumer.gui.config;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
+import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.util.StringConverter;
 
 public abstract class ConfigController {
+
+  /**
+   * template method.
+   */
+  @FXML
+  protected void initialize() {
+    initializeComponents();
+    setDefaultValues();
+  }
+
+  protected abstract void initializeComponents();
+
+  protected abstract void setDefaultValues();
 
   protected abstract ConsumerConfig createConsumerConfig() throws ConfigArgumentException;
 
