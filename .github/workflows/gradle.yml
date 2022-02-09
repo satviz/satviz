@@ -12,7 +12,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ develop ]
-  workflow_dispatch: {}
+  workflow_dispatch: { }
 
 jobs:
   build:
@@ -20,31 +20,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
-    - name: Set up JDK 17
-      uses: actions/setup-java@v2
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    - name: Cache native dependencies
-      uses: actions/cache@v2
-      with:
-        path: |
-          odgf
-          satviz-consumer/build/cmake-build/ogdf
-        key: ${{ runner.os }}-deps
-    - name: Install native dependencies
-      run: sudo apt-get install -y libtheora-dev libgtest-dev libsfml-dev
-    - name: Unit tests
-      uses: gradle/gradle-build-action@v2
-      with:
-        arguments: test
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache native dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            odgf
+            satviz-consumer/build/cmake-build/ogdf
+          key: ${{ runner.os }}-deps
+      - name: Install native dependencies
+        run: sudo apt-get install -y libtheora-dev libgtest-dev libsfml-dev
+      - name: Unit tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: test
   checkstyle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
       - name: Checkstyle
         uses: gradle/gradle-build-action@v2
         with:
