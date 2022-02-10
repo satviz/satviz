@@ -5,6 +5,7 @@ import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -48,8 +49,7 @@ public class EmbeddedConfigController extends ModeConfigController {
 
     File file = fileChooser.showOpenDialog(null);
     if (file != null) {
-      producerModeFile = file;
-      producerModeFileLabel.setText(file.getName());
+      setProducerModeFile(file);
     }
   }
 
@@ -81,12 +81,24 @@ public class EmbeddedConfigController extends ModeConfigController {
 
   @Override
   protected void loadSettings(ConsumerModeConfig config) {
+    setDefaultValues();
+
     EmbeddedModeConfig embeddedModeConfig = (EmbeddedModeConfig) config;
 
-    producerModeChoiceBox.setValue(embeddedModeConfig.getSource());
+    EmbeddedModeSource source = embeddedModeConfig.getSource();
+    if (source != null) {
+      producerModeChoiceBox.setValue(source);
+    }
 
-    producerModeFile = embeddedModeConfig.getSourcePath().toFile();
-    producerModeFileLabel.setText(producerModeFile.getName());
+    Path sourcePath = embeddedModeConfig.getSourcePath();
+    if (sourcePath != null) {
+      setProducerModeFile(sourcePath.toFile());
+    }
+  }
+
+  private void setProducerModeFile(File file) {
+    producerModeFile = file;
+    producerModeFileLabel.setText(file.getName());
   }
 
 }

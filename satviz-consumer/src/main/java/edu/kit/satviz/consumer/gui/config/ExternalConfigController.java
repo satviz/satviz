@@ -44,6 +44,8 @@ public class ExternalConfigController extends ModeConfigController {
 
   @Override
   protected void loadSettings(ConsumerModeConfig config) {
+    setDefaultValues();
+
     ExternalModeConfig externalModeConfig = (ExternalModeConfig) config;
 
     portSpinner.getValueFactory().setValue(externalModeConfig.getPort());
