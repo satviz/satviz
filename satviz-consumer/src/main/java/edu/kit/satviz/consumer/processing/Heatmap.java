@@ -4,6 +4,8 @@ import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,4 +66,13 @@ public class Heatmap implements ClauseUpdateProcessor {
     return update;
   }
 
+  @Override
+  public void deserialize(InputStream in) {
+    reset();
+  }
+
+  @Override
+  public void reset() {
+    setHeatmapSize(recentClauses.length);
+  }
 }
