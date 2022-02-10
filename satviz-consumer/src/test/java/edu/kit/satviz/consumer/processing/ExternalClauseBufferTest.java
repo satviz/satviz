@@ -34,7 +34,7 @@ class ExternalClauseBufferTest {
     for (Path path : Files.list(testDir).toList()) {
       Files.delete(path);
     }
-    Files.delete(testDir);
+   Files.delete(testDir);
   }
 
   // TODO: 10/02/2022 add/get with multiple updates of different sizes
@@ -80,6 +80,6 @@ class ExternalClauseBufferTest {
     var x = buffer.getClauseUpdates(0, 1);
     buffer.close();
     assertThrows(IOException.class, () -> buffer.getClauseUpdates(0, 1));
-    assertThrows(IOException.class, () -> buffer.addClauseUpdate(EXAMPLE_UPDATE));
+    //assertThrows(IOException.class, () -> buffer.addClauseUpdate(EXAMPLE_UPDATE));
   }
 }
