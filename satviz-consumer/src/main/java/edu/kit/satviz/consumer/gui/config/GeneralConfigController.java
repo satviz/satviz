@@ -72,9 +72,9 @@ public class GeneralConfigController extends ConfigController {
   // ATTRIBUTES (OTHER)
 
   private Gson gson;
-  private ModeConfigController modeConfigController;
   private String recordingFile;
   private File satInstanceFile;
+  private ModeConfigController modeConfigController;
 
   private ConsumerConfig consumerConfig;
 
@@ -115,28 +115,42 @@ public class GeneralConfigController extends ConfigController {
       return;
     }
 
+
     setDefaultValues();
 
+    // override all settings that are defined in the JSON file
     ConsumerModeConfig modeConfig = config.getModeConfig();
-    if (modeConfig != null) {
-      modeChoiceBox.setValue(modeConfig.getMode());
-      updateMode();
+    if (modeConfig != null && modeConfig.getMode() != null) {
+      setConsumerMode(modeConfig.getMode());
       modeConfigController.loadSettings(modeConfig);
     }
 
-    config.getInstancePath();
+    Path instancePath = config.getInstancePath();
+    if (instancePath != null) {
+      setSatInstanceFile(instancePath.toFile());
+    }
 
-    config.isNoGui();
+    showLiveVisualizationCheckBox.setSelected(!config.isNoGui());
 
-    config.getVideoTemplatePath();
+    String videoTemplatePath = config.getVideoTemplatePath();
+    if (videoTemplatePath != null) {
+      setRecordingFile(videoTemplatePath);
+    }
 
-    config.isRecordImmediately();
+    recordFromStartCheckBox.setSelected(config.isRecordImmediately());
 
-    config.getWeightFactor();
+    WeightFactor weightFactor = config.getWeightFactor();
+    if (weightFactor != null) {
+      weightFactorChoiceBox.setValue(weightFactor);
+    }
 
-    config.getWindowSize();
+    windowSizeSpinner.getValueFactory().setValue(config.getWindowSize());
 
-    config.getHeatmapColors();
+    HeatmapColors colors = config.getHeatmapColors();
+    if (colors != null) {
+      coldColorColorPicker.setValue(intToColor(colors.getFromColor()));
+      hotColorColorPicker.setValue(intToColor(colors.getToColor()));
+    }
   }
 
   @FXML
@@ -152,8 +166,7 @@ public class GeneralConfigController extends ConfigController {
 
     File file = fileChooser.showSaveDialog(null);
     if (file != null) {
-      recordingFile = file.getAbsolutePath();
-      recordingFileLabel.setText(file.getName());
+      setRecordingFile(file);
     }
   }
 
@@ -175,8 +188,7 @@ public class GeneralConfigController extends ConfigController {
 
     File file = fileChooser.showOpenDialog(null);
     if (file != null) {
-      satInstanceFile = file;
-      satInstanceFileLabel.setText(file.getName());
+      setSatInstanceFile(file);
     }
   }
 
@@ -210,8 +222,7 @@ public class GeneralConfigController extends ConfigController {
 
   @Override
   protected void setDefaultValues() {
-    recordingFile = ConsumerConfig.DEFAULT_VIDEO_TEMPLATE_PATH;
-    recordingFileLabel.setText(recordingFile.substring(recordingFile.lastIndexOf("/") + 1));
+    setRecordingFile(ConsumerConfig.DEFAULT_VIDEO_TEMPLATE_PATH);
 
     showLiveVisualizationCheckBox.setSelected(!ConsumerConfig.DEFAULT_NO_GUI);
 
@@ -228,8 +239,7 @@ public class GeneralConfigController extends ConfigController {
     satInstanceFile = null;
     satInstanceFileLabel.setText("");
 
-    modeChoiceBox.setValue(ConsumerConfig.DEFAULT_CONSUMER_MODE);
-    updateMode();
+    setConsumerMode(ConsumerConfig.DEFAULT_CONSUMER_MODE);
   }
 
   @Override
@@ -258,6 +268,26 @@ public class GeneralConfigController extends ConfigController {
     config.setHeatmapColors(colors);
 
     return config;
+  }
+
+  private void setRecordingFile(String file) {
+    recordingFile = file;
+    recordingFileLabel.setText(recordingFile.substring(recordingFile.lastIndexOf("/") + 1));
+  }
+
+  private void setRecordingFile(File file) {
+    recordingFile = file.getAbsolutePath();
+    recordingFileLabel.setText(file.getName());
+  }
+
+  private void setSatInstanceFile(File file) {
+    satInstanceFile = file;
+    satInstanceFileLabel.setText(file.getName());
+  }
+
+  private void setConsumerMode(ConsumerMode mode) {
+    modeChoiceBox.setValue(mode);
+    updateMode();
   }
 
   public ConsumerConfig getConsumerConfig() {
