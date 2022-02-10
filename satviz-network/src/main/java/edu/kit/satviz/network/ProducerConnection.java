@@ -15,15 +15,25 @@ public class ProducerConnection {
 
   private final ClientConnectionManager conman;
   private ConnectionId cid = null;
-  private ProducerId pid;
+  private ProducerId pid = null;
 
   private volatile boolean startReceived = false;
+  private volatile boolean stopReceived = false;
   private ProducerConnectionListener ls = null;
 
   public ProducerConnection(String address, int port) {
     this.conman = new ClientConnectionManager(address, port, MessageTypes.satvizBlueprint);
   }
 
+  /**
+   * Starts establishing the connection to the consumer.
+   * Make sure to register a {@link ProducerConnectionListener} if you want to be notified
+   *     as soon as this process is done.
+   * Calling this method more than once has no effect.
+   *
+   * @param pid the ID that is sent to the client. The address is ignored.
+   * @return whether this was the first time calling this method or not
+   */
   public boolean establish(ProducerId pid) {
     synchronized (conman) {
       if (this.pid == null) {
@@ -37,7 +47,7 @@ public class ProducerConnection {
   }
 
   private void sendOrTerminate(byte type, Object obj) throws NotYetConnectedException {
-    if (!startReceived) { // offer packet not yet through
+    if (!startReceived || stopReceived) { // server not expecting messages
       throw new NotYetConnectedException();
     }
     try {
@@ -50,15 +60,21 @@ public class ProducerConnection {
     }
   }
 
-  private void sendAndTerminate(byte type, Object obj) throws InterruptedException {
+  private void sendAndTerminate(byte type, Object obj) {
     try {
       conman.send(cid, type, obj);
     } catch (NotYetConnectedException | IOException e) {
       // nothing more we can do
     }
-    conman.finishStop();
+    conman.stop();
   }
 
+  /**
+   * Sends a clause update to the consumer.
+   *
+   * @param c the update
+   * @throws NotYetConnectedException if the consumer is not expecting data
+   */
   public void sendClauseUpdate(ClauseUpdate c) throws NotYetConnectedException {
     sendOrTerminate(
         c.type() == ClauseUpdate.Type.ADD ? MessageTypes.CLAUSE_ADD : MessageTypes.CLAUSE_DEL,
@@ -66,28 +82,56 @@ public class ProducerConnection {
     );
   }
 
-  public void terminateSolved(SatAssignment assign) throws NotYetConnectedException,
-      InterruptedException {
+  /**
+   * Terminates this connection with a satisfying SAT assignment.
+   *
+   * @param assign the assignment
+   */
+  public void terminateSolved(SatAssignment assign) {
     sendAndTerminate(MessageTypes.TERM_SOLVE, assign);
   }
 
-  public void terminateRefuted() throws NotYetConnectedException, InterruptedException {
+  /**
+   * Terminates this connection with a refutation message.
+   */
+  public void terminateRefuted() {
     sendAndTerminate(MessageTypes.TERM_REFUTE, null);
   }
 
-  public void terminateFailed(String reason) throws NotYetConnectedException,
-      InterruptedException {
+  /**
+   * Terminates this connection with a fail message.
+   *
+   * @param reason the message of failure
+   */
+  public void terminateFailed(String reason) {
     sendAndTerminate(MessageTypes.TERM_FAIL, reason);
   }
 
+  /**
+   * Stops this connection.
+   * This method has to be called after working with this connection is done.
+   * Otherwise, some threads may not safely exit.
+   *
+   * @throws InterruptedException if this thread is interrupted waiting on others
+   */
   public void stop() throws InterruptedException {
     conman.finishStop();
   }
 
+  /**
+   * Registers a listener to listen on this connection.
+   *
+   * @param ls the listener
+   */
   public void register(ProducerConnectionListener ls) {
     this.ls = ls;
   }
 
+  /**
+   * Registers a listener to listen on global failures.
+   *
+   * @param ls the listener
+   */
   public void registerGlobalFail(Consumer<String> ls) {
     conman.registerGlobalFail(ls);
   }
@@ -134,6 +178,7 @@ public class ProducerConnection {
             callOnConnect();
           }
           case MessageTypes.STOP -> {
+            stopReceived = true;
             conman.stop();
             callOnDisconnect("stop");
           }
@@ -141,10 +186,12 @@ public class ProducerConnection {
         }
         break;
       case TERM:
+        stopReceived = true;
         conman.stop();
         callOnDisconnect("term");
         break;
       case FAIL:
+        stopReceived = true;
         conman.stop();
         callOnDisconnect("fail");
         break;

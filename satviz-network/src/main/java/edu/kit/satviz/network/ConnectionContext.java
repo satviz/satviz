@@ -251,7 +251,7 @@ public class ConnectionContext {
    * @throws NotYetConnectedException if the socket is not connected
    * @throws IOException if the channel is not connected or a write error occurs
    */
-  public int write(ByteBuffer bb) throws IOException {
+  public synchronized int write(ByteBuffer bb) throws IOException {
     if (state != State.CONNECTED) {
       throw new NotYetConnectedException();
     }
