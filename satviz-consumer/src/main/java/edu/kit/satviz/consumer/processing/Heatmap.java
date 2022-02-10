@@ -42,19 +42,20 @@ public class Heatmap implements ClauseUpdateProcessor {
       if (previous != null) {
         full = true;
         for (int literal : previous.literals()) {
-          Integer val = frequencies.get(literal);
+          int variable = Math.abs(literal);
+          Integer val = frequencies.get(variable);
           if (val != null) {
             if (val == 1) {
-              frequencies.remove(literal);
+              frequencies.remove(variable);
             } else {
-              frequencies.put(literal, val - 1);
+              frequencies.put(variable, val - 1);
             }
           }
         }
       }
       recentClauses[cursor] = clause;
       for (int literal : clause.literals()) {
-        frequencies.compute(literal, (k, v) -> v == null ? 1 : v + 1);
+        frequencies.compute(Math.abs(literal), (k, v) -> v == null ? 1 : v + 1);
       }
     }
 
