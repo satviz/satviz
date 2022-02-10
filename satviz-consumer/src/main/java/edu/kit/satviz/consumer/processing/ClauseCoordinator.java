@@ -87,6 +87,10 @@ public class ClauseCoordinator implements AutoCloseable {
     return currentUpdate;
   }
 
+  public long totalUpdateCount() {
+    return buffer.size();
+  }
+
   public void seekToUpdate(long index) throws IOException, SerializationException {
     if (index < 0) {
       throw new IllegalArgumentException("Index must not be negative: " + index);
