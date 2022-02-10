@@ -61,8 +61,7 @@ public class Heatmap implements ClauseUpdateProcessor {
 
     int totalAmount = full ? recentClauses.length : cursor;
     for (var entry : frequencies.entrySet()) {
-      // FIXME: 10/02/2022 this is very wrong; the heat value should be a float/double
-      update.add(entry.getKey(), entry.getValue() / totalAmount);
+      update.add(entry.getKey(), (float) entry.getValue() / totalAmount);
     }
     return update;
   }
