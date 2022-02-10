@@ -90,6 +90,9 @@ public class ExternalClauseBuffer implements AutoCloseable {
     readLock.lock();
     try {
       int actualNumUpdates = (int) Math.min(numUpdates, size - index);
+      if (actualNumUpdates < 0) {
+        throw new IndexOutOfBoundsException("For clause update index " + index);
+      }
       ClauseUpdate[] updates = new ClauseUpdate[actualNumUpdates];
       // TODO: 08/02/2022 pick strategy
       readUpdatesBufferless(index, updates);
