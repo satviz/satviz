@@ -155,7 +155,39 @@ public class GeneralConfigController extends ConfigController {
 
   @FXML
   private void saveSettings() {
+    FileChooser fileChooser = new FileChooser();
+    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
+    fileChooser.getExtensionFilters().add(filter);
 
+    File file = fileChooser.showSaveDialog(null);
+    if (file == null) {
+      return;
+    }
+
+    // creates config where ConsumerModeConfig has already been set
+    ConsumerConfig config = modeConfigController.saveConsumerConfig();
+
+    if (satInstanceFile != null) {
+      config.setInstancePath(satInstanceFile.toPath());
+    }
+
+    config.setNoGui(!showLiveVisualizationCheckBox.isSelected());
+
+    config.setVideoTemplatePath(recordingFile);
+
+    config.setRecordImmediately(recordFromStartCheckBox.isSelected());
+
+    config.setWeightFactor(weightFactorChoiceBox.getValue());
+
+    config.setWindowSize(windowSizeSpinner.getValue());
+
+    HeatmapColors colors = new HeatmapColors();
+    colors.setFromColor(colorToInt(coldColorColorPicker.getValue()));
+    colors.setToColor(colorToInt(hotColorColorPicker.getValue()));
+    config.setHeatmapColors(colors);
+
+
+    getGson().toJson(file, config);
   }
 
   @FXML
