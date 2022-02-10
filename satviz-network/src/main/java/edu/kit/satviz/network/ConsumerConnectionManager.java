@@ -2,19 +2,25 @@ package edu.kit.satviz.network;
 
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
-
+import edu.kit.satviz.sat.SatAssignment;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static edu.kit.satviz.network.MessageTypes.OFFER;
-
+/**
+ * A clause consumer connection to several clause producers.
+ */
 public class ConsumerConnectionManager {
 
+  // TODO a lot of stuff is not synchronized yet!
+
   private final ConnectionManager conman;
-  private Map<ConnectionId, ProducerId> idMap = new HashMap<>();
-  private Map<ProducerId, ConsumerConnectionListener> listeners = new HashMap<>();
+  private final Map<ConnectionId, ProducerId> idMap = new HashMap<>();
+  private final Map<ProducerId, ConsumerConnectionListener> listeners = new HashMap<>();
+
+  private Consumer<ProducerId> lsConnect = null;
 
   private boolean started = false;
 
@@ -22,6 +28,13 @@ public class ConsumerConnectionManager {
     this.conman = new ConnectionManager(port, MessageTypes.satvizBlueprint);
   }
 
+  /**
+   * Starts this connection manager.
+   * Make sure to call <code>registerConnect</code> to get notified if new producers arrive.
+   * Calling this method more than once has no effect.
+   *
+   * @return whether this was the first time calling this method or not
+   */
   public boolean start() {
     synchronized (conman) {
       if (started) {
@@ -29,60 +42,104 @@ public class ConsumerConnectionManager {
       }
       conman.registerConnect(this::connectListener);
       conman.start();
+      started = true;
       return true;
     }
   }
 
+  /**
+   * Stops this manager and all associated connections.
+   * This method has to be called after working with this connection is done.
+   * Otherwise, some threads may not safely exit.
+   *
+   * @throws InterruptedException if this thread is interrupted waiting on others
+   */
   public void stop() throws InterruptedException {
     conman.finishStop();
   }
 
+  /**
+   * Gets a list of all producers that have attempted to connect here.
+   *
+   * @return list of producers
+   */
   public List<ProducerId> getProducers() {
     return idMap.values().stream().toList();
   }
 
+  /**
+   * Registers a listener to listen on global failures.
+   *
+   * @param ls the listener
+   */
   public void registerGlobalFail(Consumer<String> ls) {
-    // TODO
+    conman.registerGlobalFail(ls);
   }
 
-  public void connect(ProducerId pid, ConsumerConnectionListener ls) {
-    // TODO
+  public void registerConnect(Consumer<ProducerId> lsConnect) {
+    this.lsConnect = lsConnect;
   }
 
-  public void disconnect(ProducerId pid, ConsumerConnectionListener ls) {
-    // TODO
-  }
-
-  private void callOnClauseUpdate(ConnectionId cid, ClauseUpdate c) {
-    ProducerId pid = idMap.get(cid);
-    if (pid == null) {
-      return;
+  /**
+   * Attempts to establish this connection, so that the producer may start sending data.
+   * If the operation fails, the corresponding connection is closed.
+   *
+   * @param pid the ID of the producer
+   * @param ls the listener to be notified on incoming data
+   * @return whether the operation succeeded or not
+   */
+  public boolean connect(ProducerId pid, ConsumerConnectionListener ls) {
+    listeners.put(pid, ls);
+    try {
+      conman.send(pid.cid(), MessageTypes.START, null);
+    } catch (IOException e) {
+      return false;
     }
+    return true;
+  }
+
+  /**
+   * Attempts to close this connection.
+   * If the operation fails, the corresponding connection is closed without the producer
+   *     receiving a signal.
+   *
+   * @param pid the ID of the producer
+   * @return whether the operation succeeded or not
+   */
+  public boolean disconnect(ProducerId pid) {
+    try {
+      conman.send(pid.cid(), MessageTypes.STOP, null);
+    } catch (IOException e) {
+      return false;
+    }
+    return true;
+  }
+
+  private void callOnClauseUpdate(ProducerId pid, ClauseUpdate c) {
     ConsumerConnectionListener ls = listeners.get(pid);
     if (ls != null) {
       ls.onClauseUpdate(pid, c);
     }
   }
 
-  private void callOnTerminateOtherwise(ConnectionId cid, String reason) {
-    ProducerId pid = idMap.get(cid);
-    if (pid == null) {
-      return;
-    }
+  private void callOnTerminateOtherwise(ProducerId pid, String reason) {
     ConsumerConnectionListener ls = listeners.get(pid);
     if (ls != null) {
       ls.onTerminateOtherwise(pid, reason);
     }
   }
 
-  private void callOnClauseAdd(ConnectionId cid, ClauseUpdate c) {
-    ProducerId pid = idMap.get(cid);
-    if (pid == null) {
-      return;
-    }
+  private void callOnTerminateRefuted(ProducerId pid) {
     ConsumerConnectionListener ls = listeners.get(pid);
     if (ls != null) {
-      ls.onClauseUpdate(pid, c);
+      ls.onTerminateRefuted(pid);
+    }
+  }
+
+  private void callOnTerminateSolved(ProducerId pid, SatAssignment assign) {
+    ConsumerConnectionListener ls = listeners.get(pid);
+    if (ls != null) {
+      ls.onTerminateSolved(pid, assign);
     }
   }
 
@@ -91,49 +148,58 @@ public class ConsumerConnectionManager {
     conman.register(cid, this::messageListener);
   }
 
+  private ProducerId generatePid(ConnectionId cid, Map<String, String> offerData) {
+    // no error handling yet
+    String type = offerData.get("type");
+    if (type.equals("solver")) {
+      String name = offerData.get("name");
+      int hash = Integer.parseInt(offerData.get("hash"));
+      boolean delayed = offerData.get("delayed").equals("true");
+      return new ProducerId(cid, OfferType.SOLVER, name, delayed, hash);
+    } else {
+      return new ProducerId(cid, OfferType.PROOF, null, false, 0);
+    }
+  }
+
   private void messageListener(ConnectionId cid, NetworkMessage msg) {
     ProducerId pid = idMap.get(cid);
-    if (pid == null) {
-      // no pid -> no listener connected yet
-      if (msg.getState() == NetworkMessage.State.PRESENT && msg.getType() == OFFER) {
-        Map<String, String> offerData = (Map<String, String>) msg.getObject();
-        String type = offerData.get("type");
-        if (type.equals("solver")) {
-          String name = offerData.get("name");
-          int hash = Integer.parseInt(offerData.get("hash"));
-          boolean delayed = offerData.get("delayed").equals("true");
-          pid = new ProducerId(cid.address(), OfferType.SOLVER, name, delayed, hash);
-        } else {
-          pid = new ProducerId(cid.address(), OfferType.PROOF, null, false, 0);
-        }
-        idMap.put(cid, pid);
-      }
-    } else {
-      switch (msg.getState()) {
-        case PRESENT:
+
+    switch (msg.getState()) {
+      case PRESENT:
+        if (pid != null) {
           switch (msg.getType()) {
-            case MessageTypes.CLAUSE_ADD -> {
-              callOnClauseUpdate(cid,
-                  new ClauseUpdate((Clause) msg.getObject(), ClauseUpdate.Type.ADD));
-            }
-            case MessageTypes.CLAUSE_DEL -> {
-              callOnClauseUpdate(cid,
-                  new ClauseUpdate((Clause) msg.getObject(), ClauseUpdate.Type.REMOVE));
-            }
-            // TODO terminate
+            case MessageTypes.CLAUSE_ADD -> callOnClauseUpdate(pid,
+                new ClauseUpdate((Clause) msg.getObject(), ClauseUpdate.Type.ADD));
+            case MessageTypes.CLAUSE_DEL -> callOnClauseUpdate(pid,
+                new ClauseUpdate((Clause) msg.getObject(), ClauseUpdate.Type.REMOVE));
+            case MessageTypes.TERM_FAIL -> callOnTerminateOtherwise(pid, (String) msg.getObject());
+            case MessageTypes.TERM_REFUTE -> callOnTerminateRefuted(pid);
+            case MessageTypes.TERM_SOLVE -> callOnTerminateSolved(pid,
+                (SatAssignment) msg.getObject());
             default -> { /* ignore */ }
           }
-          break;
-        case TERM:
-          callOnTerminateOtherwise(cid, "term");
-          break;
-        case FAIL:
-          callOnTerminateOtherwise(cid, "fail");
-          break;
-        default:
-          // ignore
-          break;
-      }
+        } else {
+          // receive offer packet
+          if (msg.getType() == MessageTypes.OFFER) {
+            @SuppressWarnings("unchecked")
+            Map<String, String> offerData = (Map<String, String>) msg.getObject();
+            pid = generatePid(cid, offerData);
+            idMap.put(cid, pid);
+            if (lsConnect != null) {
+              lsConnect.accept(pid);
+            }
+          }
+        }
+        break;
+      case TERM:
+        callOnTerminateOtherwise(pid, "term");
+        break;
+      case FAIL:
+        callOnTerminateOtherwise(pid, "fail");
+        break;
+      default:
+        // ignore
+        break;
     }
   }
 }
