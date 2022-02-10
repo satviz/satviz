@@ -46,9 +46,10 @@ class ExternalClauseBufferTest {
   }
 
   @Test
-  void test_getClauseUpdates_tooFar() {
+  void test_getClauseUpdates_outOfBounds() {
     assertThrows(IndexOutOfBoundsException.class, () -> buffer.getClauseUpdates(0, 1));
     assertThrows(IndexOutOfBoundsException.class, () -> buffer.getClauseUpdates(2, 0));
+    assertThrows(IndexOutOfBoundsException.class, () -> buffer.getClauseUpdates(-1, 0));
   }
 
   @Test

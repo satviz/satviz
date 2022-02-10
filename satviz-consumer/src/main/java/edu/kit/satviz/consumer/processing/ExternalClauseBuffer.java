@@ -113,12 +113,12 @@ public class ExternalClauseBuffer implements AutoCloseable {
    * @throws SerializationException If a clause update cannot be deserialised.
    *                                This can only happen if the files used in this implementation
    *                                are modified from the outside.
-   * @throws IndexOutOfBoundsException if {@code index >=} {@link #size()}
+   * @throws IndexOutOfBoundsException if {@code index >=} {@link #size()} or {@code index < 0}
    * @throws IllegalArgumentException if {@code numUpdates < 0}
    */
   public ClauseUpdate[] getClauseUpdates(long index, int numUpdates)
       throws IOException, SerializationException {
-    if (index >= size) {
+    if (index < 0 || index >= size) {
       throw new IndexOutOfBoundsException("For clause update index " + index);
     }
     if (numUpdates < 0) {
