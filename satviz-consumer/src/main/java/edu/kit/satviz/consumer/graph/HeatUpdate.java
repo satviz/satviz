@@ -29,9 +29,9 @@ public final class HeatUpdate implements GraphUpdate {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER)
   );
 
-  private final Map<Integer, Integer> values = new HashMap<>();
+  private final Map<Integer, Float> values = new HashMap<>();
 
-  public void add(int index, int heat) {
+  public void add(int index, float heat) {
     values.put(index, heat);
   }
 
