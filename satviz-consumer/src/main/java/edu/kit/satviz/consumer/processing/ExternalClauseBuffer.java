@@ -18,9 +18,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * This class stores ClauseUpdates in a temporary file. It allows random access
- * of clause updates at specific indices with the method <code>getClauseUpdate()</code> and adding
- * updates to the end of the file with the method <code>addClauseUpdate()</code>.
+ * A memory-external, append-only, ranged random access storage for {@link ClauseUpdate}s.
+ *
+ * <p>This class uses temporary files to store its data.
+ *
+ * @implNote Currently, the implementation uses two temporary files: One that contains all the
+ *           added clause updates, serialised in order, and one that acts as a lookup table.
+ *           The lookup table file contains the byte at which each clause begins in the clause file.
+ *           Hence, whenever a clause is added, it is first serialised to the clause file, then
+ *           its beginning byte number is written to the lookup file.
  */
 public class ExternalClauseBuffer implements AutoCloseable {
 
@@ -36,6 +42,12 @@ public class ExternalClauseBuffer implements AutoCloseable {
   private volatile long size;
   private long nextClauseBegin;
 
+  /**
+   * Create and initialise a new {@code ExternalClauseBuffer} with no initial clauses.
+   *
+   * @param dir The directory where the data will be stored.
+   * @throws IOException if an I/O error occurs.
+   */
   public ExternalClauseBuffer(Path dir) throws IOException {
     this.outputLock = new ReentrantLock();
     this.readLock = new ReentrantLock();
@@ -55,6 +67,12 @@ public class ExternalClauseBuffer implements AutoCloseable {
     clauseLookupOutStream.write(new byte[Long.BYTES]);
   }
 
+  /**
+   * Add a clause update to this buffer.
+   *
+   * @param update the {@link ClauseUpdate}.
+   * @throws IOException if the update can't be stored due to an I/O error.
+   */
   public void addClauseUpdate(ClauseUpdate update) throws IOException {
     Objects.requireNonNull(update);
     ByteArrayOutputStream byteArrayStream = new ByteArrayOutputStream();
@@ -78,6 +96,26 @@ public class ExternalClauseBuffer implements AutoCloseable {
     }
   }
 
+  /**
+   * Get a number of clause updates starting from a specific index.
+   *
+   * <p>This method is <em>lenient</em>: If the {@code index} is valid but the number of clauses
+   * requested is more than this buffer holds after the index, it reads the maximum amount of clause
+   * updates possible.<br>
+   * E.g., for {@link #size()} {@code == 4}, {@code index == 1} and {@code numUpdates == 6},
+   * 3 clause updates will be read.
+   *
+   * @param index The index of the first clause
+   * @param numUpdates The number of clause updates to read, starting from {@code index}
+   * @return An array of {@link ClauseUpdate}s. As explained in the summary, it is not guaranteed to
+   *         be of length {@code numUpdates}.
+   * @throws IOException if an I/O error occurs.
+   * @throws SerializationException If a clause update cannot be deserialised.
+   *                                This can only happen if the files used in this implementation
+   *                                are modified from the outside.
+   * @throws IndexOutOfBoundsException if {@code index >=} {@link #size()}
+   * @throws IllegalArgumentException if {@code numUpdates < 0}
+   */
   public ClauseUpdate[] getClauseUpdates(long index, int numUpdates)
       throws IOException, SerializationException {
     if (index >= size) {
@@ -166,10 +204,23 @@ public class ExternalClauseBuffer implements AutoCloseable {
     clauseOutStream.flush();
   }
 
+  /**
+   * Returns the number of clause updates stored in this buffer.
+   *
+   * @return the size of this buffer.
+   */
   public long size() {
     return size;
   }
 
+  /**
+   * Closes this buffer.<br>
+   * After performing this operation, this buffer must not be used anymore.
+   *
+   * <p>Note: this <strong>does not</strong> delete the temporary files created by this buffer.
+   *
+   * @throws IOException if an I/O error occurs.
+   */
   @Override
   public void close() throws IOException {
     outputLock.lock();
