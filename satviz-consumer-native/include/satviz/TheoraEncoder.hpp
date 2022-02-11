@@ -9,7 +9,7 @@ namespace video {
 struct TheoraStream;
 
 /**
- *
+ * A concrete implementation of a VideoEncoder that outputs OGG/Theora video files.
  */
 class TheoraEncoder : public VideoEncoder {
 private:
@@ -17,9 +17,9 @@ private:
 
 public:
   TheoraEncoder();
-  ~TheoraEncoder();
-  bool startRecording(const char *filename, int width, int height);
-  void submitFrame(VideoFrame &frame, bool last);
+  ~TheoraEncoder() override;
+  bool startRecording(const char *filename, int width, int height) override;
+  void submitFrame(VideoFrame &frame, bool last) override;
 };
 
 } // namespace video

@@ -54,6 +54,10 @@ public:
   inline int getWidth() { return width; }
   inline int getHeight() { return height; }
 
+  /**
+   * Set whether the current size of the display should be mutable or immutable.
+   * @param lock if set to true, the display size will be immutable
+   */
   void lockSize(bool lock);
 
   /**

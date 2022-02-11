@@ -3,8 +3,6 @@
 #include <fstream>
 #include <theora/theoraenc.h>
 
-#include <iostream>
-
 namespace satviz {
 namespace video {
 
@@ -121,7 +119,6 @@ void TheoraEncoder::submitFrame(VideoFrame &frame, bool last) {
   }
 
   if (last) {
-    std::cout << "<encoding last frame>" << std::endl;
     stream->flushPage();
     delete stream;
     stream = nullptr;
