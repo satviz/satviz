@@ -8,14 +8,17 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
-
+import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class ClauseCoordinatorTest {
 
@@ -24,10 +27,10 @@ class ClauseCoordinatorTest {
   private int clausesAdded;
   private int currentlyAdvanced;
   private ClauseCoordinator coordinator;
-
   private Graph graph;
   private ClauseUpdateProcessor processor1;
   private ClauseUpdateProcessor processor2;
+  private AtomicInteger changeListenerCallAmount;
 
   private final ClauseUpdate[] clauseUpdates = new ClauseUpdate[]{
           ClauseUpdate.of(ClauseUpdate.Type.ADD, 6, 1),
@@ -52,13 +55,17 @@ class ClauseCoordinatorTest {
     graph = mock(Graph.class);
     processor1 = mock(ClauseUpdateProcessor.class);
     processor2 = mock(ClauseUpdateProcessor.class);
+    changeListenerCallAmount = new AtomicInteger();
+
     Path tempDir = Files.createDirectory(Paths.get(TEMP_DIR));
     coordinator = new ClauseCoordinator(graph, tempDir);
     coordinator.addProcessor(processor1);
+
+    coordinator.registerChangeListener(() -> changeListenerCallAmount.getAndIncrement());
   }
 
   @Test
-  void test_advanceVisualization_valid() throws IOException, SerializationException {
+  void test_advanceVisualization() throws IOException, SerializationException {
     int processor1AdvanceCalls = 0;
     int processor2AdvanceCalls = 0;
     for (int i = 4; i < clauseUpdates.length; i += 4) {
@@ -86,6 +93,55 @@ class ClauseCoordinatorTest {
     coordinator.advanceVisualization(clauseUpdatesToAdd.length);
     currentlyAdvanced += clauseUpdatesToAdd.length;
     assertEquals(currentlyAdvanced, coordinator.currentUpdate());
+  }
+
+  @Test
+  void test_advanceVisualization_once() throws IOException, SerializationException {
+    ClauseUpdate[] array = Arrays.copyOfRange(clauseUpdates, 0, 4);
+    for (ClauseUpdate update : array) {
+      coordinator.addClauseUpdate(update);
+    }
+    verify(processor1, never()).process(notNull(), eq(graph));
+    coordinator.advanceVisualization(1);
+    assertEquals(1, changeListenerCallAmount.get());
+  }
+
+  // the change listener tests
+
+  @Test
+  void test_registerChangeListener_advanceOnce() throws IOException, SerializationException {
+    coordinator.addClauseUpdate(clauseUpdates[0]);
+    assertEquals(0, changeListenerCallAmount.get());
+    coordinator.advanceVisualization(1);
+    assertEquals(1, changeListenerCallAmount.get());
+  }
+
+  @Test
+  void test_registerChangeListener_advanceMultipleTimes()
+          throws SerializationException, IOException {
+    int expectedCallAmount = 0;
+    for (ClauseUpdate update : clauseUpdates) {
+      coordinator.addClauseUpdate(update);
+    }
+    while (coordinator.currentUpdate() < clauseUpdates.length) {
+      coordinator.advanceVisualization(1);
+      expectedCallAmount++;
+    }
+    assertEquals(expectedCallAmount, changeListenerCallAmount.get());
+  }
+
+  @Test
+  void test_registerChangeListener_dontAdvance() throws IOException {
+    for (ClauseUpdate update : clauseUpdates) {
+      coordinator.addClauseUpdate(update);
+    }
+    assertEquals(0, changeListenerCallAmount.get());
+  }
+
+  @Test
+  void test_registerChangeListener_advanceZero() throws SerializationException, IOException {
+    coordinator.advanceVisualization(0);
+    assertEquals(0, changeListenerCallAmount.get());
   }
 
   @AfterEach
