@@ -102,7 +102,7 @@ class ClauseCoordinatorTest {
     for (ClauseUpdate update : array) {
       coordinator.addClauseUpdate(update);
     }
-    assertEquals(clauseUpdates.length, coordinator.totalUpdateCount());
+    assertEquals(4, coordinator.totalUpdateCount());
     verify(processor1, never()).process(notNull(), eq(graph));
     coordinator.advanceVisualization(1);
     assertEquals(1, changeListenerCallAmount.get());
