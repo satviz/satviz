@@ -51,7 +51,7 @@ public final class HeatUpdate implements GraphUpdate {
     MemorySegment indices = MemorySegment.allocateNative(
         MemoryLayout.sequenceLayout(size, CLinker.C_INT), scope);
     MemorySegment heatValues = MemorySegment.allocateNative(
-        MemoryLayout.sequenceLayout(size, CLinker.C_INT), scope);
+        MemoryLayout.sequenceLayout(size, CLinker.C_FLOAT), scope);
     STRUCT.varHandle("n").set(segment, size);
     STRUCT.varHandle("index").set(segment, indices.address());
     STRUCT.varHandle("heat").set(segment, heatValues.address());
@@ -59,8 +59,8 @@ public final class HeatUpdate implements GraphUpdate {
     int index = 0;
     for (var entry : values.entrySet()) {
       long offset = index * intSize;
-      MemoryAccess.setIntAtOffset(indices, offset, entry.getValue());
-      MemoryAccess.setIntAtOffset(heatValues, offset, entry.getValue());
+      MemoryAccess.setIntAtOffset(indices, offset, entry.getKey());
+      MemoryAccess.setFloatAtOffset(heatValues, offset, entry.getValue());
       index++;
     }
     return segment;

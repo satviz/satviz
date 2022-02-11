@@ -17,7 +17,7 @@ typedef struct CWeightUpdate {
 typedef struct CHeatUpdate {
   unsigned int n;
   int *index;
-  int *heat;
+  float *heat;
 } CHeatUpdate;
 
 // Graph

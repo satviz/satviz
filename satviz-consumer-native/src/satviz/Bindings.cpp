@@ -64,6 +64,7 @@ void satviz_submit_weight_update(void *graph, CWeightUpdate *update) {
 }
 
 void satviz_submit_heat_update(void *graph, CHeatUpdate *update) {
+  // TODO use tuple<int, float> on c++ side and fix it here
   std::vector<std::tuple<int, int>> values { update->n };
   for (size_t i = 0; i < update->n; i++) {
     values.emplace_back(update->index[i], update->heat[i]);
