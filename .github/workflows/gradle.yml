@@ -36,7 +36,7 @@ jobs:
             .ogdf-build
           key: ${{ runner.os }}-deps
       - name: Install native dependencies
-        run: sudo apt-get install -y libtheora-dev libgtest-dev libsfml-dev libosmesa6-dev
+        run: sudo apt-get install -y libtheora-dev libgtest-dev libsfml-dev
       - name: Build natives
         uses: gradle/gradle-build-action@v2
         with:
