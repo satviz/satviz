@@ -173,6 +173,7 @@ public class ClauseCoordinator implements AutoCloseable {
 
   public void addClauseUpdate(ClauseUpdate clauseUpdate) throws IOException {
     buffer.addClauseUpdate(clauseUpdate);
+    changeListener.run();
   }
 
   public void registerChangeListener(Runnable action) {
