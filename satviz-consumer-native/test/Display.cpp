@@ -4,12 +4,23 @@
 
 #include <gtest/gtest.h>
 
+#include <cstdlib>
+
 using namespace ::satviz::video;
+
+static bool isX11Running() {
+  char *dpy = getenv("DISPLAY");
+  return dpy && dpy[0];
+}
 
 /*
  * Test capturing the on-screen frame as a VideoFrame.
  */
 TEST(Display, FrameCapture) {
+  if (!isX11Running()) {
+    GTEST_SKIP();
+  }
+
   OffscreenDisplay dpy(16, 16);
 
   // Draw a completely red frame
