@@ -6,7 +6,7 @@ namespace video {
 OnscreenDisplay::OnscreenDisplay(int w, int h)
   : Display(w, h) {
   sf::ContextSettings settings = makeContextSettings();
-  window.create(sf::VideoMode(w, h), "satviz", sf::Style::Close | sf::Style::Titlebar, settings);
+  window.create(sf::VideoMode(w, h), "satviz", sf::Style::Default, settings);
   initializeGl();
 }
 
@@ -22,19 +22,16 @@ void OnscreenDisplay::activateContext() {
 bool OnscreenDisplay::pollEvent(sf::Event &event) {
   if (window.pollEvent(event)) {
     if (event.type == sf::Event::Resized) {
-      width  = event.size.width;
-      height = event.size.height;
-      onResize();
+      if (size_locked) {
+        window.setSize(sf::Vector2<unsigned>(getWidth(), getHeight()));
+      } else {
+        onResize(event.size.width, event.size.height);
+      }
     }
     return true;
   } else {
     return false;
   }
-}
-
-void OnscreenDisplay::lockSize(bool lock) {
-  // TODO stub
-  (void) lock;
 }
 
 void OnscreenDisplay::displayFrame() {

@@ -93,11 +93,13 @@ void VideoController::nextFrame() {
   }
   if (recording_state == REC_WINDUP) {
     recording_state = REC_ON;
+    display->lockSize(true);
   }
   if (recording_state == REC_WINDDOWN) {
     delete video_encoder;
     video_encoder = nullptr;
     recording_state = REC_OFF;
+    display->lockSize(false);
   }
   display->endFrame();
 }
@@ -109,7 +111,6 @@ bool VideoController::startRecording(const char *filename, VideoEncoder *enc) {
   }
   std::cout << "STARTED RECORDING" << std::endl;
   recording_state = REC_WINDUP;
-  // TODO size locking!
   video_encoder = enc;
   return true;
 }
@@ -128,6 +129,7 @@ void VideoController::finishRecording() {
   assert(recording_state == REC_ON);
   std::cout << "FINISHED RECORDING" << std::endl;
   recording_state = REC_WINDDOWN;
+  display->lockSize(false);
 }
 
 } // namespace video

@@ -15,6 +15,10 @@ namespace video {
  * Internally, each Display object manages its own OpenGL context.
  */
 class Display {
+private:
+  int width;
+  int height;
+
 protected:
   enum {
     PBO_IN_PROGRESS,
@@ -22,8 +26,7 @@ protected:
     NUM_PBOS
   };
 
-  int width;
-  int height;
+  bool size_locked = false;
   unsigned pbos[NUM_PBOS];
 
   Display(int w, int h) : width(w), height(h) {}
@@ -34,7 +37,7 @@ protected:
   static sf::ContextSettings makeContextSettings();
   void initializeGl();
   void deinitializeGl();
-  void onResize();
+  void onResize(int w, int h);
 
   /**
    * Switch to this Displays OpenGL context.
@@ -46,10 +49,12 @@ protected:
   virtual void displayFrame() = 0;
 
 public:
-  virtual ~Display() {}
+  virtual ~Display() = default;
 
   inline int getWidth() { return width; }
   inline int getHeight() { return height; }
+
+  void lockSize(bool lock);
 
   /**
    * Prepare the OpenGL state to draw a new frame.
@@ -80,7 +85,6 @@ public:
    * @return true if an event has been found
    */
   virtual bool pollEvent(sf::Event &event) = 0;
-  virtual void lockSize(bool lock) = 0;
 };
 
 } // namespace video
