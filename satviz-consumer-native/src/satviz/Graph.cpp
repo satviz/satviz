@@ -17,6 +17,16 @@ Graph::Graph(ogdf::Graph &graphToCopy)
     : graph(graphToCopy), attrs(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics) {
 }
 
+void Graph::submitWeightUpdate(WeightUpdate &update) {
+  // TODO stub
+  (void) update;
+}
+
+void Graph::submitHeatUpdate(HeatUpdate &update) {
+  // TODO stub
+  (void) update;
+}
+
 void Graph::recalculateLayout() {
   ogdf::FMMMLayout fmmm;
   fmmm.useHighLevelOptions(true);
@@ -30,6 +40,36 @@ void Graph::recalculateLayout() {
   for (auto o : observers) {
     o->onLayoutChange(nodes);
   }
+}
+
+void Graph::adaptLayout() {
+  // TODO stub
+}
+
+std::stringbuf Graph::serialize() {
+  // TODO stub
+  std::stringbuf buf;
+  return buf;
+}
+
+void Graph::deserialize(std::stringbuf &buf) {
+  // TODO stub
+  (void) buf;
+}
+
+NodeInfo Graph::queryNode(int index) {
+  // TODO stub
+  (void) index;
+  NodeInfo info = { 0, 0, 0.0f, 0.0f };
+  return info;
+}
+
+EdgeInfo Graph::queryEdge(int index1, int index2) {
+  // TODO stub
+  (void) index1;
+  (void) index2;
+  EdgeInfo info = { 0, 0, 0.0f };
+  return info;
 }
 
 } // namespace graph
