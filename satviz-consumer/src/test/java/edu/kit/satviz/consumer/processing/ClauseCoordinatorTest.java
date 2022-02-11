@@ -89,6 +89,7 @@ class ClauseCoordinatorTest {
       coordinator.addClauseUpdate(update);
       clausesAdded++;
     }
+    assertEquals(clausesAdded, coordinator.totalUpdateCount());
     assertEquals(currentlyAdvanced, coordinator.currentUpdate());
     coordinator.advanceVisualization(clauseUpdatesToAdd.length);
     currentlyAdvanced += clauseUpdatesToAdd.length;
@@ -101,12 +102,13 @@ class ClauseCoordinatorTest {
     for (ClauseUpdate update : array) {
       coordinator.addClauseUpdate(update);
     }
+    assertEquals(clauseUpdates.length, coordinator.totalUpdateCount());
     verify(processor1, never()).process(notNull(), eq(graph));
     coordinator.advanceVisualization(1);
     assertEquals(1, changeListenerCallAmount.get());
   }
 
-  // the change listener tests
+  // registerChangeListener
 
   @Test
   void test_registerChangeListener_advanceOnce() throws IOException, SerializationException {
@@ -131,7 +133,7 @@ class ClauseCoordinatorTest {
   }
 
   @Test
-  void test_registerChangeListener_dontAdvance() throws IOException {
+  void test_registerChangeListener_withoutAdvance() throws IOException {
     for (ClauseUpdate update : clauseUpdates) {
       coordinator.addClauseUpdate(update);
     }
@@ -142,6 +144,50 @@ class ClauseCoordinatorTest {
   void test_registerChangeListener_advanceZero() throws SerializationException, IOException {
     coordinator.advanceVisualization(0);
     assertEquals(0, changeListenerCallAmount.get());
+  }
+
+  // seekToUpdate
+
+  @Test
+  void test_seekToUpdate_goForward() throws SerializationException, IOException {
+    ClauseUpdate[] someUpdates = Arrays.copyOfRange(clauseUpdates, 0, 4);
+    for (ClauseUpdate update : someUpdates) {
+      coordinator.addClauseUpdate(update);
+    }
+    assertEquals(0, coordinator.currentUpdate());
+    coordinator.seekToUpdate(4);
+    verify(processor1).process(eq(someUpdates), eq(graph));
+    assertEquals(4, coordinator.currentUpdate());
+  }
+
+  @Test
+  void test_seekToUpdate_goToCurrentSnapshot() throws SerializationException, IOException {
+    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 0, 4)) {
+      coordinator.addClauseUpdate(update);
+    }
+    coordinator.advanceVisualization(3);
+    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 4, 7)) {
+      coordinator.addClauseUpdate(update);
+    }
+    assertEquals(3, coordinator.currentUpdate());
+    coordinator.seekToUpdate(3);
+    assertEquals(3, coordinator.currentUpdate());
+  }
+
+  @Test
+  void test_seekToUpdate_goToPast() throws SerializationException, IOException {
+    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 0, 5)) {
+      coordinator.addClauseUpdate(update);
+    }
+    coordinator.advanceVisualization(4);
+    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 5, 11)) {
+      coordinator.addClauseUpdate(update);
+    }
+    coordinator.advanceVisualization(5);
+    coordinator.advanceVisualization(1);
+    assertEquals(10, coordinator.currentUpdate());
+    coordinator.seekToUpdate(6);
+    assertEquals(6, coordinator.currentUpdate());
   }
 
   @AfterEach
