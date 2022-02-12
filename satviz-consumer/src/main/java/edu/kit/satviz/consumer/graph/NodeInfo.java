@@ -7,6 +7,11 @@ import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemorySegment;
 
+/**
+ * A class that holds information about a node in a {@link Graph}.
+ *
+ * <p>{@link #close()} should be called on instances of this class backed by native memory.
+ */
 public final class NodeInfo extends NativeObject {
 
   public static final Struct STRUCT = Struct.builder()
@@ -21,6 +26,12 @@ public final class NodeInfo extends NativeObject {
   private final float x;
   private final float y;
 
+  /**
+   * Create a {@code NodeInfo} object from a {@code MemorySegment} containing a {@code NodeInfo}
+   * C struct.
+   *
+   * @param segment the piece of memory holding the {@code NodeInfo} struct.
+   */
   public NodeInfo(MemorySegment segment) {
     super(segment.address());
     this.index = (int) STRUCT.varHandle("index").get(segment);
@@ -29,6 +40,14 @@ public final class NodeInfo extends NativeObject {
     this.y = (float) STRUCT.varHandle("y").get(segment);
   }
 
+  /**
+   * Create a {@code NodeInfo} object that is not backed by native memory.
+   *
+   * @param index The index of the node described.
+   * @param heat The heat value of the node.
+   * @param x The node's x position
+   * @param y The node's y position
+   */
   public NodeInfo(int index, int heat, float x, float y) {
     super(MemoryAddress.NULL);
     this.index = index;
@@ -37,18 +56,38 @@ public final class NodeInfo extends NativeObject {
     this.y = y;
   }
 
+  /**
+   * Returns the index of the node.
+   *
+   * @return the index
+   */
   public int getIndex() {
     return index;
   }
 
+  /**
+   * Returns the heat value of the node.
+   *
+   * @return a number from 0-255.
+   */
   public int getHeat() {
     return heat;
   }
 
+  /**
+   * Returns the current x position of the node.
+   *
+   * @return the x position
+   */
   public float getX() {
     return x;
   }
 
+  /**
+   * Returns the current y position of the node.
+   *
+   * @return the y position
+   */
   public float getY() {
     return y;
   }

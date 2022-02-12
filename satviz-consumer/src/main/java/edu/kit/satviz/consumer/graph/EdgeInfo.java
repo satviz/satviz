@@ -12,7 +12,7 @@ import jdk.incubator.foreign.MemorySegment;
  *
  * <p>{@link #close()} should be called on instances of this class backed by native memory.
  */
-public class EdgeInfo extends NativeObject {
+public final class EdgeInfo extends NativeObject {
 
   public static final Struct STRUCT = Struct.builder()
       .field("index1", int.class, CLinker.C_INT)
