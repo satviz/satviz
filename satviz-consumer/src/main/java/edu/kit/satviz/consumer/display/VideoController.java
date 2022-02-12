@@ -14,8 +14,10 @@ public class VideoController extends NativeObject {
 
   private static final MethodHandle NEW_CONTROLLER = lookupFunction(
       "new_video_controller",
-      MethodType.methodType(MemoryAddress.class, MemoryAddress.class, int.class),
-      FunctionDescriptor.of(CLinker.C_POINTER, CLinker.C_POINTER, CLinker.C_INT)
+      MethodType.methodType(MemoryAddress.class, MemoryAddress.class,
+          int.class, int.class, int.class),
+      FunctionDescriptor.of(CLinker.C_POINTER, CLinker.C_POINTER,
+          CLinker.C_INT, CLinker.C_INT, CLinker.C_INT)
   );
 
   private static final MethodHandle RELEASE = lookupFunction(
@@ -54,10 +56,12 @@ public class VideoController extends NativeObject {
     super(pointer);
   }
 
-  public static VideoController create(Graph graph, DisplayType displayType) {
+  public static VideoController create(
+      Graph graph, DisplayType displayType, int width, int height
+  ) {
     try {
       MemoryAddress controllerAddr = (MemoryAddress) NEW_CONTROLLER
-          .invokeExact(graph.getPointer(), displayType.ordinal());
+          .invokeExact(graph.getPointer(), displayType.ordinal(), width, height);
       if (MemoryAddress.NULL.equals(controllerAddr)) {
         throw new AssertionError("invalid display type provided");
       }

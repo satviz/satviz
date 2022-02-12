@@ -69,9 +69,7 @@ EdgeInfo satviz_query_edge(void *graph, int index1, int index2) {
   return reinterpret_cast<Graph*>(graph)->queryEdge(index1, index2);
 }
 
-void *satviz_new_video_controller(void *graph, int display_type) {
-  static const int width = 800;
-  static const int height = 600;
+void *satviz_new_video_controller(void *graph, int display_type, int width, int height) {
   Display *display;
   switch (display_type) {
     case 0:

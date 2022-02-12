@@ -33,7 +33,7 @@ NodeInfo satviz_query_node(void *graph, int index);
 EdgeInfo satviz_query_edge(void *graph, int index1, int index2);
 
 // VideoController
-void *satviz_new_video_controller(void *graph, int display_type);
+void *satviz_new_video_controller(void *graph, int display_type, int width, int height);
 void satviz_release_video_controller(void *controller);
 int satviz_start_recording(void *controller, const char *filename, const char *encoder_name);
 void satviz_stop_recording(void *controller);
