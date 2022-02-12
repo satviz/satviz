@@ -219,10 +219,7 @@ class ClauseCoordinatorTest {
   }
 
   @Test
-  void test_seekToUpdate_resetTest() throws SerializationException, IOException {
-    int graphDeserializeCalls = 0;
-    int processorDeserializeCalls = 0;
-    int resetCalls = 0;
+  void test_seekToUpdate_reset() throws SerializationException, IOException {
     for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 0, 11)) {
       coordinator.addClauseUpdate(update);
     }
@@ -239,6 +236,9 @@ class ClauseCoordinatorTest {
     // -  -  -  p  =  =  =  = >pp ~  ~
     assertEquals(9, coordinator.currentUpdate());
 
+    verify(processor1, times(2)).process(any(), any());
+    verify(processor2, times(1)).process(any(), any());
+
     // -  -  -  p  =  =  =  = >pp ~  ~
     coordinator.seekToUpdate(5);
     // -  -  -  p >c  =  =  =  pp ~  ~
@@ -250,6 +250,8 @@ class ClauseCoordinatorTest {
     verify(processor1, times(0)).reset();
     verify(processor2, times(0)).deserialize(any());
     verify(processor2, times(1)).reset();
+    verify(processor1, times(3)).process(any(), any());
+    verify(processor2, times(2)).process(any(), any());
 
     // -  -  -  p >c  =  =  =  pp ~  ~
     coordinator.takeSnapshot(); // serializing reset state of processor2 (not necessary)
@@ -267,6 +269,8 @@ class ClauseCoordinatorTest {
     verify(processor1, times(1)).reset();
     verify(processor2, times(0)).deserialize(any());
     verify(processor2, times(2)).reset();
+    verify(processor1, times(4)).process(any(), any());
+    verify(processor2, times(3)).process(any(), any());
 
     // = >c  -  p  pp =  =  =  pp ~  ~
     coordinator.seekToUpdate(7);
@@ -280,6 +284,8 @@ class ClauseCoordinatorTest {
     verify(processor1, times(1)).reset();
     verify(processor2, times(1)).deserialize(any());
     verify(processor2, times(2)).reset();
+    verify(processor1, times(5)).process(any(), any());
+    verify(processor2, times(4)).process(any(), any());
   }
 
   @AfterEach
