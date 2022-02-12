@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.gui.config;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
+import edu.kit.satviz.consumer.gui.GuiUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 
@@ -17,7 +18,7 @@ public class ExternalConfigController extends ConfigController {
 
   @Override
   protected void initializeComponents() {
-    initializeIntegerSpinner(portSpinner,
+    GuiUtils.initializeIntegerSpinner(portSpinner,
         ExternalModeConfig.MIN_PORT_NUMBER,
         ExternalModeConfig.MAX_PORT_NUMBER,
         ExternalModeConfig.DEFAULT_PORT_NUMBER);

@@ -16,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
+
+import edu.kit.satviz.consumer.gui.GuiUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -193,7 +195,7 @@ public class GeneralConfigController extends ConfigController {
   protected void initializeComponents() {
     weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
 
-    initializeIntegerSpinner(windowSizeSpinner,
+    GuiUtils.initializeIntegerSpinner(windowSizeSpinner,
         ConsumerConfig.MIN_WINDOW_SIZE,
         ConsumerConfig.MAX_WINDOW_SIZE,
         ConsumerConfig.DEFAULT_WINDOW_SIZE);
