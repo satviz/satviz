@@ -10,6 +10,11 @@ import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.ResourceScope;
 
+/**
+ * Class used to render and record the visualisation done by satviz.
+ * Every instance of this class is bound to a {@code satviz::video::VideoController}
+ * instance in C++.
+ */
 public class VideoController extends NativeObject {
 
   private static final MethodHandle NEW_CONTROLLER = lookupFunction(
@@ -56,6 +61,15 @@ public class VideoController extends NativeObject {
     super(pointer);
   }
 
+  /**
+   * Create a new {@code VideoController}. This will also create a display window.
+   *
+   * @param graph The graph used for the visualisation.
+   * @param displayType The type of display to use (see {@link DisplayType})
+   * @param width The width of the display
+   * @param height The height of the display
+   * @return a {@code VideoController} instance
+   */
   public static VideoController create(
       Graph graph, DisplayType displayType, int width, int height
   ) {
@@ -71,6 +85,17 @@ public class VideoController extends NativeObject {
     }
   }
 
+  /**
+   * Start recording the visualisation and save it to the file with the given name.
+   *
+   * @param fileName The path to the output file.
+   * @param encoder The name of the video encoder to use. Currently supported encoders:
+   *                <ul>
+   *                  <li>{@code "theora"}
+   *                  - <a href="https://en.wikipedia.org/wiki/Theora">Link</a></li>
+   *                </ul>
+   * @return {@code true} if the recording could be started successfully, {@code false} if not.
+   */
   public boolean startRecording(String fileName, String encoder) {
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
       int res = (int) START_RECORDING.invokeExact(getPointer(),
@@ -85,6 +110,9 @@ public class VideoController extends NativeObject {
     }
   }
 
+  /**
+   * Stop the active recording session ("Pause").
+   */
   public void stopRecording() {
     try {
       STOP_RECORDING.invokeExact(getPointer());
@@ -93,6 +121,9 @@ public class VideoController extends NativeObject {
     }
   }
 
+  /**
+   * Resume the active recording session.
+   */
   public void resumeRecording() {
     try {
       RESUME_RECORDING.invokeExact(getPointer());
@@ -101,6 +132,9 @@ public class VideoController extends NativeObject {
     }
   }
 
+  /**
+   * Finish the active recording session, finalising the video output file.
+   */
   public void finishRecording() {
     try {
       FINISH_RECORDING.invokeExact(getPointer());
@@ -109,6 +143,11 @@ public class VideoController extends NativeObject {
     }
   }
 
+  /**
+   * Destroy the underlying resources.<br>
+   * To clean up {@code VideoController} instances, you should generally
+   * use {@link #close()} instead.
+   */
   public void destroy() {
     try {
       RELEASE.invokeExact(getPointer());
