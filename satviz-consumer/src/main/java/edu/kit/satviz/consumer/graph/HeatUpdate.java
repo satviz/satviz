@@ -7,6 +7,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAccess;
@@ -64,5 +65,22 @@ public final class HeatUpdate implements GraphUpdate {
       index++;
     }
     return segment;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    HeatUpdate update = (HeatUpdate) o;
+    return Objects.equals(values, update.values);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(values);
   }
 }
