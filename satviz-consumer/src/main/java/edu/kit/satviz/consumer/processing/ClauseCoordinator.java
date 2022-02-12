@@ -100,19 +100,23 @@ public class ClauseCoordinator implements AutoCloseable {
       return;
     }
 
+    boolean hasAdvanced;
     stateLock.lock();
     try {
       long closestSnapshotIndex = loadClosestSnapshot(index);
       currentUpdate = closestSnapshotIndex;
-      advance((int) (index - closestSnapshotIndex));
+      hasAdvanced = advance((int) (index - closestSnapshotIndex));
     } finally {
       stateLock.unlock();
     }
+    if (!hasAdvanced) {
+      changeListener.run();
+    }
   }
 
-  private void advance(int numUpdates) throws SerializationException, IOException {
+  private boolean advance(int numUpdates) throws SerializationException, IOException {
     if (numUpdates < 1) {
-      return;
+      return false;
     }
 
     // the state needs to be locked to synchronise advancements.
@@ -134,6 +138,7 @@ public class ClauseCoordinator implements AutoCloseable {
     }
     // the change listener may run concurrently again
     changeListener.run();
+    return true;
   }
 
   public void takeSnapshot() throws IOException {
@@ -214,7 +219,7 @@ public class ClauseCoordinator implements AutoCloseable {
 
       List<ClauseUpdateProcessor> newProcessors = new ArrayList<>();
       newProcessors.addAll(snapshotProcessors); // first the processors that exist in the snapshot
-      newProcessors.addAll(nonSnapshotProcessors); // then the processors that were added afterwards
+      newProcessors.addAll(nonSnapshotProcessors); // then the ones that were added afterwards
 
       // set new processor list
       this.processors.clear();
