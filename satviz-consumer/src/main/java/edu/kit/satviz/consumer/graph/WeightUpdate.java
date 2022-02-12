@@ -19,10 +19,10 @@ import jdk.incubator.foreign.ResourceScope;
 public final class WeightUpdate implements GraphUpdate {
 
   private static final Struct STRUCT = Struct.builder()
-      .field("n", int.class, CLinker.C_INT)
       .field("index1", MemoryAddress.class, CLinker.C_POINTER)
       .field("index2", MemoryAddress.class, CLinker.C_POINTER)
       .field("weight", MemoryAddress.class, CLinker.C_POINTER)
+      .field("n", int.class, CLinker.C_INT)
       .build();
 
   private static final MethodHandle SUBMIT_WEIGHT_UPDATE = NativeObject.lookupFunction(

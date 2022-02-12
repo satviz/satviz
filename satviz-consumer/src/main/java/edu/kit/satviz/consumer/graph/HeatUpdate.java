@@ -19,9 +19,9 @@ import jdk.incubator.foreign.ResourceScope;
 public final class HeatUpdate implements GraphUpdate {
 
   private static final Struct STRUCT = Struct.builder()
-      .field("n", int.class, CLinker.C_INT)
       .field("index", MemoryAddress.class, CLinker.C_POINTER)
       .field("heat", MemoryAddress.class, CLinker.C_POINTER)
+      .field("n", int.class, CLinker.C_INT)
       .build();
 
   private static final MethodHandle SUBMIT_HEAT_UPDATE = NativeObject.lookupFunction(
