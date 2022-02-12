@@ -38,7 +38,7 @@ public final class WeightUpdate implements GraphUpdate {
   private final Map<Edge, Float> values = new HashMap<>();
 
   /**
-   * Add an edge whose weight should be adjusted to this batch of updates.
+   * Add an edge whose weight should be adjusted via this batch of updates.
    *
    * @param index1 One end of the edge
    * @param index2 The other end of the edge

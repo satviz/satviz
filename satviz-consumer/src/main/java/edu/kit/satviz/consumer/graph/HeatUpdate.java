@@ -16,6 +16,10 @@ import jdk.incubator.foreign.MemoryLayout;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 
+/**
+ * An implementation of {@link GraphUpdate} that updates a set of nodes by
+ * changing their heat value.
+ */
 public final class HeatUpdate implements GraphUpdate {
 
   private static final Struct STRUCT = Struct.builder()
@@ -32,6 +36,12 @@ public final class HeatUpdate implements GraphUpdate {
 
   private final Map<Integer, Float> values = new HashMap<>();
 
+  /**
+   * Add a node whose heat should be adjusted via this batch of updates.
+   *
+   * @param index The index of the node to update
+   * @param heat The new heat value, a value between 0.0f and 1.0f
+   */
   public void add(int index, float heat) {
     values.put(index, heat);
   }
