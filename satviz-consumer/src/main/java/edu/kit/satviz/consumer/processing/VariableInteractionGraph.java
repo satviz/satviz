@@ -13,10 +13,11 @@ import java.io.OutputStream;
 public class VariableInteractionGraph implements ClauseUpdateProcessor {
 
   private WeightFactor weightFactor;
-  private StringSerializer serializer;
+  private final StringSerializer serializer;
 
   public VariableInteractionGraph(WeightFactor weightFactor) {
     this.weightFactor = weightFactor;
+    this.serializer = new StringSerializer();
   }
 
   public void setWeightFactor(WeightFactor weightFactor) {
