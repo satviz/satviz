@@ -11,13 +11,12 @@ import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.config.json.ModeConfigAdapterFactory;
 import edu.kit.satviz.consumer.config.json.PathAdapter;
+import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-
-import edu.kit.satviz.consumer.gui.GuiUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -32,6 +31,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
+/**
+ * Controls the general configuration window.
+ */
 public class GeneralConfigController extends ConfigController {
 
   // ATTRIBUTES (FXML)

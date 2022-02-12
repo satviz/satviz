@@ -4,8 +4,21 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.util.StringConverter;
 
+/**
+ * Provides functionality for fxml GUI windows.
+ */
 public interface GuiUtils {
 
+  /**
+   * Initializes a {@link Spinner} so that the user can only enter valid integers while allowing
+   * it to be empty if the user is currently entering a new value
+   * (i.e., has just erased an old value).
+   *
+   * @param spinner The {@link Spinner} to be initialized.
+   * @param min The minimum value of this {@link Spinner}.
+   * @param max The maximum value of this {@link Spinner}.
+   * @param init The initial value of this {@link Spinner}.
+   */
   static void initializeIntegerSpinner(Spinner<Integer> spinner, int min, int max, int init) {
     SpinnerValueFactory<Integer> spinnerValueFactory
         = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, init);

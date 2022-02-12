@@ -6,6 +6,9 @@ import edu.kit.satviz.consumer.gui.GuiUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 
+/**
+ * Controls the window for the external mode configuration.
+ */
 public class ExternalConfigController extends ConfigController {
 
   // ATTRIBUTES (FXML)

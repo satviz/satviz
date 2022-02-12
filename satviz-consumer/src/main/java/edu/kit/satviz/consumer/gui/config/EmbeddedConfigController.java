@@ -12,7 +12,9 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 
-
+/**
+ * Controls the window for the embedded mode configuration.
+ */
 public class EmbeddedConfigController extends ConfigController {
 
   // ATTRIBUTES (FXML)

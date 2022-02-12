@@ -6,6 +6,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Starts the configuration window of the application.
+ * Allows to retrieve the resulting {@link ConsumerConfig} object after the configuration has been
+ * finished.
+ */
 public class ConfigStarter extends Application {
 
   private static GeneralConfigController configController;
@@ -24,6 +29,12 @@ public class ConfigStarter extends Application {
     primaryStage.show();
   }
 
+  /**
+   * Retrieve the configuration set by the user.
+   *
+   * @return The {@link ConsumerConfig} object which contains the configuration parameters set by
+   *    the user.
+   */
   public static ConsumerConfig getConsumerConfig() {
     return configController.getConsumerConfig();
   }
