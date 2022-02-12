@@ -16,6 +16,10 @@ import jdk.incubator.foreign.MemoryLayout;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 
+/**
+ * An implementation of {@link GraphUpdate} that updates a set of edges by
+ * adding deltas to their weights.
+ */
 public final class WeightUpdate implements GraphUpdate {
 
   private static final Struct STRUCT = Struct.builder()
@@ -33,6 +37,13 @@ public final class WeightUpdate implements GraphUpdate {
 
   private final Map<Edge, Float> values = new HashMap<>();
 
+  /**
+   * Add an edge whose weight should be adjusted to this batch of updates.
+   *
+   * @param index1 One end of the edge
+   * @param index2 The other end of the edge
+   * @param weight The amount to add to the current edge weight
+   */
   public void add(int index1, int index2, float weight) {
     values.put(new Edge(index1, index2), weight);
   }
