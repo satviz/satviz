@@ -73,24 +73,12 @@ public class GeneralConfigController extends ConfigController {
   private Gson gson;
   private String recordingFile;
   private File satInstanceFile;
-  private ModeConfigController modeConfigController;
+  private ConfigController modeConfigController;
 
   private ConsumerConfig consumerConfig;
 
 
   // METHODS (FXML)
-
-  @Override
-  protected void initializeComponents() {
-    weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
-
-    initializeIntegerSpinner(windowSizeSpinner,
-        ConsumerConfig.MIN_WINDOW_SIZE,
-        ConsumerConfig.MAX_WINDOW_SIZE,
-        ConsumerConfig.DEFAULT_WINDOW_SIZE);
-
-    modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
-  }
 
   @FXML
   private void loadSettings() {
@@ -103,7 +91,7 @@ public class GeneralConfigController extends ConfigController {
       return;
     }
 
-    ConsumerConfig config = null;
+    ConsumerConfig config;
     try {
       config = getGson().fromJson(new FileReader(file), ConsumerConfig.class);
     } catch (FileNotFoundException e) {
@@ -118,38 +106,7 @@ public class GeneralConfigController extends ConfigController {
     setDefaultValues();
 
     // override all settings that are defined in the JSON file
-    ConsumerModeConfig modeConfig = config.getModeConfig();
-    if (modeConfig != null && modeConfig.getMode() != null) {
-      setConsumerMode(modeConfig.getMode());
-      modeConfigController.loadSettings(modeConfig);
-    }
-
-    Path instancePath = config.getInstancePath();
-    if (instancePath != null) {
-      setSatInstanceFile(instancePath.toFile());
-    }
-
-    showLiveVisualizationCheckBox.setSelected(!config.isNoGui());
-
-    String videoTemplatePath = config.getVideoTemplatePath();
-    if (videoTemplatePath != null) {
-      setRecordingFile(videoTemplatePath);
-    }
-
-    recordFromStartCheckBox.setSelected(config.isRecordImmediately());
-
-    WeightFactor weightFactor = config.getWeightFactor();
-    if (weightFactor != null) {
-      weightFactorChoiceBox.setValue(weightFactor);
-    }
-
-    windowSizeSpinner.getValueFactory().setValue(config.getWindowSize());
-
-    HeatmapColors colors = config.getHeatmapColors();
-    if (colors != null) {
-      coldColorColorPicker.setValue(intToColor(colors.getFromColor()));
-      hotColorColorPicker.setValue(intToColor(colors.getToColor()));
-    }
+    loadConsumerConfig(config);
   }
 
   @FXML
@@ -163,28 +120,7 @@ public class GeneralConfigController extends ConfigController {
       return;
     }
 
-    // creates config where ConsumerModeConfig has already been set
-    ConsumerConfig config = modeConfigController.saveConsumerConfig();
-
-    if (satInstanceFile != null) {
-      config.setInstancePath(satInstanceFile.toPath());
-    }
-
-    config.setNoGui(!showLiveVisualizationCheckBox.isSelected());
-
-    config.setVideoTemplatePath(recordingFile);
-
-    config.setRecordImmediately(recordFromStartCheckBox.isSelected());
-
-    config.setWeightFactor(weightFactorChoiceBox.getValue());
-
-    config.setWindowSize(windowSizeSpinner.getValue());
-
-    HeatmapColors colors = new HeatmapColors();
-    colors.setFromColor(colorToInt(coldColorColorPicker.getValue()));
-    colors.setToColor(colorToInt(hotColorColorPicker.getValue()));
-    config.setHeatmapColors(colors);
-
+    ConsumerConfig config = saveConsumerConfig();
 
     getGson().toJson(file, config);
   }
@@ -241,8 +177,10 @@ public class GeneralConfigController extends ConfigController {
 
   @FXML
   private void run() {
+    ConsumerConfig config = saveConsumerConfig();
     try {
-      consumerConfig = createConsumerConfig();
+      validateConsumerConfig(config);
+      consumerConfig = config;
       Platform.exit();
     } catch (ConfigArgumentException e) {
       errorLabel.setText(e.getMessage());
@@ -250,6 +188,18 @@ public class GeneralConfigController extends ConfigController {
   }
 
   // METHODS (OTHER)
+
+  @Override
+  protected void initializeComponents() {
+    weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
+
+    initializeIntegerSpinner(windowSizeSpinner,
+        ConsumerConfig.MIN_WINDOW_SIZE,
+        ConsumerConfig.MAX_WINDOW_SIZE,
+        ConsumerConfig.DEFAULT_WINDOW_SIZE);
+
+    modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
+  }
 
   @Override
   protected void setDefaultValues() {
@@ -274,14 +224,53 @@ public class GeneralConfigController extends ConfigController {
   }
 
   @Override
-  protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {
-    // creates config where ConsumerModeConfig has already been set
-    ConsumerConfig config = modeConfigController.createConsumerConfig();
-
-    if (satInstanceFile == null) {
-      throw new ConfigArgumentException("Please select a SAT instance file.");
+  protected void loadConsumerConfig(ConsumerConfig config) {
+    if (config == null) {
+      return;
     }
-    config.setInstancePath(satInstanceFile.toPath());
+
+    ConsumerModeConfig modeConfig = config.getModeConfig();
+    if (modeConfig != null && modeConfig.getMode() != null) {
+      setConsumerMode(modeConfig.getMode());
+      modeConfigController.loadConsumerConfig(config);
+    }
+
+    Path instancePath = config.getInstancePath();
+    if (instancePath != null) {
+      setSatInstanceFile(instancePath.toFile());
+    }
+
+    showLiveVisualizationCheckBox.setSelected(!config.isNoGui());
+
+    String videoTemplatePath = config.getVideoTemplatePath();
+    if (videoTemplatePath != null) {
+      setRecordingFile(videoTemplatePath);
+    }
+
+    recordFromStartCheckBox.setSelected(config.isRecordImmediately());
+
+    WeightFactor weightFactor = config.getWeightFactor();
+    if (weightFactor != null) {
+      weightFactorChoiceBox.setValue(weightFactor);
+    }
+
+    windowSizeSpinner.getValueFactory().setValue(config.getWindowSize());
+
+    HeatmapColors colors = config.getHeatmapColors();
+    if (colors != null) {
+      coldColorColorPicker.setValue(intToColor(colors.getFromColor()));
+      hotColorColorPicker.setValue(intToColor(colors.getToColor()));
+    }
+  }
+
+  @Override
+  protected ConsumerConfig saveConsumerConfig() {
+    // creates config where ConsumerModeConfig has already been set
+    ConsumerConfig config = modeConfigController.saveConsumerConfig();
+
+    if (satInstanceFile != null) {
+      config.setInstancePath(satInstanceFile.toPath());
+    }
 
     config.setNoGui(!showLiveVisualizationCheckBox.isSelected());
 
@@ -299,6 +288,14 @@ public class GeneralConfigController extends ConfigController {
     config.setHeatmapColors(colors);
 
     return config;
+  }
+
+  @Override
+  protected void validateConsumerConfig(ConsumerConfig config) throws ConfigArgumentException {
+    if (config.getInstancePath() == null) {
+      throw new ConfigArgumentException("Please select a SAT instance file.");
+    }
+    modeConfigController.validateConsumerConfig(config);
   }
 
   private void setRecordingFile(String file) {

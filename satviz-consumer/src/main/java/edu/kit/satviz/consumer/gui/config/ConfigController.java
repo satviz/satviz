@@ -21,7 +21,12 @@ public abstract class ConfigController {
 
   protected abstract void setDefaultValues();
 
-  protected abstract ConsumerConfig createConsumerConfig() throws ConfigArgumentException;
+  protected abstract void loadConsumerConfig(ConsumerConfig config);
+
+  protected abstract ConsumerConfig saveConsumerConfig();
+
+  protected abstract void validateConsumerConfig(ConsumerConfig config)
+      throws ConfigArgumentException;
 
   protected void initializeIntegerSpinner(Spinner<Integer> spinner, int min, int max, int init) {
     SpinnerValueFactory<Integer> spinnerValueFactory

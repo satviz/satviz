@@ -1,7 +1,6 @@
 package edu.kit.satviz.consumer.gui.config;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
-import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import java.io.File;
@@ -9,13 +8,12 @@ import java.nio.file.Path;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 
 
-public class EmbeddedConfigController extends ModeConfigController {
+public class EmbeddedConfigController extends ConfigController {
 
   // ATTRIBUTES (FXML)
 
@@ -30,11 +28,6 @@ public class EmbeddedConfigController extends ModeConfigController {
 
 
   // METHODS (FXML)
-
-  @Override
-  protected void initializeComponents() {
-    producerModeChoiceBox.setItems(FXCollections.observableArrayList(EmbeddedModeSource.values()));
-  }
 
   @FXML
   private void selectProducerModeFile() {
@@ -56,6 +49,11 @@ public class EmbeddedConfigController extends ModeConfigController {
   // METHODS (OTHER)
 
   @Override
+  protected void initializeComponents() {
+    producerModeChoiceBox.setItems(FXCollections.observableArrayList(EmbeddedModeSource.values()));
+  }
+
+  @Override
   protected void setDefaultValues() {
     producerModeChoiceBox.setValue(EmbeddedModeConfig.DEFAULT_EMBEDDED_MODE_SOURCE);
 
@@ -64,26 +62,11 @@ public class EmbeddedConfigController extends ModeConfigController {
   }
 
   @Override
-  protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {
-    EmbeddedModeConfig modeConfig = new EmbeddedModeConfig();
-    modeConfig.setSource(producerModeChoiceBox.getValue());
-    if (producerModeFile == null) {
-      throw new ConfigArgumentException("Please select a "
-          + producerModeChoiceBox.getValue().name() + " file.");
-    }
-    modeConfig.setSourcePath(producerModeFile.toPath());
-
-    ConsumerConfig config = new ConsumerConfig();
-    config.setModeConfig(modeConfig);
-
-    return config;
-  }
-
-  @Override
-  protected void loadSettings(ConsumerModeConfig config) {
+  protected void loadConsumerConfig(ConsumerConfig config) {
     setDefaultValues();
 
-    EmbeddedModeConfig embeddedModeConfig = (EmbeddedModeConfig) config;
+    // config & config.getModeConfig() have already been checked for null by GeneralConfigController
+    EmbeddedModeConfig embeddedModeConfig = (EmbeddedModeConfig) config.getModeConfig();
 
     EmbeddedModeSource source = embeddedModeConfig.getSource();
     if (source != null) {
@@ -96,9 +79,32 @@ public class EmbeddedConfigController extends ModeConfigController {
     }
   }
 
+  @Override
+  protected ConsumerConfig saveConsumerConfig() {
+    EmbeddedModeConfig modeConfig = new EmbeddedModeConfig();
+    modeConfig.setSource(producerModeChoiceBox.getValue());
+    if (producerModeFile != null) {
+      modeConfig.setSourcePath(producerModeFile.toPath());
+    }
+
+    ConsumerConfig config = new ConsumerConfig();
+    config.setModeConfig(modeConfig);
+
+    return config;
+  }
+
+  @Override
+  protected void validateConsumerConfig(ConsumerConfig config) throws ConfigArgumentException {
+    EmbeddedModeConfig embeddedModeConfig = (EmbeddedModeConfig) config.getModeConfig();
+
+    if (embeddedModeConfig.getSourcePath() == null) {
+      throw new ConfigArgumentException("Please select a "
+          + producerModeChoiceBox.getValue().name() + " file.");
+    }
+  }
+
   private void setProducerModeFile(File file) {
     producerModeFile = file;
     producerModeFileLabel.setText(file.getName());
   }
-
 }

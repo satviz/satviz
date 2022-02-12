@@ -1,12 +1,11 @@
 package edu.kit.satviz.consumer.gui.config;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
-import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 
-public class ExternalConfigController extends ModeConfigController {
+public class ExternalConfigController extends ConfigController {
 
   // ATTRIBUTES (FXML)
 
@@ -14,7 +13,7 @@ public class ExternalConfigController extends ModeConfigController {
   private Spinner<Integer> portSpinner;
 
 
-  // METHODS (FXML)
+  // METHODS (OTHER)
 
   @Override
   protected void initializeComponents() {
@@ -24,15 +23,23 @@ public class ExternalConfigController extends ModeConfigController {
         ExternalModeConfig.DEFAULT_PORT_NUMBER);
   }
 
-  // METHODS (OTHER)
-
   @Override
   protected void setDefaultValues() {
     portSpinner.getValueFactory().setValue(ExternalModeConfig.DEFAULT_PORT_NUMBER);
   }
 
   @Override
-  protected ConsumerConfig createConsumerConfig() throws ConfigArgumentException {
+  protected void loadConsumerConfig(ConsumerConfig config) {
+    setDefaultValues();
+
+    // config & config.getModeConfig() have already been checked for null by GeneralConfigController
+    ExternalModeConfig externalModeConfig = (ExternalModeConfig) config.getModeConfig();
+
+    portSpinner.getValueFactory().setValue(externalModeConfig.getPort());
+  }
+
+  @Override
+  protected ConsumerConfig saveConsumerConfig() {
     ExternalModeConfig modeConfig = new ExternalModeConfig();
     modeConfig.setPort(portSpinner.getValue());
 
@@ -43,13 +50,7 @@ public class ExternalConfigController extends ModeConfigController {
   }
 
   @Override
-  protected void loadSettings(ConsumerModeConfig config) {
-    setDefaultValues();
-
-    ExternalModeConfig externalModeConfig = (ExternalModeConfig) config;
-
-    portSpinner.getValueFactory().setValue(externalModeConfig.getPort());
+  protected void validateConsumerConfig(ConsumerConfig config) throws ConfigArgumentException {
+    // nothing to validate
   }
-
-
 }
