@@ -65,9 +65,4 @@ class GraphTest {
     assertTrue(output.toByteArray().length > 0);
   }
 
-  @Test
-  void test_deserialize() {
-    // TODO: 07/02/2022
-  }
-
 }
