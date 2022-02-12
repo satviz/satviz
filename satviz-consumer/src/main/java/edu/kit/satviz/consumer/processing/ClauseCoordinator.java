@@ -194,40 +194,46 @@ public class ClauseCoordinator implements AutoCloseable {
     try {
       // find nearest snapshot to index
       Map.Entry<Long, Snapshot> entry = snapshots.floorEntry(index);
-      Snapshot snapshot = entry.getValue();
-      List<ClauseUpdateProcessor> snapshotProcessors = Arrays.asList(snapshot.processors());
+      if (index >= currentUpdate && entry.getKey() <= currentUpdate) {
+        return currentUpdate;
+      }
+      try {
+        Snapshot snapshot = entry.getValue();
+        List<ClauseUpdateProcessor> snapshotProcessors = Arrays.asList(snapshot.processors());
 
-      try (var stream = new BufferedInputStream(Files.newInputStream(snapshot.file()))) {
-        // lock state to ensure consistent graph and processor views for advance()
-        stateLock.lock();
-        // restore processor and graph state
-        for (ClauseUpdateProcessor processor : snapshotProcessors) {
-          processor.deserialize(stream);
+        try (var stream = new BufferedInputStream(Files.newInputStream(snapshot.file()))) {
+          // lock state to ensure consistent graph and processor views for advance()
+          stateLock.lock();
+          // restore processor and graph state
+          for (ClauseUpdateProcessor processor : snapshotProcessors) {
+            processor.deserialize(stream);
+          }
+          graph.deserialize(stream);
         }
-        graph.deserialize(stream);
+
+        // lock processors so processor updates don't interleave
+        processorLock.lock();
+        List<ClauseUpdateProcessor> nonSnapshotProcessors = new ArrayList<>(this.processors);
+        nonSnapshotProcessors.removeAll(snapshotProcessors);
+
+        // reset processors that were added later
+        for (ClauseUpdateProcessor processor : nonSnapshotProcessors) {
+          processor.reset();
+        }
+
+        List<ClauseUpdateProcessor> newProcessors = new ArrayList<>();
+        newProcessors.addAll(snapshotProcessors); // first the processors that exist in the snapshot
+        newProcessors.addAll(nonSnapshotProcessors); // then the ones that were added afterwards
+
+        // set new processor list
+        this.processors.clear();
+        this.processors.addAll(newProcessors);
+        return entry.getKey();
+      } finally {
+        stateLock.unlock();
+        processorLock.unlock();
       }
-
-      // lock processors so processor updates don't interleave
-      processorLock.lock();
-      List<ClauseUpdateProcessor> nonSnapshotProcessors = new ArrayList<>(this.processors);
-      nonSnapshotProcessors.removeAll(snapshotProcessors);
-
-      // reset processors that were added later
-      for (ClauseUpdateProcessor processor : nonSnapshotProcessors) {
-        processor.reset();
-      }
-
-      List<ClauseUpdateProcessor> newProcessors = new ArrayList<>();
-      newProcessors.addAll(snapshotProcessors); // first the processors that exist in the snapshot
-      newProcessors.addAll(nonSnapshotProcessors); // then the ones that were added afterwards
-
-      // set new processor list
-      this.processors.clear();
-      this.processors.addAll(newProcessors);
-      return entry.getKey();
     } finally {
-      stateLock.unlock();
-      processorLock.unlock();
       snapshotLock.unlock();
     }
   }

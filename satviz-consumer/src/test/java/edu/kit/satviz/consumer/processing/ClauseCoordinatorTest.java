@@ -179,8 +179,8 @@ class ClauseCoordinatorTest {
     verify(processor1).process(eq(someUpdates), eq(graph));
     assertEquals(4, coordinator.currentUpdate());
     // unnecessary deserialization should be avoided
-    // verify(graph, never()).deserialize(any());
-    // verify(processor1, never()).deserialize(any());
+    verify(graph, never()).deserialize(any());
+    verify(processor1, never()).deserialize(any());
   }
 
   @Test
@@ -197,8 +197,8 @@ class ClauseCoordinatorTest {
     coordinator.seekToUpdate(3);
     assertEquals(3, coordinator.currentUpdate());
     // unnecessary deserialization should be avoided
-    // verify(graph, never()).deserialize(any());
-    // verify(processor1, never()).deserialize(any());
+    verify(graph, never()).deserialize(any());
+    verify(processor1, never()).deserialize(any());
   }
 
   @Test
