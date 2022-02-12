@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -44,7 +45,6 @@ public class ClauseCoordinator implements AutoCloseable {
   // therefore marked volatile.
   private volatile long currentUpdate;
   private Runnable changeListener;
-  private boolean processorsChanged;
 
   public ClauseCoordinator(Graph graph, Path tempDir) throws IOException {
     this.tempDir = tempDir;
@@ -59,7 +59,8 @@ public class ClauseCoordinator implements AutoCloseable {
     this.snapshotLock = new ReentrantLock();
     this.stateLock = new ReentrantLock();
     this.processorLock = new ReentrantLock();
-    this.processorsChanged = true; // set to true so the first snapshot has something to save
+    // so the initial snapshot has something to compare the processor list against
+    this.snapshots.put(0L, new Snapshot(null, new ClauseUpdateProcessor[0]));
     // take initial snapshot to have a baseline in the snapshots TreeMap
     takeSnapshot();
   }
@@ -68,7 +69,6 @@ public class ClauseCoordinator implements AutoCloseable {
     processorLock.lock();
     try {
       processors.add(processor);
-      processorsChanged = true;
     } finally {
       processorLock.unlock();
     }
@@ -159,10 +159,12 @@ public class ClauseCoordinator implements AutoCloseable {
 
       // if the processor list has changed since the last snapshot, create a new snapshot array.
       // otherwise, reuse the processors snapshot from the most recent snapshot
-      ClauseUpdateProcessor[] processorsSnapshot = processorsChanged
-          ? this.processors.toArray(new ClauseUpdateProcessor[0])
-          : snapshots.floorEntry(current).getValue().processors();
-      processorsChanged = false;
+      ClauseUpdateProcessor[] mostRecentProcessors = snapshots.floorEntry(current)
+          .getValue().processors();
+      ClauseUpdateProcessor[] processorsSnapshot =
+          Arrays.asList(mostRecentProcessors).equals(processors)
+              ? mostRecentProcessors
+              : this.processors.toArray(new ClauseUpdateProcessor[0]);
       snapshots.put(current, new Snapshot(snapshotFile, processorsSnapshot));
     } finally {
       processorLock.unlock();
@@ -217,7 +219,6 @@ public class ClauseCoordinator implements AutoCloseable {
       // set new processor list
       this.processors.clear();
       this.processors.addAll(newProcessors);
-      processorsChanged = false;
       return entry.getKey();
     } finally {
       stateLock.unlock();
