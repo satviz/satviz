@@ -25,8 +25,8 @@
                 <ToolBar prefHeight="0.0" prefWidth="348.0" BorderPane.alignment="CENTER">
                     <Pane HBox.hgrow="ALWAYS" />
                     <items>
-                        <Button mnemonicParsing="false" text="Load Settings" fx:id="loadSettingsButton"/>
-                        <Button mnemonicParsing="false" text="Save Settings" fx:id="saveSettingsButton"/>
+                        <Button mnemonicParsing="false" text="Load Settings" fx:id="loadSettingsButton" onAction="#loadSettings"/>
+                        <Button mnemonicParsing="false" text="Save Settings" fx:id="saveSettingsButton" onAction="#saveSettings"/>
                     </items>
                 </ToolBar>
             </top>

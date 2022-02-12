@@ -15,6 +15,7 @@ import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import javafx.application.Platform;
@@ -126,7 +127,14 @@ public class GeneralConfigController extends ConfigController {
 
     ConsumerConfig config = saveConsumerConfig();
 
-    getGson().toJson(file, config);
+    FileWriter writer = null;
+    try {
+      writer = new FileWriter(file);
+    } catch (IOException e) {
+      errorLabel.setText("The settings file could not be created.");
+    }
+
+    getGson().toJson(config, writer);
   }
 
   @FXML
