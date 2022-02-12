@@ -12,7 +12,7 @@ add_executable(
 
 target_link_libraries(
   native-test
-  gtest gtest_main
+  gtest gtest_main pthread
   satviz-consumer-native
 )
 
