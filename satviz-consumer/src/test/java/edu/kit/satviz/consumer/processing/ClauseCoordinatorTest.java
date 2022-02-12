@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -61,7 +62,7 @@ class ClauseCoordinatorTest {
     coordinator = new ClauseCoordinator(graph, tempDir);
     coordinator.addProcessor(processor1);
 
-    coordinator.registerChangeListener(() -> changeListenerCallAmount.getAndIncrement());
+    coordinator.registerChangeListener(changeListenerCallAmount::getAndIncrement);
   }
 
   @Test
@@ -105,7 +106,7 @@ class ClauseCoordinatorTest {
     assertEquals(4, coordinator.totalUpdateCount());
     verify(processor1, never()).process(notNull(), eq(graph));
     coordinator.advanceVisualization(1);
-    assertEquals(1, changeListenerCallAmount.get());
+    verify(processor1).process(eq(Arrays.copyOfRange(clauseUpdates, 0, 1)), eq(graph));
   }
 
   // registerChangeListener
@@ -113,9 +114,9 @@ class ClauseCoordinatorTest {
   @Test
   void test_registerChangeListener_advanceOnce() throws IOException, SerializationException {
     coordinator.addClauseUpdate(clauseUpdates[0]);
-    assertEquals(0, changeListenerCallAmount.get());
-    coordinator.advanceVisualization(1);
     assertEquals(1, changeListenerCallAmount.get());
+    coordinator.advanceVisualization(1);
+    assertEquals(2, changeListenerCallAmount.get());
   }
 
   @Test
@@ -124,6 +125,7 @@ class ClauseCoordinatorTest {
     int expectedCallAmount = 0;
     for (ClauseUpdate update : clauseUpdates) {
       coordinator.addClauseUpdate(update);
+      expectedCallAmount++;
     }
     while (coordinator.currentUpdate() < clauseUpdates.length) {
       coordinator.advanceVisualization(1);
@@ -137,13 +139,31 @@ class ClauseCoordinatorTest {
     for (ClauseUpdate update : clauseUpdates) {
       coordinator.addClauseUpdate(update);
     }
-    assertEquals(0, changeListenerCallAmount.get());
+    assertEquals(clauseUpdates.length, changeListenerCallAmount.get());
   }
 
   @Test
   void test_registerChangeListener_advanceZero() throws SerializationException, IOException {
     coordinator.advanceVisualization(0);
     assertEquals(0, changeListenerCallAmount.get());
+  }
+
+  // takeSnapshot
+
+  @Test
+  void test_takeSnapshot_initialSnapshot() {
+    verify(graph).serialize(any());
+  }
+
+  @Test
+  void test_takeSnapshot() throws SerializationException, IOException {
+    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 0, 4)) {
+      coordinator.addClauseUpdate(update);
+    }
+    coordinator.advanceVisualization(3);
+    coordinator.takeSnapshot();
+    verify(graph, times(2)).serialize(any());
+    verify(processor1).serialize(any());
   }
 
   // seekToUpdate
@@ -158,6 +178,9 @@ class ClauseCoordinatorTest {
     coordinator.seekToUpdate(4);
     verify(processor1).process(eq(someUpdates), eq(graph));
     assertEquals(4, coordinator.currentUpdate());
+    // unnecessary deserialization should be avoided
+    // verify(graph, never()).deserialize(any());
+    // verify(processor1, never()).deserialize(any());
   }
 
   @Test
@@ -166,28 +189,97 @@ class ClauseCoordinatorTest {
       coordinator.addClauseUpdate(update);
     }
     coordinator.advanceVisualization(3);
+    coordinator.takeSnapshot();
     for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 4, 7)) {
       coordinator.addClauseUpdate(update);
     }
     assertEquals(3, coordinator.currentUpdate());
     coordinator.seekToUpdate(3);
     assertEquals(3, coordinator.currentUpdate());
+    // unnecessary deserialization should be avoided
+    // verify(graph, never()).deserialize(any());
+    // verify(processor1, never()).deserialize(any());
   }
 
   @Test
   void test_seekToUpdate_goToPast() throws SerializationException, IOException {
-    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 0, 5)) {
+    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 0, 11)) {
       coordinator.addClauseUpdate(update);
     }
     coordinator.advanceVisualization(4);
-    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 5, 11)) {
-      coordinator.addClauseUpdate(update);
-    }
+    coordinator.takeSnapshot();
     coordinator.advanceVisualization(5);
-    coordinator.advanceVisualization(1);
-    assertEquals(10, coordinator.currentUpdate());
+    coordinator.takeSnapshot();
+    assertEquals(9, coordinator.currentUpdate());
+
     coordinator.seekToUpdate(6);
     assertEquals(6, coordinator.currentUpdate());
+    verify(graph).deserialize(any());
+    verify(processor1).deserialize(any());
+  }
+
+  @Test
+  void test_seekToUpdate_resetTest() throws SerializationException, IOException {
+    int graphDeserializeCalls = 0;
+    int processorDeserializeCalls = 0;
+    int resetCalls = 0;
+    for (ClauseUpdate update : Arrays.copyOfRange(clauseUpdates, 0, 11)) {
+      coordinator.addClauseUpdate(update);
+    }
+    // ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~
+    coordinator.advanceVisualization(4);
+    // -  -  - >c  ~  ~  ~  ~  ~  ~  ~
+    coordinator.takeSnapshot();
+    // -  -  - >p  ~  ~  ~  ~  ~  ~  ~
+    coordinator.addProcessor(processor2);
+    // -  -  - >p |~  ~  ~  ~  ~  ~  ~
+    coordinator.advanceVisualization(5);
+    // -  -  -  p  =  =  =  = >c  ~  ~
+    coordinator.takeSnapshot(); // first serialization of processor2
+    // -  -  -  p  =  =  =  = >pp ~  ~
+    assertEquals(9, coordinator.currentUpdate());
+
+    // -  -  -  p  =  =  =  = >pp ~  ~
+    coordinator.seekToUpdate(5);
+    // -  -  -  p >c  =  =  =  pp ~  ~
+
+    assertEquals(5, coordinator.currentUpdate());
+    verify(graph).deserialize(any());
+    // only first processor is serialized at a lower index
+    verify(processor1, times(1)).deserialize(any());
+    verify(processor1, times(0)).reset();
+    verify(processor2, times(0)).deserialize(any());
+    verify(processor2, times(1)).reset();
+
+    // -  -  -  p >c  =  =  =  pp ~  ~
+    coordinator.takeSnapshot(); // serializing reset state of processor2 (not necessary)
+    // -  -  -  p >pp =  =  =  pp ~  ~
+
+    // -  -  -  p >pp =  =  =  pp ~  ~
+    coordinator.seekToUpdate(2);
+    // - >c  -  p  pp =  =  =  pp ~  ~
+
+    assertEquals(2, coordinator.currentUpdate());
+    verify(graph, times(2)).deserialize(any());
+    // no processor is serialized at a lower index than 2
+    // => reset is called instead of deserialize for both processors
+    verify(processor1, times(1)).deserialize(any()); // still only once
+    verify(processor1, times(1)).reset();
+    verify(processor2, times(0)).deserialize(any());
+    verify(processor2, times(2)).reset();
+
+    // = >c  -  p  pp =  =  =  pp ~  ~
+    coordinator.seekToUpdate(7);
+    // =  =  -  p  pp = >c  =  pp ~  ~
+
+    assertEquals(7, coordinator.currentUpdate());
+    verify(graph, times(3)).deserialize(any());
+    // both processors are serialized at a lower index than 7
+    // => deserialize is called instead of reset for both processors
+    verify(processor1, times(2)).deserialize(any()); // still only once
+    verify(processor1, times(1)).reset();
+    verify(processor2, times(1)).deserialize(any());
+    verify(processor2, times(2)).reset();
   }
 
   @AfterEach
