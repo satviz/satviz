@@ -8,6 +8,8 @@ import javafx.scene.control.Spinner;
 
 /**
  * Controls the window for the external mode configuration.
+ *
+ * @author Tim-17
  */
 public class ExternalConfigController extends ConfigController {
 

@@ -5,6 +5,8 @@ import javafx.fxml.FXML;
 
 /**
  * Abstract superclass to all controller classes for config GUI windows.
+ *
+ * @author Tim-17
  */
 public abstract class ConfigController {
 
@@ -50,7 +52,7 @@ public abstract class ConfigController {
    *
    * @param config The {@link ConsumerConfig} object to be validated.
    * @throws ConfigArgumentException If the {@link ConsumerConfig} object doesn't contain
-   * all necessary information.
+   *                                 all necessary information.
    */
   protected abstract void validateConsumerConfig(ConsumerConfig config)
       throws ConfigArgumentException;

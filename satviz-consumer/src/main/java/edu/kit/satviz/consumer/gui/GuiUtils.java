@@ -6,6 +6,8 @@ import javafx.util.StringConverter;
 
 /**
  * Provides functionality for fxml GUI windows.
+ *
+ * @author Tim-17
  */
 public interface GuiUtils {
 
