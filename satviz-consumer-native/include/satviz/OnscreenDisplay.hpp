@@ -17,10 +17,9 @@ private:
 
 public:
   OnscreenDisplay(int width, int height);
-  ~OnscreenDisplay();
+  ~OnscreenDisplay() override;
 
   bool pollEvent(sf::Event &event) override;
-  void lockSize(bool lock) override;
   void displayFrame() override;
 };
 
