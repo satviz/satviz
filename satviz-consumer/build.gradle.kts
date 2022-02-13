@@ -59,5 +59,11 @@ tasks {
 
     test {
         dependsOn.add("ctest")
+        jvmArgs = listOf("--add-modules", "jdk.incubator.foreign",
+            "--enable-native-access=edu.kit.satviz.consumer")
+    }
+
+    compileTestJava {
+        options.compilerArgs = listOf("--add-modules", "jdk.incubator.foreign")
     }
 }
