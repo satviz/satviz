@@ -17,14 +17,20 @@ sf::ContextSettings Display::makeContextSettings() {
 void Display::initializeGl() {
   gladLoaderLoadGL();
   glGenBuffers(NUM_PBOS, pbos);
-  onResize();
+  onResize(width, height);
 }
 
 void Display::deinitializeGl() {
   glDeleteBuffers(NUM_PBOS, pbos);
 }
 
-void Display::onResize() {
+void Display::onResize(int w, int h) {
+  if (size_locked) return;
+  width  = w;
+  height = h;
+  // Resize GL viewport
+  glViewport(0, 0, width, height);
+  // Resize pixel buffer objects
   glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_IN_PROGRESS]);
   glBufferData(GL_PIXEL_PACK_BUFFER, 4 * width * height, NULL, GL_STREAM_READ);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_READY]);
@@ -32,8 +38,14 @@ void Display::onResize() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
+void Display::lockSize(bool lock) {
+  size_locked = lock;
+  if (!size_locked) {
+    onResize(width, height);
+  }
+}
+
 void Display::startFrame() {
-  glViewport(0, 0, width, height);
   glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -54,10 +66,10 @@ void Display::transferCurrentFrame() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
-VideoFrame Display::grabPreviousFrame() {
+VideoFrame Display::grabPreviousFrame(const VideoGeometry &geom) {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_READY]);
   void *pixels = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-  VideoFrame frame = VideoFrame::fromBgraImage(width, height, pixels);
+  VideoFrame frame = VideoFrame::fromBgraImage(geom, pixels);
   glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
   return frame;

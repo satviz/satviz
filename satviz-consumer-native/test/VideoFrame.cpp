@@ -6,7 +6,7 @@
 using namespace ::satviz::video;
 
 /*
- * Test whether VideoFrame::fromImage() correctly converts images to video frames.
+ * Test whether VideoFrame::fromBgraImage() correctly converts images to video frames.
  */
 TEST(VideoFrame, FromBgraImage) {
   const int width  = 2;
@@ -36,9 +36,14 @@ TEST(VideoFrame, FromBgraImage) {
   }
 
   // Create VideoFrame from image data
-  VideoFrame frame = VideoFrame::fromBgraImage(width, height, pixels);
-  ASSERT_EQ(frame.width,  width);
-  ASSERT_EQ(frame.height, height);
+  VideoGeometry geom;
+  geom.view_width    = width;
+  geom.view_height   = height;
+  geom.view_offset_x = 0;
+  geom.view_offset_y = 0;
+  geom.padded_width  = width;
+  geom.padded_height = height;
+  VideoFrame frame = VideoFrame::fromBgraImage(geom, pixels);
 
   /* check all pixels */
   for (int i = 0; i < width * height; i++) {

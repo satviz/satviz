@@ -17,7 +17,9 @@ public class PathAdapter extends TypeAdapter<Path> {
 
   @Override
   public void write(JsonWriter out, Path value) throws IOException {
-    out.value(value.toString());
+    if (value != null) {
+      out.value(value.toString());
+    }
   }
 
   @Override
