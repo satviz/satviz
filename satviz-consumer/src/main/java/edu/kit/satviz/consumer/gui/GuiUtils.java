@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.gui;
 
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
 
 /**
@@ -62,6 +63,20 @@ public interface GuiUtils {
         }
       }
     });
+  }
+
+  static Color intToColor(int color) {
+    int red = (color >>> 16) & 0xFF;
+    int green = (color >>> 8) & 0xFF;
+    int blue = color & 0xFF;
+    return new Color(red / 255.0, green / 255.0, blue / 255.0, 1.0);
+  }
+
+  static int colorToInt(Color color) {
+    int red = (int) Math.round(color.getRed() * 255);
+    int green = (int) Math.round(color.getGreen() * 255);
+    int blue = (int) Math.round(color.getBlue() * 255);
+    return (red << 16) | (green << 8) | blue;
   }
 
 }

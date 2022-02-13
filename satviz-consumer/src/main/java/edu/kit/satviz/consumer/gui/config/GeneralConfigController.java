@@ -227,9 +227,9 @@ public class GeneralConfigController extends ConfigController {
 
     windowSizeSpinner.getValueFactory().setValue(ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
-    coldColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
+    coldColorColorPicker.setValue(GuiUtils.intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
 
-    hotColorColorPicker.setValue(intToColor(HeatmapColors.DEFAULT_TO_COLOR));
+    hotColorColorPicker.setValue(GuiUtils.intToColor(HeatmapColors.DEFAULT_TO_COLOR));
 
     satInstanceFile = null;
     satInstanceFileLabel.setText("");
@@ -272,8 +272,8 @@ public class GeneralConfigController extends ConfigController {
 
     HeatmapColors colors = config.getHeatmapColors();
     if (colors != null) {
-      coldColorColorPicker.setValue(intToColor(colors.getFromColor()));
-      hotColorColorPicker.setValue(intToColor(colors.getToColor()));
+      coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
+      hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
     }
   }
 
@@ -297,8 +297,8 @@ public class GeneralConfigController extends ConfigController {
     config.setWindowSize(windowSizeSpinner.getValue());
 
     HeatmapColors colors = new HeatmapColors();
-    colors.setFromColor(colorToInt(coldColorColorPicker.getValue()));
-    colors.setToColor(colorToInt(hotColorColorPicker.getValue()));
+    colors.setFromColor(GuiUtils.colorToInt(coldColorColorPicker.getValue()));
+    colors.setToColor(GuiUtils.colorToInt(hotColorColorPicker.getValue()));
     config.setHeatmapColors(colors);
 
     return config;
@@ -345,20 +345,6 @@ public class GeneralConfigController extends ConfigController {
           .create();
     }
     return gson;
-  }
-
-  private Color intToColor(int color) {
-    int red = (color >>> 16) & 0xFF;
-    int green = (color >>> 8) & 0xFF;
-    int blue = color & 0xFF;
-    return new Color(red / 255.0, green / 255.0, blue / 255.0, 1.0);
-  }
-
-  private int colorToInt(Color color) {
-    int red = (int) Math.round(color.getRed() * 255);
-    int green = (int) Math.round(color.getGreen() * 255);
-    int blue = (int) Math.round(color.getBlue() * 255);
-    return (red << 16) | (green << 8) | blue;
   }
 
 }
