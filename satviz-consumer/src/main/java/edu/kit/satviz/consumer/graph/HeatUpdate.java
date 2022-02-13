@@ -23,8 +23,8 @@ import jdk.incubator.foreign.ResourceScope;
 public final class HeatUpdate implements GraphUpdate {
 
   private static final Struct STRUCT = Struct.builder()
-      .field("index", MemoryAddress.class, CLinker.C_POINTER)
-      .field("heat", MemoryAddress.class, CLinker.C_POINTER)
+      .field("index", long.class, CLinker.C_POINTER)
+      .field("heat", long.class, CLinker.C_POINTER)
       .field("n", int.class, CLinker.C_INT)
       .build();
 
@@ -64,8 +64,8 @@ public final class HeatUpdate implements GraphUpdate {
     MemorySegment heatValues = MemorySegment.allocateNative(
         MemoryLayout.sequenceLayout(size, CLinker.C_FLOAT), scope);
     STRUCT.varHandle("n").set(segment, size);
-    STRUCT.varHandle("index").set(segment, indices.address());
-    STRUCT.varHandle("heat").set(segment, heatValues.address());
+    STRUCT.varHandle("index").set(segment, indices.address().toRawLongValue());
+    STRUCT.varHandle("heat").set(segment, heatValues.address().toRawLongValue());
     long intSize = CLinker.C_INT.byteSize();
     int index = 0;
     for (var entry : values.entrySet()) {
