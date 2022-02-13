@@ -18,30 +18,29 @@ set(SRC_SATVIZ_FILES
   Camera.cpp
   VideoController.cpp
   Graph.cpp
-  VideoFrame.cpp TheoraEncoder.cpp)
+  VideoFrame.cpp
+  TheoraEncoder.cpp
+)
 
 add_library(
   satviz-consumer-native SHARED
   ${SRC_SATVIZ_FILES}
 )
 
+target_compile_options(satviz-consumer-native PRIVATE ${SATVIZ_COMPILER_WARNINGS})
+
 target_include_directories(
   satviz-consumer-native
-  PRIVATE ${OGDF_INCLUDE_DIRS}
-  PRIVATE ${SFML_INCLUDE_DIRS}
-  PRIVATE ${THEORA_INCLUDE_DIRS}
+  SYSTEM PUBLIC ${OGDF_INCLUDE_DIRS}
+  SYSTEM PUBLIC ${SFML_INCLUDE_DIRS}
+  SYSTEM PRIVATE ${THEORA_INCLUDE_DIRS}
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 target_link_libraries(
   satviz-consumer-native
-  PRIVATE OGDF
-  PRIVATE sfml-window
+  PUBLIC OGDF
+  PUBLIC sfml-window
   PRIVATE ${THEORA_LIBRARIES}
   PRIVATE satviz-glad
-)
-
-target_compile_options(
-  satviz-consumer-native
-  PRIVATE -Wall -Wextra -Wconversion -pedantic
 )

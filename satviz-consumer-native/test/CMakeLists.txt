@@ -8,24 +8,17 @@ include(GoogleTest)
 add_executable(
   native-test
   Test.cpp
-  YCbCr.cpp VideoFrame.cpp Display.cpp)
+  YCbCr.cpp
+  VideoFrame.cpp
+  Display.cpp
+)
+
+target_compile_options(native-test PRIVATE ${SATVIZ_COMPILER_WARNINGS})
 
 target_link_libraries(
   native-test
   gtest gtest_main pthread
   satviz-consumer-native
-)
-
-target_include_directories(
-  native-test
-  PRIVATE ${OGDF_INCLUDE_DIRS}
-  PRIVATE ${SFML_INCLUDE_DIRS}
-  PRIVATE ${THEORA_INCLUDE_DIRS}
-)
-
-target_compile_options(
-  native-test
-  PRIVATE -Wall -Wextra -Wconversion -pedantic
 )
 
 gtest_discover_tests(

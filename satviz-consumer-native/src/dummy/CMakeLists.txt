@@ -5,20 +5,9 @@ add_executable(
   Main.cpp
 )
 
-target_include_directories(
-  dummy
-  PRIVATE ${OGDF_INCLUDE_DIRS}
-  PRIVATE ${SFML_INCLUDE_DIRS}
-  PRIVATE ${THEORA_INCLUDE_DIRS}
-)
-
 target_link_libraries(
   dummy
   PRIVATE satviz-consumer-native
-  PRIVATE OGDF
 )
 
-target_compile_options(
-  dummy
-  PRIVATE -Wall -Wextra -Wconversion -pedantic
-)
+target_compile_options(dummy PRIVATE ${SATVIZ_COMPILER_WARNINGS})
