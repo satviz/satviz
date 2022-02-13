@@ -54,7 +54,7 @@ public final class WeightUpdate implements GraphUpdate {
       MemorySegment segment = toSegment(local);
       SUBMIT_WEIGHT_UPDATE.invokeExact(graph.getPointer(), segment.address());
     } catch (Throwable e) {
-      throw new NativeInvocationException("Error while submitting weight update");
+      throw new NativeInvocationException("Error while submitting weight update", e);
     }
   }
 
