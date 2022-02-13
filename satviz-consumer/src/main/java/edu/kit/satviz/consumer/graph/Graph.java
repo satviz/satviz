@@ -160,8 +160,9 @@ public class Graph extends NativeObject {
    * @return A {@link NodeInfo} object detailing information about the node.
    */
   public NodeInfo queryNode(int index) {
-    try {
-      MemorySegment segment = (MemorySegment) QUERY_NODE.invokeExact(getPointer(), index);
+    try (var localScope = ResourceScope.newConfinedScope()) {
+      MemorySegment segment = (MemorySegment) QUERY_NODE.invokeExact(
+          SegmentAllocator.ofScope(localScope), getPointer(), index);
       return new NodeInfo(segment);
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while querying node", e);
@@ -176,8 +177,9 @@ public class Graph extends NativeObject {
    * @return A {@link EdgeInfo} object detailing information about the edge.
    */
   public EdgeInfo queryEdge(int index1, int index2) {
-    try {
-      MemorySegment segment = (MemorySegment) QUERY_EDGE.invokeExact(getPointer(), index1, index2);
+    try (var localScope = ResourceScope.newConfinedScope()) {
+      MemorySegment segment = (MemorySegment) QUERY_EDGE.invokeExact(
+          SegmentAllocator.ofScope(localScope), getPointer(), index1, index2);
       return new EdgeInfo(segment);
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while querying edge", e);
