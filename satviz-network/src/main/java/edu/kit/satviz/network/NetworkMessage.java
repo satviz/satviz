@@ -18,13 +18,11 @@ public class NetworkMessage {
     TERM
   }
 
-  // single instances to save space
+  // single instances for performance
   private static final NetworkMessage objFail = new NetworkMessage(State.FAIL);
   private static final NetworkMessage objTerm = new NetworkMessage(State.TERM);
 
-  /** The state. */
   private final State state;
-  /** The message type. */
   private final byte type;
   /** The object contained in this message. Only relevant if state is <code>PRESENT</code> */
   private final Object obj;

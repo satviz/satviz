@@ -13,7 +13,7 @@ import java.util.Map;
  * This class maps bytes (encoding the message type) to {@link Serializer}s.
  */
 public class NetworkBlueprint {
-  private final Map<Byte, Serializer<?>> typeMap;
+  private final Serializer<?>[] serializers = new Serializer<?>[256];
 
   /**
    * Creates a new blueprint with specified type mapping.
@@ -21,7 +21,9 @@ public class NetworkBlueprint {
    * @param typeMap the mapping from type to serializer
    */
   public NetworkBlueprint(Map<Byte, Serializer<?>> typeMap) {
-    this.typeMap = typeMap;
+    for (int i = 0; i < 256; i++) {
+      serializers[i] = typeMap.get((byte) i);
+    }
   }
 
   /**
@@ -36,7 +38,7 @@ public class NetworkBlueprint {
    */
   public void serialize(byte type, Object obj, OutputStream out) throws IOException,
       SerializationException, ClassCastException {
-    Serializer<?> serial = typeMap.get(type);
+    Serializer<?> serial = serializers[type];
     if (serial != null) {
       serial.serializeUnsafe(obj, out);
     } else {
@@ -51,7 +53,7 @@ public class NetworkBlueprint {
    * @return a new builder for the given type of objects, <code>null</code> if not specified
    */
   public SerialBuilder<?> getBuilder(int type) {
-    Serializer<?> s = typeMap.get((byte) type);
+    Serializer<?> s = serializers[type & 0xff];
     if (s != null) {
       return s.getBuilder();
     }
