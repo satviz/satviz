@@ -2,13 +2,17 @@ package edu.kit.satviz.consumer.display;
 
 import edu.kit.satviz.consumer.bindings.NativeInvocationException;
 import edu.kit.satviz.consumer.bindings.NativeObject;
+import edu.kit.satviz.consumer.bindings.Struct;
 import edu.kit.satviz.consumer.graph.Graph;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.MemoryHandles;
+import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
+import jdk.incubator.foreign.SegmentAllocator;
 
 /**
  * Class used to render and record the visualisation done by satviz.
@@ -33,7 +37,7 @@ public class VideoController extends NativeObject {
 
   private static final MethodHandle START_RECORDING = lookupFunction(
       "start_recording",
-      MethodType.methodType(int.class, MemoryAddress.class,
+      MethodType.methodType(MemorySegment.class, MemoryAddress.class,
           MemoryAddress.class, MemoryAddress.class),
       FunctionDescriptor.of(CLinker.C_INT, CLinker.C_POINTER,
           CLinker.C_POINTER, CLinker.C_POINTER)
@@ -57,8 +61,16 @@ public class VideoController extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
 
+  private static final Struct START_RECORDING_RESULT = Struct.builder()
+      .field("encoder", long.class, CLinker.C_POINTER)
+      .field("code", int.class, CLinker.C_INT)
+      .build();
+
+  private MemoryAddress currentEncoderAddr;
+
   private VideoController(MemoryAddress pointer) {
     super(pointer);
+    currentEncoderAddr = MemoryAddress.NULL;
   }
 
   /**
@@ -98,13 +110,19 @@ public class VideoController extends NativeObject {
    */
   public boolean startRecording(String fileName, String encoder) {
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
-      int res = (int) START_RECORDING.invokeExact(getPointer(),
+      MemorySegment res = (MemorySegment) START_RECORDING.invokeExact(
+          SegmentAllocator.ofScope(local),
+          getPointer(),
           CLinker.toCString(fileName, local),
-          CLinker.toCString(encoder, local));
-      if (res == -1) {
+          CLinker.toCString(encoder, local)
+      );
+      int resultCode = (int) START_RECORDING_RESULT.varHandle("code").get(res);
+      if (resultCode == -1) {
         throw new IllegalArgumentException("Unsupported encoder " + encoder);
       }
-      return res != 0;
+      currentEncoderAddr = MemoryAddress.ofLong(
+          (long) START_RECORDING_RESULT.varHandle("encoder").get(res));
+      return resultCode != 0;
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while starting a recording", e);
     }
@@ -138,6 +156,7 @@ public class VideoController extends NativeObject {
   public void finishRecording() {
     try {
       FINISH_RECORDING.invokeExact(getPointer());
+      freeEncoder();
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while finishing a recording", e);
     }
@@ -156,8 +175,13 @@ public class VideoController extends NativeObject {
     }
   }
 
+  private void freeEncoder() {
+    CLinker.freeMemory(currentEncoderAddr);
+  }
+
   @Override
   public void close() {
+    freeEncoder();
     destroy();
   }
 }

@@ -35,7 +35,7 @@ EdgeInfo satviz_query_edge(void *graph, int index1, int index2);
 // VideoController
 typedef struct RecordingStartResult {
   void *encoder;
-  int success;
+  int code;
 } RecordingStartResult;
 
 void *satviz_new_video_controller(void *graph, int display_type, int width, int height);
