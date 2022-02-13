@@ -73,7 +73,7 @@ public abstract class NativeObject implements AutoCloseable {
       long r = offset % field.byteAlignment();
       if (r > 0) {
         offset += size - r;
-        alignedFields.add(MemoryLayout.paddingLayout(size - r));
+        alignedFields.add(MemoryLayout.paddingLayout(Byte.SIZE * (size - r)));
       }
       offset += size;
       alignedFields.add(field);
@@ -81,7 +81,7 @@ public abstract class NativeObject implements AutoCloseable {
     long strongestAlignment = MemoryLayout.structLayout(fields).byteAlignment();
     long r = offset % strongestAlignment;
     if (r > 0) {
-      alignedFields.add(MemoryLayout.paddingLayout(strongestAlignment - r));
+      alignedFields.add(MemoryLayout.paddingLayout(Byte.SIZE * (strongestAlignment - r)));
     }
     return MemoryLayout.structLayout(alignedFields.toArray(new MemoryLayout[0]));
   }
