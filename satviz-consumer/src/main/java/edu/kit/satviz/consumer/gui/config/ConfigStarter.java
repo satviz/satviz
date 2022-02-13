@@ -35,7 +35,7 @@ public class ConfigStarter extends Application {
    * Retrieve the configuration set by the user.
    *
    * @return The {@link ConsumerConfig} object which contains the configuration parameters set by
-   *    the user.
+   *         the user.
    */
   public static ConsumerConfig getConsumerConfig() {
     return configController.getConsumerConfig();

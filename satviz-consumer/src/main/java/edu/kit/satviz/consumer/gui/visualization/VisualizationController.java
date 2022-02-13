@@ -1,6 +1,8 @@
 package edu.kit.satviz.consumer.gui.visualization;
 
+import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.processing.Mediator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -9,6 +11,8 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 
 public class VisualizationController {
+
+  // ATTRIBUTES (FXML)
 
   @FXML
   private ChoiceBox<WeightFactor> weightFactorChoiceBox;
@@ -39,7 +43,92 @@ public class VisualizationController {
   @FXML
   private Button relayoutButton;
 
-  // TODO: add constructor with Mediator parameter
+  // ATTRIBUTES (OTHER)
+
+  private Mediator mediator;
+  private ConsumerConfig config;
+
+
+  // CONSTRUCTORS
+
+  public VisualizationController(Mediator mediator, ConsumerConfig config) {
+    this.mediator = mediator;
+    this.config = config;
+  }
+
+  // METHODS (FXML)
+
+  @FXML
+  private void initialize() {
+
+  }
+
+  @FXML
+  private void updateWeightFactor() {
+
+  }
+
+  @FXML
+  private void updateWindowSize() {
+
+  }
+
+  @FXML
+  private void updateHeatmapColdColor() {
+
+  }
+
+  @FXML
+  private void updateHeatmapHotColor() {
+
+  }
+
+  @FXML
+  private void highlightVariable() {
+
+  }
+
+  @FXML
+  private void clearHighlightVariable() {
+
+  }
+
+  @FXML
+  private void screenshot() {
+
+  }
+
+  @FXML
+  private void openScreenShotFolder() {
+
+  }
+
+  @FXML
+  private void startOrStopRecording() {
+
+  }
+
+  @FXML
+  private void pauseOrContinueRecording() {
+
+  }
+
+  @FXML
+  private void pauseOrContinueVisualization() {
+
+  }
+
+  @FXML
+  private void relayout() {
+
+  }
+
+  @FXML
+  private void seekToUpdate() {
+
+  }
+
+  // METHODS (OTHER)
 
   public void onClauseUpdate() {
 
