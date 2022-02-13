@@ -23,9 +23,9 @@ import jdk.incubator.foreign.ResourceScope;
 public final class WeightUpdate implements GraphUpdate {
 
   private static final Struct STRUCT = Struct.builder()
-      .field("index1", MemoryAddress.class, CLinker.C_POINTER)
-      .field("index2", MemoryAddress.class, CLinker.C_POINTER)
-      .field("weight", MemoryAddress.class, CLinker.C_POINTER)
+      .field("index1", long.class, CLinker.C_POINTER)
+      .field("index2", long.class, CLinker.C_POINTER)
+      .field("weight", long.class, CLinker.C_POINTER)
       .field("n", int.class, CLinker.C_INT)
       .build();
 
@@ -68,9 +68,9 @@ public final class WeightUpdate implements GraphUpdate {
     MemorySegment weights = MemorySegment.allocateNative(
         MemoryLayout.sequenceLayout(size, CLinker.C_FLOAT), scope);
     STRUCT.varHandle("n").set(segment, size);
-    STRUCT.varHandle("index1").set(indices1);
-    STRUCT.varHandle("index2").set(indices2);
-    STRUCT.varHandle("weight").set(weights);
+    STRUCT.varHandle("index1").set(segment, indices1.address().toRawLongValue());
+    STRUCT.varHandle("index2").set(segment, indices2.address().toRawLongValue());
+    STRUCT.varHandle("weight").set(segment, weights.address().toRawLongValue());
     long intSize = CLinker.C_INT.byteSize();
     long floatSize = CLinker.C_FLOAT.byteSize();
     int index = 0;
