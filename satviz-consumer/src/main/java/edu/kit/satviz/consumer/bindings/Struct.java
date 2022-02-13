@@ -101,7 +101,7 @@ public final class Struct {
     public Struct build() {
       MemoryLayout structLayout = NativeObject.paddedStruct(
           fields.stream()
-              .map(Field::layout)
+              .map(field -> field.layout().withName(field.name()))
               .toArray(MemoryLayout[]::new)
       );
       return new Struct(structLayout, fields);
