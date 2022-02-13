@@ -1,18 +1,14 @@
 package edu.kit.satviz.consumer.graph;
 
-import edu.kit.satviz.consumer.bindings.NativeObject;
 import edu.kit.satviz.consumer.bindings.Struct;
 import java.util.Objects;
 import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemorySegment;
 
 /**
  * A class that holds information about an edge in a {@link Graph}.
- *
- * <p>{@link #close()} should be called on instances of this class backed by native memory.
  */
-public final class EdgeInfo extends NativeObject {
+public final class EdgeInfo {
 
   public static final Struct STRUCT = Struct.builder()
       .field("index1", int.class, CLinker.C_INT)
@@ -27,10 +23,12 @@ public final class EdgeInfo extends NativeObject {
    * Create an {@code EdgeInfo} object from a {@code MemorySegment} containing a {@code EdgeInfo}
    * C struct.
    *
+   * @apiNote The resulting object does not take ownership of the given segment,
+   *          it only reads it to initialise its fields. It is therefore still the
+   *          caller's responsibility to close the segment appropriately.
    * @param segment the piece of memory holding the {@code EdgeInfo} struct.
    */
   public EdgeInfo(MemorySegment segment) {
-    super(segment.address());
     int index1 = (int) STRUCT.varHandle("index1").get(segment);
     int index2 = (int) STRUCT.varHandle("index2").get(segment);
     this.edge = new Edge(index1, index2);
@@ -44,7 +42,6 @@ public final class EdgeInfo extends NativeObject {
    * @param weight the weight associated with the edge.
    */
   public EdgeInfo(Edge edge, float weight) {
-    super(MemoryAddress.NULL);
     this.edge = edge;
     this.weight = weight;
   }
@@ -85,11 +82,4 @@ public final class EdgeInfo extends NativeObject {
     return Objects.hash(edge, weight);
   }
 
-  /**
-   * Frees the native memory associated with this object.
-   */
-  @Override
-  public void close() {
-    CLinker.freeMemory(getPointer());
-  }
 }

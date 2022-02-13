@@ -1,18 +1,14 @@
 package edu.kit.satviz.consumer.graph;
 
-import edu.kit.satviz.consumer.bindings.NativeObject;
 import edu.kit.satviz.consumer.bindings.Struct;
 import java.util.Objects;
 import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemorySegment;
 
 /**
  * A class that holds information about a node in a {@link Graph}.
- *
- * <p>{@link #close()} should be called on instances of this class backed by native memory.
  */
-public final class NodeInfo extends NativeObject {
+public final class NodeInfo {
 
   public static final Struct STRUCT = Struct.builder()
       .field("index", int.class, CLinker.C_INT)
@@ -30,10 +26,12 @@ public final class NodeInfo extends NativeObject {
    * Create a {@code NodeInfo} object from a {@code MemorySegment} containing a {@code NodeInfo}
    * C struct.
    *
+   * @apiNote The resulting object does not take ownership of the given segment,
+   *          it only reads it to initialise its fields. It is therefore still the
+   *          caller's responsibility to close the segment appropriately.
    * @param segment the piece of memory holding the {@code NodeInfo} struct.
    */
   public NodeInfo(MemorySegment segment) {
-    super(segment.address());
     this.index = (int) STRUCT.varHandle("index").get(segment);
     this.heat = (int) STRUCT.varHandle("heat").get(segment);
     this.x = (float) STRUCT.varHandle("x").get(segment);
@@ -49,7 +47,6 @@ public final class NodeInfo extends NativeObject {
    * @param y The node's y position
    */
   public NodeInfo(int index, int heat, float x, float y) {
-    super(MemoryAddress.NULL);
     this.index = index;
     this.heat = heat;
     this.x = x;
@@ -112,8 +109,4 @@ public final class NodeInfo extends NativeObject {
     return Objects.hash(index, heat, x, y);
   }
 
-  @Override
-  public void close() {
-    CLinker.freeMemory(getPointer());
-  }
 }
