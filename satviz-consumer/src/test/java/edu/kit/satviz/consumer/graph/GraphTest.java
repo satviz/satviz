@@ -42,10 +42,10 @@ class GraphTest {
   @Test
   void test_submitUpdate_heatUpdate() {
     var update = new HeatUpdate();
-    update.add(0, 3);
+    update.add(0, 1.0f);
     graph.submitUpdate(update);
     var node = graph.queryNode(0);
-    assertEquals(new NodeInfo(0, 3, 0, 0), node);
+    assertEquals(new NodeInfo(0, 0xff, 0, 0), node);
   }
 
   @Test
