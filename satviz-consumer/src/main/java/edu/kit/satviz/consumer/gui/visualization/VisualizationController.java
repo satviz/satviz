@@ -1,8 +1,11 @@
 package edu.kit.satviz.consumer.gui.visualization;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
+import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.processing.Mediator;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -45,8 +48,8 @@ public class VisualizationController {
 
   // ATTRIBUTES (OTHER)
 
-  private Mediator mediator;
-  private ConsumerConfig config;
+  private final Mediator mediator;
+  private final ConsumerConfig config;
 
 
   // CONSTRUCTORS
@@ -60,7 +63,36 @@ public class VisualizationController {
 
   @FXML
   private void initialize() {
+    weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
+    weightFactorChoiceBox.setValue(config.getWeightFactor());
 
+    GuiUtils.initializeIntegerSpinner(windowSizeSpinner,
+        ConsumerConfig.MIN_WINDOW_SIZE,
+        ConsumerConfig.MAX_WINDOW_SIZE,
+        config.getWindowSize());
+
+    HeatmapColors colors = config.getHeatmapColors();
+    coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
+    hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
+
+    // TODO: initialize the following spinners + slider properly
+
+    /*
+    GuiUtils.initializeIntegerSpinner(highlightVariableSpinner,
+        1,
+        maxVariableNumber,
+        1);
+
+    GuiUtils.initializeIntegerSpinner(receivedClausesSpinner,
+        0,
+        Integer.MAX_VALUE,
+        0);
+
+    GuiUtils.initializeSlider(receivedClausesSlider,
+        0,
+        0,
+        0);
+     */
   }
 
   @FXML
