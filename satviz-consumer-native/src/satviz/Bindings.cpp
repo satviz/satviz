@@ -95,13 +95,15 @@ RecordingStartResult satviz_start_recording(void *controller, const char *filena
   if (enc_name_str == "theora") {
     encoder = new TheoraEncoder;
   } else {
-    return -1;
+    return RecordingStartResult {
+        nullptr,
+        -1
+    };
   }
   return RecordingStartResult {
       encoder,
       reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder)
-  }
-
+  };
 }
 
 void satviz_stop_recording(void *controller) {
