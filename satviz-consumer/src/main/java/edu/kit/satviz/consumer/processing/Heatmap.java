@@ -48,7 +48,7 @@ public class Heatmap implements ClauseUpdateProcessor {
 
     int totalAmount = full ? recentClauses.length : cursor;
     for (var entry : frequencies.entrySet()) {
-      update.add(entry.getKey(), (float) entry.getValue() / totalAmount);
+      update.add(entry.getKey() - 1, (float) entry.getValue() / totalAmount);
     }
     return update;
   }
