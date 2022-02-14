@@ -31,10 +31,14 @@ target_compile_options(satviz-consumer-native PRIVATE ${SATVIZ_COMPILER_WARNINGS
 
 target_include_directories(
   satviz-consumer-native
-  SYSTEM PUBLIC ${OGDF_INCLUDE_DIRS}
-  SYSTEM PUBLIC ${SFML_INCLUDE_DIRS}
-  SYSTEM PRIVATE ${THEORA_INCLUDE_DIRS}
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+target_include_directories(
+  satviz-consumer-native SYSTEM
+  PUBLIC ${CMAKE_SOURCE_DIR}/ogdf/include
+  PUBLIC ${SFML_INCLUDE_DIRS}
+  PRIVATE ${THEORA_INCLUDE_DIRS}
 )
 
 target_link_libraries(
