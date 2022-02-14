@@ -14,8 +14,6 @@ import java.util.function.Consumer;
  */
 public class ConsumerConnection {
 
-  // TODO a lot of stuff is not synchronized yet!
-
   private final ServerConnectionManager conman;
   private final Map<ConnectionId, ProducerId> idMap = new ConcurrentHashMap<>();
   private final Map<ProducerId, ConsumerConnectionListener> listeners = new ConcurrentHashMap<>();
