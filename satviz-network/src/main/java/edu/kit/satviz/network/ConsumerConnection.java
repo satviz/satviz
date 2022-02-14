@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 /**
  * A clause consumer connection to several clause producers.
  */
-public class ConsumerConnectionManager {
+public class ConsumerConnection {
 
   // TODO a lot of stuff is not synchronized yet!
 
@@ -24,7 +24,7 @@ public class ConsumerConnectionManager {
 
   private boolean started = false;
 
-  public ConsumerConnectionManager(int port) {
+  public ConsumerConnection(int port) {
     this.conman = new ServerConnectionManager(port, MessageTypes.satvizBlueprint);
   }
 

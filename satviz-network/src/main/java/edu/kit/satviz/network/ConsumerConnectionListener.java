@@ -32,7 +32,7 @@ public interface ConsumerConnectionListener {
   void onTerminateRefuted(ProducerId pid);
 
   /**
-   * Called when the solver/proof failed or stopped some other way
+   * Called when the solver/proof failed or stopped some other way.
    *
    * @param pid ID of sending producer
    * @param reason the reason for termination
