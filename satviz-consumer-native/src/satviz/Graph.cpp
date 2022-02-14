@@ -3,13 +3,15 @@
 
 #include <ogdf/energybased/FMMMLayout.h>
 
+#include <algorithm>
+
 namespace satviz {
 namespace graph {
 
 void Graph::setup() {
-  attrs.init(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics);
-  node_heat.init(graph, 0);
-  edge_weights.init(graph, 0.0f);
+  using GA = ogdf::GraphAttributes;
+  attrs.init(graph, GA::nodeGraphics | GA::nodeWeight | GA::edgeGraphics | GA::edgeDoubleWeight);
+  attrs.directed = false;
 }
 
 Graph::Graph(size_t num_nodes) {
@@ -29,19 +31,30 @@ Graph::Graph(ogdf::Graph &graphToCopy) {
   setup();
 }
 
+void Graph::addObserver(GraphObserver *o) {
+  observers.push_back(o);
+}
+
+void Graph::removeObserver(GraphObserver *o) {
+  auto pos = std::find(observers.begin(), observers.end(), o);
+  if (pos != observers.end()) {
+    observers.erase(pos);
+  }
+}
+
 void Graph::submitWeightUpdate(WeightUpdate &update) {
   for (auto row : update.values) {
     auto v = node_handles[std::get<0>(row)];
     auto w = node_handles[std::get<1>(row)];
     auto e = graph.searchEdge(v, w, false);
-    edge_weights[e] = std::get<2>(row);
+    attrs.doubleWeight(e) = std::get<2>(row);
   }
 }
 
 void Graph::submitHeatUpdate(HeatUpdate &update) {
   for (auto row : update.values) {
     auto v = node_handles[std::get<0>(row)];
-    node_heat[v] = std::get<1>(row);
+    attrs.weight(v) = std::get<1>(row);
   }
 }
 
@@ -65,7 +78,6 @@ void Graph::adaptLayout() {
 }
 
 std::stringbuf Graph::serialize() {
-  // TODO stub
   std::stringbuf buf;
   return buf;
 }
@@ -81,7 +93,7 @@ NodeInfo Graph::queryNode(int index) {
 
   NodeInfo info;
   info.index = index;
-  info.heat  = node_heat[v];
+  info.heat  = attrs.weight(v);
   info.x     = attrs.x(v);
   info.y     = attrs.y(v);
   return info;
@@ -96,7 +108,7 @@ EdgeInfo Graph::queryEdge(int index1, int index2) {
   EdgeInfo info;
   info.index1 = index1;
   info.index2 = index2;
-  info.weight = edge_weights[e];
+  info.weight = attrs.doubleWeight(e);
   return info;
 }
 

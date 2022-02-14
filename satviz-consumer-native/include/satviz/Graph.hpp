@@ -42,8 +42,6 @@ private:
   ogdf::Graph graph;
   ogdf::GraphAttributes attrs;
   std::vector<ogdf::node> node_handles;
-  ogdf::NodeArray<unsigned char> node_heat;
-  ogdf::EdgeArray<float> edge_weights;
   std::vector<GraphObserver*> observers;
 
   void setup();
@@ -60,7 +58,8 @@ public:
   ogdf::Graph &getOgdfGraph() { return graph; }
   ogdf::GraphAttributes &getOgdfAttrs() { return attrs; }
 
-  void addObserver(GraphObserver *o) { observers.push_back(o); }
+  void addObserver(GraphObserver *o);
+  void removeObserver(GraphObserver *o);
 
   void submitWeightUpdate(WeightUpdate &update);
   void submitHeatUpdate(HeatUpdate &update);
