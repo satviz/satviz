@@ -51,13 +51,13 @@ tasks {
     }
 
     processResources {
-        //dependsOn.add("make")
+        dependsOn.add("make")
         from(consumerLib)
         from(ogdfLib)
         from(coinLib)
     }
 
     test {
-        //dependsOn.add("ctest")
+        dependsOn.add("ctest")
     }
 }
