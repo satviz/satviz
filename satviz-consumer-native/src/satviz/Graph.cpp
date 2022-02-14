@@ -2,33 +2,38 @@
 #include <satviz/GraphObserver.hpp>
 
 #include <ogdf/energybased/FMMMLayout.h>
+#include <ogdf/fileformats/GraphIO.h>
 
 #include <algorithm>
 
 namespace satviz {
 namespace graph {
 
-void Graph::setup() {
+void Graph::initAttrs() {
   using GA = ogdf::GraphAttributes;
   attrs.init(graph, GA::nodeGraphics | GA::nodeWeight | GA::edgeGraphics | GA::edgeDoubleWeight);
-  attrs.directed = false;
+  attrs.directed() = false;
 }
 
-Graph::Graph(size_t num_nodes) {
-  node_handles.resize(num_nodes, nullptr);
-  for (size_t i = 0; i < num_nodes; i++) {
-    node_handles[i] = graph.newNode();
-  }
-  setup();
-}
-
-Graph::Graph(ogdf::Graph &graphToCopy) {
-  graph = graphToCopy;
+void Graph::initNodeHandles() {
   node_handles.resize(graph.numberOfNodes(), nullptr);
   for (auto v = graph.firstNode(); v != graph.lastNode(); v = v->succ()) {
     node_handles[v->index()] = v;
   }
-  setup();
+}
+
+Graph::Graph(size_t num_nodes) {
+  for (size_t i = 0; i < num_nodes; i++) {
+    graph.newNode();
+  }
+  initAttrs();
+  initNodeHandles();
+}
+
+Graph::Graph(ogdf::Graph &graphToCopy) {
+  graph = graphToCopy;
+  initAttrs();
+  initNodeHandles();
 }
 
 void Graph::addObserver(GraphObserver *o) {
@@ -77,14 +82,13 @@ void Graph::adaptLayout() {
   // TODO stub
 }
 
-std::stringbuf Graph::serialize() {
-  std::stringbuf buf;
-  return buf;
+void Graph::serialize(std::ostream &stream) {
+  ogdf::GraphIO::writeGDF(attrs, stream);
 }
 
-void Graph::deserialize(std::stringbuf &buf) {
-  // TODO stub
-  (void) buf;
+void Graph::deserialize(std::istream &stream) {
+  ogdf::GraphIO::readGDF(attrs, graph, stream);
+  initNodeHandles();
 }
 
 NodeInfo Graph::queryNode(int index) {

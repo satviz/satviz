@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <tuple>
-#include <sstream>
+#include <iostream>
 
 #include <ogdf/basic/Graph.h>
 #include <ogdf/basic/GraphAttributes.h>
@@ -44,7 +44,8 @@ private:
   std::vector<ogdf::node> node_handles;
   std::vector<GraphObserver*> observers;
 
-  void setup();
+  void initAttrs();
+  void initNodeHandles();
 
 public:
   Graph(size_t num_nodes);
@@ -67,8 +68,8 @@ public:
   void recalculateLayout();
   void adaptLayout();
 
-  std::stringbuf serialize();
-  void deserialize(std::stringbuf &buf);
+  void serialize(std::ostream &stream);
+  void deserialize(std::istream &stream);
 
   NodeInfo queryNode(int index);
   EdgeInfo queryEdge(int index1, int index2);
