@@ -32,7 +32,6 @@ public class Heatmap implements ClauseUpdateProcessor {
 
   @Override
   public HeatUpdate process(ClauseUpdate[] updates, Graph graph) {
-    HeatUpdate update = new HeatUpdate();
     boolean full = false;
     for (int i = 0; i < updates.length; i++) {
       Clause clause = updates[i].clause();
@@ -47,8 +46,18 @@ public class Heatmap implements ClauseUpdateProcessor {
     }
 
     int totalAmount = full ? recentClauses.length : cursor;
-    for (var entry : frequencies.entrySet()) {
+    return populateUpdate(totalAmount);
+  }
+
+  private HeatUpdate populateUpdate(int totalAmount) {
+    HeatUpdate update = new HeatUpdate();
+    var iterator = frequencies.entrySet().iterator();
+    while (iterator.hasNext()) {
+      var entry = iterator.next();
       update.add(entry.getKey() - 1, (float) entry.getValue() / totalAmount);
+      if (entry.getValue() == 0) {
+        iterator.remove();
+      }
     }
     return update;
   }
@@ -63,12 +72,8 @@ public class Heatmap implements ClauseUpdateProcessor {
     for (int literal : clause.literals()) {
       int variable = Math.abs(literal);
       Integer val = frequencies.get(variable);
-      if (val != null) {
-        if (val == 1) {
-          frequencies.remove(variable);
-        } else {
-          frequencies.put(variable, val - 1);
-        }
+      if (val != null && val > 0) {
+        frequencies.put(variable, val - 1);
       }
     }
   }
