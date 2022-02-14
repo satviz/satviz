@@ -7,7 +7,6 @@ include(GoogleTest)
 
 add_executable(
   native-test
-  Test.cpp
   YCbCr.cpp
   VideoFrame.cpp
   Display.cpp
