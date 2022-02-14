@@ -5,7 +5,6 @@ import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,22 +40,10 @@ public class Heatmap implements ClauseUpdateProcessor {
       Clause previous = recentClauses[cursor];
       if (previous != null) {
         full = true;
-        for (int literal : previous.literals()) {
-          int variable = Math.abs(literal);
-          Integer val = frequencies.get(variable);
-          if (val != null) {
-            if (val == 1) {
-              frequencies.remove(variable);
-            } else {
-              frequencies.put(variable, val - 1);
-            }
-          }
-        }
+        decreaseFrequencies(previous);
       }
       recentClauses[cursor] = clause;
-      for (int literal : clause.literals()) {
-        frequencies.compute(Math.abs(literal), (k, v) -> v == null ? 1 : v + 1);
-      }
+      increaseFrequencies(clause);
     }
 
     int totalAmount = full ? recentClauses.length : cursor;
@@ -64,6 +51,26 @@ public class Heatmap implements ClauseUpdateProcessor {
       update.add(entry.getKey(), (float) entry.getValue() / totalAmount);
     }
     return update;
+  }
+
+  private void increaseFrequencies(Clause clause) {
+    for (int literal : clause.literals()) {
+      frequencies.compute(Math.abs(literal), (k, v) -> v == null ? 1 : v + 1);
+    }
+  }
+
+  private void decreaseFrequencies(Clause clause) {
+    for (int literal : clause.literals()) {
+      int variable = Math.abs(literal);
+      Integer val = frequencies.get(variable);
+      if (val != null) {
+        if (val == 1) {
+          frequencies.remove(variable);
+        } else {
+          frequencies.put(variable, val - 1);
+        }
+      }
+    }
   }
 
   @Override
