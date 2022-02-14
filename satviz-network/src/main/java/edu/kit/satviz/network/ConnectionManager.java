@@ -3,13 +3,12 @@ package edu.kit.satviz.network;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A server manager, servicing multiple {@link ClientConnectionManager}s.
+ */
 public class ConnectionManager extends AbstractConnectionManager {
 
   private final InetSocketAddress serverAddress;
@@ -30,34 +29,24 @@ public class ConnectionManager extends AbstractConnectionManager {
         // not our problem
       }
     }
-    System.out.println("Server: processTerminateGlobal: close contexts done");
   }
 
   @Override
   protected void processSelectAcceptable(SelectionKey key) {
     System.out.println("Server: acceptNew");
-    synchronized (syncState) {
-      if (state != State.OPEN) {
-        return;
-      }
-
-      SocketChannel newChan;
-      try {
-        newChan = serverChan.accept();
-      } catch (IOException e) {
-        // we take this as a fatal condition
-        terminateGlobal(true, "error accepting new connection");
-        return;
-      }
-      if (newChan == null) { // only call this function with acceptable event
-        terminateGlobal(true, "error accepting new connection");
-        return;
-      }
-      ConnectionContext newCtx = addContext(newChan);
-      if (newCtx != null) {
-        callConnect(newCtx.getCid());
-      }
+    SocketChannel newChan;
+    try {
+      newChan = serverChan.accept();
+    } catch (IOException e) {
+      // we take this as a fatal condition
+      terminateGlobal(true, "error accepting new connection");
+      return;
     }
+    if (newChan == null) { // only call this function with acceptable event
+      terminateGlobal(true, "error accepting new connection");
+      return;
+    }
+    addContext(newChan);
     System.out.println("Server: acceptNew successful");
   }
 
@@ -71,7 +60,7 @@ public class ConnectionManager extends AbstractConnectionManager {
       try {
         serverChan = ServerSocketChannel.open();
         serverChan.configureBlocking(false);
-        addToSelector(serverChan, SelectionKey.OP_ACCEPT);
+        addAcceptable(serverChan);
         serverChan.bind(serverAddress);
       } catch (IOException e) {
         terminateGlobal(true, "unable to create server socket");

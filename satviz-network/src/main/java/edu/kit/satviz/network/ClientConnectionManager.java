@@ -3,18 +3,24 @@ package edu.kit.satviz.network;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.util.Iterator;
-import java.util.Set;
 
+/**
+ * A client manager, connected to a {@link ConnectionManager}.
+ */
 public class ClientConnectionManager extends AbstractConnectionManager {
 
-  private final ConnectionId cid;
   private final ConnectionContext ctx;
 
+  /**
+   * Creates a new client manager without connecting to the server.
+   *
+   * @param address the address of the server
+   * @param port the server port
+   * @param bp the network blueprint
+   */
   public ClientConnectionManager(String address, int port, NetworkBlueprint bp) {
     super(bp);
-    this.cid = new ConnectionId(new InetSocketAddress(address, port));
+    ConnectionId cid = new ConnectionId(new InetSocketAddress(address, port));
     this.ctx = new ConnectionContext(
         cid,
         new Receiver(bp::getBuilder),
@@ -55,10 +61,6 @@ public class ClientConnectionManager extends AbstractConnectionManager {
       }
       if (!addContext(ctx)) {
         terminateGlobal(true, "could not create single client context");
-      }
-
-      if (state == State.OPEN) {
-        callConnect(ctx.getCid());
       }
     }
 
