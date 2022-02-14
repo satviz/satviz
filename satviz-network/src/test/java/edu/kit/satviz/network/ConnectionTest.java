@@ -28,7 +28,7 @@ class ConnectionTest {
   private static String failListenedServer;
   private static final Object syncNewConnections = new Object();
 
-  private static ConnectionManager server;
+  private static ServerConnectionManager server;
   private static ClientConnectionManager client;
 
   @BeforeAll
@@ -53,7 +53,7 @@ class ConnectionTest {
 
   @Test
   void testConnection() throws InterruptedException {
-    server = new ConnectionManager(PORT, bp);
+    server = new ServerConnectionManager(PORT, bp);
     client = new ClientConnectionManager("localhost", PORT, bp);
 
     System.out.println("initialized");

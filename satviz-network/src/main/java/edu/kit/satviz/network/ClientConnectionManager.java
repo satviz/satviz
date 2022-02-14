@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 
 /**
- * A client manager, connected to a {@link ConnectionManager}.
+ * A client manager, connected to a {@link ServerConnectionManager}.
  */
 public class ClientConnectionManager extends AbstractConnectionManager {
 

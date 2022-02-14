@@ -16,7 +16,7 @@ public class ConsumerConnectionManager {
 
   // TODO a lot of stuff is not synchronized yet!
 
-  private final ConnectionManager conman;
+  private final ServerConnectionManager conman;
   private final Map<ConnectionId, ProducerId> idMap = new HashMap<>();
   private final Map<ProducerId, ConsumerConnectionListener> listeners = new HashMap<>();
 
@@ -25,7 +25,7 @@ public class ConsumerConnectionManager {
   private boolean started = false;
 
   public ConsumerConnectionManager(int port) {
-    this.conman = new ConnectionManager(port, MessageTypes.satvizBlueprint);
+    this.conman = new ServerConnectionManager(port, MessageTypes.satvizBlueprint);
   }
 
   /**

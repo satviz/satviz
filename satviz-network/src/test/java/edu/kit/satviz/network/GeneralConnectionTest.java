@@ -17,7 +17,7 @@ class GeneralConnectionTest {
     m.put((byte) 1, new NullSerializer());
     m.put((byte) 2, new NullSerializer());
 
-    ConnectionManager conman = new ConnectionManager(PORT, new NetworkBlueprint(m));
+    ServerConnectionManager conman = new ServerConnectionManager(PORT, new NetworkBlueprint(m));
     assertTrue(conman.start());
     assertFalse(conman.start());
     assertFalse(conman.isClosed());

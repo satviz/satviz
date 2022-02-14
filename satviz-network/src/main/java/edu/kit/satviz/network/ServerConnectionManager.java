@@ -9,12 +9,12 @@ import java.nio.channels.SocketChannel;
 /**
  * A server manager, servicing multiple {@link ClientConnectionManager}s.
  */
-public class ConnectionManager extends AbstractConnectionManager {
+public class ServerConnectionManager extends AbstractConnectionManager {
 
   private final InetSocketAddress serverAddress;
   private ServerSocketChannel serverChan = null;
 
-  public ConnectionManager(int port, NetworkBlueprint bp) {
+  public ServerConnectionManager(int port, NetworkBlueprint bp) {
     super(bp);
     serverAddress = new InetSocketAddress("localhost", port);
   }
