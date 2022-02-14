@@ -56,6 +56,9 @@ public:
   Graph(ogdf::Graph &graphToCopy);
   ~Graph() = default;
 
+  int numNodes() { return graph.numberOfNodes(); }
+  int numEdges() { return graph.numberOfEdges(); }
+
   ogdf::Graph &getOgdfGraph() { return graph; }
   ogdf::GraphAttributes &getOgdfAttrs() { return attrs; }
 

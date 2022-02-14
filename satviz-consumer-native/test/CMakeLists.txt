@@ -10,6 +10,7 @@ add_executable(
   YCbCr.cpp
   VideoFrame.cpp
   Display.cpp
+  Graph.cpp
 )
 
 target_compile_options(native-test PRIVATE ${SATVIZ_COMPILER_WARNINGS})

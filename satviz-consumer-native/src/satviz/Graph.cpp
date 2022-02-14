@@ -17,7 +17,7 @@ void Graph::initAttrs() {
 
 void Graph::initNodeHandles() {
   node_handles.resize(graph.numberOfNodes(), nullptr);
-  for (auto v = graph.firstNode(); v != graph.lastNode(); v = v->succ()) {
+  for (auto v = graph.firstNode(); v != nullptr; v = v->succ()) {
     node_handles[v->index()] = v;
   }
 }
