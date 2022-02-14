@@ -4,21 +4,21 @@ import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
  * A clause consumer connection to several clause producers.
+ * Wraps {@link ServerConnectionManager}.
  */
 public class ConsumerConnection {
 
   // TODO a lot of stuff is not synchronized yet!
 
   private final ServerConnectionManager conman;
-  private final Map<ConnectionId, ProducerId> idMap = new HashMap<>();
-  private final Map<ProducerId, ConsumerConnectionListener> listeners = new HashMap<>();
+  private final Map<ConnectionId, ProducerId> idMap = new ConcurrentHashMap<>();
+  private final Map<ProducerId, ConsumerConnectionListener> listeners = new ConcurrentHashMap<>();
 
   private Consumer<ProducerId> lsConnect = null;
 
@@ -56,15 +56,6 @@ public class ConsumerConnection {
    */
   public void stop() throws InterruptedException {
     conman.finishStop();
-  }
-
-  /**
-   * Gets a list of all producers that have attempted to connect here.
-   *
-   * @return list of producers
-   */
-  public List<ProducerId> getProducers() {
-    return idMap.values().stream().toList();
   }
 
   /**
@@ -107,6 +98,7 @@ public class ConsumerConnection {
    * @return whether the operation succeeded or not
    */
   public boolean disconnect(ProducerId pid) {
+    listeners.put(pid, null); // remove listener
     try {
       conman.send(pid.cid(), MessageTypes.STOP, null);
     } catch (IOException e) {
@@ -127,6 +119,7 @@ public class ConsumerConnection {
     if (ls != null) {
       ls.onTerminateOtherwise(pid, reason);
     }
+    listeners.put(pid, null); // make sure this is the last received message
   }
 
   private void callOnTerminateRefuted(ProducerId pid) {
@@ -134,6 +127,7 @@ public class ConsumerConnection {
     if (ls != null) {
       ls.onTerminateRefuted(pid);
     }
+    listeners.put(pid, null);
   }
 
   private void callOnTerminateSolved(ProducerId pid, SatAssignment assign) {
@@ -141,7 +135,9 @@ public class ConsumerConnection {
     if (ls != null) {
       ls.onTerminateSolved(pid, assign);
     }
+    listeners.put(pid, null);
   }
+
 
 
   private void connectListener(ConnectionId cid) {

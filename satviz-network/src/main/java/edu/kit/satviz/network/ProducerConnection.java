@@ -3,13 +3,13 @@ package edu.kit.satviz.network;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
-import java.nio.channels.NotYetConnectedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 /**
  * A clause producer connection to a clause consumer.
+ * Wraps {@link ClientConnectionManager}.
  */
 public class ProducerConnection {
 
@@ -46,36 +46,33 @@ public class ProducerConnection {
     }
   }
 
-  private void sendOrTerminate(byte type, Object obj) throws NotYetConnectedException {
-    if (!startReceived || stopReceived) { // server not expecting messages
-      throw new NotYetConnectedException();
+  private void sendOrTerminate(byte type, Object obj) throws IllegalStateException {
+    if (!startReceived || stopReceived) {
+      throw new IllegalStateException("server not expecting messages");
     }
     try {
       conman.send(cid, type, obj);
-    } catch (NotYetConnectedException e) {
-      // throw again
-      throw e;
     } catch (IOException e) {
-      conman.stop();
+      conman.stop(); // globally terminate
     }
   }
 
   private void sendAndTerminate(byte type, Object obj) {
     try {
       conman.send(cid, type, obj);
-    } catch (NotYetConnectedException | IOException e) {
+    } catch (IllegalStateException | IOException e) {
       // nothing more we can do
     }
-    conman.stop();
+    conman.stop(); // globally terminate
   }
 
   /**
    * Sends a clause update to the consumer.
    *
    * @param c the update
-   * @throws NotYetConnectedException if the consumer is not expecting data
+   * @throws IllegalStateException if the consumer is not expecting data
    */
-  public void sendClauseUpdate(ClauseUpdate c) throws NotYetConnectedException {
+  public void sendClauseUpdate(ClauseUpdate c) throws IllegalStateException {
     sendOrTerminate(
         c.type() == ClauseUpdate.Type.ADD ? MessageTypes.CLAUSE_ADD : MessageTypes.CLAUSE_DEL,
         c.clause()
@@ -140,6 +137,7 @@ public class ProducerConnection {
 
 
   private void connectListener(ConnectionId cid) {
+    // called once the connection to the server is established
     this.cid = cid;
     conman.register(cid, this::messageListener);
 
