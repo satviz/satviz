@@ -30,13 +30,19 @@ Graph::Graph(ogdf::Graph &graphToCopy) {
 }
 
 void Graph::submitWeightUpdate(WeightUpdate &update) {
-  // TODO stub
-  (void) update;
+  for (auto row : update.values) {
+    auto v = node_handles[std::get<0>(row)];
+    auto w = node_handles[std::get<1>(row)];
+    auto e = graph.searchEdge(v, w, false);
+    edge_weights[e] = std::get<2>(row);
+  }
 }
 
 void Graph::submitHeatUpdate(HeatUpdate &update) {
-  // TODO stub
-  (void) update;
+  for (auto row : update.values) {
+    auto v = node_handles[std::get<0>(row)];
+    node_heat[v] = std::get<1>(row);
+  }
 }
 
 void Graph::recalculateLayout() {
