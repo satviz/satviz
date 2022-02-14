@@ -52,7 +52,24 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
     auto v = node_handles[std::get<0>(row)];
     auto w = node_handles[std::get<1>(row)];
     auto e = graph.searchEdge(v, w, false);
+    if (e != nullptr && std::get<2>(row) == 0.0f) {
+      for (auto o : observers) {
+        o->onEdgeDeleted(e);
+      }
+      graph.delEdge(e);
+      continue;
+    }
+    if (e == nullptr && std::get<2>(row) != 0.0f) {
+      e = graph.newEdge(v, w);
+      for (auto o : observers) {
+        o->onEdgeAdded(e);
+      }
+    }
     attrs.doubleWeight(e) = std::get<2>(row);
+  }
+
+  for (auto o : observers) {
+    o->onWeightUpdate(update);
   }
 }
 
@@ -60,6 +77,10 @@ void Graph::submitHeatUpdate(HeatUpdate &update) {
   for (auto row : update.values) {
     auto v = node_handles[std::get<0>(row)];
     attrs.weight(v) = std::get<1>(row);
+  }
+
+  for (auto o : observers) {
+    o->onHeatUpdate(update);
   }
 }
 
@@ -89,6 +110,10 @@ void Graph::serialize(std::ostream &stream) {
 void Graph::deserialize(std::istream &stream) {
   ogdf::GraphIO::readGDF(attrs, graph, stream);
   initNodeHandles();
+
+  for (auto o : observers) {
+    o->onReload();
+  }
 }
 
 NodeInfo Graph::queryNode(int index) {
@@ -98,8 +123,8 @@ NodeInfo Graph::queryNode(int index) {
   NodeInfo info;
   info.index = index;
   info.heat  = attrs.weight(v);
-  info.x     = attrs.x(v);
-  info.y     = attrs.y(v);
+  info.x     = (float) attrs.x(v);
+  info.y     = (float) attrs.y(v);
   return info;
 }
 
@@ -112,7 +137,7 @@ EdgeInfo Graph::queryEdge(int index1, int index2) {
   EdgeInfo info;
   info.index1 = index1;
   info.index2 = index2;
-  info.weight = attrs.doubleWeight(e);
+  info.weight = (float) attrs.doubleWeight(e);
   return info;
 }
 
