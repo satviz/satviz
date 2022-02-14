@@ -6,15 +6,27 @@
 namespace satviz {
 namespace graph {
 
-Graph::Graph(size_t num_nodes)
-  : graph(), attrs(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics) {
-  for (size_t i = 0; i < num_nodes; i++) {
-    graph.newNode();
-  }
+void Graph::setup() {
+  attrs.init(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics);
+  node_heat.init(graph, 0);
+  edge_weights.init(graph, 0.0f);
 }
 
-Graph::Graph(ogdf::Graph &graphToCopy)
-    : graph(graphToCopy), attrs(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics) {
+Graph::Graph(size_t num_nodes) {
+  node_handles.resize(num_nodes, nullptr);
+  for (size_t i = 0; i < num_nodes; i++) {
+    node_handles[i] = graph.newNode();
+  }
+  setup();
+}
+
+Graph::Graph(ogdf::Graph &graphToCopy) {
+  graph = graphToCopy;
+  node_handles.resize(graph.numberOfNodes(), nullptr);
+  for (auto v = graph.firstNode(); v != graph.lastNode(); v = v->succ()) {
+    node_handles[v->index()] = v;
+  }
+  setup();
 }
 
 void Graph::submitWeightUpdate(WeightUpdate &update) {
@@ -58,17 +70,27 @@ void Graph::deserialize(std::stringbuf &buf) {
 }
 
 NodeInfo Graph::queryNode(int index) {
-  // TODO stub
-  (void) index;
-  NodeInfo info = { 0, 0, 0.0f, 0.0f };
+  // TODO error handling
+  ogdf::node v = node_handles[index];
+
+  NodeInfo info;
+  info.index = index;
+  info.heat  = node_heat[v];
+  info.x     = attrs.x(v);
+  info.y     = attrs.y(v);
   return info;
 }
 
 EdgeInfo Graph::queryEdge(int index1, int index2) {
-  // TODO stub
-  (void) index1;
-  (void) index2;
-  EdgeInfo info = { 0, 0, 0.0f };
+  // TODO error handling
+  ogdf::node v = node_handles[index1];
+  ogdf::node w = node_handles[index2];
+  ogdf::edge e = graph.searchEdge(v, w, false);
+
+  EdgeInfo info;
+  info.index1 = index1;
+  info.index2 = index2;
+  info.weight = edge_weights[e];
   return info;
 }
 

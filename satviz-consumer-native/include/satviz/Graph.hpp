@@ -41,15 +41,21 @@ class Graph {
 private:
   ogdf::Graph graph;
   ogdf::GraphAttributes attrs;
+  std::vector<ogdf::node> node_handles;
+  ogdf::NodeArray<unsigned char> node_heat;
+  ogdf::EdgeArray<float> edge_weights;
   std::vector<GraphObserver*> observers;
 
+  void setup();
+
 public:
-  Graph(size_t num_nodes = 0);
+  Graph(size_t num_nodes);
   /**
    * This variant of the constructor only exists to aid
    * debugging & testing. It should not be used directly.
    */
   Graph(ogdf::Graph &graphToCopy);
+  ~Graph() = default;
 
   ogdf::Graph &getOgdfGraph() { return graph; }
   ogdf::GraphAttributes &getOgdfAttrs() { return attrs; }
