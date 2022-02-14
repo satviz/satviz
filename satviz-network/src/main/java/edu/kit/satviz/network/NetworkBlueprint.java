@@ -3,7 +3,6 @@ package edu.kit.satviz.network;
 import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
 import edu.kit.satviz.serial.Serializer;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;

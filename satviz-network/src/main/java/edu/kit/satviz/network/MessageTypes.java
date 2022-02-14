@@ -4,7 +4,6 @@ import edu.kit.satviz.serial.ClauseSerializer;
 import edu.kit.satviz.serial.SatAssignmentSerializer;
 import edu.kit.satviz.serial.StringMapSerializer;
 import edu.kit.satviz.serial.StringSerializer;
-
 import java.util.Map;
 
 /**
