@@ -8,7 +8,7 @@ dependencies {
     implementation(project(":satviz-network"))
     implementation(project(":satviz-serial"))
     implementation(project(":satviz-sat"))
-    implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
     implementation(project(":satviz-parsers"))
 }
@@ -51,13 +51,13 @@ tasks {
     }
 
     processResources {
-        dependsOn.add("make")
+        //dependsOn.add("make")
         from(consumerLib)
         from(ogdfLib)
         from(coinLib)
     }
 
     test {
-        dependsOn.add("ctest")
+        //dependsOn.add("ctest")
     }
 }

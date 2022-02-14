@@ -1,16 +1,14 @@
 package edu.kit.satviz.consumer.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import edu.kit.satviz.consumer.config.json.ModeConfigAdapterFactory;
-import edu.kit.satviz.consumer.config.json.PathAdapter;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.file.Path;
@@ -37,7 +35,7 @@ class GsonConfigParsingTest {
   private static final Path CONFIG2_SOURCE_PATH = Paths.get("foo/bar/solver.so");
   private static final EmbeddedModeSource CONFIG2_SOURCE = EmbeddedModeSource.SOLVER;
 
-  private Gson gson;
+  private ObjectMapper mapper;
   private ConsumerConfig config1;
   private ConsumerConfig config2;
 
@@ -48,11 +46,10 @@ class GsonConfigParsingTest {
    */
   @BeforeEach
   void setUp() {
-    this.gson = new GsonBuilder().setPrettyPrinting()
-            .registerTypeAdapterFactory(new ModeConfigAdapterFactory())
-            .registerTypeHierarchyAdapter(Path.class, new PathAdapter()).create();
-
-
+    SimpleModule m = new SimpleModule("PathToString");
+    m.addSerializer(Path.class, new ToStringSerializer());
+    this.mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
+    mapper.registerModule(m);
     setUpConfig2();
     setUpConfig1();
   }
@@ -88,12 +85,11 @@ class GsonConfigParsingTest {
    */
   @Test
   void deserializeConfiguration_test1() throws IOException {
-    Reader reader = new InputStreamReader(
-            GsonConfigParsingTest.class.getResourceAsStream(CONFIG1_JSON_PATH)
+    ConsumerConfig config = this.mapper.readValue(
+        GsonConfigParsingTest.class.getResource(CONFIG1_JSON_PATH),
+        ConsumerConfig.class
     );
-    ConsumerConfig config = this.gson.fromJson(reader, ConsumerConfig.class);
     assertEquals(config1, config);
-    reader.close();
   }
 
   /**
@@ -101,12 +97,11 @@ class GsonConfigParsingTest {
    */
   @Test
   void deserializeConfiguration_test2() throws IOException {
-    Reader reader = new InputStreamReader(
-            GsonConfigParsingTest.class.getResourceAsStream(CONFIG2_JSON_PATH)
+    ConsumerConfig config = mapper.readValue(
+        GsonConfigParsingTest.class.getResource(CONFIG2_JSON_PATH),
+        ConsumerConfig.class
     );
-    ConsumerConfig config = gson.fromJson(reader, ConsumerConfig.class);
     assertEquals(config2, config);
-    reader.close();
   }
 
   /**
@@ -114,9 +109,9 @@ class GsonConfigParsingTest {
    * class, specifically <code>config1</code>, correctly.
    */
   @Test
-  void serializeConfiguration_test1() {
-    JsonObject jsonObject = JsonParser.parseString(gson.toJson(config1)).getAsJsonObject();
-    checkConfigWithExternalProducer(jsonObject, config1);
+  void serializeConfiguration_test1() throws IOException {
+    JsonNode node = mapper.readTree(mapper.writeValueAsBytes(config1));
+    checkConfigWithExternalProducer(node, config1);
   }
 
   /**
@@ -124,56 +119,56 @@ class GsonConfigParsingTest {
    * class, specifically <code>config2</code>, correctly.
    */
   @Test
-  void serializeConfiguration_test2() {
-    JsonObject jsonObject = JsonParser.parseString(gson.toJson(config2)).getAsJsonObject();
+  void serializeConfiguration_test2() throws IOException {
+    JsonNode jsonObject = mapper.readTree(mapper.writeValueAsBytes(config2));
     checkConfigWithEmbeddedProducer(jsonObject, config2);
   }
 
-  private static void checkConfigWithExternalProducer(JsonObject jsonObj, ConsumerConfig config) {
+  private static void checkConfigWithExternalProducer(JsonNode jsonObj, ConsumerConfig config) {
     checkCommonConfig(jsonObj, config);
-    JsonObject modeObject = jsonObj.get("modeConfig").getAsJsonObject();
+    JsonNode modeObject = jsonObj.get("modeConfig");
     ExternalModeConfig modeConfig = (ExternalModeConfig) config.getModeConfig();
 
-    assertEquals(modeConfig.getPort(), modeObject.get("port").getAsInt());
+    assertEquals(modeConfig.getPort(), modeObject.get("port").intValue());
   }
 
-  private static void checkConfigWithEmbeddedProducer(JsonObject jsonObj, ConsumerConfig config) {
+  private static void checkConfigWithEmbeddedProducer(JsonNode jsonObj, ConsumerConfig config) {
     checkCommonConfig(jsonObj, config);
-    JsonObject modeObject = jsonObj.get("modeConfig").getAsJsonObject();
+    JsonNode modeObject = jsonObj.get("modeConfig");
     EmbeddedModeConfig modeConfig = (EmbeddedModeConfig) config.getModeConfig();
 
-    assertEquals(modeConfig.getSource().name(), modeObject.get("source").getAsString());
-    assertEquals(modeConfig.getSourcePath(), Paths.get(modeObject.get("sourcePath").getAsString()));
+    assertEquals(modeConfig.getSource().name(), modeObject.get("source").textValue());
+    assertEquals(modeConfig.getSourcePath(), Paths.get(modeObject.get("sourcePath").textValue()));
   }
 
-  private static void checkCommonConfig(JsonObject jsonConfig, ConsumerConfig config) {
+  private static void checkCommonConfig(JsonNode jsonConfig, ConsumerConfig config) {
     assertEquals(
             config.isNoGui(),
-            jsonConfig.get("noGui").getAsBoolean()
+            jsonConfig.get("noGui").booleanValue()
     );
     assertEquals(
             config.getVideoTemplatePath(),
-            jsonConfig.get("videoTemplatePath").getAsString()
+            jsonConfig.get("videoTemplatePath").textValue()
     );
     assertEquals(
             config.getBufferSize(),
-            jsonConfig.get("bufferSize").getAsInt()
+            jsonConfig.get("bufferSize").intValue()
     );
     assertEquals(
             config.getWindowSize(),
-            jsonConfig.get("windowSize").getAsInt()
+            jsonConfig.get("windowSize").intValue()
     );
     assertEquals(
             config.getInstancePath(),
-            Paths.get(jsonConfig.get("instancePath").getAsString())
+            Paths.get(jsonConfig.get("instancePath").textValue())
     );
     assertEquals(
             config.isRecordImmediately(),
-            jsonConfig.get("recordImmediately").getAsBoolean()
+            jsonConfig.get("recordImmediately").booleanValue()
     );
     assertEquals(
             config.getModeConfig().getMode().name(),
-            jsonConfig.get("modeConfig").getAsJsonObject().get("mode").getAsString()
+            jsonConfig.get("modeConfig").get("mode").textValue()
     );
   }
 
@@ -182,13 +177,13 @@ class GsonConfigParsingTest {
    */
   @Test
   void serializeThenDeserializeConfiguration_test() throws IOException {
-    Reader reader = new StringReader(gson.toJson(config1));
-    ConsumerConfig config = gson.fromJson(reader, ConsumerConfig.class);
+    Reader reader = new StringReader(mapper.writeValueAsString(config1));
+    ConsumerConfig config = mapper.readValue(reader, ConsumerConfig.class);
     assertEquals(config1, config);
     reader.close();
 
-    reader = new StringReader(gson.toJson(config2));
-    config = gson.fromJson(reader, ConsumerConfig.class);
+    reader = new StringReader(mapper.writeValueAsString(config2));
+    config = mapper.readValue(reader, ConsumerConfig.class);
     assertEquals(config2, config);
     reader.close();
   }
