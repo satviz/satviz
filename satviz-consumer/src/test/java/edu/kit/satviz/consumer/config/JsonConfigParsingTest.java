@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * This test class tests the gson parsing of a config file.
  */
-class GsonConfigParsingTest {
+class JsonConfigParsingTest {
 
   private static final String CONFIG1_JSON_PATH = "/config1.json";
   private static final String CONFIG2_JSON_PATH = "/config2.json";
@@ -86,7 +86,7 @@ class GsonConfigParsingTest {
   @Test
   void deserializeConfiguration_test1() throws IOException {
     ConsumerConfig config = this.mapper.readValue(
-        GsonConfigParsingTest.class.getResource(CONFIG1_JSON_PATH),
+        JsonConfigParsingTest.class.getResource(CONFIG1_JSON_PATH),
         ConsumerConfig.class
     );
     assertEquals(config1, config);
@@ -98,7 +98,7 @@ class GsonConfigParsingTest {
   @Test
   void deserializeConfiguration_test2() throws IOException {
     ConsumerConfig config = mapper.readValue(
-        GsonConfigParsingTest.class.getResource(CONFIG2_JSON_PATH),
+        JsonConfigParsingTest.class.getResource(CONFIG2_JSON_PATH),
         ConsumerConfig.class
     );
     assertEquals(config2, config);
