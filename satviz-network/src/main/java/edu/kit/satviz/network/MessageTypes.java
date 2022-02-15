@@ -26,6 +26,9 @@ public final class MessageTypes {
   public static final byte CLAUSE_ADD = 'a';
   public static final byte CLAUSE_DEL = 'd';
 
+  /**
+   * All the message types for satviz communication.
+   */
   public static final NetworkBlueprint satvizBlueprint = new NetworkBlueprint(
       Map.ofEntries(
           Map.entry(OFFER, new StringMapSerializer()),

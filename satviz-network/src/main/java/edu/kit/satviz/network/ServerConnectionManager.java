@@ -21,7 +21,6 @@ public class ServerConnectionManager extends AbstractConnectionManager {
 
   @Override
   protected void processTerminateGlobal(boolean abnormal, String reason) {
-    System.out.println("Server: processTerminateGlobal");
     if (serverChan != null) {
       try {
         serverChan.close();
@@ -33,7 +32,6 @@ public class ServerConnectionManager extends AbstractConnectionManager {
 
   @Override
   protected void processSelectAcceptable(SelectionKey key) {
-    System.out.println("Server: acceptNew");
     SocketChannel newChan;
     try {
       newChan = serverChan.accept();
@@ -47,12 +45,10 @@ public class ServerConnectionManager extends AbstractConnectionManager {
       return;
     }
     addContext(newChan);
-    System.out.println("Server: acceptNew successful");
   }
 
   @Override
   protected void processStart() {
-    System.out.println("Server: open");
     synchronized (syncState) {
       if (state != State.STARTED) { // someone already terminated
         return;
@@ -68,6 +64,5 @@ public class ServerConnectionManager extends AbstractConnectionManager {
       }
       state = State.OPEN;
     }
-    System.out.println("Server: open successful");
   }
 }

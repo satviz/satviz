@@ -65,7 +65,6 @@ public abstract class AbstractConnectionManager {
           // not our problem
         }
       }
-      System.out.println("processTerminateGlobal: close contexts");
       for (ConnectionContext ctx : contexts) {
         // no new contexts are added while this loop executes
         ctx.close(abnormal);
@@ -193,7 +192,6 @@ public abstract class AbstractConnectionManager {
    */
   public final void stop() {
     synchronized (syncState) {
-      System.out.println("stop: got lock");
       if (state == State.FINISHING || state == State.FINISHED || state == State.FAILED) {
         return;
       }
@@ -205,7 +203,6 @@ public abstract class AbstractConnectionManager {
 
       state = State.FINISHING; // let reader thread handle terminating
       // even if reader thread has already failed at this point, it still terminates
-      System.out.println("set state to FINISHING");
     }
   }
 
@@ -290,35 +287,28 @@ public abstract class AbstractConnectionManager {
   }
 
   private void pollAll() {
-    System.out.println("pollAll");
     synchronized (syncState) {
-      System.out.println("pollAll: got lock");
       if (state != State.OPEN) {
-        System.out.println("pollAll: state not open before selecting");
         return;
       }
 
       try {
         sel.select(1000);
       } catch (IOException e) {
-        System.out.println("selection error");
         terminateGlobal(true, "error selecting socket events");
         return;
       }
     }
-    System.out.println("pollAll: selected");
     Iterator<SelectionKey> iter = sel.selectedKeys().iterator();
     while (iter.hasNext()) {
       SelectionKey key = iter.next();
       if (key.isAcceptable()) {
         processSelectAcceptable(key);
       } else if (key.isReadable()) {
-        System.out.println("Server: pollAll: read event");
         doRead(getContextFrom((SocketChannel) key.channel()));
       }
       iter.remove();
     }
-    System.out.println("Server: pollAll successful");
   }
 
   private void doStart() {

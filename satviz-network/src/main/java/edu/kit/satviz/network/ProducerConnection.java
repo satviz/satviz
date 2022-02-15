@@ -46,7 +46,8 @@ public class ProducerConnection {
     }
   }
 
-  private void sendOrTerminate(byte type, Object obj, boolean checkState) throws IllegalStateException {
+  private void sendOrTerminate(byte type, Object obj, boolean checkState)
+      throws IllegalStateException {
     if (checkState && (!startReceived || stopReceived)) {
       throw new IllegalStateException("server not expecting messages");
     }

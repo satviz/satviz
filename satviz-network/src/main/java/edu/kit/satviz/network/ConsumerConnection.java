@@ -78,6 +78,9 @@ public class ConsumerConnection {
    * @return whether the operation succeeded or not
    */
   public boolean connect(ProducerId pid, ConsumerConnectionListener ls) {
+    if (ls == null) {
+      return false;
+    }
     listeners.put(pid, ls);
     try {
       conman.send(pid.cid(), MessageTypes.START, null);
@@ -96,7 +99,7 @@ public class ConsumerConnection {
    * @return whether the operation succeeded or not
    */
   public boolean disconnect(ProducerId pid) {
-    listeners.put(pid, null); // remove listener
+    listeners.remove(pid);
     try {
       conman.send(pid.cid(), MessageTypes.STOP, null);
     } catch (IOException e) {

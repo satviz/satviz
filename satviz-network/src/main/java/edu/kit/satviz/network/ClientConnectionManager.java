@@ -30,16 +30,13 @@ public class ClientConnectionManager extends AbstractConnectionManager {
 
   @Override
   protected void processTerminateGlobal(boolean abnormal, String reason) {
-    System.out.println("Client: processTerminateGlobal");
     // nothing to do
   }
 
   @Override
   protected void processStart() {
-    System.out.println("Client: processStart");
     synchronized (syncState) {
       while (state == State.STARTED) {
-        System.out.println("Client: tryConnect");
         try {
           if (ctx.tryConnect()) {
             state = State.OPEN;
@@ -49,7 +46,6 @@ public class ClientConnectionManager extends AbstractConnectionManager {
           terminateGlobal(true, "error while trying to connect");
           return;
         }
-        System.out.println("Client: tryConnect failed");
         try {
           syncState.wait(1000);
           // state might change in the meantime
@@ -63,8 +59,6 @@ public class ClientConnectionManager extends AbstractConnectionManager {
         terminateGlobal(true, "could not create single client context");
       }
     }
-
-    System.out.println("Client: tryConnect done");
   }
 
   @Override

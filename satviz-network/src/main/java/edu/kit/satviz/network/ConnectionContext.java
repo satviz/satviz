@@ -227,7 +227,7 @@ public class ConnectionContext {
    * @throws IOException if the socket is not connected or some other messaging error occurs
    */
   public int read(ByteBuffer bb) throws IOException {
-    synchronized (syncRead) {
+    synchronized (syncRead) { // we don't want multiple reads to happen at the same time
       bb.clear();
       int numRead;
       try {
@@ -266,7 +266,7 @@ public class ConnectionContext {
    * @throws IOException if the channel is not connected or a write error occurs
    */
   public int write(ByteBuffer bb) throws IOException {
-    synchronized (syncWrite) {
+    synchronized (syncWrite) { // we don't want multiple writes to happen at the same time
       int remaining = bb.remaining();
       while (bb.hasRemaining()) { // force synchronous
         try {
