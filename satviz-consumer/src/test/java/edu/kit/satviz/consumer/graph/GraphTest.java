@@ -3,6 +3,7 @@ package edu.kit.satviz.consumer.graph;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,7 @@ class GraphTest {
   }
 
   @Test
-  void test_serialize() {
+  void test_serialize() throws IOException {
     var output = new ByteArrayOutputStream();
     graph.serialize(output);
     assertTrue(output.toByteArray().length > 0);

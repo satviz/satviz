@@ -2,6 +2,8 @@ package edu.kit.satviz.consumer.graph;
 
 import edu.kit.satviz.consumer.bindings.NativeInvocationException;
 import edu.kit.satviz.consumer.bindings.NativeObject;
+import edu.kit.satviz.consumer.bindings.Struct;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandle;
@@ -9,7 +11,9 @@ import java.lang.invoke.MethodType;
 import java.nio.charset.StandardCharsets;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
+import jdk.incubator.foreign.MemoryAccess;
 import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.MemoryHandles;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 import jdk.incubator.foreign.SegmentAllocator;
@@ -19,6 +23,11 @@ import jdk.incubator.foreign.SegmentAllocator;
  * {@code satviz::graph::Graph} instance in C++.
  */
 public class Graph extends NativeObject {
+
+  private static final Struct SERIALIZED_DATA = Struct.builder()
+      .field("data", long.class, CLinker.C_POINTER)
+      .field("n", long.class, CLinker.C_LONG)
+      .build();
 
   private static final MethodHandle NEW_GRAPH = lookupFunction(
       "new_graph",
@@ -46,14 +55,14 @@ public class Graph extends NativeObject {
 
   private static final MethodHandle SERIALIZE = lookupFunction(
       "serialize",
-      MethodType.methodType(MemoryAddress.class, MemoryAddress.class),
-      FunctionDescriptor.of(CLinker.C_POINTER, CLinker.C_POINTER)
+      MethodType.methodType(MemorySegment.class, MemoryAddress.class),
+      FunctionDescriptor.of(SERIALIZED_DATA.getLayout(), CLinker.C_POINTER)
   );
 
   private static final MethodHandle DESERIALIZE = lookupFunction(
       "deserialize",
-      MethodType.methodType(void.class, MemoryAddress.class, MemoryAddress.class),
-      FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER)
+      MethodType.methodType(void.class, MemoryAddress.class, MemoryAddress.class, long.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER, CLinker.C_LONG)
   );
 
   private static final MethodHandle QUERY_NODE = lookupFunction(
@@ -126,12 +135,20 @@ public class Graph extends NativeObject {
    * Serialize this graph to an {@code OutputStream}.
    *
    * @param stream The {@code OutputStream} this graph's data should be written to.
+   * @throws IOException if an I/O problem occurs
    * @see #deserialize(InputStream)
    */
-  public void serialize(OutputStream stream) {
-    try {
-      String s = CLinker.toJavaString((MemoryAddress) SERIALIZE.invokeExact(getPointer()));
-      stream.write(s.getBytes(StandardCharsets.UTF_8));
+  public void serialize(OutputStream stream) throws IOException {
+    try (var localScope = ResourceScope.newConfinedScope()) {
+      var segment = (MemorySegment) SERIALIZE.invokeExact(
+          SegmentAllocator.ofScope(localScope), getPointer());
+      long n = (long) SERIALIZED_DATA.varHandle("n").get(segment);
+      MemoryAddress data = MemoryAddress.ofLong(
+          (long) SERIALIZED_DATA.varHandle("data").get(segment));
+      byte[] byteData = data.asSegment(n, localScope).toByteArray();
+      stream.write(byteData);
+    } catch (IOException e) {
+      throw e;
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while serializing graph", e);
     }
@@ -141,14 +158,21 @@ public class Graph extends NativeObject {
    * Deserialize a graph from an {@code InputStream} and store its data in this instance.
    *
    * @param stream The stream the graph data should be read from.
+   * @throws IOException if an I/O problem occurs
    * @see #serialize(OutputStream)
    */
-  public void deserialize(InputStream stream) {
-    try (ResourceScope local = ResourceScope.newConfinedScope()) {
-      String string = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-      DESERIALIZE.invokeExact(getPointer(), CLinker.toCString(string, local));
+  public void deserialize(InputStream stream) throws IOException {
+    MemoryAddress dataAddr = MemoryAddress.NULL;
+    try {
+      byte[] byteData = stream.readAllBytes();
+      dataAddr = MemorySegment.ofArray(byteData).address();
+      DESERIALIZE.invokeExact(getPointer(), dataAddr, byteData.length);
+    } catch (IOException e) {
+      throw e;
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while deserializing graph representation", e);
+    } finally {
+      CLinker.freeMemory(dataAddr);
     }
 
   }
