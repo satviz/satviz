@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -49,13 +50,13 @@ class ContextTest {
     assertFalse(ctx.tryConnect());
     assertEquals(0, received.size());
 
-    assertThrows(NotYetConnectedException.class, () -> ctx.read(bb));
-    assertThrows(NotYetConnectedException.class, () -> ctx.write(bb));
+    assertThrows(IOException.class, () -> ctx.read(bb));
+    assertThrows(IOException.class, () -> ctx.write(bb));
 
     ctx.close(false);
 
-    assertThrows(NotYetConnectedException.class, () -> ctx.read(bb));
-    assertThrows(NotYetConnectedException.class, () -> ctx.write(bb));
+    assertThrows(IOException.class, () -> ctx.read(bb));
+    assertThrows(IOException.class, () -> ctx.write(bb));
 
     assertEquals(1, received.size());
     assertEquals(NetworkMessage.State.TERM, received.get(0).getState());

@@ -230,7 +230,7 @@ public class ConnectionContext {
    */
   public int read(ByteBuffer bb) throws IOException {
     if (chan == null) {
-      throw new NotYetConnectedException();
+      throw new IOException("not connected");
     }
     synchronized (syncRead) { // we don't want multiple reads to happen at the same time
       bb.clear();
@@ -275,7 +275,7 @@ public class ConnectionContext {
    */
   public int write(ByteBuffer bb) throws IOException {
     if (chan == null) {
-      throw new NotYetConnectedException();
+      throw new IOException("not connected");
     }
     synchronized (syncWrite) { // we don't want multiple writes to happen at the same time
       int remaining = bb.remaining();
