@@ -14,7 +14,9 @@ public interface ConsumerConnectionListener {
    * @param pid ID of sending producer
    * @param c the clause update
    */
-  void onClauseUpdate(ProducerId pid, ClauseUpdate c);
+  default void onClauseUpdate(ProducerId pid, ClauseUpdate c) {
+    // do nothing
+  }
 
   /**
    * Called when a satisfying SAT assignment was sent.
@@ -22,14 +24,18 @@ public interface ConsumerConnectionListener {
    * @param pid ID of sending producer
    * @param assign the satisfying assignment
    */
-  void onTerminateSolved(ProducerId pid, SatAssignment assign);
+  default void onTerminateSolved(ProducerId pid, SatAssignment assign) {
+    // do nothing
+  }
 
   /**
    * Called when the solver/proof is done and no solution was found.
    *
    * @param pid ID of sending producer
    */
-  void onTerminateRefuted(ProducerId pid);
+  default void onTerminateRefuted(ProducerId pid) {
+    // do nothing
+  }
 
   /**
    * Called when the solver/proof failed or stopped some other way.
@@ -37,5 +43,7 @@ public interface ConsumerConnectionListener {
    * @param pid ID of sending producer
    * @param reason the reason for termination
    */
-  void onTerminateOtherwise(ProducerId pid, String reason);
+  default void onTerminateOtherwise(ProducerId pid, String reason) {
+    // do nothing
+  }
 }

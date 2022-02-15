@@ -8,12 +8,16 @@ public interface ProducerConnectionListener {
   /**
    * Called when the connection to the server was established.
    */
-  void onConnect();
+  default void onConnect() {
+    // do nothing
+  }
 
   /**
    * Called when the connection to the server was closed.
    *
    * @param reason the reason for closing
    */
-  void onDisconnect(String reason);
+  default void onDisconnect(String reason) {
+    // do nothing
+  }
 }
