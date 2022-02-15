@@ -298,9 +298,9 @@ public class GeneralConfigController extends ConfigController {
     modeConfigController.validateConsumerConfig(config);
   }
 
-  private void setRecordingFile(String file) {
-    recordingFile = file;
-    recordingFileLabel.setText(recordingFile.substring(recordingFile.lastIndexOf("/") + 1));
+  private void setRecordingFile(String path) {
+    recordingFile = path;
+    recordingFileLabel.setText(new File(path).getName());
   }
 
   private void setRecordingFile(File file) {
