@@ -20,6 +20,11 @@ typedef struct CHeatUpdate {
   unsigned int n;
 } CHeatUpdate;
 
+typedef struct SerializedData {
+  const char *data;
+  size_t n;
+} SerializedData;
+
 // Graph
 void *satviz_new_graph(unsigned long nodes);
 void satviz_release_graph(void *graph);
@@ -27,8 +32,8 @@ void satviz_submit_weight_update(void *graph, CWeightUpdate *);
 void satviz_submit_heat_update(void *graph, CHeatUpdate *);
 void satviz_recalculate_layout(void *graph);
 void satviz_adapt_layout(void *graph);
-const char *satviz_serialize(void *graph);
-void satviz_deserialize(void *graph, const char *);
+SerializedData satviz_serialize(void *graph);
+void satviz_deserialize(void *graph, const char *data, size_t n);
 NodeInfo satviz_query_node(void *graph, int index);
 EdgeInfo satviz_query_edge(void *graph, int index1, int index2);
 

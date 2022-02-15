@@ -1,7 +1,7 @@
 #include <vector>
 #include <string>
-#include <memory>
-#include <unordered_map>
+#include <sstream>
+#include <cstdlib>
 
 #include <satviz/Graph.hpp>
 #include <satviz/Display.hpp>
@@ -34,13 +34,18 @@ void satviz_adapt_layout(void *graph) {
   reinterpret_cast<Graph*>(graph)->adaptLayout();
 }
 
-const char *satviz_serialize(void *graph) {
-  return reinterpret_cast<Graph*>(graph)->serialize().str().c_str();
+SerializedData satviz_serialize(void *graph) {
+  std::stringstream stream {};
+  reinterpret_cast<Graph*>(graph)->serialize(stream);
+  auto size = stream.tellp();
+  char *buf = (char*) malloc(static_cast<size_t>(size));
+  stream.get(buf, size);
+  return SerializedData { buf, static_cast<size_t>(size) };
 }
 
-void satviz_deserialize(void *graph, const char *str) {
-  std::stringbuf buf { std::string { str } };
-  reinterpret_cast<Graph*>(graph)->deserialize(buf);
+void satviz_deserialize(void *graph, const char *data, size_t n) {
+  std::stringstream stream { std::string { data, n } };
+  reinterpret_cast<Graph*>(graph)->deserialize(stream);
 }
 
 void satviz_submit_weight_update(void *graph, CWeightUpdate *update) {
