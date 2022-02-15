@@ -113,27 +113,37 @@ public class ConsumerConnection {
   }
 
   private void callOnTerminateOtherwise(ProducerId pid, String reason) {
+    if (pid == null) {
+      return;
+    }
     ConsumerConnectionListener ls = listeners.get(pid);
     if (ls != null) {
       ls.onTerminateOtherwise(pid, reason);
     }
-    listeners.put(pid, null); // make sure this is the last received message
+    // no synchronization needed here, because this happens from internal thread
+    listeners.remove(pid);
   }
 
   private void callOnTerminateRefuted(ProducerId pid) {
+    if (pid == null) {
+      return;
+    }
     ConsumerConnectionListener ls = listeners.get(pid);
     if (ls != null) {
       ls.onTerminateRefuted(pid);
     }
-    listeners.put(pid, null);
+    listeners.remove(pid);
   }
 
   private void callOnTerminateSolved(ProducerId pid, SatAssignment assign) {
+    if (pid == null) {
+      return;
+    }
     ConsumerConnectionListener ls = listeners.get(pid);
     if (ls != null) {
       ls.onTerminateSolved(pid, assign);
     }
-    listeners.put(pid, null);
+    listeners.remove(pid);
   }
 
 

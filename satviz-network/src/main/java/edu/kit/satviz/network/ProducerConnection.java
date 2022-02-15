@@ -46,8 +46,8 @@ public class ProducerConnection {
     }
   }
 
-  private void sendOrTerminate(byte type, Object obj) throws IllegalStateException {
-    if (!startReceived || stopReceived) {
+  private void sendOrTerminate(byte type, Object obj, boolean checkState) throws IllegalStateException {
+    if (checkState && (!startReceived || stopReceived)) {
       throw new IllegalStateException("server not expecting messages");
     }
     try {
@@ -75,7 +75,8 @@ public class ProducerConnection {
   public void sendClauseUpdate(ClauseUpdate c) throws IllegalStateException {
     sendOrTerminate(
         c.type() == ClauseUpdate.Type.ADD ? MessageTypes.CLAUSE_ADD : MessageTypes.CLAUSE_DEL,
-        c.clause()
+        c.clause(),
+        true
     );
   }
 
@@ -151,7 +152,7 @@ public class ProducerConnection {
     } else {
       offerData.put("type", "proof");
     }
-    sendOrTerminate(MessageTypes.OFFER, offerData);
+    sendOrTerminate(MessageTypes.OFFER, offerData, false);
   }
 
   private void callOnConnect() {
