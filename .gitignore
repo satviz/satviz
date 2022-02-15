@@ -5,3 +5,6 @@
 build
 
 .idea
+
+.ogdf-build
+

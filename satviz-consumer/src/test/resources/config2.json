@@ -1,0 +1,14 @@
+{
+  "bufferSize": 350,
+  "heatmapColors": {
+    "fromColor": 12,
+    "toColor": 10
+  },
+  "modeConfig": {
+    "sourcePath": "foo/bar/solver.so",
+    "source": "SOLVER",
+    "mode": "EMBEDDED"
+  },
+  "instancePath": "foo/bar/instance.cnf",
+  "videoTemplatePath": "Videos/video-%s.mp4"
+}
