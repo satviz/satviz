@@ -217,11 +217,15 @@ public class ConsumerConnection {
   }
 
   /**
-   * Gets the local address that the server socket is bound to.
+   * Gets the local port that the server socket is bound to.
    *
-   * @return local address, <code>null</code> if not bound
+   * @return port, 0 if not bound
    */
-  public InetSocketAddress getLocalAddress() {
-    return conman.getLocalAddress();
+  public int getPort() {
+    InetSocketAddress addr = conman.getLocalAddress();
+    if (addr == null) {
+      return 0;
+    }
+    return addr.getPort();
   }
 }
