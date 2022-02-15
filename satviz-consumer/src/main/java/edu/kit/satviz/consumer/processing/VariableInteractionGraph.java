@@ -38,11 +38,13 @@ public class VariableInteractionGraph implements ClauseUpdateProcessor {
       isAdd = clauseUpdate.type() == ClauseUpdate.Type.ADD;
       literals = clauseUpdate.clause().literals();
       for (int i = 0; i < literals.length; i++) {
-        for (int j = i; j < literals.length; j++) {
-          if (literals[i] != literals[j]) {
-            weight = (float) weightFactor.apply(literals.length);
-            weightUpdate.add(i, j, (isAdd) ? weight : -weight);
-          }
+        for (int j = i + 1; j < literals.length; j++) {
+          weight = (float) weightFactor.apply(literals.length);
+          weightUpdate.add(
+              Math.abs(literals[i]) - 1,
+              Math.abs(literals[j]) - 1,
+              (isAdd) ? weight : -weight
+          );
         }
       }
     }

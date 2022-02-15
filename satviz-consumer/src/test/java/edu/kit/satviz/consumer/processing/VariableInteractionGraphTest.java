@@ -51,39 +51,18 @@ class VariableInteractionGraphTest {
   @BeforeAll
   static void setupBeforeAll() {
     WeightUpdate constantUpdate = new WeightUpdate();
-    constantUpdate.add(-1, -2, -1);
-    constantUpdate.add(-1, 3, -1);
-    constantUpdate.add(-2, 3, -1);
-    constantUpdate.add(-1, -3, -1);
-    constantUpdate.add(-1, -4, -1);
-    constantUpdate.add(-3, -4, -1);
-    constantUpdate.add(-1, 2, 1);
-    constantUpdate.add(-1, 4, 1);
-    constantUpdate.add(2, 4, 1);
-    WEIGHT_UPDATES.put(WeightFactor.CONSTANT, constantUpdate);
-
     WeightUpdate reciprocalUpdate = new WeightUpdate();
-    reciprocalUpdate.add(-1, -2, -1f / 3f);
-    reciprocalUpdate.add(-1, 3, -1f / 3f);
-    reciprocalUpdate.add(-2, 3, -1f / 3f);
-    reciprocalUpdate.add(-1, -3, -1f / 3f);
-    reciprocalUpdate.add(-1, -4, -1f / 3f);
-    reciprocalUpdate.add(-3, -4, -1f / 3f);
-    reciprocalUpdate.add(-1, 2, 1f / 3f);
-    reciprocalUpdate.add(-1, 4, 1f / 3f);
-    reciprocalUpdate.add(2, 4, 1f / 3f);
-    WEIGHT_UPDATES.put(WeightFactor.RECIPROCAL, reciprocalUpdate);
-
     WeightUpdate exponentialUpdate = new WeightUpdate();
-    exponentialUpdate.add(-1, -2, -1f / (float) Math.pow(2, 3));
-    exponentialUpdate.add(-1, 3, -1f / (float) Math.pow(2, 3));
-    exponentialUpdate.add(-2, 3, -1f / (float) Math.pow(2, 3));
-    exponentialUpdate.add(-1, -3, -1f / (float) Math.pow(2, 3));
-    exponentialUpdate.add(-1, -4, -1f / (float) Math.pow(2, 3));
-    exponentialUpdate.add(-3, -4, -1f / (float) Math.pow(2, 3));
-    exponentialUpdate.add(-1, 2, 1f / (float) Math.pow(2, 3));
-    exponentialUpdate.add(-1, 4, 1f / (float) Math.pow(2, 3));
-    exponentialUpdate.add(2, 4, 1f / (float) Math.pow(2, 3));
+    int[] indeces1 = new int[] {0, 0, 1, 0, 0, 2, 0, 0, 1};
+    int[] indeces2 = new int[] {1, 2, 2, 2, 3, 3, 1, 3, 3};
+    float[] weights = new float[] {-1, -1, -1, -1, -1, -1, 1, 1, 1};
+    for (int i = 0; i < 9; i++) {
+      constantUpdate.add(indeces1[i], indeces2[i], weights[i]);
+      reciprocalUpdate.add(indeces1[i], indeces2[i], weights[i] / 3f);
+      exponentialUpdate.add(indeces1[i], indeces2[i], weights[i] / (float) Math.pow(2, 3));
+    }
+    WEIGHT_UPDATES.put(WeightFactor.CONSTANT, constantUpdate);
+    WEIGHT_UPDATES.put(WeightFactor.RECIPROCAL, reciprocalUpdate);
     WEIGHT_UPDATES.put(WeightFactor.EXPONENTIAL, exponentialUpdate);
   }
 
