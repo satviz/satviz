@@ -5,6 +5,7 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.function.BiConsumer;
@@ -198,6 +199,7 @@ public class ConnectionContext {
       } catch (ConnectException e) {
         // server not yet online; socket was closed
         // may try again later when the server is online
+        chan = null;
         return false;
       } catch (IOException e) {
         close(true);
@@ -227,11 +229,17 @@ public class ConnectionContext {
    * @throws IOException if the socket is not connected or some other messaging error occurs
    */
   public int read(ByteBuffer bb) throws IOException {
+    if (chan == null) {
+      throw new NotYetConnectedException();
+    }
     synchronized (syncRead) { // we don't want multiple reads to happen at the same time
       bb.clear();
       int numRead;
       try {
         numRead = chan.read(bb);
+      } catch (NotYetConnectedException e) {
+        // do not fail
+        throw e;
       } catch (IOException e) {
         close(true);
         throw e;
@@ -266,11 +274,17 @@ public class ConnectionContext {
    * @throws IOException if the channel is not connected or a write error occurs
    */
   public int write(ByteBuffer bb) throws IOException {
+    if (chan == null) {
+      throw new NotYetConnectedException();
+    }
     synchronized (syncWrite) { // we don't want multiple writes to happen at the same time
       int remaining = bb.remaining();
       while (bb.hasRemaining()) { // force synchronous
         try {
           chan.write(bb);
+        } catch (NotYetConnectedException e) {
+          // do not fail
+          throw e;
         } catch (IOException e) {
           close(true);
           throw e;
