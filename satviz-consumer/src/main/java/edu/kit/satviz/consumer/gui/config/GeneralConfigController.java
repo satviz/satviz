@@ -1,21 +1,16 @@
 package edu.kit.satviz.consumer.gui.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
-import edu.kit.satviz.consumer.config.json.ModeConfigAdapterFactory;
-import edu.kit.satviz.consumer.config.json.PathAdapter;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import javafx.application.Platform;
@@ -29,7 +24,6 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
 /**
@@ -77,7 +71,7 @@ public class GeneralConfigController extends ConfigController {
 
   // ATTRIBUTES (OTHER)
 
-  private Gson gson;
+  private ObjectMapper mapper;
   private String recordingFile;
   private File satInstanceFile;
   private ConfigController modeConfigController;
@@ -98,17 +92,12 @@ public class GeneralConfigController extends ConfigController {
       return;
     }
 
-    ConsumerConfig config;
+    ConsumerConfig config = null;
     try {
-      config = getGson().fromJson(new FileReader(file), ConsumerConfig.class);
-    } catch (FileNotFoundException e) {
-      errorLabel.setText("The settings file could not be found.");
-      return;
-    } catch (JsonSyntaxException | JsonIOException e) {
+      config = getMapper().readValue(file, ConsumerConfig.class);
+    } catch (IOException e) {
       errorLabel.setText("The settings file could not be read.");
-      return;
     }
-
 
     setDefaultValues();
 
@@ -129,14 +118,11 @@ public class GeneralConfigController extends ConfigController {
 
     ConsumerConfig config = saveConsumerConfig();
 
-    FileWriter writer = null;
     try {
-      writer = new FileWriter(file);
+      getMapper().writeValue(file, config);
     } catch (IOException e) {
-      errorLabel.setText("The settings file could not be created.");
+      errorLabel.setText("The settings file could not be saved.");
     }
-
-    getGson().toJson(config, writer);
   }
 
   @FXML
@@ -336,15 +322,15 @@ public class GeneralConfigController extends ConfigController {
     return consumerConfig;
   }
 
-  private Gson getGson() {
-    if (gson == null) {
-      gson = new GsonBuilder()
-          .setPrettyPrinting()
-          .registerTypeAdapterFactory(new ModeConfigAdapterFactory())
-          .registerTypeHierarchyAdapter(Path.class, new PathAdapter())
-          .create();
+  private ObjectMapper getMapper() {
+    if (mapper == null) {
+      mapper = new ObjectMapper();
+      mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+      SimpleModule m = new SimpleModule("PathToString");
+      m.addSerializer(Path.class, new ToStringSerializer());
+      mapper.registerModule(m);
     }
-    return gson;
+    return mapper;
   }
 
 }
