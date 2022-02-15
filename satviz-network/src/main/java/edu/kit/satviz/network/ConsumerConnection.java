@@ -4,6 +4,7 @@ import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -213,5 +214,14 @@ public class ConsumerConnection {
         // ignore
         break;
     }
+  }
+
+  /**
+   * Gets the local address that the server socket is bound to.
+   *
+   * @return local address, <code>null</code> if not bound
+   */
+  public InetSocketAddress getLocalAddress() {
+    return conman.getLocalAddress();
   }
 }

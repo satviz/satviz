@@ -76,7 +76,7 @@ public class ServerConnectionManager extends AbstractConnectionManager {
   /**
    * Gets the local address that the server socket is bound to.
    *
-   * @return local address
+   * @return local address, null if not bound
    */
   public InetSocketAddress getLocalAddress() {
     if (serverChan != null) {
