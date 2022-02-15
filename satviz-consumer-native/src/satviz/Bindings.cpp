@@ -40,7 +40,7 @@ SerializedData satviz_serialize(void *graph) {
   auto size = stream.tellp();
   char *buf = (char*) malloc(static_cast<size_t>(size));
   stream.get(buf, size);
-  return SerializedData { buf, static_cast<size_t>(size) };
+  return SerializedData { buf, static_cast<unsigned long>(size) };
 }
 
 void satviz_deserialize(void *graph, const char *data, size_t n) {

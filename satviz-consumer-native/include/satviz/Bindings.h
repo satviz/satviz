@@ -22,7 +22,7 @@ typedef struct CHeatUpdate {
 
 typedef struct SerializedData {
   const char *data;
-  size_t n;
+  unsigned long n;
 } SerializedData;
 
 // Graph
