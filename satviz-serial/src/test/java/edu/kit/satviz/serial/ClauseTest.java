@@ -25,12 +25,12 @@ class ClauseTest {
     assertEquals(6, b.length);
 
     // expect number 2000000000 encoded in 7-bit blocks
-    assertEquals(b[0], (byte) (0x00 | 0x80));
-    assertEquals(b[1], (byte) (0x28 | 0x80));
-    assertEquals(b[2], (byte) (0x56 | 0x80));
-    assertEquals(b[3], (byte) (0x39 | 0x80));
-    assertEquals(b[4], (byte) 0x07);
-    assertEquals(b[5], (byte) 0x00);
+    assertEquals((byte) (0x00 | 0x80), b[0]);
+    assertEquals((byte) (0x28 | 0x80), b[1]);
+    assertEquals((byte) (0x56 | 0x80), b[2]);
+    assertEquals((byte) (0x39 | 0x80), b[3]);
+    assertEquals((byte) 0x07, b[4]);
+    assertEquals((byte) 0x00, b[5]);
 
     ByteArrayInputStream byteIn = new ByteArrayInputStream(b);
     Clause result = null;

@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.config;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.Objects;
 
 /**
@@ -8,6 +9,7 @@ import java.util.Objects;
  *
  * @author johnnyjayjay
  */
+@JsonTypeName("EXTERNAL")
 public class ExternalModeConfig extends ConsumerModeConfig {
 
   public static final int MIN_PORT_NUMBER = 1;

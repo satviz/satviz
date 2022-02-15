@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.config;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -9,6 +10,7 @@ import java.util.Objects;
  *
  * @author johnnyjayjay
  */
+@JsonTypeName("EMBEDDED")
 public class EmbeddedModeConfig extends ConsumerModeConfig {
 
   public static final EmbeddedModeSource DEFAULT_EMBEDDED_MODE_SOURCE = EmbeddedModeSource.SOLVER;

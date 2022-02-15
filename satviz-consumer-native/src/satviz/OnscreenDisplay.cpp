@@ -4,29 +4,29 @@ namespace satviz {
 namespace video {
 
 OnscreenDisplay::OnscreenDisplay(int w, int h)
-  : Display(w, h)
-{
+  : Display(w, h) {
   sf::ContextSettings settings = makeContextSettings();
   window.create(sf::VideoMode(w, h), "satviz", sf::Style::Default, settings);
-  loadGlExtensions();
+  initializeGl();
 }
 
-OnscreenDisplay::~OnscreenDisplay()
-{
+OnscreenDisplay::~OnscreenDisplay() {
+  deinitializeGl();
   window.close();
 }
 
-void OnscreenDisplay::activateContext()
-{
+void OnscreenDisplay::activateContext() {
   window.setActive(true);
 }
 
-bool OnscreenDisplay::pollEvent(sf::Event &event)
-{
+bool OnscreenDisplay::pollEvent(sf::Event &event) {
   if (window.pollEvent(event)) {
     if (event.type == sf::Event::Resized) {
-      width  = event.size.width;
-      height = event.size.height;
+      if (size_locked) {
+        window.setSize(sf::Vector2<unsigned>(getWidth(), getHeight()));
+      } else {
+        onResize(event.size.width, event.size.height);
+      }
     }
     return true;
   } else {
@@ -34,14 +34,7 @@ bool OnscreenDisplay::pollEvent(sf::Event &event)
   }
 }
 
-void OnscreenDisplay::lockSize(bool lock)
-{
-  // TODO stub
-  (void) lock;
-}
-
-void OnscreenDisplay::displayFrame()
-{
+void OnscreenDisplay::displayFrame() {
   window.display();
 }
 
