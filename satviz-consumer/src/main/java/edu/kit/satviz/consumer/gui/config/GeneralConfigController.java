@@ -318,11 +318,18 @@ public class GeneralConfigController extends ConfigController {
     updateMode();
   }
 
+  /**
+   * Retrieve the configuration set by the user.
+   *
+   * @return The {@link ConsumerConfig} object which contains the configuration parameters set by
+   *         the user.
+   */
   public ConsumerConfig getConsumerConfig() {
     return consumerConfig;
   }
 
   private ObjectMapper getMapper() {
+    // only create mapper once
     if (mapper == null) {
       mapper = new ObjectMapper();
       mapper.configure(SerializationFeature.INDENT_OUTPUT, true);

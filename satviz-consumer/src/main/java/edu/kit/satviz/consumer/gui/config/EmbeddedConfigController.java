@@ -38,7 +38,9 @@ public class EmbeddedConfigController extends ConfigController {
     FileChooser fileChooser = new FileChooser();
 
     List<String> fileExtensions = producerModeChoiceBox.getValue().getFileExtensions()
-        .stream().map(s -> "*" + s).toList();
+        .stream()
+        .map(s -> "*" + s)
+        .toList();
     FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(
         producerModeChoiceBox.getValue().name(), fileExtensions);
 
