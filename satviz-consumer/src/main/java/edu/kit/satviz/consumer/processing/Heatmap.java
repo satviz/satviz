@@ -132,7 +132,7 @@ public class Heatmap implements ClauseUpdateProcessor {
 
   @Override
   public void deserialize(InputStream in) {
-
+    reset();
   }
 
   @Override
