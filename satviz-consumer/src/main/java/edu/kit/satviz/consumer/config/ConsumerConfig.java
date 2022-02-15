@@ -1,12 +1,12 @@
 package edu.kit.satviz.consumer.config;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.nio.file.Path;
 import java.util.Objects;
 
 /**
  * This class contains the starting configuration for the consumer.
- *
- * @author johnnyjayjay
  */
 public class ConsumerConfig {
 
