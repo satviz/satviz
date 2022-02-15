@@ -67,11 +67,11 @@ public final class HeatUpdate implements GraphUpdate {
     STRUCT.varHandle("index").set(segment, indices.address().toRawLongValue());
     STRUCT.varHandle("heat").set(segment, heatValues.address().toRawLongValue());
     long intSize = CLinker.C_INT.byteSize();
+    long floatSize = CLinker.C_FLOAT.byteSize();
     int index = 0;
     for (var entry : values.entrySet()) {
-      long offset = index * intSize;
-      MemoryAccess.setIntAtOffset(indices, offset, entry.getKey());
-      MemoryAccess.setFloatAtOffset(heatValues, offset, entry.getValue());
+      MemoryAccess.setIntAtOffset(indices, index * intSize, entry.getKey());
+      MemoryAccess.setFloatAtOffset(heatValues, index * floatSize, entry.getValue());
       index++;
     }
     return segment;
