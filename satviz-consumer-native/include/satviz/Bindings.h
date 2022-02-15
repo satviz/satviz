@@ -33,7 +33,7 @@ void satviz_submit_heat_update(void *graph, CHeatUpdate *);
 void satviz_recalculate_layout(void *graph);
 void satviz_adapt_layout(void *graph);
 SerializedData satviz_serialize(void *graph);
-void satviz_deserialize(void *graph, const char *data, size_t n);
+void satviz_deserialize(void *graph, const char *data, unsigned long n);
 NodeInfo satviz_query_node(void *graph, int index);
 EdgeInfo satviz_query_edge(void *graph, int index1, int index2);
 

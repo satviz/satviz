@@ -43,7 +43,7 @@ SerializedData satviz_serialize(void *graph) {
   return SerializedData { buf, static_cast<unsigned long>(size) };
 }
 
-void satviz_deserialize(void *graph, const char *data, size_t n) {
+void satviz_deserialize(void *graph, const char *data, unsigned long n) {
   std::stringstream stream { std::string { data, n } };
   reinterpret_cast<Graph*>(graph)->deserialize(stream);
 }
