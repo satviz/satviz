@@ -22,6 +22,11 @@ public class ConsumerConnection {
 
   private boolean started = false;
 
+  /**
+   * Creates a new consumer connection with specified port.
+   *
+   * @param port the port, 0 to assign automatically
+   */
   public ConsumerConnection(int port) {
     this.conman = new ServerConnectionManager(port, MessageTypes.satvizBlueprint);
   }

@@ -11,12 +11,19 @@ import java.nio.channels.SocketChannel;
  */
 public class ServerConnectionManager extends AbstractConnectionManager {
 
-  private final InetSocketAddress serverAddress;
+  private final int port;
   private ServerSocketChannel serverChan = null;
 
+  /**
+   * Creates a server manager.
+   * It is not bound to the port yet. Call <code>start()</code> to initiate this.
+   *
+   * @param port the port, 0 to assign automatically
+   * @param bp the network blueprint
+   */
   public ServerConnectionManager(int port, NetworkBlueprint bp) {
     super(bp);
-    serverAddress = new InetSocketAddress("localhost", port);
+    this.port = port;
   }
 
   @Override
@@ -57,12 +64,28 @@ public class ServerConnectionManager extends AbstractConnectionManager {
         serverChan = ServerSocketChannel.open();
         serverChan.configureBlocking(false);
         addAcceptable(serverChan);
-        serverChan.bind(serverAddress);
+        serverChan.bind(port != 0 ? new InetSocketAddress("localhost", port) : null);
       } catch (IOException e) {
         terminateGlobal(true, "unable to create server socket");
         return;
       }
       state = State.OPEN;
     }
+  }
+
+  /**
+   * Gets the local address that the server socket is bound to.
+   *
+   * @return local address
+   */
+  public InetSocketAddress getLocalAddress() {
+    if (serverChan != null) {
+      try {
+        return (InetSocketAddress) serverChan.getLocalAddress();
+      } catch (IOException e) {
+        return null;
+      }
+    }
+    return null;
   }
 }

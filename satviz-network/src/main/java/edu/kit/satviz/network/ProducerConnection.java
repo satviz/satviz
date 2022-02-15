@@ -21,6 +21,12 @@ public class ProducerConnection {
   private volatile boolean stopReceived = false;
   private ProducerConnectionListener ls = null;
 
+  /**
+   * Creates a new producer connection that connects to the specified address and port.
+   *
+   * @param address the remote address
+   * @param port the remote port
+   */
   public ProducerConnection(String address, int port) {
     this.conman = new ClientConnectionManager(address, port, MessageTypes.satvizBlueprint);
   }
