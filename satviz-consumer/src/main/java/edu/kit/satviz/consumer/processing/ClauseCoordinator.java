@@ -45,15 +45,19 @@ public class ClauseCoordinator implements AutoCloseable {
   private volatile long currentUpdate;
   private Runnable changeListener;
 
-  public ClauseCoordinator(Graph graph, Path tempDir) throws IOException {
+  private final int variableAmount;
+
+  public ClauseCoordinator(Graph graph, Path tempDir, int variableAmount) throws IOException {
+    this.graph = graph;
     this.tempDir = tempDir;
+    this.variableAmount = variableAmount;
+
     this.snapshotDir = Files.createTempDirectory(tempDir, "satviz-snapshots");
     this.snapshots = new TreeMap<>();
     this.processors = new CopyOnWriteArrayList<>();
     this.changeListener = () -> {
     };
     this.currentUpdate = 0;
-    this.graph = graph;
     this.buffer = new ExternalClauseBuffer(tempDir);
     this.snapshotLock = new ReentrantLock();
     this.stateLock = new ReentrantLock();
@@ -178,8 +182,12 @@ public class ClauseCoordinator implements AutoCloseable {
   }
 
   public void addClauseUpdate(ClauseUpdate clauseUpdate) throws IOException {
-    buffer.addClauseUpdate(clauseUpdate);
-    changeListener.run();
+    if (isValidClauseUpdate(clauseUpdate)) {
+      buffer.addClauseUpdate(clauseUpdate);
+      changeListener.run();
+    } else {
+      // TODO: 15.02.2022 pls implement error handling!
+    }
   }
 
   public void registerChangeListener(Runnable action) {
@@ -235,6 +243,21 @@ public class ClauseCoordinator implements AutoCloseable {
     } finally {
       snapshotLock.unlock();
     }
+  }
+
+  private boolean isValidClauseUpdate(ClauseUpdate update) {
+    int[] literals = update.clause().literals();
+    for (int i = 0; i < literals.length; i++) {
+      if (Math.abs(literals[i]) > variableAmount || literals[i] == 0) {
+        return false;
+      }
+      for (int j = i + 1; j < literals.length; j++) {
+        if (Math.abs(literals[i]) == Math.abs(literals[j])) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   @Override

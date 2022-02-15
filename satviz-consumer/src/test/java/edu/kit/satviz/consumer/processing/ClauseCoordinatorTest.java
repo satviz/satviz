@@ -59,7 +59,7 @@ class ClauseCoordinatorTest {
     changeListenerCallAmount = new AtomicInteger();
 
     Path tempDir = Files.createDirectory(Paths.get(TEMP_DIR));
-    coordinator = new ClauseCoordinator(graph, tempDir);
+    coordinator = new ClauseCoordinator(graph, tempDir, 6);
     coordinator.addProcessor(processor1);
 
     coordinator.registerChangeListener(changeListenerCallAmount::getAndIncrement);
@@ -106,7 +106,7 @@ class ClauseCoordinatorTest {
     assertEquals(4, coordinator.totalUpdateCount());
     verify(processor1, never()).process(notNull(), eq(graph));
     coordinator.advanceVisualization(1);
-    verify(processor1).process(eq(Arrays.copyOfRange(clauseUpdates, 0, 1)), eq(graph));
+    verify(processor1).process(Arrays.copyOfRange(clauseUpdates, 0, 1), eq(graph));
   }
 
   // registerChangeListener
@@ -176,7 +176,7 @@ class ClauseCoordinatorTest {
     }
     assertEquals(0, coordinator.currentUpdate());
     coordinator.seekToUpdate(4);
-    verify(processor1).process(eq(someUpdates), eq(graph));
+    verify(processor1).process(someUpdates, eq(graph));
     assertEquals(4, coordinator.currentUpdate());
     // unnecessary deserialization should be avoided
     verify(graph, never()).deserialize(any());
