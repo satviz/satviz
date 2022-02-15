@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ProducerConsumerTest implements ProducerConnectionListener, ConsumerConnectionListener {
 
@@ -53,8 +52,10 @@ class ProducerConsumerTest implements ProducerConnectionListener, ConsumerConnec
       }
 
       ProducerId consId = consConnections.get(0);
-      System.out.println("connected PID: " + consId.type() + " " + consId.cid().address() + " "
-          + consId.solverName() + " " + consId.instanceHash() + " " + consId.solverDelayed());
+      assertEquals(OfferType.SOLVER, consId.type());
+      assertEquals("cadical", consId.solverName());
+      assertTrue(consId.solverDelayed());
+      assertEquals(42, consId.instanceHash());
 
       cons.connect(consId, this);
 
@@ -106,13 +107,9 @@ class ProducerConsumerTest implements ProducerConnectionListener, ConsumerConnec
       } catch (InterruptedException e) {
         fail(e);
       }
-      if (prodFail != null) {
-        System.out.println("prodFail: " + prodFail);
-      }
-      if (consFail != null) {
-        System.out.println("consFail: " + consFail);
-      }
     }
+    assertNull(prodFail);
+    assertNull(consFail);
   }
 
   private void consFailListener(String reason) {
