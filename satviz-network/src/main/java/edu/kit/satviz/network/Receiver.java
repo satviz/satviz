@@ -38,7 +38,7 @@ public class Receiver {
    */
   public NetworkMessage receive(ByteBuffer bb) {
     if (failed) {
-      return NetworkMessage.createFail();
+      return null;
     }
 
     int nb = bb.remaining();
