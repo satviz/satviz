@@ -47,9 +47,8 @@ public class ProducerApplication {
       ProducerConnection connection = new ProducerConnection(
           parameters.getHost(), parameters.getPort());
       connection.register(new SourceControlConnectionListener(connection, data.source()));
-      // TODO: 29/01/2022
       logger.info("Waiting for network connection...");
-      connection.establish(new ProducerId(null, OfferType.PROOF, null, parameters.isNoWait(), 0));
+      connection.establish(data.id());
     } catch (SourceException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       System.exit(1);
