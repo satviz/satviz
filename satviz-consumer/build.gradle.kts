@@ -15,6 +15,7 @@ dependencies {
 
 javafx {
     modules("javafx.controls", "javafx.fxml")
+    version = "17"
 }
 
 val nativeBuildDir = project.buildDir.resolve("cmake-build")

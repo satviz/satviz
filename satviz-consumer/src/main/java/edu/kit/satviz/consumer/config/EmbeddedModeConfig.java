@@ -7,11 +7,11 @@ import java.util.Objects;
 /**
  * This subclass of the <code>ConsumerModeConfig</code> class is used, when one decides
  * to use the consumer with an embedded producer.
- *
- * @author johnnyjayjay
  */
 @JsonTypeName("EMBEDDED")
 public class EmbeddedModeConfig extends ConsumerModeConfig {
+
+  public static final EmbeddedModeSource DEFAULT_EMBEDDED_MODE_SOURCE = EmbeddedModeSource.SOLVER;
 
   private EmbeddedModeSource source;
   private Path sourcePath;
