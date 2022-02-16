@@ -16,10 +16,14 @@ class GraphObserver;
 
 struct WeightUpdate {
   std::vector<std::tuple<int, int, float> > values;
+
+  explicit WeightUpdate(size_t n) : values(n) {}
 };
 
 struct HeatUpdate {
   std::vector<std::tuple<int, int> > values;
+
+  explicit HeatUpdate(size_t n) : values(n) {}
 };
 
 /**
