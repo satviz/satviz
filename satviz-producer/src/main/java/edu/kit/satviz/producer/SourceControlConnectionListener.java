@@ -45,10 +45,10 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
         logger.info("Starting to send clause updates");
         source.open();
       } catch (SourceException e) {
-        e.printStackTrace();
+        logger.log(Level.SEVERE, "Error draining source", e);
         connection.terminateFailed(e.getMessage());
       } catch (Exception e) {
-        e.printStackTrace();
+        logger.log(Level.SEVERE, "Unknown error", e);
       }
     }, "ClauseSource-" + Integer.toHexString(source.hashCode()));
     sourceThread.start();
