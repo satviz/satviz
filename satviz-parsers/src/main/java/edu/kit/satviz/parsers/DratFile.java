@@ -1,24 +1,34 @@
 package edu.kit.satviz.parsers;
 
 import edu.kit.satviz.sat.ClauseUpdate;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
-public class DratFile implements Iterable<ClauseUpdate>, AutoCloseable {
+/**
+ * This class is used to parse an <code>InputStream</code> that complies with the DRAT format.
+ */
+public class DratFile extends ClauseFile {
 
+  private final DratParsingIterator dratParsingIterator;
+
+  /**
+   * This constructor creates an instance of the <code>DratFile</code> class.
+   *
+   * @param in An instance of the <code>InputStream</code> class.
+   */
   public DratFile(InputStream in) {
+    super(in);
+    dratParsingIterator = new DratParsingIterator(scanner);
+  }
 
+  @Override
+  protected void parseHeader() {
+    // This method is empty, because in DRAT Files there is no header.
   }
 
   @Override
   public Iterator<ClauseUpdate> iterator() {
-    return null;
+    return dratParsingIterator;
   }
 
-  @Override
-  public void close() throws IOException {
-
-  }
 }

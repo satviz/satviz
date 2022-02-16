@@ -10,19 +10,97 @@ namespace satviz {
 namespace video {
 
 /**
+ * Visual representation of a graph. Implements hardware-accelerated graphics.
  *
+ * Each GraphRenderer object is associated with exactly one Graph.
  */
-class GraphRenderer : graph::GraphObserver {
+class GraphRenderer : public graph::GraphObserver {
 private:
-  unsigned int node_vbo;
-  unsigned int edge_ibo;
+  enum {
+    BO_NODE_OFFSET,
+    BO_NODE_HEAT,
+    BO_EDGE_INDICES,
+    BO_EDGE_WEIGHT,
+    NUM_BUFFER_OBJECTS
+  };
+
+  /**
+   * A bundle of OpenGL resources that only need to be created once, not per graph.
+   */
+  struct Resources {
+    unsigned node_prog;
+    unsigned edge_prog;
+    unsigned template_vbo;
+  };
+
+  static Resources resources;
+
+  unsigned node_state;
+  unsigned edge_state;
+  unsigned buffer_objects[NUM_BUFFER_OBJECTS];
+  unsigned offset_texview;
+  unsigned heat_palette;
+  int node_count;
+  int edge_capacity;
+  /// Mapping from edge handles to edge indices
   ogdf::EdgeArray<int> edge_mapping;
+  /// List of free/unused edge indices
+  std::vector<int> free_edges;
+
+  /**
+   * Initialize rendering data.
+   *
+   * Gets called by the constructor.
+   */
+  void init();
+  /**
+   * Un-Initialize rendering data.
+   *
+   * Gets called by the destructor.
+   */
+  void deinit();
+
+  int  allocateEdgeIndex();
+  void freeEdgeIndex(int index);
 
 public:
-  GraphRenderer(graph::Graph *gr);
-  ~GraphRenderer();
+  /**
+   * The GraphRenderer needs some global (per GL context) state to operate.
+   * This static method initializes theses resources.
+   */
+  static void initializeResources();
+  /**
+   * The GraphRenderer needs some global (per GL context) state to operate.
+   * This static method un-initializes theses resources.
+   */
+  static void terminateResources();
 
-  void draw(Camera &camera);
+  /**
+   * Creates a new GraphRenderer.
+   *
+   * Note that the GraphRenderer still has to be registered as an observer afterwards.
+   *
+   * @param gr a reference to the graph that this GraphRenderer should be attached to.
+   */
+  GraphRenderer(graph::Graph &gr);
+  virtual ~GraphRenderer();
+
+  /**
+   * Draw the associated graph onto the OpenGL framebuffer.
+   *
+   * @param camera The virtual camera from which the graph should be viewed
+   * @param width  the width of the display
+   * @param height the height of the display
+   */
+  void draw(Camera &camera, int width, int height);
+
+  // The following methods are all inherited from GraphObserver
+  void onWeightUpdate(graph::WeightUpdate &update) override;
+  void onHeatUpdate(graph::HeatUpdate &update) override;
+  void onLayoutChange(ogdf::Array<ogdf::node> &changed) override;
+  void onEdgeAdded(ogdf::edge e) override;
+  void onEdgeDeleted(ogdf::edge e) override;
+  void onReload() override;
 };
 
 } // namespace video

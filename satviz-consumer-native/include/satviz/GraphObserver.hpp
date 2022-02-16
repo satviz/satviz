@@ -10,17 +10,17 @@ namespace graph {
  *
  */
 class GraphObserver {
-private:
-  Graph *my_graph;
-
 protected:
-  GraphObserver(Graph *gr) : my_graph(gr) {}
+  Graph &my_graph;
+
+  GraphObserver(Graph &gr) : my_graph(gr) {}
 
 public:
-  virtual void onWeightUpdate(WeightUpdate &update) {}
-  virtual void onHeatUpdate(HeatUpdate &update) {}
-  virtual void onLayoutChange() {}
-  virtual void onLayoutChange(std::vector<int> changed) {}
+  virtual void onWeightUpdate(WeightUpdate &update) { (void) update; }
+  virtual void onHeatUpdate(HeatUpdate &update) { (void) update; }
+  virtual void onLayoutChange(ogdf::Array<ogdf::node> &changed) { (void) changed; }
+  virtual void onEdgeAdded(ogdf::edge e) { (void) e; }
+  virtual void onEdgeDeleted(ogdf::edge e) { (void) e; }
   virtual void onReload() {}
 };
 

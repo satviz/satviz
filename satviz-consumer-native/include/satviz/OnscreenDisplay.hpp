@@ -7,20 +7,20 @@ namespace satviz {
 namespace video {
 
 /**
- *
+ * A Display that renders to a window.
  */
-class OnscreenDisplay : Display {
+class OnscreenDisplay : public Display {
 private:
   sf::Window window;
 
-  void activateContext();
+  void activateContext() override;
 
 public:
   OnscreenDisplay(int width, int height);
-  ~OnscreenDisplay();
+  ~OnscreenDisplay() override;
 
-  bool pollEvent(sf::Event &event);
-  void lockSize(bool lock);
+  bool pollEvent(sf::Event &event) override;
+  void displayFrame() override;
 };
 
 } // namespace video
