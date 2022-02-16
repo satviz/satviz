@@ -33,7 +33,7 @@ tasks {
             nativeBuildDir.mkdir()
         }
         workingDir = nativeBuildDir
-        commandLine = listOf("cmake", "../../..")
+        commandLine = listOf("cmake", "../../..", "-DCMAKE_BUILD_TYPE=Debug")
     }
 
     register<Exec>("ctest") {

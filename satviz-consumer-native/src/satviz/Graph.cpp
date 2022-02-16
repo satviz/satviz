@@ -59,10 +59,14 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
       graph.delEdge(e);
       continue;
     }
-    if (e == nullptr && std::get<2>(row) != 0.0f) {
-      e = graph.newEdge(v, w);
-      for (auto o : observers) {
-        o->onEdgeAdded(e);
+    if (e == nullptr) {
+      if (std::get<2>(row) != 0.0f) {
+        e = graph.newEdge(v, w);
+        for (auto o: observers) {
+          o->onEdgeAdded(e);
+        }
+      } else {
+        continue;
       }
     }
     attrs.doubleWeight(e) = std::get<2>(row);
