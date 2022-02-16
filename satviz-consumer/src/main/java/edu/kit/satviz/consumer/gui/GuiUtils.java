@@ -10,7 +10,12 @@ import javafx.util.StringConverter;
  *
  * @author Tim-17
  */
-public interface GuiUtils {
+public final class GuiUtils {
+
+  // hide public constructor
+  private GuiUtils() {
+
+  }
 
   /**
    * Initializes a {@link Spinner} so that the user can only enter valid integers while allowing
@@ -22,7 +27,7 @@ public interface GuiUtils {
    * @param max The maximum value of this {@link Spinner}.
    * @param init The initial value of this {@link Spinner}.
    */
-  static void initializeIntegerSpinner(Spinner<Integer> spinner, int min, int max, int init) {
+  public static void initializeIntegerSpinner(Spinner<Integer> spinner, int min, int max, int init) {
     SpinnerValueFactory<Integer> spinnerValueFactory
         = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, init);
 
@@ -71,7 +76,7 @@ public interface GuiUtils {
    * @param color The color to be parsed.
    * @return The parsed color.
    */
-  static Color intToColor(int color) {
+  public static Color intToColor(int color) {
     int red = (color >>> 16) & 0xFF;
     int green = (color >>> 8) & 0xFF;
     int blue = color & 0xFF;
@@ -84,7 +89,7 @@ public interface GuiUtils {
    * @param color The color to be parsed.
    * @return The parsed color.
    */
-  static int colorToInt(Color color) {
+  public static int colorToInt(Color color) {
     int red = (int) Math.round(color.getRed() * 255);
     int green = (int) Math.round(color.getGreen() * 255);
     int blue = (int) Math.round(color.getBlue() * 255);
