@@ -75,8 +75,8 @@ class SolverModeTest {
     var params = solverParams("/libcadical.so", "/instance.cnf");
     assertTrue(mode.isSet(params));
     try {
-      ProducerModeData source = mode.apply(params);
-      assertTrue(source instanceof SolverSource);
+      ProducerModeData data = mode.apply(params);
+      assertTrue(data.source() instanceof SolverSource);
     } catch (SourceException e) {
       fail(e);
     }

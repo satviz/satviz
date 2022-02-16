@@ -36,20 +36,20 @@ class SolverSourceTest {
   @Test
   void test_open_satisfiable() throws IOException, SourceException {
     var params = solverParams("/libcadical.so", "/instance.cnf");
-    ProducerModeData source = mode.apply(params);
+    ProducerModeData data = mode.apply(params);
     var solution = new AtomicReference<SatAssignment>(null);
-    source.whenSolved(solution::set);
-    source.open();
+    data.source().whenSolved(solution::set);
+    data.source().open();
     assertNotNull(solution.get());
   }
 
   @Test
   void test_open_unsatisfiable() throws IOException, SourceException {
     var params = solverParams("/libcadical.so", "/instance-unsat.cnf");
-    ProducerModeData source = mode.apply(params);
+    ProducerModeData data = mode.apply(params);
     var bool = new AtomicBoolean(false);
-    source.whenRefuted(() -> bool.set(true));
-    source.open();
+    data.source().whenRefuted(() -> bool.set(true));
+    data.source().open();
     assertTrue(bool.get());
   }
 

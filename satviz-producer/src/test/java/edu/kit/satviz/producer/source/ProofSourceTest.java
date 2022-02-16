@@ -30,10 +30,10 @@ class ProofSourceTest {
     var params = new ProducerParameters();
     params.setHost("example.com");
     params.setProofFile(extractResource("/proof.drat"));
-    ProducerModeData source = mode.apply(params);
+    ProducerModeData data = mode.apply(params);
     var bool = new AtomicBoolean(false);
-    source.whenRefuted(() -> bool.set(true));
-    source.open();
+    data.source().whenRefuted(() -> bool.set(true));
+    data.source().open();
     assertTrue(bool.get());
   }
 
@@ -42,10 +42,10 @@ class ProofSourceTest {
     var params = new ProducerParameters();
     params.setHost("example.com");
     params.setProofFile(extractResource("/proof.drat"));
-    ProducerModeData source = mode.apply(params);
+    ProducerModeData data = mode.apply(params);
     List<ClauseUpdate> updates = new ArrayList<>();
-    source.subscribe(updates::add);
-    source.open();
+    data.source().subscribe(updates::add);
+    data.source().open();
     assertEquals(PROOF_UPDATES, updates);
   }
 

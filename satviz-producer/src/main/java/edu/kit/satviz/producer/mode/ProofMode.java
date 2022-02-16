@@ -1,5 +1,7 @@
 package edu.kit.satviz.producer.mode;
 
+import edu.kit.satviz.network.OfferType;
+import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.parsers.DratFile;
 import edu.kit.satviz.producer.ProducerMode;
 import edu.kit.satviz.producer.ProducerModeData;
@@ -24,7 +26,11 @@ public class ProofMode implements ProducerMode {
     try {
       InputStream proofStream = Files.newInputStream(parameters.getProofFile());
       DratFile drat = new DratFile(proofStream);
-      return new ProofSource(drat);
+      return new ProducerModeData(
+          new ProofSource(drat),
+          new ProducerId(null, OfferType.PROOF,
+              null, false, 0)
+      );
     } catch (IOException e) {
       throw new SourceException("Could not create source - I/O error", e);
     }

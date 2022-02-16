@@ -30,7 +30,7 @@ public class SolverMode implements ProducerMode {
     try (DimacsFile instance = new DimacsFile(Files.newInputStream(parameters.getInstanceFile()))) {
       Solver solver = Ipasir.init();
       configureSolver(solver, instance);
-      return new SolverSource(solver, instance.getVariableAmount());
+      return new ProducerModeData(new SolverSource(solver, instance.getVariableAmount()), null);
     } catch (IOException e) {
       throw new SourceException("I/O exception trying to read instance file", e);
     } catch (ParsingException e) {
@@ -39,6 +39,10 @@ public class SolverMode implements ProducerMode {
       throw new SourceException("Ipasir function(s) not found in shared library", e);
     }
 
+  }
+
+  private long hashInstance(Path file) {
+    return 0;
   }
 
   private void tryLoadSolver(Path path) throws SourceException {

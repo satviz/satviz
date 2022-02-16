@@ -46,8 +46,8 @@ class ProofModeTest {
     params.setProofFile(proof);
     assertTrue(mode.isSet(params));
     try {
-      ProducerModeData source = mode.apply(params);
-      assertTrue(source instanceof ProofSource);
+      ProducerModeData data = mode.apply(params);
+      assertTrue(data.source() instanceof ProofSource);
     } catch (SourceException e) {
       fail(e);
     }
