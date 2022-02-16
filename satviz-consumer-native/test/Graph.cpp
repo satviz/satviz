@@ -123,3 +123,9 @@ TEST_F(GraphTest, Serialization) {
     ASSERT_EQ(info.heat, 0);
   }
 }
+
+TEST_F(GraphTest, SubmitWeightUpdateRegression) {
+  WeightUpdate update;
+  update.values.push_back(std::make_tuple<int, int, float>(0, 2, 0.0f));
+  graph.submitWeightUpdate(update);
+}
