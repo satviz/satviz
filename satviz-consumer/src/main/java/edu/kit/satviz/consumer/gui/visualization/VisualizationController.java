@@ -48,13 +48,15 @@ public class VisualizationController {
 
   // ATTRIBUTES (OTHER)
 
+  private final int variableCount;
   private final Mediator mediator;
   private final ConsumerConfig config;
 
 
   // CONSTRUCTORS
 
-  public VisualizationController(Mediator mediator, ConsumerConfig config) {
+  public VisualizationController(Mediator mediator, ConsumerConfig config, int variableCount) {
+    this.variableCount = variableCount;
     this.mediator = mediator;
     this.config = config;
   }
@@ -75,14 +77,14 @@ public class VisualizationController {
     coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
     hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
 
-    // TODO: initialize the following spinners + slider properly
-
-    /*
     GuiUtils.initializeIntegerSpinner(highlightVariableSpinner,
         1,
-        maxVariableNumber,
+        variableCount,
         1);
 
+    // TODO: initialize the following spinner + slider properly
+
+    /*
     GuiUtils.initializeIntegerSpinner(receivedClausesSpinner,
         0,
         Integer.MAX_VALUE,
