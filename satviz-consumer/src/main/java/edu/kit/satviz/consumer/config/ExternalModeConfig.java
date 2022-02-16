@@ -6,8 +6,6 @@ import java.util.Objects;
 /**
  * This subclass of the ConsumerModeConfig class is used, when one decides
  * to use the consumer with an external producer.
- *
- * @author johnnyjayjay
  */
 @JsonTypeName("EXTERNAL")
 public class ExternalModeConfig extends ConsumerModeConfig {

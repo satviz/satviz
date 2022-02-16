@@ -10,8 +10,6 @@ import javafx.stage.Stage;
  * Starts the configuration window of the application.
  * Allows to retrieve the resulting {@link ConsumerConfig} object after the configuration has been
  * finished.
- *
- * @author Tim-17
  */
 public class ConfigStarter extends Application {
 

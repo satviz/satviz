@@ -28,8 +28,6 @@ import javafx.stage.FileChooser;
 
 /**
  * Controls the general configuration window.
- *
- * @author Tim-17
  */
 public class GeneralConfigController extends ConfigController {
 

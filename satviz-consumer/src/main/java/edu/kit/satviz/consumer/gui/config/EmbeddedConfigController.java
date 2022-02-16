@@ -14,8 +14,6 @@ import javafx.stage.FileChooser;
 
 /**
  * Controls the window for the embedded mode configuration.
- *
- * @author Tim-17
  */
 public class EmbeddedConfigController extends ConfigController {
 

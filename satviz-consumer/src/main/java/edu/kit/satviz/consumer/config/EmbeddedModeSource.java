@@ -6,9 +6,6 @@ import java.util.List;
  * This enum allows for different types of sources for the embedded
  * producer to be differentiated, such as a solver file or a finished
  * proof as a DRAT-file.
- *
- * @author johnnyjayjay
- * @author Tim-17
  */
 public enum EmbeddedModeSource {
 

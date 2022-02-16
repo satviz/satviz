@@ -5,8 +5,6 @@ import javafx.fxml.FXML;
 
 /**
  * Abstract superclass to all controller classes for config GUI windows.
- *
- * @author Tim-17
  */
 public abstract class ConfigController {
 
