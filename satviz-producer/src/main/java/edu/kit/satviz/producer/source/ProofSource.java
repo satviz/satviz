@@ -52,8 +52,6 @@ public class ProofSource extends ClauseSource {
       }
     } catch (ParsingException e) {
       throw new SourceException("DRAT proof parsing error", e);
-    } catch (IOException e) {
-      throw new SourceException("DRAT proof I/O error", e);
     }
 
     if (!stop) {

@@ -2,6 +2,7 @@ package edu.kit.satviz.producer;
 
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
+import edu.kit.satviz.network.OfferType;
 import edu.kit.satviz.network.ProducerConnection;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.producer.cli.ProducerCli;
@@ -41,10 +42,11 @@ public class ProducerApplication {
 
     try {
       ClauseSource source = selectedMode.createSource(parameters);
-      ProducerConnection connection = new ProducerConnection(); // TODO: 29/01/2022 host, port
+      ProducerConnection connection = new ProducerConnection(
+          parameters.getHost(), parameters.getPort());
       connection.register(new SourceControlConnectionListener(connection, source));
       // TODO: 29/01/2022
-      connection.establish(new ProducerId(null, null, null, false, 0));
+      connection.establish(new ProducerId(null, OfferType.PROOF, null, false, 0));
     } catch (SourceException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       System.exit(1);
