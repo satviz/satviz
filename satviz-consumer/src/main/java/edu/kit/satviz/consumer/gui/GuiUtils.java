@@ -25,7 +25,10 @@ public final class GuiUtils {
    * @param max The maximum value of this {@link Spinner}.
    * @param init The initial value of this {@link Spinner}.
    */
-  public static void initializeIntegerSpinner(Spinner<Integer> spinner, int min, int max, int init) {
+  public static void initializeIntegerSpinner(Spinner<Integer> spinner,
+                                              int min,
+                                              int max,
+                                              int init) {
     SpinnerValueFactory<Integer> spinnerValueFactory
         = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, init);
 
