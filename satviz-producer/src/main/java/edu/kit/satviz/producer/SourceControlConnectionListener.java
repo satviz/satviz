@@ -2,6 +2,8 @@ package edu.kit.satviz.producer;
 
 import edu.kit.satviz.network.ProducerConnection;
 import edu.kit.satviz.network.ProducerConnectionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The {@code ProducerConnectionListener} used by this application.<br>
@@ -9,6 +11,8 @@ import edu.kit.satviz.network.ProducerConnectionListener;
  * forward updates in the {@code source} to the network connection.
  */
 public class SourceControlConnectionListener implements ProducerConnectionListener {
+
+  private static final Logger logger = Logger.getLogger("Network");
 
   private final ProducerConnection connection;
   private final ClauseSource source;
@@ -35,8 +39,10 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
    */
   @Override
   public void onConnect() {
+    logger.info("Connected to consumer");
     sourceThread = new Thread(null, () -> {
       try (source) {
+        logger.info("Starting to send clause updates");
         source.open();
       } catch (SourceException e) {
         e.printStackTrace();
@@ -53,6 +59,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
    */
   @Override
   public void onDisconnect(String reason) {
+    logger.log(Level.WARNING, "Consumer connection disconnected. Reason: {}", reason);
     try {
       source.close();
     } catch (Exception e) {

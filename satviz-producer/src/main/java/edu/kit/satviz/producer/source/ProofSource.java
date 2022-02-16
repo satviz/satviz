@@ -49,9 +49,12 @@ public class ProofSource extends ClauseSource {
       Iterator<ClauseUpdate> iterator = proof.iterator();
       while (!stop && iterator.hasNext()) {
         clauseListener.accept(iterator.next());
+        Thread.sleep(1000);
       }
     } catch (ParsingException e) {
       throw new SourceException("DRAT proof parsing error", e);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
     }
 
     if (!stop) {
