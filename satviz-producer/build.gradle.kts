@@ -19,6 +19,12 @@ application {
     mainClass.set("edu.kit.satviz.producer.ProducerApplication")
 }
 
+jlink {
+    launcher {
+        name = "sat-prod"
+    }
+}
+
 tasks {
 
     compileTestJava {
