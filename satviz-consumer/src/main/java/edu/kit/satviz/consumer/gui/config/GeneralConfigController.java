@@ -97,6 +97,7 @@ public class GeneralConfigController extends ConfigController {
       config = getMapper().readValue(file, ConsumerConfig.class);
     } catch (IOException e) {
       errorLabel.setText("The settings file could not be read.");
+      return;
     }
 
     setDefaultValues();
