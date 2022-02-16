@@ -14,12 +14,18 @@ dependencies {
     implementation(project(":satviz-parsers"))
 }
 
+application {
+    mainModule.set("edu.kit.satviz.producer")
+    mainClass.set("edu.kit.satviz.producer.ProducerApplication")
+}
+
 tasks {
-    getByName<JavaCompile>("compileTestJava") {
+
+    compileTestJava {
         options.compilerArgs = listOf("--add-modules", "jdk.incubator.foreign")
     }
 
-    getByName<Test>("test") {
+    test {
         jvmArgs = listOf("--add-modules", "jdk.incubator.foreign", "--enable-native-access=ALL-UNNAMED")
     }
 }
