@@ -1,5 +1,6 @@
 package edu.kit.satviz.producer.mode;
 
+import edu.kit.satviz.producer.ProducerModeData;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.source.ProofSource;
@@ -45,7 +46,7 @@ class ProofModeTest {
     params.setProofFile(proof);
     assertTrue(mode.isSet(params));
     try {
-      var source = mode.createSource(params);
+      ProducerModeData source = mode.apply(params);
       assertTrue(source instanceof ProofSource);
     } catch (SourceException e) {
       fail(e);

@@ -4,6 +4,7 @@ import static edu.kit.satviz.producer.SolverParams.solverParams;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.kit.satviz.producer.ProducerModeData;
 import edu.kit.satviz.producer.ResourceHelper;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.mode.SolverMode;
@@ -11,7 +12,6 @@ import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import org.junit.jupiter.api.*;
 
 class SolverSourceTest {
@@ -36,7 +36,7 @@ class SolverSourceTest {
   @Test
   void test_open_satisfiable() throws IOException, SourceException {
     var params = solverParams("/libcadical.so", "/instance.cnf");
-    var source = mode.createSource(params);
+    ProducerModeData source = mode.apply(params);
     var solution = new AtomicReference<SatAssignment>(null);
     source.whenSolved(solution::set);
     source.open();
@@ -46,7 +46,7 @@ class SolverSourceTest {
   @Test
   void test_open_unsatisfiable() throws IOException, SourceException {
     var params = solverParams("/libcadical.so", "/instance-unsat.cnf");
-    var source = mode.createSource(params);
+    ProducerModeData source = mode.apply(params);
     var bool = new AtomicBoolean(false);
     source.whenRefuted(() -> bool.set(true));
     source.open();

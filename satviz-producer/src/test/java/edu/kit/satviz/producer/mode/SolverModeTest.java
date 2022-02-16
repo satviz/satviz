@@ -1,9 +1,9 @@
 package edu.kit.satviz.producer.mode;
 
-import static edu.kit.satviz.producer.ResourceHelper.extractResource;
 import static edu.kit.satviz.producer.SolverParams.solverParams;
 import static org.junit.jupiter.api.Assertions.*;
 
+import edu.kit.satviz.producer.ProducerModeData;
 import edu.kit.satviz.producer.ResourceHelper;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
@@ -61,13 +61,13 @@ class SolverModeTest {
   @Test
   void test_createSource_invalidInstance() throws IOException {
     var params = solverParams("/libcadical.so", "/instance-broken.cnf");
-    assertThrows(SourceException.class, () -> mode.createSource(params));
+    assertThrows(SourceException.class, () -> mode.apply(params));
   }
 
   @Test
   void test_createSource_invalidSolver() throws IOException {
     var params = solverParams("/instance.cnf", "/instance.cnf");
-    assertThrows(SourceException.class, () -> mode.createSource(params));
+    assertThrows(SourceException.class, () -> mode.apply(params));
   }
 
   @Test
@@ -75,7 +75,7 @@ class SolverModeTest {
     var params = solverParams("/libcadical.so", "/instance.cnf");
     assertTrue(mode.isSet(params));
     try {
-      var source = mode.createSource(params);
+      ProducerModeData source = mode.apply(params);
       assertTrue(source instanceof SolverSource);
     } catch (SourceException e) {
       fail(e);

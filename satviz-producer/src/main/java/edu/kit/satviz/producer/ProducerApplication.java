@@ -42,14 +42,14 @@ public class ProducerApplication {
 
     try {
       logger.info("Opening clause source");
-      ClauseSource source = selectedMode.createSource(parameters);
+      ProducerModeData data = selectedMode.apply(parameters);
       logger.info("Clause source opened");
       ProducerConnection connection = new ProducerConnection(
           parameters.getHost(), parameters.getPort());
-      connection.register(new SourceControlConnectionListener(connection, source));
+      connection.register(new SourceControlConnectionListener(connection, data.source()));
       // TODO: 29/01/2022
       logger.info("Waiting for network connection...");
-      connection.establish(new ProducerId(null, OfferType.PROOF, null, false, 0));
+      connection.establish(new ProducerId(null, OfferType.PROOF, null, parameters.isNoWait(), 0));
     } catch (SourceException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       System.exit(1);

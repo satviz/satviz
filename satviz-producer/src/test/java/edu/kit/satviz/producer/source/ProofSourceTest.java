@@ -4,17 +4,15 @@ import static edu.kit.satviz.producer.ResourceHelper.PROOF_UPDATES;
 import static edu.kit.satviz.producer.ResourceHelper.extractResource;
 import static org.junit.jupiter.api.Assertions.*;
 
+import edu.kit.satviz.producer.ProducerModeData;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.mode.ProofMode;
-import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +30,7 @@ class ProofSourceTest {
     var params = new ProducerParameters();
     params.setHost("example.com");
     params.setProofFile(extractResource("/proof.drat"));
-    var source = mode.createSource(params);
+    ProducerModeData source = mode.apply(params);
     var bool = new AtomicBoolean(false);
     source.whenRefuted(() -> bool.set(true));
     source.open();
@@ -44,7 +42,7 @@ class ProofSourceTest {
     var params = new ProducerParameters();
     params.setHost("example.com");
     params.setProofFile(extractResource("/proof.drat"));
-    var source = mode.createSource(params);
+    ProducerModeData source = mode.apply(params);
     List<ClauseUpdate> updates = new ArrayList<>();
     source.subscribe(updates::add);
     source.open();

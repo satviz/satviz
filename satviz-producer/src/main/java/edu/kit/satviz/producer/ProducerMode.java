@@ -18,12 +18,13 @@ public interface ProducerMode {
   boolean isSet(ProducerParameters parameters);
 
   /**
-   * Create a {@link ClauseSource} corresponding to this mode.
+   * Apply this mode to a set of parameters to obtain corresponding {@link ProducerModeData}.
    *
    * @param parameters the {@link ProducerParameters}
-   * @return A {@link ClauseSource} implementation according to the parameters and this mode
+   * @return {@link ProducerModeData} containing a {@link ClauseSource} implementation and a
+   *         {@link edu.kit.satviz.network.ProducerId} according to the parameters and this mode
    * @throws SourceException If the source can not be created for some reason.
    */
-  ClauseSource createSource(ProducerParameters parameters) throws SourceException;
+  ProducerModeData apply(ProducerParameters parameters) throws SourceException;
 
 }

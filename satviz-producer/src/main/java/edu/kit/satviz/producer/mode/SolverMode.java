@@ -5,8 +5,8 @@ import edu.kit.ipasir4j.IpasirNotFoundException;
 import edu.kit.ipasir4j.Solver;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
-import edu.kit.satviz.producer.ClauseSource;
 import edu.kit.satviz.producer.ProducerMode;
+import edu.kit.satviz.producer.ProducerModeData;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.source.SolverSource;
@@ -25,7 +25,7 @@ public class SolverMode implements ProducerMode {
   }
 
   @Override
-  public ClauseSource createSource(ProducerParameters parameters) throws SourceException {
+  public ProducerModeData apply(ProducerParameters parameters) throws SourceException {
     tryLoadSolver(parameters.getSolverFile());
     try (DimacsFile instance = new DimacsFile(Files.newInputStream(parameters.getInstanceFile()))) {
       Solver solver = Ipasir.init();

@@ -1,8 +1,8 @@
 package edu.kit.satviz.producer.mode;
 
 import edu.kit.satviz.parsers.DratFile;
-import edu.kit.satviz.producer.ClauseSource;
 import edu.kit.satviz.producer.ProducerMode;
+import edu.kit.satviz.producer.ProducerModeData;
 import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.source.ProofSource;
@@ -20,7 +20,7 @@ public class ProofMode implements ProducerMode {
   }
 
   @Override
-  public ClauseSource createSource(ProducerParameters parameters) throws SourceException {
+  public ProducerModeData apply(ProducerParameters parameters) throws SourceException {
     try {
       InputStream proofStream = Files.newInputStream(parameters.getProofFile());
       DratFile drat = new DratFile(proofStream);

@@ -39,8 +39,8 @@ class SourceControlConnectionListenerTest {
     var params = new ProducerParameters();
     params.setHost("example.com");
     params.setProofFile(extractResource("/instance-broken.cnf"));
-    var source = new ProofMode().createSource(params);
-    var listener = new SourceControlConnectionListener(connection, source);
+    ProducerModeData data = new ProofMode().apply(params);
+    var listener = new SourceControlConnectionListener(connection, data.source());
     listener.onConnect();
     listener.getSourceThread().join();
     verify(connection).terminateFailed(anyString());
@@ -49,8 +49,8 @@ class SourceControlConnectionListenerTest {
   @Test
   void test_onConnect_refutedResult() throws InterruptedException, SourceException, IOException {
     var params = solverParams("/libcadical.so", "/instance-unsat.cnf");
-    var source = new SolverMode().createSource(params);
-    var listener = new SourceControlConnectionListener(connection, source);
+    ProducerModeData data = new SolverMode().apply(params);
+    var listener = new SourceControlConnectionListener(connection, data.source());
     listener.onConnect();
     listener.getSourceThread().join();
     verify(connection).terminateRefuted();
@@ -59,8 +59,8 @@ class SourceControlConnectionListenerTest {
   @Test
   void test_onConnect_satisfiableResult() throws IOException, SourceException, InterruptedException {
     var params = solverParams("/libcadical.so", "/instance.cnf");
-    var source = new SolverMode().createSource(params);
-    var listener = new SourceControlConnectionListener(connection, source);
+    ProducerModeData data = new SolverMode().apply(params);
+    var listener = new SourceControlConnectionListener(connection, data.source());
     listener.onConnect();
     listener.getSourceThread().join();
     verify(connection).terminateSolved(notNull());
@@ -71,8 +71,8 @@ class SourceControlConnectionListenerTest {
     var params = new ProducerParameters();
     params.setHost("example.com");
     params.setProofFile(extractResource("/proof.drat"));
-    var source = new ProofMode().createSource(params);
-    var listener = new SourceControlConnectionListener(connection, source);
+    ProducerModeData data = new ProofMode().apply(params);
+    var listener = new SourceControlConnectionListener(connection, data.source());
     listener.onConnect();
     listener.getSourceThread().join();
     PROOF_UPDATES.forEach(update -> verify(connection).sendClauseUpdate(update));
