@@ -31,6 +31,7 @@ class ExternalClauseBufferTest {
 
   @AfterEach
   void tearDownTestDir() throws IOException {
+    buffer.close();
     for (Path path : Files.list(testDir).toList()) {
       Files.delete(path);
     }
