@@ -14,7 +14,6 @@ import edu.kit.satviz.producer.SourceException;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.source.SolverSource;
 import edu.kit.satviz.sat.ClauseUpdate;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

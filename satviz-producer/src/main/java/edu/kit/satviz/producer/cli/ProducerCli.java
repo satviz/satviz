@@ -1,6 +1,7 @@
 package edu.kit.satviz.producer.cli;
 
 import edu.kit.satviz.common.PathArgumentType;
+import java.util.Locale;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -17,11 +18,11 @@ public final class ProducerCli {
   public static final ArgumentParser PARSER;
 
   static {
-    PARSER = ArgumentParsers.newFor("sat-prod").build()
+    PARSER = ArgumentParsers.newFor("sat-prod").locale(Locale.ENGLISH).build()
         .defaultHelp(true)
         .version("0.1.0-SNAPSHOT")
         .description("""
-                        A clause producer for sat-viz.
+                        A clause producer for satviz.
                         Can be started with either a solver and a SAT instance or a proof.""");
     // TODO PARSER.addArgument("-l", "--log-level")
     PARSER.addArgument("--host", "-H")
