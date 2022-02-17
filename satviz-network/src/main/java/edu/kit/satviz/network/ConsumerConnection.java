@@ -166,7 +166,7 @@ public class ConsumerConnection {
     String type = offerData.get("type");
     if (type.equals("solver")) {
       String name = offerData.get("name");
-      int hash = Integer.parseInt(offerData.get("hash"));
+      long hash = Long.parseLong(offerData.get("hash"));
       boolean delayed = offerData.get("delayed").equals("true");
       return new ProducerId(cid, OfferType.SOLVER, name, delayed, hash);
     } else {

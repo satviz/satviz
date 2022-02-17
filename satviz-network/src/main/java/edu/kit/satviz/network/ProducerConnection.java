@@ -154,7 +154,7 @@ public class ProducerConnection {
     if (pid.type() == OfferType.SOLVER) {
       offerData.put("type", "solver");
       offerData.put("name", pid.solverName());
-      offerData.put("hash", Integer.toString(pid.instanceHash()));
+      offerData.put("hash", Long.toString(pid.instanceHash()));
       offerData.put("delayed", pid.solverDelayed() ? "true" : "false");
     } else {
       offerData.put("type", "proof");
