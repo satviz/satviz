@@ -2,9 +2,7 @@ package edu.kit.satviz.producer;
 
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
-import edu.kit.satviz.network.OfferType;
 import edu.kit.satviz.network.ProducerConnection;
-import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.producer.cli.ProducerCli;
 import edu.kit.satviz.producer.cli.ProducerConstraints;
 import edu.kit.satviz.producer.cli.ProducerParameters;
@@ -32,7 +30,6 @@ public class ProducerApplication {
    * @param args The command line args, as defined by the CLI specification.
    */
   public static void main(String[] args) {
-
     ProducerParameters parameters = parseArgs(args);
     validateArgs(parameters);
     ProducerMode selectedMode = SUPPORTED_MODES.stream()

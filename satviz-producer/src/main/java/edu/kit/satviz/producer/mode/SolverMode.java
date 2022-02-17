@@ -17,7 +17,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import net.jpountz.xxhash.StreamingXXHash64;
 import net.jpountz.xxhash.XXHashFactory;
 
 /**
