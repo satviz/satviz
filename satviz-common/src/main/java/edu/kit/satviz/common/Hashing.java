@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import net.jpountz.xxhash.XXHashFactory;
 
+/**
+ * Utility class with a method to hash the contents of an {@code InputStream}.
+ */
 public final class Hashing {
 
   private static final XXHashFactory HASH_FACTORY = XXHashFactory.fastestInstance();
@@ -13,6 +16,13 @@ public final class Hashing {
 
   }
 
+  /**
+   * Reads and hashes the content of the given {@code InputStream}.
+   *
+   * @param in The stream to read, which will be fully exhausted
+   * @return The hash
+   * @throws IOException If there is an I/O error while reading the stream
+   */
   public static long hashContent(InputStream in) throws IOException {
     byte[] buf = new byte[8192];
     try (
