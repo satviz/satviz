@@ -5,8 +5,6 @@ import java.util.Objects;
 /**
  * This class stores two colors, which will then be used
  * to create the heatmap color spectrum.
- *
- * @author johnnyjayjay
  */
 public class HeatmapColors {
 

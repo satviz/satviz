@@ -7,8 +7,6 @@ import java.util.Objects;
 /**
  * This abstract class allows for different configuration modes
  * with different options to be set exclusively.
- *
- * @author johnnyjayjay
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "mode")
 @JsonSubTypes({
