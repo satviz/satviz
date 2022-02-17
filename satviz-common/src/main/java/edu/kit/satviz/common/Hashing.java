@@ -19,7 +19,7 @@ public final class Hashing {
   /**
    * Reads and hashes the content of the given {@code InputStream}.
    *
-   * @param in The stream to read, which will be fully exhausted
+   * @param in The stream to read, which will be fully exhausted <strong>and closed.</strong>
    * @return The hash
    * @throws IOException If there is an I/O error while reading the stream
    */
