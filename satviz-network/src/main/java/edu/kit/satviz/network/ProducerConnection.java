@@ -60,8 +60,7 @@ public class ProducerConnection {
     try {
       conman.send(cid, type, obj);
     } catch (IOException e) {
-      conman.stop(); // globally terminate
-      callOnDisconnect("send error");
+      close("send error");
     }
   }
 
@@ -71,8 +70,7 @@ public class ProducerConnection {
     } catch (IllegalStateException | IOException e) {
       // nothing more we can do
     }
-    conman.stop(); // globally terminate
-    callOnDisconnect("term");
+    close("term");
   }
 
   /**
@@ -123,6 +121,11 @@ public class ProducerConnection {
    */
   public void stop() throws InterruptedException {
     conman.finishStop();
+  }
+
+  private void close(String reason) {
+    conman.stop();
+    callOnDisconnect(reason);
   }
 
   /**
@@ -200,21 +203,18 @@ public class ProducerConnection {
           }
           case MessageTypes.STOP -> {
             stopReceived = true;
-            conman.stop();
-            callOnDisconnect("stop");
+            close("stop");
           }
           default -> { /* ignore */ }
         }
         break;
       case TERM:
         stopReceived = true;
-        conman.stop();
-        callOnDisconnect("term");
+        close("term");
         break;
       case FAIL:
         stopReceived = true;
-        conman.stop();
-        callOnDisconnect("fail");
+        close("fail");
         break;
       default:
         // ignore
