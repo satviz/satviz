@@ -25,7 +25,7 @@ public class VisualizationController {
   @FXML
   private ChoiceBox<WeightFactor> weightFactorChoiceBox;
   @FXML
-  private Spinner<Integer> windowSizeSpinner; // TODO: convert to Spinner<Long>
+  private Spinner<Integer> windowSizeSpinner;
   @FXML
   private ColorPicker coldColorColorPicker;
   @FXML
