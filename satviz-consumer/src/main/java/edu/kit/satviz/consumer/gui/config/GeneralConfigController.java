@@ -48,7 +48,7 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private ChoiceBox<WeightFactor> weightFactorChoiceBox;
   @FXML
-  private Spinner<Integer> windowSizeSpinner;
+  private Spinner<Integer> windowSizeSpinner; // TODO: convert to Spinner<Long>
   @FXML
   private ColorPicker coldColorColorPicker;
   @FXML

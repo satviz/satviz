@@ -20,7 +20,7 @@ public class VisualizationController {
   @FXML
   private ChoiceBox<WeightFactor> weightFactorChoiceBox;
   @FXML
-  private Spinner<Integer> windowSizeSpinner;
+  private Spinner<Integer> windowSizeSpinner; // TODO: convert to Spinner<Long>
   @FXML
   private ColorPicker coldColorColorPicker;
   @FXML
@@ -40,7 +40,7 @@ public class VisualizationController {
   @FXML
   private Button pauseOrContinueVisualizationButton;
   @FXML
-  private Spinner<Integer> receivedClausesSpinner;
+  private Spinner<Integer> receivedClausesSpinner; // TODO: convert to Spinner<Long>
   @FXML
   private Slider receivedClausesSlider;
   @FXML
