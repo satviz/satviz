@@ -82,19 +82,23 @@ public class VisualizationController {
         variableCount,
         1);
 
-    // TODO: initialize the following spinner + slider properly
+    long totalClausesReceived = mediator.numberOfUpdates();
+    long currentClausesReceived = mediator.currentUpdate();
 
-    /*
     GuiUtils.initializeIntegerSpinner(receivedClausesSpinner,
         0,
-        Integer.MAX_VALUE,
-        0);
+        (int) totalClausesReceived,
+        (int) currentClausesReceived);
 
-    GuiUtils.initializeSlider(receivedClausesSlider,
-        0,
-        0,
-        0);
-     */
+    receivedClausesSlider.setMin(0);
+    receivedClausesSlider.setMax(totalClausesReceived);
+    receivedClausesSlider.setValue(currentClausesReceived);
+    // make slider move in discrete steps
+    receivedClausesSlider.setSnapToTicks(true);
+    receivedClausesSlider.setShowTickMarks(true);
+    receivedClausesSlider.setMajorTickUnit(1.0);
+    receivedClausesSlider.setBlockIncrement(1.0);
+    receivedClausesSlider.setMinorTickCount(0); // Disable minor ticks
   }
 
   @FXML
