@@ -113,7 +113,7 @@ public class VisualizationController {
 
   @FXML
   private void updateWindowSize() {
-
+    mediator.updateWindowSize(windowSizeSpinner.getValue());
   }
 
   @FXML
@@ -143,7 +143,7 @@ public class VisualizationController {
 
   @FXML
   private void openScreenShotFolder() {
-
+    // Desktop.getDesktop().open(new File("C:\\folder"));
   }
 
   @FXML
