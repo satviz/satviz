@@ -15,6 +15,11 @@ import javafx.scene.control.Spinner;
 
 public class VisualizationController {
 
+  // CONSTANTS
+
+  private static final int MIN_HIGHLIGHT_VARIABLE = 1;
+  private static final int DEFAULT_HIGHLIGHT_VARIABLE = 1;
+
   // ATTRIBUTES (FXML)
 
   @FXML
@@ -78,9 +83,9 @@ public class VisualizationController {
     hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
 
     GuiUtils.initializeIntegerSpinner(highlightVariableSpinner,
-        1,
+        MIN_HIGHLIGHT_VARIABLE,
         variableCount,
-        1);
+        DEFAULT_HIGHLIGHT_VARIABLE);
 
     long totalClausesReceived = mediator.numberOfUpdates();
     long currentClausesReceived = mediator.currentUpdate();
@@ -103,7 +108,7 @@ public class VisualizationController {
 
   @FXML
   private void updateWeightFactor() {
-
+    mediator.updateWeightFactor(weightFactorChoiceBox.getValue());
   }
 
   @FXML
@@ -113,27 +118,27 @@ public class VisualizationController {
 
   @FXML
   private void updateHeatmapColdColor() {
-
+    mediator.updateHeatmapColdColor(coldColorColorPicker.getValue());
   }
 
   @FXML
   private void updateHeatmapHotColor() {
-
+    mediator.updateHeatmapHotColor(hotColorColorPicker.getValue());
   }
 
   @FXML
   private void highlightVariable() {
-
+    mediator.highlightVariable(highlightVariableSpinner.getValue());
   }
 
   @FXML
   private void clearHighlightVariable() {
-
+    mediator.clearHighlightVariable();
   }
 
   @FXML
   private void screenshot() {
-
+    mediator.screenshot();
   }
 
   @FXML
@@ -158,7 +163,7 @@ public class VisualizationController {
 
   @FXML
   private void relayout() {
-
+    mediator.relayout();
   }
 
   @FXML
