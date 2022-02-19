@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    implementation("edu.kit:ipasir4j:0.1.0")
+    implementation("edu.kit:ipasir4j:0.1.1")
     implementation(project(":satviz-common"))
     implementation(project(":satviz-network"))
     implementation(project(":satviz-parsers"))
