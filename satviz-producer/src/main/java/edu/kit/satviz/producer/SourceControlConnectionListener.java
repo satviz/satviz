@@ -49,6 +49,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
         connection.terminateFailed(e.getMessage());
       } catch (Exception e) {
         logger.log(Level.SEVERE, "Unknown error", e);
+        connection.terminateFailed("internal error: " + e);
       }
     }, "ClauseSource-" + Integer.toHexString(source.hashCode()));
     sourceThread.start();
