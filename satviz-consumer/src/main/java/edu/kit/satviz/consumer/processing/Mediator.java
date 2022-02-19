@@ -125,8 +125,6 @@ public class Mediator implements ConsumerConnectionListener {
 
   public void pauseOrContinueVisualization() {
     if (currentTask == null) {
-      this.clausesPerAdvance = clausesPerAdvance;
-      this.period = period;
       currentTask = advanceScheduler.scheduleAtFixedRate(
           this::periodicallyAdvance,
           0,
