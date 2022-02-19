@@ -21,6 +21,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * A class that manages incoming {@link ClauseUpdate}s. A {@code ClauseCoordinator}
+ * <ul>
+ *   <li>stores clause updates sequentially in an {@link ExternalClauseBuffer}</li>
+ *   <li>manages snapshots of {@link ClauseUpdateProcessor}s and {@link Graph}s</li>
+ *   <li>holds a cursor pointing to the most recently processed clause update</li>
+ * </ul>
+ */
 public class ClauseCoordinator implements AutoCloseable {
 
   private final Path tempDir;
