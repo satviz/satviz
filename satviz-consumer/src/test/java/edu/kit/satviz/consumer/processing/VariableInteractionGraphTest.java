@@ -29,16 +29,14 @@ class VariableInteractionGraphTest {
    * d -1 -2  3 0
    * d -1 -3 -4 0
    * d -1  2  4 0
-   *          2 0
-   *            0</pre>
+   *          2 0</pre>
    */
   private static final ClauseUpdate[] clauseUpdates = new ClauseUpdate[] {
           new ClauseUpdate(new Clause(new int[]{-1}), ClauseUpdate.Type.ADD),
           new ClauseUpdate(new Clause(new int[]{-1, -2, 3}), ClauseUpdate.Type.REMOVE),
           new ClauseUpdate(new Clause(new int[]{-1, -3, -4}), ClauseUpdate.Type.REMOVE),
           new ClauseUpdate(new Clause(new int[]{-1, 2, 4}), ClauseUpdate.Type.ADD),
-          new ClauseUpdate(new Clause(new int[]{2}), ClauseUpdate.Type.ADD),
-          new ClauseUpdate(new Clause(new int[]{}), ClauseUpdate.Type.ADD),
+          new ClauseUpdate(new Clause(new int[]{2}), ClauseUpdate.Type.ADD)
   };
 
   private static final Map<WeightFactor, WeightUpdate> WEIGHT_UPDATES = new HashMap<>();
