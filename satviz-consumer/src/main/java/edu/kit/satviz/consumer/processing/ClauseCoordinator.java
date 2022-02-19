@@ -43,6 +43,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ClauseCoordinator implements AutoCloseable {
 
+  private static final String INVALID_CLAUSE_UPDATE = " is invalid.";
+
   private final Path tempDir;
   private final Path snapshotDir;
   private final TreeMap<Long, Snapshot> snapshots;
@@ -273,7 +275,7 @@ public class ClauseCoordinator implements AutoCloseable {
       buffer.addClauseUpdate(clauseUpdate);
       changeListener.run();
     } else {
-      // TODO: 15.02.2022 pls implement error handling!
+      throw new IllegalArgumentException(clauseUpdate + INVALID_CLAUSE_UPDATE);
     }
   }
 
