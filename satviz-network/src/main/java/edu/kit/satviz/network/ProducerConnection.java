@@ -5,6 +5,7 @@ import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -20,6 +21,8 @@ public class ProducerConnection {
   private volatile boolean startReceived = false;
   private volatile boolean stopReceived = false;
   private ProducerConnectionListener ls = null;
+  private boolean onConnectSent = false;
+  private boolean onDisconnectSent = false;
 
   /**
    * Creates a new producer connection that connects to the specified address and port.
@@ -38,17 +41,14 @@ public class ProducerConnection {
    * Calling this method more than once has no effect.
    *
    * @param pid the ID that is sent to the client. The address is ignored.
-   * @return whether this was the first time calling this method or not
    */
-  public boolean establish(ProducerId pid) {
-    synchronized (conman) {
+  public void establish(ProducerId pid) {
+    synchronized (this) {
       if (this.pid == null) {
-        this.pid = pid;
+        this.pid = Objects.requireNonNull(pid);
         conman.registerConnect(this::connectListener);
         conman.start();
-        return true;
       }
-      return false;
     }
   }
 
@@ -60,7 +60,7 @@ public class ProducerConnection {
     try {
       conman.send(cid, type, obj);
     } catch (IOException e) {
-      conman.stop(); // globally terminate
+      close("send error");
     }
   }
 
@@ -70,7 +70,7 @@ public class ProducerConnection {
     } catch (IllegalStateException | IOException e) {
       // nothing more we can do
     }
-    conman.stop(); // globally terminate
+    close("term");
   }
 
   /**
@@ -113,9 +113,9 @@ public class ProducerConnection {
   }
 
   /**
-   * Stops this connection.
-   * This method has to be called after working with this connection is done.
-   * Otherwise, some threads may not safely exit.
+   * Waits for the network thread to exit (optional).
+   * Only call this if you have called either <code>terminateSolved</code>,
+   *     <code>terminateRefuted</code>, or <code>terminateFailed</code>.
    *
    * @throws InterruptedException if this thread is interrupted waiting on others
    */
@@ -123,13 +123,23 @@ public class ProducerConnection {
     conman.finishStop();
   }
 
+  private void close(String reason) {
+    conman.stop();
+    callOnDisconnect(reason);
+  }
+
   /**
    * Registers a listener to listen on this connection.
+   * The listener cannot be changed after it has been assigned.
    *
    * @param ls the listener
    */
   public void register(ProducerConnectionListener ls) {
-    this.ls = ls;
+    synchronized (this) {
+      if (this.ls == null) {
+        this.ls = ls;
+      }
+    }
   }
 
   /**
@@ -163,13 +173,21 @@ public class ProducerConnection {
   }
 
   private void callOnConnect() {
-    if (ls != null) {
+    synchronized (this) {
+      if (onConnectSent || ls == null) {
+        return;
+      }
+      onConnectSent = true;
       ls.onConnect();
     }
   }
 
   private void callOnDisconnect(String reason) {
-    if (ls != null) {
+    synchronized (this) {
+      if (onDisconnectSent || ls == null) {
+        return;
+      }
+      onDisconnectSent = true;
       ls.onDisconnect(reason);
     }
   }
@@ -185,21 +203,18 @@ public class ProducerConnection {
           }
           case MessageTypes.STOP -> {
             stopReceived = true;
-            conman.stop();
-            callOnDisconnect("stop");
+            close("stop");
           }
           default -> { /* ignore */ }
         }
         break;
       case TERM:
         stopReceived = true;
-        conman.stop();
-        callOnDisconnect("term");
+        close("term");
         break;
       case FAIL:
         stopReceived = true;
-        conman.stop();
-        callOnDisconnect("fail");
+        close("fail");
         break;
       default:
         // ignore

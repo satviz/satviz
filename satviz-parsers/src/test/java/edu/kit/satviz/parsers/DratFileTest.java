@@ -34,7 +34,7 @@ class DratFileTest {
   void iterator_valid_test() {
     DratFile dratFile = new DratFile(example4FileStream);
     Iterator<ClauseUpdate> iterator = dratFile.iterator();
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 5; i++) {
       assertTrue(iterator.hasNext());
       assertEquals(example4Updates[i], iterator.next());
     }
@@ -48,7 +48,6 @@ class DratFileTest {
     int removeClauseCounter = 0;
     DratFile dratFile = new DratFile(example5FileStream);
     for (ClauseUpdate update : dratFile) {
-      System.out.println(update);
       if (update.type() == ClauseUpdate.Type.ADD) {
         addClauseCounter++;
       } else if (update.type() == ClauseUpdate.Type.REMOVE) {
@@ -59,7 +58,7 @@ class DratFileTest {
     }
     assertFalse(dratFile.iterator().hasNext());
     assertThrows(NoSuchElementException.class, dratFile.iterator()::next);
-    assertEquals(7, addClauseCounter);
+    assertEquals(6, addClauseCounter);
     assertEquals(6, removeClauseCounter);
   }
 

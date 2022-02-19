@@ -71,7 +71,7 @@ public abstract class AbstractConnectionManager {
       }
       processTerminateGlobal(abnormal, reason);
 
-      if (state == State.FAILED && lsFail != null) {
+      if (abnormal) {
         callFail(reason);
       }
     }

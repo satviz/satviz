@@ -133,7 +133,7 @@ class DimacsFileTest {
     Iterator<ClauseUpdate> iterator = dimacsFile.iterator();
     assertTrue(iterator.hasNext());
     iterator.next();
-    assertFalse(iterator.hasNext());
+    assertThrows(ParsingException.class, iterator::hasNext);
     assertThrows(ParsingException.class, iterator::next);
   }
 
@@ -149,7 +149,7 @@ class DimacsFileTest {
     assertTrue(iterator.hasNext());
     iterator.next();
     assertThrows(ParsingException.class, iterator::next);
-    assertFalse(iterator.hasNext());
+    assertThrows(ParsingException.class, iterator::hasNext);
   }
 
   /**
@@ -160,7 +160,8 @@ class DimacsFileTest {
     DimacsFile dimacsFile = new DimacsFile(invalidFileStream3);
     Iterator<ClauseUpdate> iterator = dimacsFile.iterator();
     assertThrows(ParsingException.class, iterator::next);
-    assertFalse(iterator.hasNext());
+    assertThrows(ParsingException.class, iterator::hasNext);
+    assertThrows(ParsingException.class, iterator::hasNext);
   }
 
 }
