@@ -33,14 +33,12 @@ public class Mediator implements ConsumerConnectionListener {
   private volatile int clausesPerAdvance;
   private volatile long period;
 
-  public Mediator(
+  private Mediator(
       Graph graph,
       VideoController controller,
       ClauseCoordinator coordinator,
       Heatmap heatmap,
       VariableInteractionGraph vig,
-      int clausesPerAdvance,
-      long period,
       ConsumerConfig config
   ) {
     this.graph = graph;
@@ -54,8 +52,8 @@ public class Mediator implements ConsumerConnectionListener {
     this.recordingPaused = false;
     this.advanceScheduler = Executors.newSingleThreadScheduledExecutor();
     this.currentTask = null;
-    this.clausesPerAdvance = clausesPerAdvance;
-    this.period = period;
+    this.clausesPerAdvance = config.getBufferSize();
+    this.period = config.getPeriod();
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -216,6 +214,56 @@ public class Mediator implements ConsumerConnectionListener {
       coordinator.advanceVisualization(updateAmount);
     } catch (IOException | SerializationException e) { // TODO: 19/02/2022
       throw new RuntimeException(e);
+    }
+  }
+
+  public static class MediatorBuilder {
+    private Graph graph;
+    private VideoController controller;
+    private ClauseCoordinator coordinator;
+    private Heatmap heatmap;
+    private VariableInteractionGraph vig;
+    private ConsumerConfig config;
+
+    public MediatorBuilder setGraph(Graph graph) {
+      this.graph = graph;
+      return this;
+    }
+
+    public MediatorBuilder setController(VideoController controller) {
+      this.controller = controller;
+      return this;
+    }
+
+    public MediatorBuilder setCoordinator(ClauseCoordinator coordinator) {
+      this.coordinator = coordinator;
+      return this;
+    }
+
+    public MediatorBuilder setHeatmap(Heatmap heatmap) {
+      this.heatmap = heatmap;
+      return this;
+    }
+
+    public MediatorBuilder setVig(VariableInteractionGraph vig) {
+      this.vig = vig;
+      return this;
+    }
+
+    public MediatorBuilder setConfig(ConsumerConfig config) {
+      this.config = config;
+      return this;
+    }
+
+    public Mediator createMediator() {
+      return new Mediator(
+          graph,
+          controller,
+          coordinator,
+          heatmap,
+          vig,
+          config
+      );
     }
   }
 
