@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+set(SATVIZ_COMPILER_WARNINGS -Wall -Wextra -Wconversion -pedantic)
+
 #find_package(OGDF CONFIG)
 #if(NOT OGDF_FOUND)
 #  message(FATAL_ERROR "No OGDF configuration for CMake has been found.")

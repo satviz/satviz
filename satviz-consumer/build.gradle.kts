@@ -8,13 +8,14 @@ dependencies {
     implementation(project(":satviz-network"))
     implementation(project(":satviz-serial"))
     implementation(project(":satviz-sat"))
-    implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
     implementation(project(":satviz-parsers"))
 }
 
 javafx {
     modules("javafx.controls", "javafx.fxml")
+    version = "17"
 }
 
 val nativeBuildDir = project.buildDir.resolve("cmake-build")
@@ -33,7 +34,7 @@ tasks {
             nativeBuildDir.mkdir()
         }
         workingDir = nativeBuildDir
-        commandLine = listOf("cmake", "../../..")
+        commandLine = listOf("cmake", "../../..", "-DCMAKE_BUILD_TYPE=Debug")
     }
 
     register<Exec>("ctest") {
@@ -59,5 +60,11 @@ tasks {
 
     test {
         dependsOn.add("ctest")
+        jvmArgs = listOf("--add-modules", "jdk.incubator.foreign",
+            "--enable-native-access=edu.kit.satviz.consumer")
+    }
+
+    compileTestJava {
+        options.compilerArgs = listOf("--add-modules", "jdk.incubator.foreign")
     }
 }

@@ -2,29 +2,90 @@
 #include <satviz/GraphObserver.hpp>
 
 #include <ogdf/energybased/FMMMLayout.h>
+#include <ogdf/fileformats/GraphIO.h>
+
+#include <algorithm>
 
 namespace satviz {
 namespace graph {
 
-Graph::Graph(size_t num_nodes)
-  : graph(), attrs(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics) {
-  for (size_t i = 0; i < num_nodes; i++) {
-    graph.newNode();
+void Graph::initAttrs() {
+  using GA = ogdf::GraphAttributes;
+  attrs.init(graph, GA::nodeGraphics | GA::nodeWeight | GA::edgeGraphics | GA::edgeDoubleWeight);
+  attrs.directed() = false;
+}
+
+void Graph::initNodeHandles() {
+  node_handles.resize(graph.numberOfNodes(), nullptr);
+  for (auto v = graph.firstNode(); v != nullptr; v = v->succ()) {
+    node_handles[v->index()] = v;
   }
 }
 
-Graph::Graph(ogdf::Graph &graphToCopy)
-    : graph(graphToCopy), attrs(graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics) {
+Graph::Graph(size_t num_nodes) {
+  for (size_t i = 0; i < num_nodes; i++) {
+    graph.newNode();
+  }
+  initAttrs();
+  initNodeHandles();
+}
+
+Graph::Graph(ogdf::Graph &graphToCopy) {
+  graph = graphToCopy;
+  initAttrs();
+  initNodeHandles();
+}
+
+void Graph::addObserver(GraphObserver *o) {
+  observers.push_back(o);
+}
+
+void Graph::removeObserver(GraphObserver *o) {
+  auto pos = std::find(observers.begin(), observers.end(), o);
+  if (pos != observers.end()) {
+    observers.erase(pos);
+  }
 }
 
 void Graph::submitWeightUpdate(WeightUpdate &update) {
-  // TODO stub
-  (void) update;
+  for (auto row : update.values) {
+    auto v = node_handles[std::get<0>(row)];
+    auto w = node_handles[std::get<1>(row)];
+    auto e = graph.searchEdge(v, w, false);
+    if (e != nullptr && std::get<2>(row) == 0.0f) {
+      for (auto o : observers) {
+        o->onEdgeDeleted(e);
+      }
+      graph.delEdge(e);
+      continue;
+    }
+    if (e == nullptr) {
+      if (std::get<2>(row) != 0.0f) {
+        e = graph.newEdge(v, w);
+        for (auto o: observers) {
+          o->onEdgeAdded(e);
+        }
+      } else {
+        continue;
+      }
+    }
+    attrs.doubleWeight(e) = std::get<2>(row);
+  }
+
+  for (auto o : observers) {
+    o->onWeightUpdate(update);
+  }
 }
 
 void Graph::submitHeatUpdate(HeatUpdate &update) {
-  // TODO stub
-  (void) update;
+  for (auto row : update.values) {
+    auto v = node_handles[std::get<0>(row)];
+    attrs.weight(v) = std::get<1>(row);
+  }
+
+  for (auto o : observers) {
+    o->onHeatUpdate(update);
+  }
 }
 
 void Graph::recalculateLayout() {
@@ -46,29 +107,41 @@ void Graph::adaptLayout() {
   // TODO stub
 }
 
-std::stringbuf Graph::serialize() {
-  // TODO stub
-  std::stringbuf buf;
-  return buf;
+void Graph::serialize(std::ostream &stream) {
+  ogdf::GraphIO::writeGDF(attrs, stream);
 }
 
-void Graph::deserialize(std::stringbuf &buf) {
-  // TODO stub
-  (void) buf;
+void Graph::deserialize(std::istream &stream) {
+  ogdf::GraphIO::readGDF(attrs, graph, stream);
+  initNodeHandles();
+
+  for (auto o : observers) {
+    o->onReload();
+  }
 }
 
 NodeInfo Graph::queryNode(int index) {
-  // TODO stub
-  (void) index;
-  NodeInfo info = { 0, 0, 0.0f, 0.0f };
+  // TODO error handling
+  ogdf::node v = node_handles[index];
+
+  NodeInfo info;
+  info.index = index;
+  info.heat  = attrs.weight(v);
+  info.x     = (float) attrs.x(v);
+  info.y     = (float) attrs.y(v);
   return info;
 }
 
 EdgeInfo Graph::queryEdge(int index1, int index2) {
-  // TODO stub
-  (void) index1;
-  (void) index2;
-  EdgeInfo info = { 0, 0, 0.0f };
+  // TODO error handling
+  ogdf::node v = node_handles[index1];
+  ogdf::node w = node_handles[index2];
+  ogdf::edge e = graph.searchEdge(v, w, false);
+
+  EdgeInfo info;
+  info.index1 = index1;
+  info.index2 = index2;
+  info.weight = (float) attrs.doubleWeight(e);
   return info;
 }
 

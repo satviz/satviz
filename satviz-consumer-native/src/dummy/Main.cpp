@@ -14,7 +14,7 @@ int main() {
   das.callAndReverse(ogdfGraph);
 
   graph::Graph graph(ogdfGraph);
-  video::Display *display = new video::OnscreenDisplay(640, 480);
+  video::Display *display = new video::OnscreenDisplay(639, 469);
   video::VideoController controller(graph, display);
   graph.recalculateLayout();
   while (!controller.wantToClose) {
