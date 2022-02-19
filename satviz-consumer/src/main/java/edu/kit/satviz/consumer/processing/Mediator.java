@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.processing;
 
+import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
@@ -9,12 +10,10 @@ import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import edu.kit.satviz.serial.SerializationException;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import javafx.scene.paint.Color;
 
 public class Mediator implements ConsumerConnectionListener {
@@ -24,13 +23,13 @@ public class Mediator implements ConsumerConnectionListener {
   private final ClauseCoordinator coordinator;
   private final Heatmap heatmap;
   private final VariableInteractionGraph vig;
+  private final ConsumerConfig config;
+  private final ScheduledExecutorService advanceScheduler;
 
   private boolean recording;
   private boolean recordingPaused;
-
-  private final ScheduledExecutorService advanceScheduler;
   private ScheduledFuture<?> currentTask;
-  private volatile boolean stop;
+  private int recordedVideos;
   private volatile int clausesPerAdvance;
   private volatile long period;
 
@@ -41,14 +40,17 @@ public class Mediator implements ConsumerConnectionListener {
       Heatmap heatmap,
       VariableInteractionGraph vig,
       int clausesPerAdvance,
-      long period
+      long period,
+      ConsumerConfig config
   ) {
     this.graph = graph;
     this.videoController = controller;
     this.coordinator = coordinator;
     this.heatmap = heatmap;
     this.vig = vig;
+    this.config = config;
     this.recording = false;
+    this.recordedVideos = 0;
     this.recordingPaused = false;
     this.advanceScheduler = Executors.newSingleThreadScheduledExecutor();
     this.currentTask = null;
@@ -67,11 +69,11 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void updateHeatmapColdColor(Color color) {
-
+    // TODO: 19/02/2022
   }
 
   public void updateHeatmapHotColor(Color color) {
-
+    // TODO: 19/02/2022
   }
 
   public void setPeriod(long period) {
@@ -91,15 +93,15 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void highlightVariable(int variable) {
-
+    // TODO: 19/02/2022
   }
 
   public void clearHighlightVariable() {
-
+    // TODO: 19/02/2022
   }
 
   public void screenshot() {
-
+    // TODO: 19/02/2022
   }
 
   public void startOrStopRecording() {
@@ -109,8 +111,13 @@ public class Mediator implements ConsumerConnectionListener {
       }
       videoController.finishRecording();
     } else {
-      videoController.startRecording(null, null); // TODO: 10/02/2022
+      videoController.startRecording(
+          config.getVideoTemplatePath().replace("{}", String.valueOf(++recordedVideos)),
+          "theora"
+      );
     }
+    recordingPaused = false;
+    recording = !recording;
   }
 
   public void pauseOrContinueRecording() {
@@ -120,6 +127,7 @@ public class Mediator implements ConsumerConnectionListener {
       } else {
         videoController.stopRecording();
       }
+      recordingPaused = !recordingPaused;
     }
   }
 
@@ -146,6 +154,7 @@ public class Mediator implements ConsumerConnectionListener {
       coordinator.seekToUpdate(index);
     } catch (IOException | SerializationException e) { // TODO: 10/02/2022
       e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
@@ -162,17 +171,16 @@ public class Mediator implements ConsumerConnectionListener {
       coordinator.close();
     } catch (IOException e) { // TODO: 10/02/2022
       e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
   private void periodicallyAdvance() {
-    if (!stop) {
-      try {
-        coordinator.advanceVisualization(clausesPerAdvance);
-      } catch (IOException | SerializationException e) {
-        e.printStackTrace();
-        stop = true;
-      }
+    try {
+      coordinator.advanceVisualization(clausesPerAdvance);
+    } catch (IOException | SerializationException e) {
+      e.printStackTrace();
+      currentTask.cancel(false);
     }
   }
 
@@ -182,24 +190,22 @@ public class Mediator implements ConsumerConnectionListener {
       coordinator.addClauseUpdate(c);
     } catch (IOException e) { // TODO: 10/02/2022
       e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
   @Override
   public void onTerminateSolved(ProducerId pid, SatAssignment sol) {
-    stop = true;
     advanceRestAndShutdown();
   }
 
   @Override
   public void onTerminateRefuted(ProducerId pid) {
-    stop = true;
     advanceRestAndShutdown();
   }
 
   @Override
   public void onTerminateFailed(ProducerId pid, String reason) {
-    stop = true;
     advanceRestAndShutdown();
   }
 
@@ -208,8 +214,8 @@ public class Mediator implements ConsumerConnectionListener {
     int updateAmount = (int) (coordinator.totalUpdateCount() - coordinator.currentUpdate());
     try {
       coordinator.advanceVisualization(updateAmount);
-    } catch (IOException | SerializationException e) {
-      e.printStackTrace();
+    } catch (IOException | SerializationException e) { // TODO: 19/02/2022
+      throw new RuntimeException(e);
     }
   }
 
