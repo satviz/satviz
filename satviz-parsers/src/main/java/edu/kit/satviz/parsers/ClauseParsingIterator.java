@@ -30,6 +30,8 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
   private boolean isDone = false;
   private boolean isInvalidFile = false;
 
+  private boolean isFinalUpdateIncluded = false;
+
   /**
    * This constructor creates an instance of the <code>ClauseParsingIterator</code> class.
    *
@@ -80,6 +82,31 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
     return getNextUpdate();
   }
 
+  /**
+   * This method sets the final clause update to be included, if <i>true</i> is entered,
+   * and excluded, if <i>false</i> is entered. By default, it's <b>excluded</b>.<br>
+   * <br>
+   * The final update can be specified by the subclass with the <code>isFinalClauseUpdate()</code>
+   * method.
+   *
+   * @param isIncluded Set to <i>true</i>, if the final clause update should be included,
+   *                   to <i>false</i>, if not.
+   */
+  public void setFinalClauseUpdateIncluded(boolean isIncluded) {
+    isFinalUpdateIncluded = isIncluded;
+  }
+
+  /**
+   * This getter-method returns, whether the final clause update is included.
+   * By default, it is not.
+   *
+   * @return <i>true</i>, if the final clause update is included,<br>
+   *         <i>false</i>, if not.
+   */
+  public boolean isFinalUpdateIncluded() {
+    return isFinalUpdateIncluded;
+  }
+
   private ClauseUpdate getNextUpdate() {
     skipCommentLines();
     final ClauseUpdate.Type type = readType();
@@ -89,6 +116,9 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
       throwParsingException(UNEXPECTED_CLAUSE_MESSAGE);
     } else if (isFinalClauseUpdate(clauseUpdate)) {
       isDone = true;
+      if (!isFinalUpdateIncluded) {
+        throw new NoSuchElementException(NO_CLAUSES_LEFT_MESSAGE);
+      }
     }
     return clauseUpdate;
   }
