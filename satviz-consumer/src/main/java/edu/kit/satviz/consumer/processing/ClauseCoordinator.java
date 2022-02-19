@@ -6,6 +6,7 @@ import edu.kit.satviz.serial.SerializationException;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,8 +27,19 @@ import java.util.concurrent.locks.ReentrantLock;
  * <ul>
  *   <li>stores clause updates sequentially in an {@link ExternalClauseBuffer}</li>
  *   <li>manages snapshots of {@link ClauseUpdateProcessor}s and {@link Graph}s</li>
+ *   <li>calls registered {@link ClauseUpdateProcessor}s when visualization is advanced</li>
  *   <li>holds a cursor pointing to the most recently processed clause update</li>
  * </ul>
+ *
+ * <p><strong>Snapshots</strong> can be created via {@link #takeSnapshot()}, which will serialise
+ * the current state of the graph and the currently registered {@link ClauseUpdateProcessor}s
+ * to a temporary file. When {@link #seekToUpdate(long)} is used, the snapshot closest to the
+ * desired index will be deserialised and loaded.
+ *
+ * <p>Instances of this class hold closeable resources. It should therefore be ensured that
+ * {@code ClauseCoordinator}s are {@link #close() closed} after usage.
+ *
+ * <p>This class is thread safe.
  */
 public class ClauseCoordinator implements AutoCloseable {
 
@@ -55,6 +67,14 @@ public class ClauseCoordinator implements AutoCloseable {
 
   private final int variableAmount;
 
+  /**
+   * Create a new {@code ClauseCoordinator}.
+   *
+   * @param graph The underlying graph
+   * @param tempDir The directory where the internal files used by this class will be stored.
+   * @param variableAmount The amount of variables in the corresponding SAT instance.
+   * @throws IOException If there is an I/O error while setting up the internal files
+   */
   public ClauseCoordinator(Graph graph, Path tempDir, int variableAmount) throws IOException {
     this.graph = graph;
     this.tempDir = tempDir;
@@ -76,6 +96,11 @@ public class ClauseCoordinator implements AutoCloseable {
     takeSnapshot();
   }
 
+  /**
+   * Add a {@link ClauseUpdateProcessor} to the list of processors that will work on clause updates.
+   *
+   * @param processor The processor to add.
+   */
   public void addProcessor(ClauseUpdateProcessor processor) {
     processorLock.lock();
     try {
@@ -85,6 +110,19 @@ public class ClauseCoordinator implements AutoCloseable {
     }
   }
 
+  /**
+   * Advances the internal cursor by {@code numUpdates} clause updates, calling the registered
+   * processors in the process.
+   *
+   * <p>If {@code numUpdates} is higher than the amount of currently remaining updates available,
+   * this method will advance the highest amount of updates possible.
+   *
+   * @param numUpdates The amount of updates to process. This is a no-op if {@code numUpdates < 1}.
+   * @throws IOException If an I/O error occurs.
+   * @throws SerializationException If the updates can't be deserialised from the external buffer.
+   *                                This may only happen as a result of external interference with
+   *                                the internal files used by this object.
+   */
   public void advanceVisualization(int numUpdates)
       throws IOException, SerializationException {
     // to prevent alien call processor.process from looping back
@@ -94,14 +132,48 @@ public class ClauseCoordinator implements AutoCloseable {
     advance(numUpdates);
   }
 
+  /**
+   * Returns the cursor of this coordinator.
+   *
+   * @return The index of the update up to which this coordinator has advanced.
+   */
   public long currentUpdate() {
     return currentUpdate;
   }
 
+  /**
+   * The total amount of clause updates added to this coordinator.
+   *
+   * @return how many updates have been added via {@link #addClauseUpdate(ClauseUpdate)}.
+   */
   public long totalUpdateCount() {
     return buffer.size();
   }
 
+  /**
+   * Resets the internal cursor to an update at a specific index.
+   *
+   * <p>This will do the following:
+   * <ol>
+   *   <li>Find the snapshot that is closest to, but not newer than {@code index}</li>
+   *   <li>Load the snapshot, i.e. deserialise the {@link Graph} state and:
+   *   <ul>
+   *     <li>{@link ClauseUpdateProcessor#deserialize(InputStream) Deserialise} the processors
+   *     that were registered at the time of the snapshot</li>
+   *     <li>{@link ClauseUpdateProcessor#reset() Reset} the processors that were <em>not</em>
+   *     registered at the time of the snapshot but that <em>are</em> registered <em>now</em></li>
+   *   </ul>
+   *   </li>
+   *   <li>Advance the remaining number of clause updates to get to the desired {@code index},
+   *   as per {@link #advanceVisualization(int)}</li>
+   * </ol>
+   *
+   * @param index The index of the clause update to seek to.
+   * @throws IOException If an I/O error occurs
+   * @throws SerializationException If deserialisation fails. This can only happen realistically
+   *                                if the internal files of this processor have been subject to
+   *                                external interference.
+   */
   public void seekToUpdate(long index) throws IOException, SerializationException {
     if (index < 0) {
       throw new IllegalArgumentException("Index must not be negative: " + index);
@@ -152,6 +224,12 @@ public class ClauseCoordinator implements AutoCloseable {
     return true;
   }
 
+  /**
+   * Take a snapshot at the {@link #currentUpdate() current update}.<br>
+   * This will serialise the underlying {@link Graph} and registered {@link ClauseUpdateProcessor}s.
+   *
+   * @throws IOException If an I/O error occurs
+   */
   public void takeSnapshot() throws IOException {
     // prevent alien calls from looping back
     if (snapshotLock.isHeldByCurrentThread()) {
@@ -189,6 +267,12 @@ public class ClauseCoordinator implements AutoCloseable {
 
   }
 
+  /**
+   * Append a clause update to this coordinator.
+   *
+   * @param clauseUpdate the update to add
+   * @throws IOException if an I/O error occurs
+   */
   public void addClauseUpdate(ClauseUpdate clauseUpdate) throws IOException {
     if (isValidClauseUpdate(clauseUpdate)) {
       buffer.addClauseUpdate(clauseUpdate);
@@ -198,6 +282,15 @@ public class ClauseCoordinator implements AutoCloseable {
     }
   }
 
+  /**
+   * Register a {@code Runnable} that will be called whenever one of the following values change:
+   * <ul>
+   *   <li>{@link #currentUpdate()}</li>
+   *   <li>{@link #totalUpdateCount()}</li>
+   * </ul>.
+   *
+   * @param action The action to run.
+   */
   public void registerChangeListener(Runnable action) {
     changeListener = Objects.requireNonNull(action);
   }
