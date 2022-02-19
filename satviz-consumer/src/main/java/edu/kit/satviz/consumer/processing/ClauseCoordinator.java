@@ -207,7 +207,7 @@ public class ClauseCoordinator implements AutoCloseable {
     try {
       ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
       for (ClauseUpdateProcessor processor : processors) {
-        processor.process(updates, graph);
+        graph.submitUpdate(processor.process(updates, graph));
       }
       // this operation is not atomic although currentUpdate is volatile.
       // However, this is no problem because write access to currentUpdate is always coordinated
