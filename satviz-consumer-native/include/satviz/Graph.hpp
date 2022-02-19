@@ -5,6 +5,7 @@
 #include <tuple>
 #include <iostream>
 
+#include <satviz/info.h>
 #include <ogdf/basic/Graph.h>
 #include <ogdf/basic/GraphAttributes.h>
 
@@ -13,25 +14,18 @@ namespace graph {
 
 class GraphObserver;
 
-struct NodeInfo {
-  int index;
-  int heat;
-  float x;
-  float y;
-};
-
-struct EdgeInfo {
-  int index1;
-  int index2;
-  float weight;
-};
-
 struct WeightUpdate {
   std::vector<std::tuple<int, int, float> > values;
+
+  WeightUpdate() = default;
+  explicit WeightUpdate(size_t n) : values(n) {}
 };
 
 struct HeatUpdate {
   std::vector<std::tuple<int, int> > values;
+
+  HeatUpdate() = default;
+  explicit HeatUpdate(size_t n) : values(n) {}
 };
 
 /**

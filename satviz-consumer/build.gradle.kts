@@ -34,7 +34,7 @@ tasks {
             nativeBuildDir.mkdir()
         }
         workingDir = nativeBuildDir
-        commandLine = listOf("cmake", "../../..")
+        commandLine = listOf("cmake", "../../..", "-DCMAKE_BUILD_TYPE=Debug")
     }
 
     register<Exec>("ctest") {
@@ -60,5 +60,11 @@ tasks {
 
     test {
         dependsOn.add("ctest")
+        jvmArgs = listOf("--add-modules", "jdk.incubator.foreign",
+            "--enable-native-access=edu.kit.satviz.consumer")
+    }
+
+    compileTestJava {
+        options.compilerArgs = listOf("--add-modules", "jdk.incubator.foreign")
     }
 }
