@@ -130,6 +130,7 @@ public class ClauseCoordinator implements AutoCloseable {
       return;
     }
     advance(numUpdates);
+    changeListener.run();
   }
 
   /**
@@ -183,23 +184,20 @@ public class ClauseCoordinator implements AutoCloseable {
       return;
     }
 
-    boolean hasAdvanced;
     stateLock.lock();
     try {
       long closestSnapshotIndex = loadClosestSnapshot(index);
       currentUpdate = closestSnapshotIndex;
-      hasAdvanced = advance((int) (index - closestSnapshotIndex));
+      advance((int) (index - closestSnapshotIndex));
     } finally {
       stateLock.unlock();
     }
-    if (!hasAdvanced) {
-      changeListener.run();
-    }
+    changeListener.run();
   }
 
-  private boolean advance(int numUpdates) throws SerializationException, IOException {
+  private void advance(int numUpdates) throws SerializationException, IOException {
     if (numUpdates < 1) {
-      return false;
+      return;
     }
 
     // the state needs to be locked to synchronise advancements.
@@ -219,9 +217,6 @@ public class ClauseCoordinator implements AutoCloseable {
       stateLock.unlock();
       snapshotLock.unlock();
     }
-    // the change listener may run concurrently again
-    changeListener.run();
-    return true;
   }
 
   /**
