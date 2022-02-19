@@ -136,7 +136,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
       int actualNumUpdates = (int) Math.min(numUpdates, size - index);
       ClauseUpdate[] updates = new ClauseUpdate[actualNumUpdates];
       // TODO: 08/02/2022 pick strategy
-      readUpdatesBufferless(index, updates);
+      readUpdatesWithEphemeralBuffers(index, updates);
       return updates;
     } finally {
       readLock.unlock();
