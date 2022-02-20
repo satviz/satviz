@@ -157,7 +157,7 @@ class ClauseCoordinatorTest {
   // takeSnapshot
 
   @Test
-  void test_takeSnapshot_initialSnapshot() {
+  void test_takeSnapshot_initialSnapshot() throws IOException {
     verify(graph).serialize(any());
   }
 
