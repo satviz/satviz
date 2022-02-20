@@ -7,8 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * This interface allows for instances of the <code>ClauseUpdate</code> class to be
- * processed into <code>GraphUpdate</code>s.
+ * This interface allows for instances of the {@code ClauseUpdate} class to be
+ * processed into {@code GraphUpdate}s.
  */
 public interface ClauseUpdateProcessor {
 
