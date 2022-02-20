@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -143,7 +144,11 @@ class ClauseCoordinatorTest {
     assertEquals(clauseUpdates.length, changeListenerCallAmount.get());
   }
 
+
+  /* There is no guarantee that the listener will not be called if nothing has changed,
+     therefore there is nothing to assert in this case */
   @Test
+  @Disabled
   void test_registerChangeListener_advanceZero() throws SerializationException, IOException {
     coordinator.advanceVisualization(0);
     assertEquals(0, changeListenerCallAmount.get());

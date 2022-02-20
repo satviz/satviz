@@ -286,6 +286,10 @@ public class ClauseCoordinator implements AutoCloseable {
    *   <li>{@link #totalUpdateCount()}</li>
    * </ul>.
    *
+   * <p><strong>Note:</strong> If the above criteria is met, the listener is called, but not
+   * necessarily the other way around (the listener being called does not imply that something
+   * has changed).
+   *
    * @param action The action to run.
    */
   public void registerChangeListener(Runnable action) {
