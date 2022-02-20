@@ -5,6 +5,10 @@ import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.processing.Mediator;
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,6 +16,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
+import javafx.scene.paint.Color;
 
 public class VisualizationController {
 
@@ -19,6 +24,8 @@ public class VisualizationController {
 
   private static final int MIN_HIGHLIGHT_VARIABLE = 1;
   private static final int DEFAULT_HIGHLIGHT_VARIABLE = 1;
+  private static final String PLAY_SYMBOL = "▶";
+  private static final String PAUSE_SYMBOL = "⏸";
 
   // ATTRIBUTES (FXML)
 
@@ -53,10 +60,13 @@ public class VisualizationController {
 
   // ATTRIBUTES (OTHER)
 
-  private final int variableCount;
   private final Mediator mediator;
   private final ConsumerConfig config;
+  private final int variableCount;
 
+  private boolean recording;
+  private boolean recordingPaused;
+  private boolean visualizationRunning;
 
   // CONSTRUCTORS
 
@@ -86,6 +96,13 @@ public class VisualizationController {
         MIN_HIGHLIGHT_VARIABLE,
         variableCount,
         DEFAULT_HIGHLIGHT_VARIABLE);
+
+    recording = config.isRecordImmediately();
+    updateRecordingDisplay();
+    recordingPaused = false;
+    updateRecordingPausedDisplay();
+    visualizationRunning = true;
+    updateVisualizationRunningDisplay();
 
     long totalClausesReceived = mediator.numberOfUpdates();
     long currentClausesReceived = mediator.currentUpdate();
@@ -142,23 +159,33 @@ public class VisualizationController {
   }
 
   @FXML
-  private void openScreenShotFolder() {
-    // Desktop.getDesktop().open(new File("C:\\folder"));
+  private void openScreenshotFolder() {
+    try {
+      Desktop.getDesktop().open(new File(ConsumerConfig.DEFAULT_SCREENSHOT_FOLDER));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   @FXML
   private void startOrStopRecording() {
-
+    mediator.startOrStopRecording();
+    recording = !recording;
+    updateRecordingDisplay();
   }
 
   @FXML
   private void pauseOrContinueRecording() {
-
+    mediator.pauseOrContinueRecording();
+    recordingPaused = !recordingPaused;
+    updateRecordingPausedDisplay();
   }
 
   @FXML
   private void pauseOrContinueVisualization() {
-
+    mediator.pauseOrContinueVisualization();
+    visualizationRunning = !visualizationRunning;
+    updateVisualizationRunningDisplay();
   }
 
   @FXML
@@ -177,4 +204,28 @@ public class VisualizationController {
 
   }
 
+  private void updateRecordingDisplay() {
+    if (recording) {
+      startOrStopRecordingButton.setTextFill(Color.RED);
+    } else {
+      startOrStopRecordingButton.setTextFill(Color.BLACK);
+    }
+    pauseOrContinueRecordingButton.setDisable(!recording);
+  }
+
+  private void updateRecordingPausedDisplay() {
+    if (recordingPaused) {
+      pauseOrContinueRecordingButton.setText(PLAY_SYMBOL);
+    } else {
+      pauseOrContinueRecordingButton.setText(PAUSE_SYMBOL);
+    }
+  }
+
+  private void updateVisualizationRunningDisplay() {
+    if (visualizationRunning) {
+      pauseOrContinueVisualizationButton.setText(PAUSE_SYMBOL);
+    } else {
+      pauseOrContinueVisualizationButton.setText(PLAY_SYMBOL);
+    }
+  }
 }
