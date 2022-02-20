@@ -87,8 +87,8 @@ public class ExternalClauseBuffer implements AutoCloseable {
     outputLock.lock();
     try {
       clauseOutStream.write(bytes);
-      buf.putLong(nextClauseBegin);
       nextClauseBegin += bytes.length;
+      buf.putLong(nextClauseBegin);
       clauseLookupOutStream.write(buf.array());
       size++;
     } finally {
@@ -169,8 +169,8 @@ public class ExternalClauseBuffer implements AutoCloseable {
     clauseLookupReadFile.read(bytePositions);
     ByteBuffer buffer = ByteBuffer.wrap(bytePositions);
     for (int i = 1; i <= updates.length; i++) {
-      long beginningByte = buffer.getLong(i - 1);
-      long endingByte = buffer.getLong(i);
+      long beginningByte = buffer.getLong((i - 1) * Long.BYTES);
+      long endingByte = buffer.getLong(i * Long.BYTES);
       int clauseSize = (int) (endingByte - beginningByte);
       byte[] clauseBuf = new byte[clauseSize];
       clauseReadFile.seek(beginningByte);
