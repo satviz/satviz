@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * This class tests the functionality of the <code>SatAssignment</code> class.
- *
- * @author quorty
  */
 class SatAssignmentTest {
 

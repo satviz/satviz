@@ -5,8 +5,6 @@ import java.util.function.DoubleUnaryOperator;
 /**
  * This enum contains the possible weight factors, by which each clause
  * affects the corresponding edge weights in the graph.
- *
- * @author johnnyjayjay
  */
 public enum WeightFactor {
 

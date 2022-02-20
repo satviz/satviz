@@ -203,7 +203,7 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   @Override
-  public void onTerminateFailed(ProducerId pid, String reason) {
+  public void onTerminateOtherwise(ProducerId pid, String reason) {
     advanceRestAndShutdown();
   }
 

@@ -1,14 +1,18 @@
 package edu.kit.satviz.consumer.config;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.Objects;
 
 /**
  * This subclass of the ConsumerModeConfig class is used, when one decides
  * to use the consumer with an external producer.
- *
- * @author johnnyjayjay
  */
+@JsonTypeName("EXTERNAL")
 public class ExternalModeConfig extends ConsumerModeConfig {
+
+  public static final int MIN_PORT_NUMBER = 1;
+  public static final int MAX_PORT_NUMBER = 65535;
+  public static final int DEFAULT_PORT_NUMBER = 34321;
 
   private int port;
 
