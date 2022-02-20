@@ -8,6 +8,7 @@ module edu.kit.satviz.consumer {
   requires javafx.base;
   requires javafx.fxml;
   requires javafx.controls;
+  requires java.desktop;
   requires jdk.incubator.foreign;
 
   exports edu.kit.satviz.consumer.gui.config to javafx.graphics;
