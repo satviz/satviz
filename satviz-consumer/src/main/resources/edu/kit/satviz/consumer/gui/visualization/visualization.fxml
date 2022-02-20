@@ -34,7 +34,7 @@
                         <Font size="16.0" />
                      </font>
                   </Label>
-                  <ChoiceBox prefHeight="24.0" prefWidth="137.0" GridPane.columnIndex="1" fx:id="weightFactorChoiceBox"/>
+                  <ChoiceBox prefHeight="24.0" prefWidth="137.0" GridPane.columnIndex="1" fx:id="weightFactorChoiceBox" onAction="#updateWeightFactor"/>
                </children>
                <padding>
                   <Insets left="5.0" />
@@ -63,8 +63,8 @@
                      <children>
                         <Label text="Cold Color" GridPane.rowIndex="1" />
                         <Label text="Hot Color" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <ColorPicker prefHeight="24.0" prefWidth="120.0" GridPane.rowIndex="2" fx:id="coldColorColorPicker"/>
-                        <ColorPicker prefHeight="24.0" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="hotColorColorPicker"/>
+                        <ColorPicker prefHeight="24.0" prefWidth="120.0" GridPane.rowIndex="2" fx:id="coldColorColorPicker" onAction="#updateHeatmapColdColor"/>
+                        <ColorPicker prefHeight="24.0" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="hotColorColorPicker" onAction="#updateHeatmapHotColor"/>
                         <Label text="Window Size" />
                         <Spinner prefHeight="24.0" prefWidth="120.0" GridPane.columnIndex="1" fx:id="windowSizeSpinner"/>
                      </children>
@@ -94,7 +94,7 @@
                   <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
                      <children>
                          <Pane HBox.hgrow="ALWAYS" />
-                        <Button mnemonicParsing="false" text="Clear" fx:id="clearHighlightVariableButton">
+                        <Button mnemonicParsing="false" text="Clear" fx:id="clearHighlightVariableButton" onAction="#clearHighlightVariable">
                            <HBox.margin>
                               <Insets top="2.5" />
                            </HBox.margin></Button>
@@ -120,8 +120,8 @@
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Button mnemonicParsing="false" text="Screenshot" fx:id="screenshotButton"/>
-                  <Button mnemonicParsing="false" text="Open Screenshot Folder" GridPane.columnIndex="1" fx:id="openScreenshotFolderButton">
+                  <Button mnemonicParsing="false" text="Screenshot" fx:id="screenshotButton" onAction="#screenshot"/>
+                  <Button mnemonicParsing="false" text="Open Screenshot Folder" GridPane.columnIndex="1" fx:id="openScreenshotFolderButton" onAction="#openScreenshotFolder">
                      <font>
                         <Font size="10.0" />
                      </font>
@@ -140,12 +140,12 @@
                   </Label>
                   <HBox prefHeight="0.0" prefWidth="307.0">
                      <children>
-                        <Button mnemonicParsing="false" text="🔴" fx:id="startOrStopRecordingButton">
+                        <Button mnemonicParsing="false" text="🔴" fx:id="startOrStopRecordingButton" onAction="#startOrStopRecording">
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button disable="true" mnemonicParsing="false" text="⏸" fx:id="pauseOrContinueRecordingButton"/>
+                        <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="28.0" fx:id="pauseOrContinueRecordingButton" onAction="#pauseOrContinueRecording"/>
                      </children>
                   </HBox>
                </children>
@@ -162,7 +162,7 @@
                   </Label>
                      <HBox prefHeight="8.0" prefWidth="291.0" spacing="2.5">
                          <children>
-                             <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="28.0" text="⏸" fx:id="pauseOrContinueVisualizationButton"/>
+                             <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="28.0" fx:id="pauseOrContinueVisualizationButton" onAction="#pauseOrContinueVisualization"/>
                              <GridPane hgap="2.0" prefHeight="25.0" prefWidth="237.0">
                                  <columnConstraints>
                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="151.0" minWidth="10.0" prefWidth="114.0" />
@@ -176,7 +176,7 @@
                               <Spinner prefHeight="25.0" prefWidth="111.0" fx:id="receivedClausesSpinner"/>
                                  </children>
                              </GridPane>
-                             <Button mnemonicParsing="false" text="Re-layout" fx:id="relayoutButton"/>
+                             <Button mnemonicParsing="false" text="Re-layout" fx:id="relayoutButton" onAction="#relayout"/>
                          </children>
                          <VBox.margin>
                              <Insets top="5.0" />
