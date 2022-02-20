@@ -1,13 +1,18 @@
 package edu.kit.satviz.consumer.config;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Objects;
 
 /**
  * This abstract class allows for different configuration modes
  * with different options to be set exclusively.
- *
- * @author johnnyjayjay
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "mode")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = EmbeddedModeConfig.class, name = "EMBEDDED"),
+    @JsonSubTypes.Type(value = ExternalModeConfig.class, name = "EXTERNAL")
+})
 public abstract class ConsumerModeConfig {
 
   private ConsumerMode mode;

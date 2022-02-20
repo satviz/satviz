@@ -6,3 +6,9 @@ build
 
 .idea
 
+.ogdf-build
+
+# Ignore crash files
+core.*
+hs_err_pid*.log
+

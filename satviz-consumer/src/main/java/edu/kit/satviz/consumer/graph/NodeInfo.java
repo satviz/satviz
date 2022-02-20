@@ -1,41 +1,41 @@
 package edu.kit.satviz.consumer.graph;
 
-import edu.kit.satviz.consumer.bindings.NativeObject;
-import jdk.incubator.foreign.MemoryAddress;
+import edu.kit.satviz.consumer.bindings.Struct;
+import jdk.incubator.foreign.CLinker;
+import jdk.incubator.foreign.MemorySegment;
 
-public class NodeInfo extends NativeObject {
+/**
+ * A class that holds information about a node in a {@link Graph}.
+ *
+ * @param index The index of the node described.
+ * @param heat The heat value of the node.
+ * @param x The node's x position
+ * @param y The node's y position
+ */
+public record NodeInfo(int index, int heat, float x, float y) {
 
-  private final int index;
-  private final int heat;
-  private final float x;
-  private final float y;
+  public static final Struct STRUCT = Struct.builder()
+      .field("index", int.class, CLinker.C_INT)
+      .field("heat", int.class, CLinker.C_INT)
+      .field("x", float.class, CLinker.C_FLOAT)
+      .field("y", float.class, CLinker.C_FLOAT)
+      .build();
 
-  public NodeInfo(int index, int heat, float x, float y) {
-    super(MemoryAddress.NULL);
-    this.index = index;
-    this.heat = heat;
-    this.x = x;
-    this.y = y;
-  }
-
-  public int getIndex() {
-    return index;
-  }
-
-  public int getHeat() {
-    return heat;
-  }
-
-  public float getX() {
-    return x;
-  }
-
-  public float getY() {
-    return y;
-  }
-
-  @Override
-  public void close() {
-
+  /**
+   * Create a {@code NodeInfo} object from a {@code MemorySegment} containing a {@code NodeInfo}
+   * C struct.
+   *
+   * @apiNote The resulting object does not take ownership of the given segment,
+   *          it only reads it to initialise its fields. It is therefore still the
+   *          caller's responsibility to close the segment appropriately.
+   * @param segment the piece of memory holding the {@code NodeInfo} struct.
+   */
+  public NodeInfo(MemorySegment segment) {
+    this(
+        (int) STRUCT.varHandle("index").get(segment),
+        (int) STRUCT.varHandle("heat").get(segment),
+        (float) STRUCT.varHandle("x").get(segment),
+        (float) STRUCT.varHandle("y").get(segment)
+    );
   }
 }
