@@ -267,6 +267,8 @@ public class ClauseCoordinator implements AutoCloseable {
    *
    * @param clauseUpdate the update to add
    * @throws IOException if an I/O error occurs
+   * @throws IllegalArgumentException if the given clause update is
+   *                                  not valid for the underlying SAT instance
    */
   public void addClauseUpdate(ClauseUpdate clauseUpdate) throws IOException {
     if (isValidClauseUpdate(clauseUpdate)) {
