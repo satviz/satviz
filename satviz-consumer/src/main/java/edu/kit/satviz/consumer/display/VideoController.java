@@ -9,7 +9,6 @@ import java.lang.invoke.MethodType;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
-import jdk.incubator.foreign.MemoryHandles;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 import jdk.incubator.foreign.SegmentAllocator;
@@ -57,6 +56,18 @@ public class VideoController extends NativeObject {
 
   private static final MethodHandle FINISH_RECORDING = lookupFunction(
       "finish_recording",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
+  private static final MethodHandle NEXT_FRAME = lookupFunction(
+      "next_frame",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
+  private static final MethodHandle RELEASE_ENCODER = lookupFunction(
+      "release_encoder",
       MethodType.methodType(void.class, MemoryAddress.class),
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
@@ -163,6 +174,17 @@ public class VideoController extends NativeObject {
   }
 
   /**
+   * Progress to the next frame in the visualisation.
+   */
+  public void nextFrame() {
+    try {
+      NEXT_FRAME.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while progressing to next frame", e);
+    }
+  }
+
+  /**
    * Destroy the underlying resources.<br>
    * To clean up {@code VideoController} instances, you should generally
    * use {@link #close()} instead.
@@ -176,7 +198,11 @@ public class VideoController extends NativeObject {
   }
 
   private void freeEncoder() {
-    CLinker.freeMemory(currentEncoderAddr);
+    try {
+      RELEASE_ENCODER.invokeExact(currentEncoderAddr);
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while releasing encoder", e);
+    }
   }
 
   @Override
