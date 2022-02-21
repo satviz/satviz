@@ -45,7 +45,9 @@ public final class ConsumerApplication {
     Graph graph = Graph.create(variableAmount);
     VideoController videoController = VideoController.create(
         graph,
-        (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN
+        (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN,
+        100,
+        100
     );
     ClauseCoordinator coordinator = new ClauseCoordinator(graph, createTempDir());
     Heatmap heatmap = new Heatmap(); //
@@ -101,11 +103,6 @@ public final class ConsumerApplication {
       }
     }
     return connection;
-  }
-
-  private static ProducerId waitForFirstProducer(ConsumerConnectionListener connectionListener) {
-    // TODO: 16.02.2022
-    return null;
   }
 
   private static Path createTempDir() {
