@@ -61,6 +61,12 @@ public class VideoController extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
 
+  private static final MethodHandle NEXT_FRAME = lookupFunction(
+      "next_frame",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
   private static final Struct START_RECORDING_RESULT = Struct.builder()
       .field("encoder", long.class, CLinker.C_POINTER)
       .field("code", int.class, CLinker.C_INT)
@@ -159,6 +165,17 @@ public class VideoController extends NativeObject {
       freeEncoder();
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while finishing a recording", e);
+    }
+  }
+
+  /**
+   * Progress to the next frame in the visualisation.
+   */
+  public void nextFrame() {
+    try {
+      NEXT_FRAME.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while progressing to next frame", e);
     }
   }
 
