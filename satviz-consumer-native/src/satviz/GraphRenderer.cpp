@@ -153,8 +153,14 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
 }
 
 void GraphRenderer::onWeightUpdate(graph::WeightUpdate &update) {
-  (void) update;
-  // TODO update & use this attribute.
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_WEIGHT]);
+  unsigned char *area = (unsigned char *) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+  for (auto row : update.values) {
+    auto e = my_graph.getEdgeHandle(std::get<0>(row), std::get<1>(row));
+    int idx = edge_mapping[e];
+    area[idx] = (unsigned char) (std::get<2>(row) * 255.0f);
+  }
+  glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
@@ -165,7 +171,6 @@ void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
 void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
   float (*area)[2] = (float (*)[2]) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
-  // TODO proper mapping of nodes to indices!
   printf("onLayoutChange():\n");
   for (ogdf::node node : changed) {
     int idx = node->index();
@@ -223,7 +228,6 @@ void GraphRenderer::onEdgeAdded(ogdf::edge e) {
   }
   int offset = index * sizeof(unsigned[2]);
 
-  // TODO proper mapping of nodes to indices!
   std::array<ogdf::node, 2> nodes = e->nodes();
   int data[2] = { nodes[0]->index(), nodes[1]->index() };
 
@@ -252,8 +256,11 @@ void GraphRenderer::onReload() {
   for (auto edge : edges) {
     onEdgeDeleted(edge);
   }
+  //graph::WeightUpdate wu(my_graph.numEdges());
+  //int idx = 0;
   for (auto edge : edges) {
     onEdgeAdded(edge);
+    //wu.values[idx++] = std::make_tuple(edge->source()->index(), edge->target()->index(), );
   }
 }
 

@@ -141,6 +141,8 @@ public:
    * @return the y coordinate value
    */
   double getY(ogdf::node v) { return attrs.y(v); }
+
+  ogdf::edge getEdgeHandle(int index1, int index2);
 };
 
 } // namespace graph

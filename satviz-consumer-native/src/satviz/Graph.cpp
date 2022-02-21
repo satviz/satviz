@@ -145,5 +145,11 @@ EdgeInfo Graph::queryEdge(int index1, int index2) {
   return info;
 }
 
+ogdf::edge Graph::getEdgeHandle(int index1, int index2) {
+  auto v = node_handles[index1];
+  auto w = node_handles[index2];
+  return graph.searchEdge(v, w, false);
+}
+
 } // namespace graph
 } // namespace satviz
