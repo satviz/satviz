@@ -176,6 +176,7 @@ public class Mediator implements ConsumerConnectionListener {
   private void periodicallyAdvance() {
     try {
       coordinator.advanceVisualization(clausesPerAdvance);
+      videoController.nextFrame();
     } catch (IOException | SerializationException e) {
       e.printStackTrace();
       currentTask.cancel(false);
