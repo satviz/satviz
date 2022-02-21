@@ -78,7 +78,7 @@ public class Heatmap implements ClauseUpdateProcessor {
   }
 
   /* Growing the ring buffer:
-     [1, 2, ..., >c, c+1, ..., n] => [1, 2, ..., >c, null, null, ..., c+1, ..., n] */
+     [1, 2, ..., >c, c+1, ..., n] => [1, 2, ..., c-1, >null, null, ..., c, c+1, ..., n] */
   private void grow(int prevSize, int newSize) {
     Clause[] temp = new Clause[newSize];
     System.arraycopy(recentClauses, 0, temp, 0, cursor);
