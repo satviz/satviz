@@ -153,12 +153,13 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
 }
 
 void GraphRenderer::onWeightUpdate(graph::WeightUpdate &update) {
+  ogdf::GraphAttributes &attrs = my_graph.getOgdfAttrs();
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_WEIGHT]);
   unsigned char *area = (unsigned char *) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
   for (auto row : update.values) {
     auto e = my_graph.getEdgeHandle(std::get<0>(row), std::get<1>(row));
     int idx = edge_mapping[e];
-    area[idx] = (unsigned char) (std::get<2>(row) * 255.0f);
+    area[idx] = (unsigned char) (attrs.doubleWeight(e) * 255.0f);
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }

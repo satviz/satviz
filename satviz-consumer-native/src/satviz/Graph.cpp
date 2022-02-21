@@ -52,16 +52,11 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
     auto v = node_handles[std::get<0>(row)];
     auto w = node_handles[std::get<1>(row)];
     auto e = graph.searchEdge(v, w, false);
-    if (e != nullptr && std::get<2>(row) == 0.0f) {
-      for (auto o : observers) {
-        o->onEdgeDeleted(e);
-      }
-      graph.delEdge(e);
-      continue;
-    }
     if (e == nullptr) {
       if (std::get<2>(row) != 0.0f) {
         e = graph.newEdge(v, w);
+        // Apparently OGDF initializes edge weights with 1.0 ...
+        attrs.doubleWeight(e) = 0.0;
         for (auto o: observers) {
           o->onEdgeAdded(e);
         }
@@ -69,7 +64,14 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
         continue;
       }
     }
-    attrs.doubleWeight(e) = std::get<2>(row);
+    attrs.doubleWeight(e) += std::get<2>(row);
+    if (attrs.doubleWeight(e) <= 0.0) {
+      for (auto o : observers) {
+        o->onEdgeDeleted(e);
+      }
+      graph.delEdge(e);
+      continue;
+    }
   }
 
   for (auto o : observers) {
