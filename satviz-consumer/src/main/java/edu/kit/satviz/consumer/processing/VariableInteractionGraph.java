@@ -10,20 +10,43 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * An implementation of {@code ClauseUpdateProcessor} that realises weight-changes for a
+ * variable interaction graph.<br>
+ * The VIG considers the clause length and {@code WeightFactor} when processing a
+ * {@code ClauseUpdate}.
+ *
+ * @see WeightUpdate
+ */
 public class VariableInteractionGraph implements ClauseUpdateProcessor {
 
   private WeightFactor weightFactor;
   private final StringSerializer serializer;
 
+  /**
+   * Create a VIG with the given initial {@code WeightFactor}.
+   *
+   * @param weightFactor An instance of the {@code WeightFactor} enum.
+   */
   public VariableInteractionGraph(WeightFactor weightFactor) {
     this.weightFactor = weightFactor;
     this.serializer = new StringSerializer();
   }
 
+  /**
+   * This setter-method sets the {@code WeightFactor} for this processor.
+   *
+   * @param weightFactor An instance of the {@code WeightFactor} enum.
+   */
   public void setWeightFactor(WeightFactor weightFactor) {
     this.weightFactor = weightFactor;
   }
 
+  /**
+   * This getter-method returns the {@code WeightFactor}, which is currently used for processing.
+   *
+   * @return An instance of the {@code WeightFactor} enum.
+   */
   public WeightFactor getWeightFactor() {
     return weightFactor;
   }
