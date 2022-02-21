@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer;
 
+import edu.kit.satviz.common.Hashing;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
@@ -19,6 +20,7 @@ import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -31,15 +33,26 @@ public final class ConsumerApplication {
   private static ProducerId pid = null;
   private static final Object SYNC_OBJECT = new Object();
 
-  // TODO: 21/02/2022 initial layout
-  // TODO: 21/02/2022 hash comparison
   public static void main(String[] args) throws IOException, InterruptedException {
     logger.log(Level.INFO, "Starting consumer with arguments {0}", args);
     ConsumerConfig config = getStartingConfig(args);
+
+    logger.info("Setting up network connection");
+    ConsumerConnection connection = setupNetworkConnection(config);
+    logger.log(Level.INFO, "Producer {0} connected", pid);
+    long hash = Hashing.hashContent(Files.newInputStream(config.getInstancePath()));
+    if (hash != pid.instanceHash()) {
+      logger.log(Level.SEVERE, "SAT instance mismatch: {0} (local) vs {1} (remote)",
+          new Object[] { hash, pid.instanceHash() });
+      connection.disconnect(pid);
+      System.exit(1);
+      return;
+    }
+
     int variableAmount;
     logger.info("Reading SAT instance file");
-    try (DimacsFile dimacsFile = new DimacsFile(
-        new FileInputStream(config.getInstancePath().toString()))) {
+    // TODO: 21/02/2022 initial layout
+    try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
       variableAmount = dimacsFile.getVariableAmount();
     } catch (ParsingException e) {
       if (!config.isNoGui()) {
@@ -71,10 +84,6 @@ public final class ConsumerApplication {
     mediatorBuilder.setHeatmap(heatmap);
     VariableInteractionGraph vig = new VariableInteractionGraph(config.getWeightFactor());
     mediatorBuilder.setVig(vig);
-
-    logger.info("Setting up network connection");
-    ConsumerConnection connection = setupNetworkConnection(config);
-    logger.log(Level.INFO, "Producer {0} connected", pid);
     Mediator mediator = mediatorBuilder.createMediator();
 
     if (!config.isNoGui()) {
@@ -137,7 +146,6 @@ public final class ConsumerApplication {
 
   private static void newConnectionAvailable(ProducerId pid) {
     synchronized (SYNC_OBJECT) {
-      logger.info("producer found ");
       if (ConsumerApplication.pid == null) {
         ConsumerApplication.pid = pid;
         SYNC_OBJECT.notifyAll();

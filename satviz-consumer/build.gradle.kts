@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":satviz-network"))
     implementation(project(":satviz-serial"))
     implementation(project(":satviz-sat"))
+    implementation(project(":satviz-common"))
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
     implementation(project(":satviz-parsers"))
