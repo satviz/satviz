@@ -49,7 +49,7 @@ RecordingStartResult satviz_start_recording(void *controller, const char *filena
 void satviz_stop_recording(void *controller);
 void satviz_resume_recording(void *controller);
 void satviz_finish_recording(void *controller);
-void next_frame(void *controller);
+void satviz_next_frame(void *controller);
 void satviz_release_encoder(void *encoder);
 
 #ifdef __cplusplus
