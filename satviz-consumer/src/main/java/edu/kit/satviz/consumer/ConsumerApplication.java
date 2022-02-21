@@ -78,7 +78,11 @@ public final class ConsumerApplication {
     }
 
     connection.connect(ConsumerApplication.pid, mediator);
-    mediator.startOrStopRecording();
+
+    if (config.isRecordImmediately() || config.isNoGui()) {
+      mediator.startOrStopRecording();
+    }
+
     mediator.pauseOrContinueVisualization();
 
 
