@@ -23,6 +23,7 @@ jlink {
     imageName.set("satviz-producer")
     launcher {
         name = "sat-prod"
+        jvmArgs.addAll(listOf("--enable-native-access=edu.kit.ipasir4j"))
     }
 }
 

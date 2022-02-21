@@ -22,6 +22,7 @@ jlink {
     imageName.set("satviz")
     launcher {
         name = "satviz"
+        jvmArgs.addAll(listOf("--enable-native-access=edu.kit.satviz.consumer"))
     }
 }
 
