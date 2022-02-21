@@ -39,13 +39,16 @@ public final class WeightUpdate implements GraphUpdate {
 
   /**
    * Add an edge whose weight should be adjusted via this batch of updates.
+   * This method may be called multiple times for the same indices, in which case the new weight
+   *     is added to the old value.
+   * Only call this method with ordered indices, i.e., <code>index1 < index2</code>.
    *
    * @param index1 One end of the edge
    * @param index2 The other end of the edge
    * @param weight The amount to add to the current edge weight
    */
   public void add(int index1, int index2, float weight) {
-    values.put(new Edge(index1, index2), weight);
+    values.merge(new Edge(index1, index2), weight, Float::sum);
   }
 
   @Override
