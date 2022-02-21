@@ -31,19 +31,18 @@ public class VariableInteractionGraph implements ClauseUpdateProcessor {
   @Override
   public WeightUpdate process(ClauseUpdate[] clauseUpdates, Graph graph) {
     WeightUpdate weightUpdate = new WeightUpdate();
-    boolean isAdd;
     int[] literals;
     float weight;
     for (ClauseUpdate clauseUpdate : clauseUpdates) {
-      isAdd = clauseUpdate.type() == ClauseUpdate.Type.ADD;
       literals = clauseUpdate.clause().literals();
+      weight = (float) weightFactor.apply(literals.length);
+      weight = (clauseUpdate.type() == ClauseUpdate.Type.ADD) ? weight : -weight;
       for (int i = 0; i < literals.length; i++) {
         for (int j = i + 1; j < literals.length; j++) {
-          weight = (float) weightFactor.apply(literals.length);
           weightUpdate.add(
               Math.abs(literals[i]) - 1,
               Math.abs(literals[j]) - 1,
-              (isAdd) ? weight : -weight
+              weight
           );
         }
       }
