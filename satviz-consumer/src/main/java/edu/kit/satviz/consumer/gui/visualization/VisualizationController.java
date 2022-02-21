@@ -9,6 +9,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -24,6 +25,7 @@ public class VisualizationController {
 
   private static final int MIN_HIGHLIGHT_VARIABLE = 1;
   private static final int DEFAULT_HIGHLIGHT_VARIABLE = 1;
+  private static final int MIN_RECEIVED_CLAUSES = 0;
   private static final String PLAY_SYMBOL = "▶";
   private static final String PAUSE_SYMBOL = "⏸";
 
@@ -68,6 +70,9 @@ public class VisualizationController {
   private boolean recordingPaused;
   private boolean visualizationRunning;
 
+  private ChangeListener<String> receivedClausesSpinnerIntegerValidationListener;
+
+
   // CONSTRUCTORS
 
   public VisualizationController(Mediator mediator, ConsumerConfig config, int variableCount) {
@@ -107,12 +112,13 @@ public class VisualizationController {
     long totalClausesReceived = mediator.numberOfUpdates();
     long currentClausesReceived = mediator.currentUpdate();
 
-    GuiUtils.initializeIntegerSpinner(receivedClausesSpinner,
-        0,
+    receivedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+        receivedClausesSpinner,
+        MIN_RECEIVED_CLAUSES,
         (int) totalClausesReceived,
         (int) currentClausesReceived);
 
-    receivedClausesSlider.setMin(0);
+    receivedClausesSlider.setMin(MIN_RECEIVED_CLAUSES);
     receivedClausesSlider.setMax(totalClausesReceived);
     receivedClausesSlider.setValue(currentClausesReceived);
     // make slider move in discrete steps
@@ -201,7 +207,21 @@ public class VisualizationController {
   // METHODS (OTHER)
 
   public void onClauseUpdate() {
+    long totalUpdates = mediator.numberOfUpdates();
+    long currentUpdate = mediator.currentUpdate();
 
+    // update spinner
+    receivedClausesSpinner.getEditor().textProperty().removeListener(
+        receivedClausesSpinnerIntegerValidationListener);
+    receivedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+        receivedClausesSpinner,
+        MIN_RECEIVED_CLAUSES,
+        (int) totalUpdates,
+        (int) currentUpdate);
+
+    // update slider
+    receivedClausesSlider.setMax(totalUpdates);
+    receivedClausesSlider.setValue(currentUpdate);
   }
 
   private void updateRecordingDisplay() {
