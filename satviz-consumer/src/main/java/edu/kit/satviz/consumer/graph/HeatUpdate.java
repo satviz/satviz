@@ -93,4 +93,9 @@ public final class HeatUpdate implements GraphUpdate {
   public int hashCode() {
     return Objects.hash(values);
   }
+
+  @Override
+  public String toString() {
+    return "HeatUpdate{" + "values=" + values + '}';
+  }
 }
