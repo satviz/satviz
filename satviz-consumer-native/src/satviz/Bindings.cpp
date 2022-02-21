@@ -121,4 +121,12 @@ void satviz_finish_recording(void *controller) {
   reinterpret_cast<VideoController*>(controller)->finishRecording();
 }
 
+void satviz_next_frame(void *controller) {
+  reinterpret_cast<VideoController*>(controller)->nextFrame();
+}
+
+void satviz_release_encoder(void *encoder) {
+  delete (VideoEncoder*) encoder;
+}
+
 }

@@ -52,16 +52,11 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
     auto v = node_handles[std::get<0>(row)];
     auto w = node_handles[std::get<1>(row)];
     auto e = graph.searchEdge(v, w, false);
-    if (e != nullptr && std::get<2>(row) == 0.0f) {
-      for (auto o : observers) {
-        o->onEdgeDeleted(e);
-      }
-      graph.delEdge(e);
-      continue;
-    }
     if (e == nullptr) {
       if (std::get<2>(row) != 0.0f) {
         e = graph.newEdge(v, w);
+        // Apparently OGDF initializes edge weights with 1.0 ...
+        attrs.doubleWeight(e) = 0.0;
         for (auto o: observers) {
           o->onEdgeAdded(e);
         }
@@ -69,7 +64,14 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
         continue;
       }
     }
-    attrs.doubleWeight(e) = std::get<2>(row);
+    attrs.doubleWeight(e) += std::get<2>(row);
+    if (attrs.doubleWeight(e) <= 0.0) {
+      for (auto o : observers) {
+        o->onEdgeDeleted(e);
+      }
+      graph.delEdge(e);
+      continue;
+    }
   }
 
   for (auto o : observers) {
@@ -89,12 +91,20 @@ void Graph::submitHeatUpdate(HeatUpdate &update) {
 }
 
 void Graph::recalculateLayout() {
+  ogdf::EdgeArray<double> lengths(graph);
+  for (auto e = graph.firstEdge(); e; e = e->succ()) {
+    double w = attrs.doubleWeight(e);
+    //double l = 1.0 / (w * w);
+    double l = 1.0 / w;
+    lengths[e] = l;
+  }
+
   ogdf::FMMMLayout fmmm;
   fmmm.useHighLevelOptions(true);
   fmmm.unitEdgeLength(10.0);
-  fmmm.newInitialPlacement(true);
-  fmmm.qualityVersusSpeed(ogdf::FMMMOptions::QualityVsSpeed::GorgeousAndEfficient);
-  fmmm.call(attrs);
+  fmmm.newInitialPlacement(false);
+  fmmm.qualityVersusSpeed(ogdf::FMMMOptions::QualityVsSpeed::NiceAndIncredibleSpeed);
+  fmmm.call(attrs, lengths);
 
   ogdf::Array<ogdf::node> nodes;
   graph.allNodes(nodes);
@@ -143,6 +153,12 @@ EdgeInfo Graph::queryEdge(int index1, int index2) {
   info.index2 = index2;
   info.weight = (float) attrs.doubleWeight(e);
   return info;
+}
+
+ogdf::edge Graph::getEdgeHandle(int index1, int index2) {
+  auto v = node_handles[index1];
+  auto w = node_handles[index2];
+  return graph.searchEdge(v, w, false);
 }
 
 } // namespace graph
