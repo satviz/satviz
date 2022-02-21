@@ -30,9 +30,9 @@ int main() {
 
   video::Display *display = new video::OnscreenDisplay(639, 469);
   video::VideoController controller(graph, display);
-  graph.recalculateLayout();
   graph.submitWeightUpdate(wu);
   graph.submitHeatUpdate(hu);
+  graph.recalculateLayout();
   while (!controller.wantToClose) {
     controller.nextFrame();
   }

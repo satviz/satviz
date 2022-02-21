@@ -89,12 +89,20 @@ void Graph::submitHeatUpdate(HeatUpdate &update) {
 }
 
 void Graph::recalculateLayout() {
+  ogdf::EdgeArray<double> lengths(graph);
+  for (auto e = graph.firstEdge(); e; e = e->succ()) {
+    double w = attrs.doubleWeight(e);
+    //double l = 1.0 / (w * w);
+    double l = 1.0 / w;
+    lengths[e] = l;
+  }
+
   ogdf::FMMMLayout fmmm;
   fmmm.useHighLevelOptions(true);
   fmmm.unitEdgeLength(10.0);
-  fmmm.newInitialPlacement(true);
-  fmmm.qualityVersusSpeed(ogdf::FMMMOptions::QualityVsSpeed::GorgeousAndEfficient);
-  fmmm.call(attrs);
+  fmmm.newInitialPlacement(false);
+  fmmm.qualityVersusSpeed(ogdf::FMMMOptions::QualityVsSpeed::NiceAndIncredibleSpeed);
+  fmmm.call(attrs, lengths);
 
   ogdf::Array<ogdf::node> nodes;
   graph.allNodes(nodes);
