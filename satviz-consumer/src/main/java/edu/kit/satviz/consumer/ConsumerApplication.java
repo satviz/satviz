@@ -14,20 +14,20 @@ import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.Mediator;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
 import edu.kit.satviz.network.ConsumerConnection;
-import edu.kit.satviz.network.ConsumerConnectionListener;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
+import javafx.application.Application;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public final class ConsumerApplication {
 
   private static ProducerId pid = null;
   private static final Object SYNC_OBJECT = new Object();
 
-  public static void main(String[] args) throws FileNotFoundException, InterruptedException {
+  public static void main(String[] args) throws IOException, InterruptedException {
     ConsumerConfig config = getStartingConfig(args);
     int variableAmount;
     try {
@@ -46,35 +46,44 @@ public final class ConsumerApplication {
     VideoController videoController = VideoController.create(
         graph,
         (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN,
-        100,
-        100
+        1000,
+        700
     );
-    ClauseCoordinator coordinator = new ClauseCoordinator(graph, createTempDir());
-    Heatmap heatmap = new Heatmap(); //
-    VariableInteractionGraph vig = new VariableInteractionGraph();
+    ClauseCoordinator coordinator = new ClauseCoordinator(
+        graph,
+        Files.createTempDirectory("satviz"),
+        variableAmount
+    );
+    Heatmap heatmap = new Heatmap();
+    VariableInteractionGraph vig = new VariableInteractionGraph(config.getWeightFactor());
 
     ConsumerConnection connection = setupNetworkConnection(config);
 
-    Mediator mediator = null; // MEDIATOR
+    Mediator.MediatorBuilder mediatorBuilder = new Mediator.MediatorBuilder();
+    mediatorBuilder.setConfig(config);
+    mediatorBuilder.setController(videoController);
+    mediatorBuilder.setCoordinator(coordinator);
+    mediatorBuilder.setGraph(graph);
+    mediatorBuilder.setHeatmap(heatmap);
+    mediatorBuilder.setVig(vig);
+    Mediator mediator = mediatorBuilder.createMediator();
 
     if (!config.isNoGui()) {
-      VisualizationController vController = new VisualizationController(mediator, config);
-      coordinator.registerChangeListener(vController::onClauseUpdate);
+      VisualizationController visController = new VisualizationController(mediator, config);
+      coordinator.registerChangeListener(visController::onClauseUpdate);
 
-      VisualizationStarter.setVisualizationController(vController);
-      VisualizationStarter.launch();
+      VisualizationStarter.setVisualizationController(visController);
+      Application.launch(VisualizationStarter.class);
     }
 
-    connection.connect(ConsumerApplication.pid, null); // MEDIATOR
-
-    // TODO: Start main-loop
-    // TODO: End
-    // TODO: Exceptions!
+    connection.connect(ConsumerApplication.pid, mediator);
+    mediator.startOrStopRecording();
+    mediator.pauseOrContinueVisualization();
   }
 
   private static ConsumerConfig getStartingConfig(String[] args) {
     if (args.length == 0) {
-      ConfigStarter.launch();
+      Application.launch(ConfigStarter.class);
       return ConfigStarter.getConsumerConfig();
     } else {
       // TODO: parse Arguments from CLI
@@ -103,11 +112,6 @@ public final class ConsumerApplication {
       }
     }
     return connection;
-  }
-
-  private static Path createTempDir() {
-    // TODO: 19.02.2022
-    return null;
   }
 
   private static void newConnectionAvailable(ProducerId pid) {
