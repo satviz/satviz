@@ -34,10 +34,10 @@ class HeatmapTest {
   void test_process_single() {
     var result = heatmap.process(new ClauseUpdate[] {UPDATES[0]}, null);
     var expected = new HeatUpdate();
-    expected.add(0, 0.25f);
-    expected.add(5, 0.25f);
-    expected.add(4, 0.25f);
-    expected.add(2, 0.25f);
+    expected.add(0, 1);
+    expected.add(5, 1);
+    expected.add(4, 1);
+    expected.add(2, 1);
     assertEquals(expected, result);
   }
 
