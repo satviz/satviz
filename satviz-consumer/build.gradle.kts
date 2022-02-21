@@ -68,6 +68,7 @@ tasks {
         from(consumerLib)
         from(ogdfLib)
         from(coinLib)
+        from(project(":satviz-producer").tasks.getByName("jlinkZip").outputs.files.singleFile)
     }
 
     test {
