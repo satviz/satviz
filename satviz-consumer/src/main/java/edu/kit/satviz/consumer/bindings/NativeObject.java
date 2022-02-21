@@ -16,12 +16,17 @@ import jdk.incubator.foreign.SymbolLookup;
  */
 public abstract class NativeObject implements AutoCloseable {
 
+  private static final String[] LIB_NAMES
+      = {"libCOIN.so", "libOGDF.so", "libsatviz-consumer-native.so"};
   private static final String PREFIX = "satviz_";
 
   static {
     try {
-      // to add windows support, select the correct shared library here
-      NativeLibraryLoader.loadLibrary("/libsatviz-consumer-native.so");
+      for (String libName : LIB_NAMES) {
+        // to add windows support, select the correct shared library here
+        NativeLibraryLoader.loadLibrary('/' + libName);
+      }
+
     } catch (IOException e) {
       throw new NativeInitializationError("Could not load required native library", e);
     }
