@@ -62,6 +62,8 @@ public final class GuiUtils {
     ChangeListener<String> listener = createIntegerValidationListener(spinner, min, max);
     spinner.getEditor().textProperty().addListener(listener);
 
+    // this must be returned so that it can be removed again later when the spinner is updated
+    // see: VisualizationController#onClauseUpdate
     return listener;
   }
 
