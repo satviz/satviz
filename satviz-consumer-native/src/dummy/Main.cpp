@@ -23,10 +23,16 @@ int main() {
     wu.values.push_back(std::make_tuple(e->source()->index(), e->target()->index(), (float) rand() / (float) RAND_MAX));
   }
 
+  graph::HeatUpdate hu;
+  for (int i = 0; i < graph.numNodes(); i++) {
+    hu.values.push_back(std::make_tuple(i, rand() & 0xFF));
+  }
+
   video::Display *display = new video::OnscreenDisplay(639, 469);
   video::VideoController controller(graph, display);
   graph.recalculateLayout();
   graph.submitWeightUpdate(wu);
+  graph.submitHeatUpdate(hu);
   while (!controller.wantToClose) {
     controller.nextFrame();
   }

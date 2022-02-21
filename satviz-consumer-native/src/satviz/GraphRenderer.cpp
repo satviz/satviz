@@ -164,8 +164,13 @@ void GraphRenderer::onWeightUpdate(graph::WeightUpdate &update) {
 }
 
 void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
-  (void) update;
-  // TODO update this attribute.
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
+  unsigned char *area = (unsigned char *) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+  for (auto row : update.values) {
+    int idx = std::get<0>(row);
+    area[idx] = (unsigned char) std::get<1>(row);
+  }
+  glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
