@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.gui;
 
+import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.paint.Color;
@@ -25,7 +26,7 @@ public final class GuiUtils {
    * @param max The maximum value of this {@link Spinner}.
    * @param init The initial value of this {@link Spinner}.
    */
-  public static void initializeIntegerSpinner(Spinner<Integer> spinner,
+  public static ChangeListener<String> initializeIntegerSpinner(Spinner<Integer> spinner,
                                               int min,
                                               int max,
                                               int init) {
@@ -53,7 +54,16 @@ public final class GuiUtils {
     spinner.setValueFactory(spinnerValueFactory);
 
     // prevent user from entering invalid characters
-    spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+    ChangeListener<String> listener = createIntegerValidationListener(spinner, min, max);
+    spinner.getEditor().textProperty().addListener(listener);
+
+    return listener;
+  }
+
+  public static ChangeListener<String> createIntegerValidationListener(Spinner<Integer> spinner,
+                                                                       int min,
+                                                                       int max) {
+    return (observable, oldValue, newValue) -> {
       if (!newValue.equals("")) { // allow empty spinner
         // check if newValue is an integer
         Integer value = null;
@@ -68,7 +78,7 @@ public final class GuiUtils {
           spinner.getEditor().setText(oldValue);
         }
       }
-    });
+    };
   }
 
   /**
