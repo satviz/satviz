@@ -98,10 +98,10 @@ public class Heatmap implements ClauseUpdateProcessor {
 
   @Override
   public HeatUpdate process(ClauseUpdate[] updates, Graph graph) {
+    int totalAmount = 0;
     boolean full = false;
-    for (int i = 0; i < updates.length; i++) {
-      Clause clause = updates[i].clause();
-      cursor = (cursor + i) % recentClauses.length;
+    for (ClauseUpdate update : updates) {
+      Clause clause = update.clause();
       Clause previous = recentClauses[cursor];
       if (previous != null) {
         // if we encounter an existing element, the ring buffer is full and
@@ -111,10 +111,10 @@ public class Heatmap implements ClauseUpdateProcessor {
       }
       recentClauses[cursor] = clause;
       increaseFrequencies(clause);
+      totalAmount = ++cursor;
+      cursor %= recentClauses.length;
     }
-
-    int totalAmount = full ? recentClauses.length : cursor;
-    return populateUpdate(totalAmount);
+    return populateUpdate(full ? recentClauses.length : totalAmount);
   }
 
   /* Calculate the updated heat values for each node based on its frequency and the total amount
