@@ -200,8 +200,17 @@ public class VisualizationController {
   }
 
   @FXML
-  private void seekToUpdate() {
+  private void updateReceivedClausesSpinner() {
+    long currentUpdate = receivedClausesSpinner.getValue();
+    receivedClausesSlider.setValue(currentUpdate);
+    mediator.seekToUpdate(currentUpdate);
+  }
 
+  @FXML
+  private void updateReceivedClausesSlider() {
+    long currentUpdate = (long) receivedClausesSlider.getValue();
+    receivedClausesSpinner.getValueFactory().setValue((int) currentUpdate);
+    mediator.seekToUpdate(currentUpdate);
   }
 
   // METHODS (OTHER)
