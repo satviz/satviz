@@ -18,6 +18,18 @@ javafx {
     version = "17"
 }
 
+jlink {
+    imageName.set("satviz")
+    launcher {
+        name = "satviz"
+    }
+}
+
+application {
+    mainModule.set("edu.kit.satviz.consumer")
+    mainClass.set("edu.kit.satviz.consumer.ConsumerApplication")
+}
+
 val nativeBuildDir = project.buildDir.resolve("cmake-build")
 val consumerLib = nativeBuildDir.resolve("satviz-consumer-native/src/satviz/libsatviz-consumer-native.so")
 val ogdfBuild = rootProject.projectDir.resolve(".ogdf-build")
