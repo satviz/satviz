@@ -8,7 +8,7 @@ repositories {
 }
 
 dependencies {
-    implementation("edu.kit:ipasir4j:0.1.1")
+    implementation("edu.kit:ipasir4j:0.1.2")
     implementation(project(":satviz-common"))
     implementation(project(":satviz-network"))
     implementation(project(":satviz-parsers"))
@@ -23,7 +23,7 @@ jlink {
     imageName.set("satviz-producer")
     launcher {
         name = "sat-prod"
-        jvmArgs.addAll(listOf("--enable-native-access=edu.kit.ipasir4j"))
+        jvmArgs = listOf("--enable-native-access=edu.kit.ipasir4j")
     }
 }
 

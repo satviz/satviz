@@ -5,6 +5,7 @@ module edu.kit.satviz.consumer {
   requires edu.kit.satviz.serial;
   requires edu.kit.satviz.parsers;
   requires net.sourceforge.argparse4j;
+  requires java.logging;
   requires javafx.base;
   requires javafx.fxml;
   requires javafx.controls;

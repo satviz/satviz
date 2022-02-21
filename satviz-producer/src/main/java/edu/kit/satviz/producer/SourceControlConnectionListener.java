@@ -60,7 +60,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
    */
   @Override
   public void onDisconnect(String reason) {
-    logger.log(Level.WARNING, "Consumer connection disconnected. Reason: {}", reason);
+    logger.log(Level.WARNING, "Consumer connection disconnected. Reason: {0}", reason);
     try {
       source.close();
     } catch (Exception e) {

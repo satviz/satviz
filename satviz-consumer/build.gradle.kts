@@ -22,7 +22,7 @@ jlink {
     imageName.set("satviz")
     launcher {
         name = "satviz"
-        jvmArgs.addAll(listOf("--enable-native-access=edu.kit.satviz.consumer"))
+        jvmArgs = listOf("--enable-native-access=edu.kit.satviz.consumer")
     }
 }
 
@@ -62,6 +62,16 @@ tasks {
         dependsOn.add("cmake")
         workingDir = nativeBuildDir
         commandLine = listOf("make", "-j", "6")
+    }
+
+    register<Copy>("installTestBuild") {
+        val dir = rootProject.projectDir.resolve("test-run/satviz")
+        doFirst {
+            dir.deleteRecursively()
+        }
+        dependsOn.add("jlink")
+        from(buildDir.resolve("satviz"))
+        into(dir)
     }
 
     processResources {
