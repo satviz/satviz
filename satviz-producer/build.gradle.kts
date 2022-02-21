@@ -20,6 +20,7 @@ application {
 }
 
 jlink {
+    imageName.set("satviz-producer")
     launcher {
         name = "sat-prod"
     }
