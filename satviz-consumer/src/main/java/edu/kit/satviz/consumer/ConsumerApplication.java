@@ -17,10 +17,10 @@ import edu.kit.satviz.network.ConsumerConnection;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
-import javafx.application.Application;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import javafx.application.Application;
 
 public final class ConsumerApplication {
 
@@ -42,30 +42,31 @@ public final class ConsumerApplication {
       throw e;
     }
 
+    Mediator.MediatorBuilder mediatorBuilder = new Mediator.MediatorBuilder();
+    mediatorBuilder.setConfig(config);
+
     Graph graph = Graph.create(variableAmount);
+    mediatorBuilder.setGraph(graph);
     VideoController videoController = VideoController.create(
         graph,
         (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN,
         1000,
         700
     );
+    mediatorBuilder.setController(videoController);
     ClauseCoordinator coordinator = new ClauseCoordinator(
         graph,
         Files.createTempDirectory("satviz"),
         variableAmount
     );
-    Heatmap heatmap = new Heatmap();
+    mediatorBuilder.setCoordinator(coordinator);
+    Heatmap heatmap = new Heatmap(variableAmount);
+    mediatorBuilder.setHeatmap(heatmap);
     VariableInteractionGraph vig = new VariableInteractionGraph(config.getWeightFactor());
+    mediatorBuilder.setVig(vig);
 
     ConsumerConnection connection = setupNetworkConnection(config);
 
-    Mediator.MediatorBuilder mediatorBuilder = new Mediator.MediatorBuilder();
-    mediatorBuilder.setConfig(config);
-    mediatorBuilder.setController(videoController);
-    mediatorBuilder.setCoordinator(coordinator);
-    mediatorBuilder.setGraph(graph);
-    mediatorBuilder.setHeatmap(heatmap);
-    mediatorBuilder.setVig(vig);
     Mediator mediator = mediatorBuilder.createMediator();
 
     if (!config.isNoGui()) {
@@ -79,6 +80,11 @@ public final class ConsumerApplication {
     connection.connect(ConsumerApplication.pid, mediator);
     mediator.startOrStopRecording();
     mediator.pauseOrContinueVisualization();
+
+
+
+    //coordinator.close();
+    //videoController.close();
   }
 
   private static ConsumerConfig getStartingConfig(String[] args) {
