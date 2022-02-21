@@ -8,7 +8,6 @@ import edu.kit.satviz.consumer.processing.Mediator;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -19,6 +18,12 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.paint.Color;
 
+/**
+ * This class offers functionality to control the live visualization with GUI components.
+ *
+ * <p>Most of the methods of this class are actually implemented in the {@link Mediator} class
+ * - this class merely delegates the method calls to a given {@link Mediator} object.</p>
+ */
 public class VisualizationController {
 
   // CONSTANTS
@@ -75,6 +80,15 @@ public class VisualizationController {
 
   // CONSTRUCTORS
 
+  /**
+   * Creates a new {@link VisualizationController} object with the given parameters.
+   *
+   * @param mediator The {@link Mediator} object to which this class delegates its method calls.
+   * @param config The {@link ConsumerConfig} object containing the initial values
+   *               for the configuration parameters.
+   * @param variableCount The number of variables of the SAT instance
+   *                      that is supposed to be visualized.
+   */
   public VisualizationController(Mediator mediator, ConsumerConfig config, int variableCount) {
     this.variableCount = variableCount;
     this.mediator = mediator;
@@ -215,6 +229,14 @@ public class VisualizationController {
 
   // METHODS (OTHER)
 
+  /**
+   * A callback method to update the {@link Spinner} and {@link Slider} of the GUI
+   * for "time" controls. It is supposed to be called whenever the {@link Mediator} object
+   * of this class receives or processes new clauses.
+   *
+   * @see VisualizationController#VisualizationController(Mediator, ConsumerConfig, int)
+   * @see Mediator
+   */
   public void onClauseUpdate() {
     long totalUpdates = mediator.numberOfUpdates();
     long currentUpdate = mediator.currentUpdate();

@@ -17,14 +17,19 @@ public final class GuiUtils {
   }
 
   /**
-   * Initializes a {@link Spinner} so that the user can only enter valid integers while allowing
-   * it to be empty if the user is currently entering a new value
+   * Initializes a {@code spinner} (with the initial value {@code init}) so that the user can only
+   * enter valid integers within the given range (from {@code min} to {@code max}) while
+   * allowing the {@code spinner} to be empty if the user is currently entering a new value
    * (i.e., has just erased an old value).
+   * <p>If the user attempts to keep the {@code spinner} empty,
+   * the {@code spinner} is reset to {@code init}.</p>
    *
-   * @param spinner The {@link Spinner} to be initialized.
-   * @param min The minimum value of this {@link Spinner}.
-   * @param max The maximum value of this {@link Spinner}.
-   * @param init The initial value of this {@link Spinner}.
+   * @param spinner The {@code spinner} to be initialized.
+   * @param min The minimum value of the {@code spinner}.
+   * @param max The maximum value of the {@code spinner}.
+   * @param init The initial value of the {@code spinner}.
+   * @return The {@link ChangeListener} which validates that the input of the {@code spinner}
+   *         is either a valid integer or empty.
    */
   public static ChangeListener<String> initializeIntegerSpinner(Spinner<Integer> spinner,
                                               int min,
@@ -60,7 +65,17 @@ public final class GuiUtils {
     return listener;
   }
 
-  public static ChangeListener<String> createIntegerValidationListener(Spinner<Integer> spinner,
+  /**
+   * Creates a new {@link ChangeListener} which validates user input of a given {@code spinner}.
+   * It confirms that the given input is either a valid integer or empty.
+   * If the new input is invalid it rejects it and keeps the old value.
+   *
+   * @param spinner The {@code spinner} whose input is supposed to be validated.
+   * @param min The minimum value of the {@code spinner}.
+   * @param max The maximum value of the {@code spinner}.
+   * @return The validating {@link ChangeListener}.
+   */
+  private static ChangeListener<String> createIntegerValidationListener(Spinner<Integer> spinner,
                                                                        int min,
                                                                        int max) {
     return (observable, oldValue, newValue) -> {

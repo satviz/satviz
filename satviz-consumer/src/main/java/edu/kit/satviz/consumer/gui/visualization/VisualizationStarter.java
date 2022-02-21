@@ -5,6 +5,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Starts the control window for the live visualization.
+ * Requires the {@link VisualizationController} of the window to be set before opening the window.
+ */
 public class VisualizationStarter extends Application {
 
   private static VisualizationController visualizationController;
@@ -22,6 +26,12 @@ public class VisualizationStarter extends Application {
     primaryStage.show();
   }
 
+  /**
+   * Sets the {@code controller} of the visualization window.
+   * This method must be called before the visualization window is opened.
+   *
+   * @param controller The {@code controller} which controls the visualization window.
+   */
   public static void setVisualizationController(VisualizationController controller) {
     visualizationController = controller;
   }
