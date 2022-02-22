@@ -98,7 +98,7 @@ public class Heatmap implements ClauseUpdateProcessor {
 
   @Override
   public HeatUpdate process(ClauseUpdate[] updates, Graph graph) {
-    int totalAmount = 0;
+    int totalAmount = cursor;
     boolean full = false;
     for (ClauseUpdate update : updates) {
       Clause clause = update.clause();
@@ -111,10 +111,12 @@ public class Heatmap implements ClauseUpdateProcessor {
       }
       recentClauses[cursor] = clause;
       increaseFrequencies(clause);
-      totalAmount = ++cursor;
-      cursor %= recentClauses.length;
+      totalAmount++;
+      cursor = (cursor + 1) % recentClauses.length;
     }
-    return populateUpdate(full ? recentClauses.length : totalAmount);
+    var u =  populateUpdate(full ? recentClauses.length : totalAmount/*frequencies.values().stream().max(Integer::compare).orElse(1)*/);
+    //System.out.println(u);
+    return u;
   }
 
   /* Calculate the updated heat values for each node based on its frequency and the total amount

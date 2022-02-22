@@ -9,6 +9,7 @@ import edu.kit.satviz.serial.StringSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 /**
  * An implementation of {@code ClauseUpdateProcessor} that realises weight-changes for a
@@ -58,6 +59,27 @@ public class VariableInteractionGraph implements ClauseUpdateProcessor {
     float weight;
     for (ClauseUpdate clauseUpdate : clauseUpdates) {
       literals = clauseUpdate.clause().literals();
+      for (int i = 0; i < literals.length; i++) {
+        literals[i] = Math.abs(literals[i]);
+      }
+      Arrays.sort(literals);
+      weight = (float) weightFactor.apply(literals.length);
+      weight = (clauseUpdate.type() == ClauseUpdate.Type.ADD) ? weight : -weight;
+      for (int i = 0; i < literals.length - 1; i++) {
+        weightUpdate.add(
+            literals[i] - 1,
+            literals[i + 1] - 1,
+            weight
+        );
+      }
+      weightUpdate.add(literals[0] - 1, literals[literals.length - 1] - 1, weight);
+    }
+    return weightUpdate;
+    /*WeightUpdate weightUpdate = new WeightUpdate();
+    int[] literals;
+    float weight;
+    for (ClauseUpdate clauseUpdate : clauseUpdates) {
+      literals = clauseUpdate.clause().literals();
       weight = (float) weightFactor.apply(literals.length);
       weight = (clauseUpdate.type() == ClauseUpdate.Type.ADD) ? weight : -weight;
       for (int i = 0; i < literals.length; i++) {
@@ -70,7 +92,7 @@ public class VariableInteractionGraph implements ClauseUpdateProcessor {
         }
       }
     }
-    return weightUpdate;
+    return weightUpdate;*/
   }
 
   @Override

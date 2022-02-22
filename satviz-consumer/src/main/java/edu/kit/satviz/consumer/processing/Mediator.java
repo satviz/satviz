@@ -177,11 +177,11 @@ public class Mediator implements ConsumerConnectionListener {
 
   private void periodicallyAdvance() {
     try {
-      System.out.println("Advance call");
+      //System.out.println("Advance call");
       coordinator.advanceVisualization(clausesPerAdvance);
-      System.out.println("Post advance");
+      //System.out.println("Post advance");
       videoController.nextFrame();
-      System.out.println("Post nextframe");
+      //System.out.println("Post nextframe");
     } catch (Throwable e) {
       e.printStackTrace();
       advanceTask.cancel(false);
@@ -190,7 +190,7 @@ public class Mediator implements ConsumerConnectionListener {
 
   @Override
   public void onClauseUpdate(ProducerId pid, ClauseUpdate c) {
-    System.out.println("Clause " + c);
+    //System.out.println("Clause " + c);
     try {
       coordinator.addClauseUpdate(c);
     } catch (IOException e) { // TODO: 10/02/2022
