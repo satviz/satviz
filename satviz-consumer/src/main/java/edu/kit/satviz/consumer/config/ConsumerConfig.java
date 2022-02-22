@@ -12,12 +12,12 @@ public class ConsumerConfig {
   // DEFINITELY NEED TO CHANGE!
   public static final String DEFAULT_VIDEO_TEMPLATE_PATH = "/cool/yes.ogv";
   public static final boolean DEFAULT_RECORD_IMMEDIATELY = false;
-  public static final int DEFAULT_BUFFER_SIZE = 100;
+  public static final int DEFAULT_BUFFER_SIZE = 1;
   public static final WeightFactor DEFAULT_WEIGHT_FACTOR = WeightFactor.RECIPROCAL;
   public static final int MIN_WINDOW_SIZE = 0;
   public static final int MAX_WINDOW_SIZE = Integer.MAX_VALUE;
   public static final int DEFAULT_WINDOW_SIZE = 1000;
-  public static final long DEFAULT_PERIOD = 100;
+  public static final long DEFAULT_PERIOD = 1000 / 60;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
 
   // mandatory settings

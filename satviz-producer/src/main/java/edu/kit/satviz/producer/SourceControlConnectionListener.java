@@ -44,6 +44,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
       try (source) {
         logger.info("Starting to send clause updates");
         source.open();
+        logger.info("Source closed.");
       } catch (SourceException e) {
         logger.log(Level.SEVERE, "Error draining source", e);
         connection.terminateFailed(e.getMessage());
