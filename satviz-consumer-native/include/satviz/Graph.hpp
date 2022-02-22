@@ -18,14 +18,18 @@ struct WeightUpdate {
   std::vector<std::tuple<int, int, float> > values;
 
   WeightUpdate() = default;
-  explicit WeightUpdate(size_t n) : values(n) {}
+  explicit WeightUpdate(size_t n) {
+    values.reserve(n);
+  }
 };
 
 struct HeatUpdate {
   std::vector<std::tuple<int, int> > values;
 
   HeatUpdate() = default;
-  explicit HeatUpdate(size_t n) : values(n) {}
+  explicit HeatUpdate(size_t n) {
+    values.reserve(n);
+  }
 };
 
 /**
