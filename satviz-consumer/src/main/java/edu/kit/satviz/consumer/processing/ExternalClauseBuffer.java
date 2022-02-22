@@ -108,22 +108,16 @@ public class ExternalClauseBuffer implements AutoCloseable {
    * @param index The index of the first clause
    * @param numUpdates The number of clause updates to read, starting from {@code index}
    * @return An array of {@link ClauseUpdate}s. As explained in the summary, it is not guaranteed to
-   *         be of length {@code numUpdates}. If {@link #size()} is {@code 0}, a zero-length-array
-   *         will always be returned.
+   *         be of length {@code numUpdates}.
    * @throws IOException if an I/O error occurs.
    * @throws SerializationException If a clause update cannot be deserialised.
    *                                This can only happen if the files used in this implementation
    *                                are modified from the outside.
-   * @throws IndexOutOfBoundsException if {@code index >=} {@link #size()} (but {@code siz != 0})
-   *                                   or {@code index < 0}
+   * @throws IndexOutOfBoundsException if {@code index >=} {@link #size()} or {@code index < 0}
    * @throws IllegalArgumentException if {@code numUpdates < 0}
    */
   public ClauseUpdate[] getClauseUpdates(long index, int numUpdates)
       throws IOException, SerializationException {
-    if (size == index) {
-      return new ClauseUpdate[0];
-    }
-
     if (index < 0 || index >= size) {
       throw new IndexOutOfBoundsException("For clause update index " + index);
     }
