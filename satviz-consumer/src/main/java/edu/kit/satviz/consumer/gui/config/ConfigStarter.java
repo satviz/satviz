@@ -37,6 +37,11 @@ public class ConfigStarter extends Application {
     primaryStage.show();
   }
 
+  /**
+   * Returns whether the configuration window has been closed.
+   *
+   * @return Whether the configuration window has been closed.
+   */
   public static boolean isDone() {
     return configController != null && configController.hasRun() || closed;
   }
