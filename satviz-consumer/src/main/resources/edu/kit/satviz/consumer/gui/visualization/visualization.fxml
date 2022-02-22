@@ -184,7 +184,7 @@
                              <Insets bottom="3.0" />
                          </padding>
                      </HBox>
-                     <Slider fx:id="receivedClausesSlider" prefHeight="16.0" prefWidth="169.0">
+                     <Slider fx:id="receivedClausesSlider" prefHeight="16.0" prefWidth="169.0" onMouseReleased="#updateReceivedClausesSlider" onKeyReleased="#updateReceivedClausesSlider">
                          <opaqueInsets>
                              <Insets top="2.5" />
                          </opaqueInsets>

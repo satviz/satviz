@@ -143,7 +143,6 @@ public class VisualizationController {
     receivedClausesSlider.setValue(currentClausesReceived);
     // make slider move in discrete steps
     receivedClausesSlider.setSnapToTicks(true);
-    receivedClausesSlider.setShowTickMarks(true);
     receivedClausesSlider.setMajorTickUnit(1.0);
     receivedClausesSlider.setBlockIncrement(1.0);
     receivedClausesSlider.setMinorTickCount(0); // Disable minor ticks
