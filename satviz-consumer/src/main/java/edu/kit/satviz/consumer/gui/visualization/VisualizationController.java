@@ -107,6 +107,10 @@ public class VisualizationController {
         ConsumerConfig.MAX_WINDOW_SIZE,
         config.getWindowSize());
 
+    windowSizeSpinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
+      updateWindowSize();
+    });
+
     HeatmapColors colors = config.getHeatmapColors();
     coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
     hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));

@@ -66,7 +66,7 @@
                         <ColorPicker prefHeight="24.0" prefWidth="120.0" GridPane.rowIndex="2" fx:id="coldColorColorPicker" onAction="#updateHeatmapColdColor"/>
                         <ColorPicker prefHeight="24.0" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="hotColorColorPicker" onAction="#updateHeatmapHotColor"/>
                         <Label text="Window Size" />
-                        <Spinner prefHeight="24.0" prefWidth="120.0" GridPane.columnIndex="1" fx:id="windowSizeSpinner"/>
+                        <Spinner prefHeight="24.0" prefWidth="120.0" GridPane.columnIndex="1" editable="true" fx:id="windowSizeSpinner" onMouseClicked="#updateWindowSize" onKeyPressed="#updateWindowSize"/>
                      </children>
                      <VBox.margin>
                         <Insets top="2.5" />
@@ -89,7 +89,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Spinner prefHeight="24.0" prefWidth="120.0" GridPane.columnIndex="1" fx:id="highlightVariableSpinner"/>
+                  <Spinner prefHeight="24.0" prefWidth="120.0" GridPane.columnIndex="1" editable="true" fx:id="highlightVariableSpinner"/>
                   <Label prefWidth="127.0" text="Highlight Variable:" />
                   <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
                      <children>
@@ -173,7 +173,7 @@
                                  </rowConstraints>
                                  <children>
                                      <Label prefHeight="17.0" prefWidth="91.0" text="Clauses Received" GridPane.columnIndex="1" />
-                              <Spinner prefHeight="25.0" prefWidth="111.0" fx:id="receivedClausesSpinner"/>
+                              <Spinner prefHeight="25.0" prefWidth="111.0" editable="true" fx:id="receivedClausesSpinner"/>
                                  </children>
                              </GridPane>
                              <Button mnemonicParsing="false" text="Re-layout" fx:id="relayoutButton" onAction="#relayout"/>
