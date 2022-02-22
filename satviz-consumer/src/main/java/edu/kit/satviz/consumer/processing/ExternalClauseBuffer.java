@@ -120,7 +120,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
    */
   public ClauseUpdate[] getClauseUpdates(long index, int numUpdates)
       throws IOException, SerializationException {
-    if (size == 0) {
+    if (size == index) {
       return new ClauseUpdate[0];
     }
 
