@@ -196,7 +196,7 @@ public class ClauseCoordinator implements AutoCloseable {
   }
 
   private void advance(int numUpdates) throws SerializationException, IOException {
-    if (numUpdates < 1) {
+    if (numUpdates < 1 || currentUpdate == buffer.size()) {
       return;
     }
 
