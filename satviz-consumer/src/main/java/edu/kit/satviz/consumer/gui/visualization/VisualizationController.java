@@ -107,9 +107,7 @@ public class VisualizationController {
         ConsumerConfig.MAX_WINDOW_SIZE,
         config.getWindowSize());
 
-    windowSizeSpinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
-      updateWindowSize();
-    });
+    GuiUtils.setOnFocusLost(windowSizeSpinner, this::updateWindowSize);
 
     HeatmapColors colors = config.getHeatmapColors();
     coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
@@ -119,6 +117,8 @@ public class VisualizationController {
         MIN_HIGHLIGHT_VARIABLE,
         variableCount,
         DEFAULT_HIGHLIGHT_VARIABLE);
+
+    GuiUtils.setOnFocusLost(highlightVariableSpinner, this::highlightVariable);
 
     recording = config.isRecordImmediately();
     updateRecordingDisplay();
@@ -135,6 +135,8 @@ public class VisualizationController {
         MIN_RECEIVED_CLAUSES,
         (int) totalClausesReceived,
         (int) currentClausesReceived);
+
+    GuiUtils.setOnFocusLost(receivedClausesSpinner, this::updateReceivedClausesSpinner);
 
     receivedClausesSlider.setMin(MIN_RECEIVED_CLAUSES);
     receivedClausesSlider.setMax(totalClausesReceived);

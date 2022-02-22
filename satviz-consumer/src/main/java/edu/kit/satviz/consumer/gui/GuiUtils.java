@@ -148,6 +148,21 @@ public final class GuiUtils {
   }
 
   /**
+   * Runs the {@code action} whenever the {@code spinner} loses focus.
+   *
+   * @param spinner The spinner to induce {@code action} to run
+   * @param action The action to be run
+   * @param <T> The type of values the {@code spinner} holds (irrelevant for this method)
+   */
+  public static <T> void setOnFocusLost(Spinner<T> spinner, Runnable action) {
+    spinner.focusedProperty().addListener((observable, oldValue, newValue) -> {
+      if (Boolean.FALSE.equals(newValue)) { // spinner lost focus
+        action.run();
+      }
+    });
+  }
+
+  /**
    * Parses an integer representation of a color into the corresponding {@link Color} object.
    *
    * @param color The color to be parsed.
