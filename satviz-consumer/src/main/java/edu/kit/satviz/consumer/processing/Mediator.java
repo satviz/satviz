@@ -54,6 +54,7 @@ public class Mediator implements ConsumerConnectionListener {
     this.advanceTask = null;
     this.clausesPerAdvance = config.getBufferSize();
     this.period = config.getPeriod();
+    System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -131,6 +132,7 @@ public class Mediator implements ConsumerConnectionListener {
 
   public void pauseOrContinueVisualization() {
     if (advanceTask == null) {
+      System.out.println("PERIOD " + period);
       advanceTask = glScheduler.scheduleAtFixedRate(
           this::periodicallyAdvance,
           0,
@@ -180,7 +182,7 @@ public class Mediator implements ConsumerConnectionListener {
       System.out.println("Post advance");
       videoController.nextFrame();
       System.out.println("Post nextframe");
-    } catch (IOException | SerializationException e) {
+    } catch (Throwable e) {
       e.printStackTrace();
       advanceTask.cancel(false);
     }
@@ -188,7 +190,7 @@ public class Mediator implements ConsumerConnectionListener {
 
   @Override
   public void onClauseUpdate(ProducerId pid, ClauseUpdate c) {
-    //System.out.println("Clause " + c);
+    System.out.println("Clause " + c);
     try {
       coordinator.addClauseUpdate(c);
     } catch (IOException e) { // TODO: 10/02/2022

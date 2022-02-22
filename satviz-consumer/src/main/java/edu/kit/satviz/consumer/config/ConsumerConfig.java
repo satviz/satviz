@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -17,7 +18,7 @@ public class ConsumerConfig {
   public static final int MIN_WINDOW_SIZE = 0;
   public static final int MAX_WINDOW_SIZE = Integer.MAX_VALUE;
   public static final int DEFAULT_WINDOW_SIZE = 1000;
-  public static final long DEFAULT_PERIOD = 1000 / 60;
+  public static final long DEFAULT_PERIOD = 500;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
 
   // mandatory settings

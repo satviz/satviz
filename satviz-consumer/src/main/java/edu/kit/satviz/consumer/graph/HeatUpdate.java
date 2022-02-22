@@ -48,6 +48,9 @@ public final class HeatUpdate implements GraphUpdate {
 
   @Override
   public void submitTo(Graph graph) {
+    if (values.isEmpty()) {
+      return;
+    }
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
       MemorySegment segment = toSegment(local);
       SUBMIT_HEAT_UPDATE.invokeExact(graph.getPointer(), segment.address());

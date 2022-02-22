@@ -98,8 +98,8 @@ public final class ConsumerApplication {
       VideoController videoController = VideoController.create(
           graph,
           (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN,
-          1000,
-          700
+          1920,
+          1080
       );
       return new GlComponents(graph, videoController);
     }).get();
@@ -126,8 +126,6 @@ public final class ConsumerApplication {
       }
 
     });
-    Thread.sleep(100000);
-    System.exit(0);
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)
         .setGlScheduler(glScheduler)
