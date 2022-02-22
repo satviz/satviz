@@ -1,9 +1,12 @@
 package edu.kit.satviz.consumer.gui;
 
+import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 /**
@@ -11,9 +14,55 @@ import javafx.util.StringConverter;
  */
 public final class GuiUtils {
 
+  // CONSTANTS
+
+  public static final Object CONFIG_MONITOR = new Object();
+
+  // ATTRIBUTES
+
+  private static volatile boolean javaFxLaunched = false;
+
+
+  // CONSTRUCTORS
+
   // hide public constructor
   private GuiUtils() {
 
+  }
+
+  // METHODS
+
+  /**
+   * Custom launch method for {@link Application#launch(Class, String...)} that can be called
+   * multiple times and that doesn't block (unlike {@link Application#launch(Class, String...)}).
+   *
+   * <p>
+   *   Copied from <a href=https://stackoverflow.com/questions/24320014/how-to-call-launch-more-than-once-in-java/61771424#61771424>StackOverflow</a>.
+   *   Only one line was slightly modified.
+   * </p>
+   *
+   * @param applicationClass The class to be launched
+   *
+   * @see Application#launch(Class, String...)
+   */
+  public static void launch(Class<? extends Application> applicationClass) {
+    if (!javaFxLaunched) { // First time
+      Platform.setImplicitExit(false);
+      new Thread(() -> Application.launch(applicationClass)).start();
+      javaFxLaunched = true;
+    } else { // Next times
+      Platform.runLater(() -> {
+        try {
+          // the following line was updated in order
+          // not to use the deprecated newInstance() method anymore
+          Application application = applicationClass.getDeclaredConstructor().newInstance();
+          Stage primaryStage = new Stage();
+          application.start(primaryStage);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      });
+    }
   }
 
   /**
