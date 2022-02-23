@@ -32,4 +32,10 @@ subprojects {
         configFile = configDirectory.file("google_checks.xml").get().asFile
         toolVersion = "9.2.1"
     }
+
+    tasks {
+        compileJava {
+            options.encoding = "UTF-8"
+        }
+    }
 }
