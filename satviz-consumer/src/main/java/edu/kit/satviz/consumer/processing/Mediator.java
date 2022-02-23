@@ -54,7 +54,7 @@ public class Mediator implements ConsumerConnectionListener {
     this.advanceTask = null;
     this.clausesPerAdvance = config.getBufferSize();
     this.period = config.getPeriod();
-    System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
+    //System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -106,14 +106,13 @@ public class Mediator implements ConsumerConnectionListener {
   public void startOrStopRecording() {
     if (recording) {
       if (!recordingPaused) {
-        videoController.stopRecording();
+        glScheduler.submit(videoController::stopRecording);
       }
-      videoController.finishRecording();
+      glScheduler.submit(videoController::finishRecording);
     } else {
-      videoController.startRecording(
-          config.getVideoTemplatePath().replace("{}", String.valueOf(++recordedVideos)),
-          "theora"
-      );
+      String filename = config.getVideoTemplatePath()
+          .replace("{}", String.valueOf(++recordedVideos));
+      glScheduler.submit(() -> videoController.startRecording(filename, "theora"));
     }
     recordingPaused = false;
     recording = !recording;
@@ -122,9 +121,9 @@ public class Mediator implements ConsumerConnectionListener {
   public void pauseOrContinueRecording() {
     if (recording) {
       if (recordingPaused) {
-        videoController.resumeRecording();
+        glScheduler.submit(videoController::resumeRecording);
       } else {
-        videoController.stopRecording();
+        glScheduler.submit(videoController::stopRecording);
       }
       recordingPaused = !recordingPaused;
     }
@@ -132,7 +131,7 @@ public class Mediator implements ConsumerConnectionListener {
 
   public void pauseOrContinueVisualization() {
     if (advanceTask == null) {
-      System.out.println("PERIOD " + period);
+      //System.out.println("PERIOD " + period);
       advanceTask = glScheduler.scheduleAtFixedRate(
           this::periodicallyAdvance,
           0,
@@ -146,16 +145,18 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void relayout() {
-    graph.recalculateLayout();
+    glScheduler.submit(graph::recalculateLayout);
   }
 
   public void seekToUpdate(long index) {
-    try {
-      coordinator.seekToUpdate(index);
-    } catch (IOException | SerializationException e) { // TODO: 10/02/2022
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
+    glScheduler.submit(() -> {
+      try {
+        coordinator.seekToUpdate(index);
+      } catch (IOException | SerializationException e) { // TODO: 10/02/2022
+        e.printStackTrace();
+        glScheduler.shutdown();
+      }
+    });
   }
 
   public long currentUpdate() {
