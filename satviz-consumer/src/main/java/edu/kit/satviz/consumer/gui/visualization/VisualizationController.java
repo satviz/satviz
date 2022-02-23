@@ -8,6 +8,7 @@ import edu.kit.satviz.consumer.processing.Mediator;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -246,42 +247,33 @@ public class VisualizationController {
     long totalUpdates = mediator.numberOfUpdates();
     long currentUpdate = mediator.currentUpdate();
 
-    // update spinner
-    receivedClausesSpinner.getEditor().textProperty().removeListener(
-        receivedClausesSpinnerIntegerValidationListener);
-    receivedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
-        receivedClausesSpinner,
-        MIN_RECEIVED_CLAUSES,
-        (int) totalUpdates,
-        (int) currentUpdate);
+    // execute on JavaFX application thread
+    Platform.runLater(() -> {
+      // update spinner
+      receivedClausesSpinner.getEditor().textProperty().removeListener(
+          receivedClausesSpinnerIntegerValidationListener);
+      receivedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+          receivedClausesSpinner,
+          MIN_RECEIVED_CLAUSES,
+          (int) totalUpdates,
+          (int) currentUpdate);
 
-    // update slider
-    receivedClausesSlider.setMax(totalUpdates);
-    receivedClausesSlider.setValue(currentUpdate);
+      // update slider
+      receivedClausesSlider.setMax(totalUpdates);
+      receivedClausesSlider.setValue(currentUpdate);
+    });
   }
 
   private void updateRecordingDisplay() {
-    if (recording) {
-      startOrStopRecordingButton.setTextFill(Color.RED);
-    } else {
-      startOrStopRecordingButton.setTextFill(Color.BLACK);
-    }
+    startOrStopRecordingButton.setTextFill(recording ? Color.RED : Color.BLACK);
     pauseOrContinueRecordingButton.setDisable(!recording);
   }
 
   private void updateRecordingPausedDisplay() {
-    if (recordingPaused) {
-      pauseOrContinueRecordingButton.setText(PLAY_SYMBOL);
-    } else {
-      pauseOrContinueRecordingButton.setText(PAUSE_SYMBOL);
-    }
+    pauseOrContinueRecordingButton.setText(recordingPaused ? PLAY_SYMBOL : PAUSE_SYMBOL);
   }
 
   private void updateVisualizationRunningDisplay() {
-    if (visualizationRunning) {
-      pauseOrContinueVisualizationButton.setText(PAUSE_SYMBOL);
-    } else {
-      pauseOrContinueVisualizationButton.setText(PLAY_SYMBOL);
-    }
+    pauseOrContinueVisualizationButton.setText(visualizationRunning ? PAUSE_SYMBOL : PLAY_SYMBOL);
   }
 }

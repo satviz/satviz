@@ -43,7 +43,7 @@ public class ConfigStarter extends Application {
    * @return Whether the configuration window has been closed.
    */
   public static boolean isDone() {
-    return configController != null && configController.hasRun() || closed;
+    return (configController != null && configController.hasRun()) || closed;
   }
 
   /**
