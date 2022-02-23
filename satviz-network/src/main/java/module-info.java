@@ -4,5 +4,4 @@ module edu.kit.satviz.network {
   requires edu.kit.satviz.serial;
 
   exports edu.kit.satviz.network;
-
 }

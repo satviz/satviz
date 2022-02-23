@@ -6,5 +6,10 @@ build
 
 .idea
 
+/satviz-consumer/src/test/temp/
 .ogdf-build
+
+# Ignore crash files
+core.*
+hs_err_pid*.log
 
