@@ -59,6 +59,9 @@ public class VariableInteractionGraph implements ClauseUpdateProcessor {
     float weight;
     for (ClauseUpdate clauseUpdate : clauseUpdates) {
       literals = clauseUpdate.clause().literals();
+      if (literals.length == 0) {
+        continue;
+      }
       for (int i = 0; i < literals.length; i++) {
         literals[i] = Math.abs(literals[i]);
       }
