@@ -10,7 +10,7 @@ import java.util.Objects;
 public class ConsumerConfig {
 
   public static final boolean DEFAULT_NO_GUI = false;
-  // DEFINITELY NEED TO CHANGE!
+  // TODO: DEFINITELY NEED TO CHANGE!
   public static final String DEFAULT_VIDEO_TEMPLATE_PATH = "/cool/yes.ogv";
   public static final boolean DEFAULT_RECORD_IMMEDIATELY = false;
   public static final int DEFAULT_BUFFER_SIZE = 10;
@@ -20,6 +20,8 @@ public class ConsumerConfig {
   public static final int DEFAULT_WINDOW_SIZE = 1000;
   public static final long DEFAULT_PERIOD = 33;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
+  // TODO: set to proper path
+  public static final String DEFAULT_SCREENSHOT_FOLDER = "path/to/screenshots";
 
   // mandatory settings
   private ConsumerModeConfig modeConfig;

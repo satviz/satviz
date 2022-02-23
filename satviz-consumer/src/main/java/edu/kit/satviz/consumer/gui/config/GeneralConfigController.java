@@ -13,7 +13,6 @@ import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 /**
  * Controls the general configuration window.
@@ -74,7 +74,8 @@ public class GeneralConfigController extends ConfigController {
   private File satInstanceFile;
   private ConfigController modeConfigController;
 
-  private ConsumerConfig consumerConfig;
+  private ConsumerConfig consumerConfig = null;
+  private boolean run = false;
 
 
   // METHODS (FXML)
@@ -180,7 +181,11 @@ public class GeneralConfigController extends ConfigController {
     try {
       validateConsumerConfig(config);
       consumerConfig = config;
-      Platform.exit();
+      ((Stage) runButton.getScene().getWindow()).close(); //runButton is just an arbitrary component
+      synchronized (GuiUtils.CONFIG_MONITOR) {
+        run = true;
+        GuiUtils.CONFIG_MONITOR.notifyAll();
+      }
     } catch (ConfigArgumentException e) {
       errorLabel.setText(e.getMessage());
     }
@@ -317,16 +322,6 @@ public class GeneralConfigController extends ConfigController {
     updateMode();
   }
 
-  /**
-   * Retrieve the configuration set by the user.
-   *
-   * @return The {@link ConsumerConfig} object which contains the configuration parameters set by
-   *         the user.
-   */
-  public ConsumerConfig getConsumerConfig() {
-    return consumerConfig;
-  }
-
   private ObjectMapper getMapper() {
     // only create mapper once
     if (mapper == null) {
@@ -337,6 +332,26 @@ public class GeneralConfigController extends ConfigController {
       mapper.registerModule(m);
     }
     return mapper;
+  }
+
+  /**
+   * Returns whether the window which this class controls
+   * has been closed by clicking the run button.
+   *
+   * @return Whether the window has been closed by clicking the run button.
+   */
+  public boolean hasRun() {
+    return run;
+  }
+
+  /**
+   * Retrieves the configuration set by the user.
+   *
+   * @return The {@link ConsumerConfig} object which contains the configuration parameters set by
+   *         the user.
+   */
+  public ConsumerConfig getConsumerConfig() {
+    return consumerConfig;
   }
 
 }
