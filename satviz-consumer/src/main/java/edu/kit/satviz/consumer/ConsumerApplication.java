@@ -4,6 +4,8 @@ import edu.kit.satviz.common.Hashing;
 import edu.kit.satviz.consumer.bindings.NativeInvocationException;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerMode;
+import edu.kit.satviz.consumer.config.ConsumerModeConfig;
+import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.display.DisplayType;
 import edu.kit.satviz.consumer.display.VideoController;
@@ -25,7 +27,11 @@ import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -36,7 +42,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
+import java.util.zip.ZipInputStream;
 import javafx.application.Application;
+import net.lingala.zip4j.ZipFile;
 
 public final class ConsumerApplication {
 
@@ -58,9 +66,10 @@ public final class ConsumerApplication {
     logger.setLevel(Level.FINER);
     logger.log(Level.FINER, "Starting consumer with arguments {0}", args);
     ConsumerConfig config = getStartingConfig(args);
-
+    Path tempDir = Files.createTempDirectory("satviz");
+    tempDir.toFile().deleteOnExit();
     logger.info("Setting up network connection");
-    ConsumerConnection connection = setupNetworkConnection(config);
+    ConsumerConnection connection = setupNetworkConnection(config, tempDir);
     logger.log(Level.INFO, "Producer {0} connected", pid);
     long hash = Hashing.hashContent(Files.newInputStream(config.getInstancePath()));
     if (hash != pid.instanceHash()) {
@@ -106,11 +115,8 @@ public final class ConsumerApplication {
 
     logger.finer("Initialising OpenGL window");
 
-    ClauseCoordinator coordinator = new ClauseCoordinator(
-        components.graph,
-        Files.createTempDirectory("satviz"),
-        variableAmount
-    );
+    ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
+        tempDir, variableAmount);
 
     logger.info("Calculating initial layout");
     glScheduler.submit(() -> {
@@ -169,20 +175,42 @@ public final class ConsumerApplication {
     }
   }
 
-  private static ConsumerConnection setupNetworkConnection(ConsumerConfig config)
+  private static ConsumerConnection setupNetworkConnection(ConsumerConfig config, Path tempDir)
       throws InterruptedException {
-    int consumerPort;
-    boolean isEmbedded = config.getModeConfig().getMode() == ConsumerMode.EMBEDDED;
-    if (isEmbedded) {
-      consumerPort = 0;
-    } else {
-      consumerPort = ((ExternalModeConfig) config.getModeConfig()).getPort();
-    }
+    ConsumerModeConfig modeConfig = config.getModeConfig();
+    boolean embedded = modeConfig.getMode() == ConsumerMode.EMBEDDED;
+    int consumerPort = embedded ? 0 : ((ExternalModeConfig) modeConfig).getPort();
     ConsumerConnection connection = new ConsumerConnection(consumerPort);
     connection.registerConnect(ConsumerApplication::newConnectionAvailable);
     connection.start();
-    if (isEmbedded) {
-      // TODO: 19.02.2022 START PRODUCER!
+    logger.log(Level.INFO, "Port {0} opened", String.valueOf(connection.getPort()));
+    if (embedded) {
+      logger.info("Starting embedded producer");
+      EmbeddedModeConfig embedConfig = (EmbeddedModeConfig) modeConfig;
+      try {
+        String sourcePath = embedConfig.getSourcePath().toString();
+        List<String> baseArgs = List.of("-H", InetAddress.getLocalHost().getHostName(),
+            "-P", String.valueOf(connection.getPort()));
+        List<String> additionalArgs = switch (embedConfig.getSource()) {
+          case SOLVER -> List.of("-s", sourcePath, "-i", config.getInstancePath().toString());
+          case PROOF -> List.of("-p", sourcePath);
+        };
+        List<String> allArgs = new ArrayList<>();
+        allArgs.add("sh");
+        allArgs.add("./sat-prod");
+        allArgs.addAll(baseArgs);
+        allArgs.addAll(additionalArgs);
+        Path bin = extractProducer(tempDir);
+        new ProcessBuilder()
+            .directory(bin.toFile())
+            .command(allArgs)
+            .inheritIO()
+            .start();
+      } catch (IOException e) {
+        logger.log(Level.SEVERE, "Error while trying to start embedded producer", e);
+        System.exit(1);
+        return null;
+      }
       connection.getPort();
     }
     logger.info("Waiting for producer to connect...");
@@ -192,6 +220,18 @@ public final class ConsumerApplication {
       }
     }
     return connection;
+  }
+
+  private static Path extractProducer(Path tempDir) throws IOException {
+    Path producerDir = Files.createTempDirectory(tempDir, "producer");
+    try (var producerStream = ConsumerApplication.class.getResourceAsStream("/satviz-producer.zip")) {
+      Path producerZip = producerDir.resolve("producer.zip");
+      Files.copy(producerStream, producerZip);
+      try (ZipFile zip = new ZipFile(producerZip.toFile())) {
+        zip.extractAll(producerDir.toString());
+      }
+    }
+    return producerDir.resolve("satviz-producer/bin/");
   }
 
   private static void newConnectionAvailable(ProducerId pid) {

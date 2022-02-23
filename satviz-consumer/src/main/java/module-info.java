@@ -11,6 +11,7 @@ module edu.kit.satviz.consumer {
   requires javafx.controls;
   requires jdk.incubator.foreign;
   requires edu.kit.satviz.common;
+  requires zip4j;
 
   exports edu.kit.satviz.consumer.gui.config to javafx.graphics;
 

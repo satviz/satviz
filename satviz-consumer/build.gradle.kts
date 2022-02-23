@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":satviz-common"))
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
+    implementation("net.lingala.zip4j:zip4j:2.9.1")
     implementation(project(":satviz-parsers"))
 }
 
@@ -76,11 +77,13 @@ tasks {
     }
 
     processResources {
+        val producerBuild = project(":satviz-producer").tasks.getByName("jlinkZip")
+        dependsOn.add(producerBuild)
         dependsOn.add("make")
         from(consumerLib)
         from(ogdfLib)
         from(coinLib)
-        from(project(":satviz-producer").tasks.getByName("jlinkZip").outputs.files.singleFile)
+        from(producerBuild.outputs.files.singleFile)
     }
 
     test {

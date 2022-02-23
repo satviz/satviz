@@ -53,7 +53,8 @@ public class ExternalClauseBuffer implements AutoCloseable {
     this.readLock = new ReentrantLock();
     Path lookupFile = Files.createTempFile(dir, "satviz-clause-lookup", null);
     Path clauseFile = Files.createTempFile(dir, "satviz-clauses", null);
-
+    lookupFile.toFile().deleteOnExit();
+    clauseFile.toFile().deleteOnExit();
     this.clauseLookupReadFile = new RandomAccessFile(lookupFile.toFile(), "r");
     this.clauseLookupOutStream = new BufferedOutputStream(Files.newOutputStream(lookupFile));
     this.clauseReadFile = new RandomAccessFile(clauseFile.toFile(), "r");
