@@ -178,7 +178,7 @@
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
                                        <children>
-                                    <Spinner fx:id="receivedClausesSpinner" editable="true" onKeyPressed="#updateReceivedClausesSpinner" onMouseClicked="#updateReceivedClausesSpinner" prefHeight="25.0" prefWidth="111.0">
+                                    <Spinner fx:id="processedClausesSpinner" editable="true" onKeyPressed="#updateProcessedClausesSpinner" onMouseClicked="#updateProcessedClausesSpinner" prefHeight="25.0" prefWidth="111.0">
                                     </Spinner>
                                     <Label fx:id="totalClausesLabel" GridPane.columnIndex="1">
                                        <GridPane.margin>
@@ -198,7 +198,7 @@
                              <Insets bottom="3.0" />
                          </padding>
                      </HBox>
-                     <Slider fx:id="receivedClausesSlider" onKeyReleased="#updateReceivedClausesSlider" onMouseReleased="#updateReceivedClausesSlider" prefHeight="16.0" prefWidth="169.0">
+                     <Slider fx:id="processedClausesSlider" onKeyReleased="#updateProcessedClausesSlider" onMouseReleased="#updateProcessedClausesSlider" prefHeight="16.0" prefWidth="169.0">
                          <opaqueInsets>
                              <Insets top="2.5" />
                          </opaqueInsets>
