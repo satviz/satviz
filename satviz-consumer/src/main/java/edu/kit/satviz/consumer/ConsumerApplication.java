@@ -12,6 +12,7 @@ import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.consumer.graph.WeightUpdate;
+import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.gui.config.ConfigStarter;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationController;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationStarter;
@@ -20,6 +21,7 @@ import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.Mediator;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
 import edu.kit.satviz.network.ConsumerConnection;
+import edu.kit.satviz.network.OfferType;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
@@ -66,18 +68,23 @@ public final class ConsumerApplication {
     logger.setLevel(Level.FINER);
     logger.log(Level.FINER, "Starting consumer with arguments {0}", args);
     ConsumerConfig config = getStartingConfig(args);
+    if (config == null) {
+      return;
+    }
     Path tempDir = Files.createTempDirectory("satviz");
     tempDir.toFile().deleteOnExit();
     logger.info("Setting up network connection");
     ConsumerConnection connection = setupNetworkConnection(config, tempDir);
     logger.log(Level.INFO, "Producer {0} connected", pid);
-    long hash = Hashing.hashContent(Files.newInputStream(config.getInstancePath()));
-    if (hash != pid.instanceHash()) {
-      logger.log(Level.SEVERE, "SAT instance mismatch: {0} (local) vs {1} (remote)",
-          new Object[] { hash, pid.instanceHash() });
-      connection.disconnect(pid);
-      System.exit(1);
-      return;
+    if (pid.type() == OfferType.SOLVER) {
+      long hash = Hashing.hashContent(Files.newInputStream(config.getInstancePath()));
+      if (hash != pid.instanceHash()) {
+        logger.log(Level.SEVERE, "SAT instance mismatch: {0} (local) vs {1} (remote)",
+            new Object[] { hash, pid.instanceHash() });
+        connection.disconnect(pid);
+        System.exit(1);
+        return;
+      }
     }
 
     int variableAmount;
@@ -124,14 +131,19 @@ public final class ConsumerApplication {
       try {
         //WeightUpdate update = new WeightUpdate();
         //update.add(256, 257, 1);
+        HeatUpdate u = new HeatUpdate();
+        for (int i = 0; i < variableAmount; i++) {
+          u.add(i, 0);
+        }
+        components.graph.submitUpdate(u);
         components.graph.submitUpdate(initialUpdate);
         components.graph.recalculateLayout();
         components.controller.nextFrame();
       } catch (Throwable e) {
         e.printStackTrace();
       }
+    }).get();
 
-    });
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)
         .setGlScheduler(glScheduler)
@@ -143,11 +155,12 @@ public final class ConsumerApplication {
         .createMediator();
 
     if (!config.isNoGui()) {
-      VisualizationController visController = new VisualizationController(mediator, config);
+      VisualizationController visController = new VisualizationController(mediator, config, variableAmount);
       coordinator.registerChangeListener(visController::onClauseUpdate);
 
       // TODO: 21/02/2022 add back in
-      //VisualizationStarter.setVisualizationController(visController);
+      VisualizationStarter.setVisualizationController(visController);
+      GuiUtils.launch(VisualizationStarter.class);
       //Application.launch(VisualizationStarter.class);
     }
 
@@ -157,7 +170,7 @@ public final class ConsumerApplication {
       mediator.startOrStopRecording();
     }
 
-    mediator.pauseOrContinueVisualization();
+    mediator.startRendering();
 
 
 
@@ -165,9 +178,14 @@ public final class ConsumerApplication {
     //videoController.close();
   }
 
-  private static ConsumerConfig getStartingConfig(String[] args) {
+  private static ConsumerConfig getStartingConfig(String[] args) throws InterruptedException {
     if (args.length == 0) {
-      Application.launch(ConfigStarter.class);
+      GuiUtils.launch(ConfigStarter.class);
+      synchronized (GuiUtils.CONFIG_MONITOR) {
+        while (!ConfigStarter.isDone()) {
+          GuiUtils.CONFIG_MONITOR.wait();
+        }
+      }
       return ConfigStarter.getConsumerConfig();
     } else {
       // TODO: parse Arguments from CLI
