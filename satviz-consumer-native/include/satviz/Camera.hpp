@@ -28,16 +28,17 @@ private:
     inline float current() const { return curValue; }
   };
 
-  float position[2];
+  SmoothedValue xpos;
+  SmoothedValue ypos;
   SmoothedValue zoom;
 
 public:
   Camera();
 
-  inline float getX() { return position[0]; }
-  inline void setX(float v) { position[0] = v; }
-  inline float getY() { return position[1]; }
-  inline void setY(float v) { position[1] = v; }
+  inline float getX() { return xpos.get(); }
+  inline void setX(float v) { xpos.set(v); }
+  inline float getY() { return ypos.get(); }
+  inline void setY(float v) { ypos.set(v); }
   float getZoom() { return zoom.get(); }
   void setZoom(float z) { zoom.set(z); }
 

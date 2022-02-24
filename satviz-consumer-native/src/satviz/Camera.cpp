@@ -23,9 +23,11 @@ void Camera::SmoothedValue::set(float v) {
   clock.restart();
 }
 
-Camera::Camera() : position{0.0f, 0.0f}, zoom(2.0f) {}
+Camera::Camera() : xpos(), ypos(), zoom(2.0f) {}
 
 void Camera::update() {
+  xpos.update();
+  ypos.update();
   zoom.update();
 }
 
@@ -35,8 +37,8 @@ void Camera::toMatrix(float matrix[16], int width, int height) {
   matrix[ 0] = 2.0f / (float) width  * zoom;
   matrix[ 5] = 2.0f / (float) height * zoom;
   matrix[10] = -1.0f;
-  matrix[12] = -position[0] * zoom;
-  matrix[13] = -position[1] * zoom;
+  matrix[12] = -xpos.current() * zoom;
+  matrix[13] = -ypos.current() * zoom;
   matrix[15] = 1.0f;
 }
 
