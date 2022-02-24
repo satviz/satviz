@@ -22,6 +22,7 @@ import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.Mediator;
 import edu.kit.satviz.consumer.processing.RecencyHeatmap;
 import edu.kit.satviz.consumer.processing.RingInteractionGraph;
+import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
 import edu.kit.satviz.network.ConsumerConnection;
 import edu.kit.satviz.network.OfferType;
 import edu.kit.satviz.network.ProducerId;
