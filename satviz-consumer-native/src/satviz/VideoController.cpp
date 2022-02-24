@@ -30,9 +30,9 @@ void VideoController::processEvent(sf::Event &event) {
   if (event.type == sf::Event::MouseWheelScrolled) {
     float factor = 1.0f;
     if (event.mouseWheelScroll.delta < 0.0f) {
-      factor = 1.0f / 1.5f;
+      factor = 1.0f / 1.3f;
     } else {
-      factor = 1.0f * 1.5f;
+      factor = 1.0f * 1.3f;
     }
     camera.setZoom(camera.getZoom() * factor);
   }
@@ -86,6 +86,7 @@ void VideoController::nextFrame() {
   while (display->pollEvent(event)) {
     processEvent(event);
   }
+  camera.update();
   display->startFrame();
   renderer->draw(camera, display->getWidth(), display->getHeight());
   if (recording_state == REC_ON || recording_state == REC_WINDUP) {
