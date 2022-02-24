@@ -48,6 +48,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private ChoiceBox<WeightFactor> weightFactorChoiceBox;
   @FXML
+  private Spinner<Integer> bufferSizeSpinner;
+  @FXML
   private Spinner<Integer> windowSizeSpinner;
   @FXML
   private ColorPicker coldColorColorPicker;
@@ -197,6 +199,11 @@ public class GeneralConfigController extends ConfigController {
   protected void initializeComponents() {
     weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
 
+    GuiUtils.initializeIntegerSpinner(bufferSizeSpinner,
+        ConsumerConfig.MIN_BUFFER_SIZE,
+        ConsumerConfig.MAX_BUFFER_SIZE,
+        ConsumerConfig.DEFAULT_BUFFER_SIZE);
+
     GuiUtils.initializeIntegerSpinner(windowSizeSpinner,
         ConsumerConfig.MIN_WINDOW_SIZE,
         ConsumerConfig.MAX_WINDOW_SIZE,
@@ -214,6 +221,8 @@ public class GeneralConfigController extends ConfigController {
     recordFromStartCheckBox.setSelected(ConsumerConfig.DEFAULT_RECORD_IMMEDIATELY);
 
     weightFactorChoiceBox.setValue(ConsumerConfig.DEFAULT_WEIGHT_FACTOR);
+
+    bufferSizeSpinner.getValueFactory().setValue(ConsumerConfig.DEFAULT_BUFFER_SIZE);
 
     windowSizeSpinner.getValueFactory().setValue(ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
@@ -258,6 +267,8 @@ public class GeneralConfigController extends ConfigController {
       weightFactorChoiceBox.setValue(weightFactor);
     }
 
+    bufferSizeSpinner.getValueFactory().setValue(config.getBufferSize());
+
     windowSizeSpinner.getValueFactory().setValue(config.getWindowSize());
 
     HeatmapColors colors = config.getHeatmapColors();
@@ -283,6 +294,8 @@ public class GeneralConfigController extends ConfigController {
     config.setRecordImmediately(recordFromStartCheckBox.isSelected());
 
     config.setWeightFactor(weightFactorChoiceBox.getValue());
+
+    config.setBufferSize(bufferSizeSpinner.getValue());
 
     config.setWindowSize(windowSizeSpinner.getValue());
 
