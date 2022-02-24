@@ -5,7 +5,9 @@ import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A specialisation of {@link Heatmap}.
@@ -14,7 +16,7 @@ import java.util.List;
  */
 public class RecencyHeatmap extends Heatmap {
 
-  private final List<Clause> setToZero;
+  private final Set<Integer> setToZero;
 
   /**
    * Create a recency-based heatmap with the given initial size.
@@ -23,7 +25,7 @@ public class RecencyHeatmap extends Heatmap {
    */
   public RecencyHeatmap(int initialSize) {
     super(initialSize);
-    this.setToZero = new ArrayList<>();
+    this.setToZero = new HashSet<>();
   }
 
   @Override
@@ -54,16 +56,16 @@ public class RecencyHeatmap extends Heatmap {
   }
 
   private void zeroPendingVariables(HeatUpdate update) {
-    for (Clause clause : setToZero) {
-      for (int literal : clause.literals()) {
-        update.add(Math.abs(literal) - 1, 0);
-      }
+    for (int variable : setToZero) {
+      update.add(variable - 1, 0);
     }
     setToZero.clear();
   }
 
   @Override
   protected void removeClause(Clause clause) {
-    setToZero.add(clause);
+    for (int literal : clause.literals()) {
+      setToZero.add(Math.abs(literal));
+    }
   }
 }
