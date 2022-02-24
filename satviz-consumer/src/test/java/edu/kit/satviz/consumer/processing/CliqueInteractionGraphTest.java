@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * The following tests check the functionality of the <code>VariableInteractionGraph</code> class.
  */
-class VariableInteractionGraphTest {
+class CliqueInteractionGraphTest {
 
   private static final WeightFactor INITIAL_FACTOR = WeightFactor.CONSTANT;
 
@@ -69,7 +69,7 @@ class VariableInteractionGraphTest {
    */
   @BeforeEach
   void setupBeforeEach() {
-    vig = new VariableInteractionGraph(INITIAL_FACTOR);
+    vig = new CliqueInteractionGraph(INITIAL_FACTOR);
   }
 
   /**

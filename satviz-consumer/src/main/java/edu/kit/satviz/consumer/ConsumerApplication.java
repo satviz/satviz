@@ -19,6 +19,7 @@ import edu.kit.satviz.consumer.gui.visualization.VisualizationStarter;
 import edu.kit.satviz.consumer.processing.ClauseCoordinator;
 import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.Mediator;
+import edu.kit.satviz.consumer.processing.RingInteractionGraph;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
 import edu.kit.satviz.network.ConsumerConnection;
 import edu.kit.satviz.network.OfferType;
@@ -89,9 +90,8 @@ public final class ConsumerApplication {
 
     int variableAmount;
     logger.finer("Reading SAT instance file");
-    VariableInteractionGraph vig = new VariableInteractionGraph(config.getWeightFactor());;
+    VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());;
     WeightUpdate initialUpdate;
-    // TODO: 21/02/2022 initial layout
     try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
       variableAmount = dimacsFile.getVariableAmount();
       logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
