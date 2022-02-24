@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<TitledPane alignment="CENTER" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="542.0" prefWidth="348.0" text="Visualization Controls" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<TitledPane alignment="CENTER" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="542.0" prefWidth="457.0" text="Visualization Controls" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
    <content>
       <VBox prefHeight="251.0" prefWidth="311.0">
          <children>
@@ -81,8 +81,8 @@
             </VBox>
             <GridPane style="-fx-border-color: lightgrey;">
               <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="161.0" minWidth="10.0" prefWidth="105.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="230.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="326.0" minWidth="0.0" prefWidth="211.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="444.0" minWidth="10.0" prefWidth="233.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -90,12 +90,12 @@
                <children>
                   <HBox alignment="CENTER_RIGHT" prefHeight="30.0" prefWidth="192.0" GridPane.columnIndex="1">
                      <children>
-                        <Spinner fx:id="highlightVariableSpinner" editable="true" onKeyPressed="#highlightVariable" onMouseClicked="#highlightVariable" prefHeight="24.0" prefWidth="120.0">
+                        <Spinner fx:id="highlightVariableSpinner" editable="true" onKeyPressed="#highlightVariable" onMouseClicked="#highlightVariable" prefHeight="25.0" prefWidth="122.0">
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Spinner>
-                        <Button fx:id="clearHighlightVariableButton" mnemonicParsing="false" onAction="#clearHighlightVariable" prefHeight="25.0" prefWidth="74.0" text="Clear" />
+                        <Button fx:id="clearHighlightVariableButton" mnemonicParsing="false" onAction="#clearHighlightVariable" prefHeight="25.0" prefWidth="96.0" text="Clear" />
                      </children>
                   </HBox>
                   <Label prefWidth="127.0" text="Highlight Variable:" />
@@ -112,15 +112,15 @@
                   <Insets bottom="2.5" top="2.5" />
                </VBox.margin>
                <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="155.0" minWidth="10.0" prefWidth="139.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="149.5" minWidth="10.0" prefWidth="149.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="350.0" minWidth="10.0" prefWidth="285.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="287.0" minWidth="10.0" prefWidth="159.0" />
                </columnConstraints>
                <rowConstraints>
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Button fx:id="screenshotButton" mnemonicParsing="false" onAction="#screenshot" text="Screenshot" />
-                  <Button fx:id="openScreenshotFolderButton" mnemonicParsing="false" onAction="#openScreenshotFolder" text="Open Screenshot Folder" GridPane.columnIndex="1">
+                  <Button fx:id="screenshotButton" mnemonicParsing="false" onAction="#screenshot" prefHeight="25.0" prefWidth="114.0" text="Screenshot" />
+                  <Button fx:id="openScreenshotFolderButton" mnemonicParsing="false" onAction="#openScreenshotFolder" prefHeight="21.0" prefWidth="156.0" text="Open Screenshot Folder" GridPane.columnIndex="1">
                      <font>
                         <Font size="10.0" />
                      </font>
@@ -165,20 +165,19 @@
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin></Button>
-                        <VBox prefHeight="57.0" prefWidth="187.0">
+                        <VBox prefHeight="57.0" prefWidth="288.0">
                            <children>
                               <Label text="Clauses Processed" />
                                    <GridPane hgap="2.0" prefHeight="66.0" prefWidth="187.0">
                                        <columnConstraints>
-                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="151.0" minWidth="10.0" prefWidth="114.0" />
-                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="168.5" minWidth="10.0" prefWidth="121.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="168.5" minWidth="10.0" prefWidth="121.0" />
+                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="151.0" minWidth="10.0" prefWidth="96.0" />
+                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="168.5" minWidth="10.0" prefWidth="89.0" />
                                        </columnConstraints>
                                        <rowConstraints>
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                        </rowConstraints>
                                        <children>
-                                    <Spinner fx:id="processedClausesSpinner" editable="true" onKeyPressed="#updateProcessedClausesSpinner" onMouseClicked="#updateProcessedClausesSpinner" prefHeight="25.0" prefWidth="111.0">
+                                    <Spinner fx:id="processedClausesSpinner" editable="true" onKeyPressed="#updateProcessedClausesSpinner" onMouseClicked="#updateProcessedClausesSpinner" prefHeight="25.0" prefWidth="143.0">
                                     </Spinner>
                                     <Label fx:id="totalClausesLabel" GridPane.columnIndex="1">
                                        <GridPane.margin>
