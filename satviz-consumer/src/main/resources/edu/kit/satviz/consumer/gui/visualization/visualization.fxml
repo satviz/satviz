@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<TitledPane alignment="CENTER" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="465.0" prefWidth="348.0" text="Visualization Controls" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<TitledPane alignment="CENTER" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="542.0" prefWidth="348.0" text="Visualization Controls" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
    <content>
       <VBox prefHeight="251.0" prefWidth="311.0">
          <children>
@@ -81,21 +81,21 @@
             </VBox>
             <GridPane style="-fx-border-color: lightgrey;">
               <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="161.0" minWidth="10.0" prefWidth="105.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="230.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                  <HBox alignment="CENTER_RIGHT" prefHeight="30.0" prefWidth="192.0" GridPane.columnIndex="1">
                      <children>
                         <Spinner fx:id="highlightVariableSpinner" editable="true" onKeyPressed="#highlightVariable" onMouseClicked="#highlightVariable" prefHeight="24.0" prefWidth="120.0">
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Spinner>
-                        <Button fx:id="clearHighlightVariableButton" mnemonicParsing="false" onAction="#clearHighlightVariable" text="Clear"/>
+                        <Button fx:id="clearHighlightVariableButton" mnemonicParsing="false" onAction="#clearHighlightVariable" prefHeight="25.0" prefWidth="74.0" text="Clear" />
                      </children>
                   </HBox>
                   <Label prefWidth="127.0" text="Highlight Variable:" />
@@ -130,21 +130,21 @@
                   <Insets bottom="2.0" left="5.0" top="2.0" />
                </padding>
             </GridPane>
-            <VBox prefHeight="18.0" prefWidth="307.0" style="-fx-border-color: lightgrey;">
+            <VBox prefHeight="73.0" prefWidth="342.0" style="-fx-border-color: lightgrey;">
                <children>
                   <Label text="Record">
                      <font>
                         <Font size="16.0" />
                      </font>
                   </Label>
-                  <HBox prefHeight="0.0" prefWidth="307.0">
+                  <HBox prefHeight="39.0" prefWidth="340.0">
                      <children>
-                        <Button fx:id="startOrStopRecordingButton" mnemonicParsing="false" onAction="#startOrStopRecording" text="🔴">
+                        <Button fx:id="startOrStopRecordingButton" mnemonicParsing="false" onAction="#startOrStopRecording" prefHeight="40.0" prefWidth="40.0" text="🔴">
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="pauseOrContinueRecordingButton" mnemonicParsing="false" onAction="#pauseOrContinueRecording" prefHeight="25.0" prefWidth="28.0" />
+                        <Button fx:id="pauseOrContinueRecordingButton" mnemonicParsing="false" onAction="#pauseOrContinueRecording" prefHeight="40.0" prefWidth="40.0" />
                      </children>
                   </HBox>
                </children>
@@ -152,30 +152,44 @@
                   <Insets top="17.5" />
                </VBox.margin>
             </VBox>
-             <VBox prefHeight="59.0" prefWidth="307.0" style="-fx-border-color: lightgrey;">
+             <VBox prefHeight="126.0" prefWidth="384.0" style="-fx-border-color: lightgrey;">
                  <children>
                   <Label text="Time Controls">
                      <font>
                         <Font size="16.0" />
                      </font>
                   </Label>
-                     <HBox prefHeight="8.0" prefWidth="291.0" spacing="2.5">
+                     <HBox prefHeight="60.0" prefWidth="382.0" spacing="2.5">
                          <children>
-                             <Button fx:id="pauseOrContinueVisualizationButton" mnemonicParsing="false" onAction="#pauseOrContinueVisualization" prefHeight="25.0" prefWidth="28.0" />
-                             <GridPane hgap="2.0" prefHeight="25.0" prefWidth="237.0">
-                                 <columnConstraints>
-                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="151.0" minWidth="10.0" prefWidth="114.0" />
-                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="168.5" minWidth="10.0" prefWidth="121.0" />
-                                 </columnConstraints>
-                                 <rowConstraints>
-                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                 </rowConstraints>
-                                 <children>
-                                     <Label prefHeight="17.0" prefWidth="91.0" text="Clauses Received" GridPane.columnIndex="1" />
-                              <Spinner fx:id="receivedClausesSpinner" editable="true" onKeyPressed="#updateReceivedClausesSpinner" onMouseClicked="#updateReceivedClausesSpinner" prefHeight="25.0" prefWidth="111.0" />
-                                 </children>
-                             </GridPane>
-                             <Button fx:id="relayoutButton" mnemonicParsing="false" onAction="#relayout" text="Re-layout"/>
+                             <Button fx:id="pauseOrContinueVisualizationButton" mnemonicParsing="false" onAction="#pauseOrContinueVisualization" prefHeight="40.0" prefWidth="40.0">
+                           <HBox.margin>
+                              <Insets right="5.0" />
+                           </HBox.margin></Button>
+                        <VBox prefHeight="57.0" prefWidth="187.0">
+                           <children>
+                              <Label text="Clauses Processed" />
+                                   <GridPane hgap="2.0" prefHeight="66.0" prefWidth="187.0">
+                                       <columnConstraints>
+                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="151.0" minWidth="10.0" prefWidth="114.0" />
+                                           <ColumnConstraints hgrow="SOMETIMES" maxWidth="168.5" minWidth="10.0" prefWidth="121.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="168.5" minWidth="10.0" prefWidth="121.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                       </rowConstraints>
+                                       <children>
+                                    <Spinner fx:id="receivedClausesSpinner" editable="true" onKeyPressed="#updateReceivedClausesSpinner" onMouseClicked="#updateReceivedClausesSpinner" prefHeight="25.0" prefWidth="111.0">
+                                    </Spinner>
+                                    <Label fx:id="totalClausesLabel" GridPane.columnIndex="1">
+                                       <GridPane.margin>
+                                          <Insets left="5.0" />
+                                       </GridPane.margin>
+                                    </Label>
+                                       </children>
+                                   </GridPane>
+                           </children>
+                        </VBox>
+                             <Button fx:id="relayoutButton" mnemonicParsing="false" onAction="#relayout" prefHeight="25.0" prefWidth="103.0" text="Re-layout" />
                          </children>
                          <VBox.margin>
                              <Insets top="5.0" />
@@ -184,7 +198,7 @@
                              <Insets bottom="3.0" />
                          </padding>
                      </HBox>
-                     <Slider fx:id="receivedClausesSlider" prefHeight="16.0" prefWidth="169.0" onMouseReleased="#updateReceivedClausesSlider" onKeyReleased="#updateReceivedClausesSlider">
+                     <Slider fx:id="receivedClausesSlider" onKeyReleased="#updateReceivedClausesSlider" onMouseReleased="#updateReceivedClausesSlider" prefHeight="16.0" prefWidth="169.0">
                          <opaqueInsets>
                              <Insets top="2.5" />
                          </opaqueInsets>

@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.paint.Color;
@@ -34,6 +35,7 @@ public class VisualizationController {
   private static final int MIN_RECEIVED_CLAUSES = 0;
   private static final String PLAY_SYMBOL = "▶";
   private static final String PAUSE_SYMBOL = "⏸";
+  private static final String TOTAL_CLAUSES_RECEIVED_DELIMITER = "/ ";
 
   // ATTRIBUTES (FXML)
 
@@ -61,6 +63,8 @@ public class VisualizationController {
   private Button pauseOrContinueVisualizationButton;
   @FXML
   private Spinner<Integer> receivedClausesSpinner; // TODO: convert to Spinner<Long>
+  @FXML
+  private Label totalClausesLabel;
   @FXML
   private Slider receivedClausesSlider;
   @FXML
@@ -138,6 +142,8 @@ public class VisualizationController {
         (int) currentClausesReceived);
 
     GuiUtils.setOnFocusLost(receivedClausesSpinner, this::updateReceivedClausesSpinner);
+
+    totalClausesLabel.setText(TOTAL_CLAUSES_RECEIVED_DELIMITER + totalClausesReceived);
 
     receivedClausesSlider.setMin(MIN_RECEIVED_CLAUSES);
     receivedClausesSlider.setMax(totalClausesReceived);
@@ -257,6 +263,9 @@ public class VisualizationController {
           MIN_RECEIVED_CLAUSES,
           (int) totalUpdates,
           (int) currentUpdate);
+
+      // update label
+      totalClausesLabel.setText(TOTAL_CLAUSES_RECEIVED_DELIMITER + totalUpdates);
 
       // update slider
       receivedClausesSlider.setMax(totalUpdates);
