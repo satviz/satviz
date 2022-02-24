@@ -44,6 +44,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
       try (source) {
         logger.info("Starting to send clause updates");
         source.open();
+        logger.info("Source closed.");
       } catch (SourceException e) {
         logger.log(Level.SEVERE, "Error draining source", e);
         connection.terminateFailed(e.getMessage());
@@ -60,7 +61,7 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
    */
   @Override
   public void onDisconnect(String reason) {
-    logger.log(Level.WARNING, "Consumer connection disconnected. Reason: {}", reason);
+    logger.log(Level.WARNING, "Consumer connection disconnected. Reason: {0}", reason);
     try {
       source.close();
     } catch (Exception e) {

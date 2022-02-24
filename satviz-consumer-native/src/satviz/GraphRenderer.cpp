@@ -105,12 +105,10 @@ void GraphRenderer::init() {
   }
 
   // Set up heatmap color palette
-  const int heat_palette_width = 4;
+  const int heat_palette_width = 2;
   const GLuint palette_colors[] = {
-      0xFFA0A0A0,
-      0xFF8C8000,
-      0xFF4DB3F2,
-      0xFF00A0FF,
+      0xFFFF0000,
+      0xFF0000FF,
   };
   glBindTexture(GL_TEXTURE_1D, heat_palette);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -177,12 +175,12 @@ void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
 void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
   float (*area)[2] = (float (*)[2]) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
-  printf("onLayoutChange():\n");
+  //printf("onLayoutChange():\n");
   for (ogdf::node node : changed) {
     int idx = node->index();
     area[idx][0] = (float) my_graph.getX(node);
     area[idx][1] = (float) my_graph.getY(node);
-    printf("\t[%03d] = %f, %f\n", idx, area[idx][0], area[idx][1]);
+    //printf("\t[%03d] = %f, %f\n", idx, area[idx][0], area[idx][1]);
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }

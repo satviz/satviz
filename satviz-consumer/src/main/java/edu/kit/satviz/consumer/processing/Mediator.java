@@ -10,7 +10,6 @@ import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import edu.kit.satviz.serial.SerializationException;
 import java.io.IOException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -24,16 +23,17 @@ public class Mediator implements ConsumerConnectionListener {
   private final Heatmap heatmap;
   private final VariableInteractionGraph vig;
   private final ConsumerConfig config;
-  private final ScheduledExecutorService advanceScheduler;
+  private final ScheduledExecutorService glScheduler;
 
   private boolean recording;
   private boolean recordingPaused;
-  private ScheduledFuture<?> currentTask;
+  private volatile boolean visualizationPaused;
   private int recordedVideos;
   private volatile int clausesPerAdvance;
   private volatile long period;
 
   private Mediator(
+      ScheduledExecutorService glScheduler,
       Graph graph,
       VideoController controller,
       ClauseCoordinator coordinator,
@@ -41,6 +41,7 @@ public class Mediator implements ConsumerConnectionListener {
       VariableInteractionGraph vig,
       ConsumerConfig config
   ) {
+    this.glScheduler = glScheduler;
     this.graph = graph;
     this.videoController = controller;
     this.coordinator = coordinator;
@@ -50,10 +51,10 @@ public class Mediator implements ConsumerConnectionListener {
     this.recording = false;
     this.recordedVideos = 0;
     this.recordingPaused = false;
-    this.advanceScheduler = Executors.newSingleThreadScheduledExecutor();
-    this.currentTask = null;
+    this.visualizationPaused = true;
     this.clausesPerAdvance = config.getBufferSize();
     this.period = config.getPeriod();
+    //System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -63,7 +64,7 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void updateWindowSize(int windowSize) {
-    heatmap.setHeatmapSize(windowSize);
+    glScheduler.submit(() -> heatmap.setHeatmapSize(windowSize));
   }
 
   public void updateHeatmapColdColor(Color color) {
@@ -104,15 +105,14 @@ public class Mediator implements ConsumerConnectionListener {
 
   public void startOrStopRecording() {
     if (recording) {
-      if (!recordingPaused) {
-        videoController.stopRecording();
-      }
-      videoController.finishRecording();
+      glScheduler.submit(videoController::finishRecording);
     } else {
-      videoController.startRecording(
-          config.getVideoTemplatePath().replace("{}", String.valueOf(++recordedVideos)),
-          "theora"
-      );
+      String filename = config.getVideoTemplatePath()
+          .replace("{}", String.valueOf(++recordedVideos));
+      glScheduler.submit(() -> {
+        videoController.startRecording(filename, "theora");
+        System.out.println("Recording started");
+      });
     }
     recordingPaused = false;
     recording = !recording;
@@ -121,39 +121,41 @@ public class Mediator implements ConsumerConnectionListener {
   public void pauseOrContinueRecording() {
     if (recording) {
       if (recordingPaused) {
-        videoController.resumeRecording();
+        glScheduler.submit(videoController::resumeRecording);
       } else {
-        videoController.stopRecording();
+        glScheduler.submit(videoController::stopRecording);
       }
       recordingPaused = !recordingPaused;
     }
   }
 
+  public void startRendering() {
+    glScheduler.scheduleAtFixedRate(
+        this::render,
+        0,
+        period,
+        TimeUnit.MILLISECONDS
+    );
+    visualizationPaused = false;
+  }
+
   public void pauseOrContinueVisualization() {
-    if (currentTask == null) {
-      currentTask = advanceScheduler.scheduleAtFixedRate(
-          this::periodicallyAdvance,
-          0,
-          period,
-          TimeUnit.MILLISECONDS
-      );
-    } else {
-      currentTask.cancel(false);
-      currentTask = null;
-    }
+    visualizationPaused = !visualizationPaused;
   }
 
   public void relayout() {
-    graph.recalculateLayout();
+    glScheduler.submit(graph::recalculateLayout);
   }
 
   public void seekToUpdate(long index) {
-    try {
-      coordinator.seekToUpdate(index);
-    } catch (IOException | SerializationException e) { // TODO: 10/02/2022
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
+    glScheduler.submit(() -> {
+      try {
+        coordinator.seekToUpdate(index);
+      } catch (IOException | SerializationException e) { // TODO: 10/02/2022
+        e.printStackTrace();
+        glScheduler.shutdown();
+      }
+    });
   }
 
   public long currentUpdate() {
@@ -173,17 +175,23 @@ public class Mediator implements ConsumerConnectionListener {
     }
   }
 
-  private void periodicallyAdvance() {
+  private void render() {
     try {
-      coordinator.advanceVisualization(clausesPerAdvance);
-    } catch (IOException | SerializationException e) {
+      //System.out.println("Advance call");
+      if (!visualizationPaused) {
+        coordinator.advanceVisualization(clausesPerAdvance);
+      }
+      //System.out.println("Post advance");
+      videoController.nextFrame();
+      //System.out.println("Post nextframe");
+    } catch (Throwable e) {
       e.printStackTrace();
-      currentTask.cancel(false);
     }
   }
 
   @Override
   public void onClauseUpdate(ProducerId pid, ClauseUpdate c) {
+    //System.out.println("Clause " + c);
     try {
       coordinator.addClauseUpdate(c);
     } catch (IOException e) { // TODO: 10/02/2022
@@ -208,7 +216,11 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   private void advanceRestAndShutdown() {
-    advanceScheduler.shutdown();
+    if (true) { // TODO: 22/02/2022 remove
+      return;
+    }
+    System.out.println("shutdown");
+    glScheduler.shutdown();
     int updateAmount = (int) (coordinator.totalUpdateCount() - coordinator.currentUpdate());
     try {
       coordinator.advanceVisualization(updateAmount);
@@ -224,6 +236,7 @@ public class Mediator implements ConsumerConnectionListener {
     private Heatmap heatmap;
     private VariableInteractionGraph vig;
     private ConsumerConfig config;
+    private ScheduledExecutorService glScheduler;
 
     public MediatorBuilder setGraph(Graph graph) {
       this.graph = graph;
@@ -250,6 +263,11 @@ public class Mediator implements ConsumerConnectionListener {
       return this;
     }
 
+    public MediatorBuilder setGlScheduler(ScheduledExecutorService scheduler) {
+      this.glScheduler = scheduler;
+      return this;
+    }
+
     public MediatorBuilder setConfig(ConsumerConfig config) {
       this.config = config;
       return this;
@@ -257,6 +275,7 @@ public class Mediator implements ConsumerConnectionListener {
 
     public Mediator createMediator() {
       return new Mediator(
+          glScheduler,
           graph,
           controller,
           coordinator,

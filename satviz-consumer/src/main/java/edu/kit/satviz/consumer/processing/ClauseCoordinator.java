@@ -81,6 +81,7 @@ public class ClauseCoordinator implements AutoCloseable {
     this.variableAmount = variableAmount;
 
     this.snapshotDir = Files.createTempDirectory(tempDir, "satviz-snapshots");
+    snapshotDir.toFile().deleteOnExit();
     this.snapshots = new TreeMap<>();
     this.processors = new CopyOnWriteArrayList<>();
     this.changeListener = () -> {
@@ -239,6 +240,7 @@ public class ClauseCoordinator implements AutoCloseable {
     try {
       long current = currentUpdate();
       Path snapshotFile = Files.createTempFile(snapshotDir, "snapshot", null);
+      snapshotFile.toFile().deleteOnExit();
       try (var stream = new BufferedOutputStream(Files.newOutputStream(snapshotFile))) {
         for (ClauseUpdateProcessor processor : processors) {
           processor.serialize(stream);

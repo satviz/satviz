@@ -20,6 +20,11 @@ import jdk.incubator.foreign.SegmentAllocator;
  */
 public class VideoController extends NativeObject {
 
+  private static final Struct START_RECORDING_RESULT = Struct.builder()
+      .field("encoder", long.class, CLinker.C_POINTER)
+      .field("code", int.class, CLinker.C_INT)
+      .build();
+
   private static final MethodHandle NEW_CONTROLLER = lookupFunction(
       "new_video_controller",
       MethodType.methodType(MemoryAddress.class, MemoryAddress.class,
@@ -38,7 +43,7 @@ public class VideoController extends NativeObject {
       "start_recording",
       MethodType.methodType(MemorySegment.class, MemoryAddress.class,
           MemoryAddress.class, MemoryAddress.class),
-      FunctionDescriptor.of(CLinker.C_INT, CLinker.C_POINTER,
+      FunctionDescriptor.of(START_RECORDING_RESULT.getLayout(), CLinker.C_POINTER,
           CLinker.C_POINTER, CLinker.C_POINTER)
   );
 
@@ -71,11 +76,6 @@ public class VideoController extends NativeObject {
       MethodType.methodType(void.class, MemoryAddress.class),
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
-
-  private static final Struct START_RECORDING_RESULT = Struct.builder()
-      .field("encoder", long.class, CLinker.C_POINTER)
-      .field("code", int.class, CLinker.C_INT)
-      .build();
 
   private MemoryAddress currentEncoderAddr;
 
@@ -124,8 +124,8 @@ public class VideoController extends NativeObject {
       MemorySegment res = (MemorySegment) START_RECORDING.invokeExact(
           SegmentAllocator.ofScope(local),
           getPointer(),
-          CLinker.toCString(fileName, local),
-          CLinker.toCString(encoder, local)
+          CLinker.toCString(fileName, local).address(),
+          CLinker.toCString(encoder, local).address()
       );
       int resultCode = (int) START_RECORDING_RESULT.varHandle("code").get(res);
       if (resultCode == -1) {

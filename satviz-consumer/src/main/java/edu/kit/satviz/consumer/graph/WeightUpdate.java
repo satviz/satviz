@@ -53,6 +53,9 @@ public final class WeightUpdate implements GraphUpdate {
 
   @Override
   public void submitTo(Graph graph) {
+    if (values.isEmpty()) {
+      return;
+    }
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
       MemorySegment segment = toSegment(local);
       SUBMIT_WEIGHT_UPDATE.invokeExact(graph.getPointer(), segment.address());
@@ -99,8 +102,17 @@ public final class WeightUpdate implements GraphUpdate {
     return Objects.equals(values, that.values);
   }
 
+  public boolean contains(Edge edge) {
+    return values.containsKey(edge);
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(values);
+  }
+
+  @Override
+  public String toString() {
+    return "WeightUpdate{" + "values=" + values + '}';
   }
 }

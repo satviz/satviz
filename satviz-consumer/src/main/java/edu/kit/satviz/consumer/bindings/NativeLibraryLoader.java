@@ -25,6 +25,7 @@ public final class NativeLibraryLoader {
    */
   public static void loadLibrary(String path) throws IOException {
     Path file = Files.createTempFile("satviz-lib", null);
+    file.toFile().deleteOnExit();
     try (InputStream is = NativeLibraryLoader.class.getResourceAsStream(path)) {
       Files.copy(is, file, StandardCopyOption.REPLACE_EXISTING);
     }
