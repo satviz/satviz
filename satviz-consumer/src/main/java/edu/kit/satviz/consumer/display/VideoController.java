@@ -124,8 +124,8 @@ public class VideoController extends NativeObject {
       MemorySegment res = (MemorySegment) START_RECORDING.invokeExact(
           SegmentAllocator.ofScope(local),
           getPointer(),
-          CLinker.toCString(fileName, local),
-          CLinker.toCString(encoder, local)
+          CLinker.toCString(fileName, local).address(),
+          CLinker.toCString(encoder, local).address()
       );
       int resultCode = (int) START_RECORDING_RESULT.varHandle("code").get(res);
       if (resultCode == -1) {
