@@ -95,8 +95,8 @@ public:
   void draw(Camera &camera, int width, int height);
 
   // The following methods are all inherited from GraphObserver
-  void onWeightUpdate(graph::WeightUpdate &update) override;
-  void onHeatUpdate(graph::HeatUpdate &update) override;
+  void onWeightChange(ogdf::Array<ogdf::edge> &changed) override;
+  void onHeatChange(ogdf::Array<ogdf::node> &changed) override;
   void onLayoutChange(ogdf::Array<ogdf::node> &changed) override;
   void onEdgeAdded(ogdf::edge e) override;
   void onEdgeDeleted(ogdf::edge e) override;

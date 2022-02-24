@@ -48,6 +48,9 @@ void Graph::removeObserver(GraphObserver *o) {
 }
 
 void Graph::submitWeightUpdate(WeightUpdate &update) {
+  ogdf::Array<ogdf::edge> changed(update.values.size());
+  int chg_idx = 0;
+
   for (auto row : update.values) {
     auto v = node_handles[std::get<0>(row)];
     auto w = node_handles[std::get<1>(row)];
@@ -71,22 +74,30 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
       }
       graph.delEdge(e);
       continue;
+    } else {
+      changed[chg_idx++] = e;
     }
   }
 
+  changed.resize(chg_idx);
+
   for (auto o : observers) {
-    o->onWeightUpdate(update);
+    o->onWeightChange(changed);
   }
 }
 
 void Graph::submitHeatUpdate(HeatUpdate &update) {
+  ogdf::Array<ogdf::node> changed((int) update.values.size());
+  int chg_idx = 0;
+
   for (auto row : update.values) {
     auto v = node_handles[std::get<0>(row)];
     attrs.weight(v) = std::get<1>(row);
+    changed[chg_idx++] = v;
   }
 
   for (auto o : observers) {
-    o->onHeatUpdate(update);
+    o->onHeatChange(changed);
   }
 }
 
