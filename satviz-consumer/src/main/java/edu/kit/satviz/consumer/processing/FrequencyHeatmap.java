@@ -111,7 +111,9 @@ public class FrequencyHeatmap extends Heatmap {
     for (int literal : clause.literals()) {
       int variable = Math.abs(literal);
       Integer val = frequencies.get(variable);
-      if (val != null && val > 0) {
+      if (val == null) {
+        frequencies.put(variable, 0);
+      } else if (val > 0) {
         frequencies.put(variable, val - 1);
       }
     }

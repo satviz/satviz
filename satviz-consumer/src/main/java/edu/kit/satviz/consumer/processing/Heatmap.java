@@ -2,7 +2,14 @@ package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.sat.Clause;
+import edu.kit.satviz.serial.ClauseSerializer;
+import edu.kit.satviz.serial.IntSerializer;
+import edu.kit.satviz.serial.SerializationException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A kind of {@code ClauseUpdateProcessor} that realises a heatmap of variables (nodes).
@@ -11,6 +18,8 @@ import java.io.InputStream;
  */
 public abstract class Heatmap implements ClauseUpdateProcessor {
 
+  private static final IntSerializer intSerializer = new IntSerializer();
+  private static final ClauseSerializer clauseSerializer = new ClauseSerializer();
 
   protected Clause[] recentClauses;
   protected int cursor;
@@ -95,11 +104,26 @@ public abstract class Heatmap implements ClauseUpdateProcessor {
     cursor = (cursor + 1) % recentClauses.length;
   }
 
-  /* The heatmap currently doesn't serialise anything, so when a different state is loaded
-     it simply resets and starts from scratch. */
+  /* Deserialising means resetting the entire heatmap,
+     done by first resetting the clauses that were serialised, then the current clauses */
   @Override
-  public void deserialize(InputStream in) {
+  public void deserialize(InputStream in) throws IOException, SerializationException {
+    int clauses = intSerializer.deserialize(in);
+    for (int i = 0; i < clauses; i++) {
+      removeClause(clauseSerializer.deserialize(in));
+    }
     reset();
+  }
+
+  @Override
+  public void serialize(OutputStream out) throws IOException {
+    int savedClauses = (int) Arrays.stream(recentClauses).filter(Objects::nonNull).count();
+    intSerializer.serialize(savedClauses, out);
+    for (Clause clause : recentClauses) {
+      if (clause != null) {
+        clauseSerializer.serialize(clause, out);
+      }
+    }
   }
 
   @Override
