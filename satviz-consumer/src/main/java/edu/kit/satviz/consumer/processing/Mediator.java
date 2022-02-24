@@ -27,7 +27,7 @@ public class Mediator implements ConsumerConnectionListener {
 
   private boolean recording;
   private boolean recordingPaused;
-  private ScheduledFuture<?> advanceTask;
+  private volatile boolean visualizationPaused;
   private int recordedVideos;
   private volatile int clausesPerAdvance;
   private volatile long period;
@@ -51,7 +51,7 @@ public class Mediator implements ConsumerConnectionListener {
     this.recording = false;
     this.recordedVideos = 0;
     this.recordingPaused = false;
-    this.advanceTask = null;
+    this.visualizationPaused = true;
     this.clausesPerAdvance = config.getBufferSize();
     this.period = config.getPeriod();
     //System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
@@ -64,7 +64,7 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void updateWindowSize(int windowSize) {
-    heatmap.setHeatmapSize(windowSize);
+    glScheduler.submit(() -> heatmap.setHeatmapSize(windowSize));
   }
 
   public void updateHeatmapColdColor(Color color) {
@@ -105,14 +105,14 @@ public class Mediator implements ConsumerConnectionListener {
 
   public void startOrStopRecording() {
     if (recording) {
-      if (!recordingPaused) {
-        glScheduler.submit(videoController::stopRecording);
-      }
       glScheduler.submit(videoController::finishRecording);
     } else {
       String filename = config.getVideoTemplatePath()
           .replace("{}", String.valueOf(++recordedVideos));
-      glScheduler.submit(() -> videoController.startRecording(filename, "theora"));
+      glScheduler.submit(() -> {
+        videoController.startRecording(filename, "theora");
+        System.out.println("Recording started");
+      });
     }
     recordingPaused = false;
     recording = !recording;
@@ -129,19 +129,18 @@ public class Mediator implements ConsumerConnectionListener {
     }
   }
 
+  public void startRendering() {
+    glScheduler.scheduleAtFixedRate(
+        this::render,
+        0,
+        period,
+        TimeUnit.MILLISECONDS
+    );
+    visualizationPaused = false;
+  }
+
   public void pauseOrContinueVisualization() {
-    if (advanceTask == null) {
-      //System.out.println("PERIOD " + period);
-      advanceTask = glScheduler.scheduleAtFixedRate(
-          this::periodicallyAdvance,
-          0,
-          period,
-          TimeUnit.MILLISECONDS
-      );
-    } else {
-      advanceTask.cancel(false);
-      advanceTask = null;
-    }
+    visualizationPaused = !visualizationPaused;
   }
 
   public void relayout() {
@@ -176,16 +175,17 @@ public class Mediator implements ConsumerConnectionListener {
     }
   }
 
-  private void periodicallyAdvance() {
+  private void render() {
     try {
       //System.out.println("Advance call");
-      coordinator.advanceVisualization(clausesPerAdvance);
+      if (!visualizationPaused) {
+        coordinator.advanceVisualization(clausesPerAdvance);
+      }
       //System.out.println("Post advance");
       videoController.nextFrame();
       //System.out.println("Post nextframe");
     } catch (Throwable e) {
       e.printStackTrace();
-      advanceTask.cancel(false);
     }
   }
 
