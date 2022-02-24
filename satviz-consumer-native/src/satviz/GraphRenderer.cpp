@@ -189,7 +189,7 @@ int GraphRenderer::allocateEdgeIndex() {
   // Resize everything if we ran out of free indices
   if (free_edges.empty()) {
     // Resize OpenGL buffers
-    int new_capacity = 2 * edge_capacity;
+    int new_capacity = edge_capacity + edge_capacity / 2;
     resizeGlBuffer(&buffer_objects[BO_EDGE_INDICES], edge_capacity * sizeof(unsigned[2]), new_capacity * sizeof (unsigned[2]));
     resizeGlBuffer(&buffer_objects[BO_EDGE_WEIGHT], edge_capacity * sizeof(char), new_capacity * sizeof (char));
 
@@ -248,24 +248,26 @@ void GraphRenderer::onEdgeDeleted(ogdf::edge e) {
 }
 
 void GraphRenderer::onReload() {
-  // TODO also update the other attributes!
-
   ogdf::Array<ogdf::node> nodes;
   my_graph.getOgdfGraph().allNodes(nodes);
-  onLayoutChange(nodes);
-
   ogdf::Array<ogdf::edge> edges;
   my_graph.getOgdfGraph().allEdges(edges);
-  // TODO properly reset edges!
-  for (auto edge : edges) {
-    onEdgeDeleted(edge);
+
+  free_edges.resize(edge_capacity);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_INDICES]);
+  unsigned data[2] = { SENTINEL_INDEX, SENTINEL_INDEX };
+  for (int i = 0; i < edge_capacity; i++) {
+    free_edges[i] = i;
+    glBufferSubData(GL_ARRAY_BUFFER, i * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
   }
-  //graph::WeightUpdate wu(my_graph.numEdges());
-  //int idx = 0;
-  for (auto edge : edges) {
-    onEdgeAdded(edge);
-    //wu.values[idx++] = std::make_tuple(edge->source()->index(), edge->target()->index(), );
+  edge_mapping.fill(-1);
+  for (auto e : edges) {
+    onEdgeAdded(e);
   }
+
+  onHeatChange(nodes);
+  onLayoutChange(nodes);
+  onWeightChange(edges);
 }
 
 } // namespace video
