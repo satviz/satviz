@@ -17,8 +17,10 @@ import edu.kit.satviz.consumer.gui.config.ConfigStarter;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationController;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationStarter;
 import edu.kit.satviz.consumer.processing.ClauseCoordinator;
+import edu.kit.satviz.consumer.processing.FrequencyHeatmap;
 import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.Mediator;
+import edu.kit.satviz.consumer.processing.RecencyHeatmap;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
 import edu.kit.satviz.network.ConsumerConnection;
 import edu.kit.satviz.network.OfferType;
@@ -150,7 +152,7 @@ public final class ConsumerApplication {
         .setController(components.controller)
         .setGraph(components.graph)
         .setCoordinator(coordinator)
-        .setHeatmap(new Heatmap(variableAmount))
+        .setHeatmap(new RecencyHeatmap(config.getWindowSize()))
         .setVig(vig)
         .createMediator();
 

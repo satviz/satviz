@@ -1,33 +1,26 @@
 package edu.kit.satviz.consumer.processing;
 
-import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.sat.Clause;
-import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * An implementation of {@code ClauseUpdateProcessor} that realises a heatmap of variables (nodes).
- * <br>The heatmap considers the frequency of each variable in the {@code n} most recently
- * processed clauses and calculates the variable's portion of occurrence based on that.
+ * A kind of {@code ClauseUpdateProcessor} that realises a heatmap of variables (nodes).
  *
  * @see HeatUpdate
  */
-public class Heatmap implements ClauseUpdateProcessor {
+public abstract class Heatmap implements ClauseUpdateProcessor {
 
-  private final Map<Integer, Integer> frequencies;
-  private Clause[] recentClauses;
-  private int cursor;
+
+  protected Clause[] recentClauses;
+  protected int cursor;
 
   /**
    * Create a heatmap with the given initial size.
    *
    * @param initialSize The amount of clauses to consider at a time.
    */
-  public Heatmap(int initialSize) {
-    this.frequencies = new HashMap<>(initialSize);
+  protected Heatmap(int initialSize) {
     this.recentClauses = new Clause[initialSize];
     this.cursor = 0;
   }
@@ -56,11 +49,11 @@ public class Heatmap implements ClauseUpdateProcessor {
       System.arraycopy(recentClauses, srcPos, temp, 0, newSize);
       /* Decrement [1, 2, ..., s-1] */
       for (int i = 0; i < srcPos; i++) {
-        decreaseFrequencies(recentClauses[i]);
+        removeClause(recentClauses[i]);
       }
       /* Decrement [c, ..., n] */
       for (int i = cursor; i < prevSize; i++) {
-        decreaseFrequencies(recentClauses[i]);
+        removeClause(recentClauses[i]);
       }
       cursor = 0;
     } else {
@@ -71,7 +64,7 @@ public class Heatmap implements ClauseUpdateProcessor {
       System.arraycopy(recentClauses, prevSize - remaining, temp, cursor, remaining);
       /* Decrement [c, ..., s-1] */
       for (int i = cursor; i < prevSize - remaining; i++) {
-        decreaseFrequencies(recentClauses[i]);
+        removeClause(recentClauses[i]);
       }
     }
     recentClauses = temp;
@@ -96,81 +89,10 @@ public class Heatmap implements ClauseUpdateProcessor {
     return recentClauses.length;
   }
 
-  @Override
-  public HeatUpdate process(ClauseUpdate[] updates, Graph graph) {
+  protected abstract void removeClause(Clause clause);
 
-    int size = recentClauses.length;
-    for (ClauseUpdate update : updates) {
-      recentClauses[cursor] = update.clause();
-      cursor = (cursor + 1) % size;
-    }
-
-    HeatUpdate u = new HeatUpdate();
-    for (int i = 0; i < size; i++) {
-      Clause subject = recentClauses[(i + cursor) % size];
-      if (subject == null) {
-        continue;
-      }
-      for (int literal : subject.literals()) {
-        u.add(Math.abs(literal) - 1, (float) i / size);
-      }
-    }
-    return u;
-    /*int totalAmount = cursor;
-    boolean full = false;
-    for (ClauseUpdate update : updates) {
-      Clause clause = update.clause();
-      Clause previous = recentClauses[cursor];
-      if (previous != null) {
-        // if we encounter an existing element, the ring buffer is full and
-        // the variables' frequencies need to be decremented
-        full = true;
-        decreaseFrequencies(previous);
-      }
-      recentClauses[cursor] = clause;
-      increaseFrequencies(clause);
-      totalAmount++;
-      cursor = (cursor + 1) % recentClauses.size;
-    }
-    //System.out.println(frequencies);
-    var u =  populateUpdate(/*full ? recentClauses.size : totalAmountfrequencies.values().stream().max(Integer::compare).orElse(1));
-    //System.out.println(u);
-    //return new HeatUpdate();
-    return u;*/
-  }
-
-  /* Calculate the updated heat values for each node based on its frequency and the total amount
-     of nodes currently being updated. */
-  private HeatUpdate populateUpdate(int totalAmount) {
-    HeatUpdate update = new HeatUpdate();
-    var iterator = frequencies.entrySet().iterator();
-    while (iterator.hasNext()) {
-      var entry = iterator.next();
-      // key - 1 here to convert between 1-indexed variables and 0-indexed graph nodes
-      update.add(entry.getKey() - 1, (float) entry.getValue() / totalAmount);
-      if (entry.getValue() == 0) {
-        iterator.remove();
-      }
-    }
-    return update;
-  }
-
-  /* Increment the frequencies of the variables in a clause */
-  private void increaseFrequencies(Clause clause) {
-    for (int literal : clause.literals()) {
-      frequencies.compute(Math.abs(literal), (k, v) -> v == null ? 1 : v + 1);
-    }
-  }
-
-  /* Decrement the frequencies of the variables in a clause - not going lower than 0 */
-  private void decreaseFrequencies(Clause clause) {
-    for (int literal : clause.literals()) {
-      int variable = Math.abs(literal);
-      Integer val = frequencies.get(variable);
-      if (val != null && val > 0) {
-        frequencies.put(variable, val - 1);
-      }
-    }
+  protected final void increaseCursor() {
+    cursor = (cursor + 1) % recentClauses.length;
   }
 
   /* The heatmap currently doesn't serialise anything, so when a different state is loaded
@@ -182,7 +104,11 @@ public class Heatmap implements ClauseUpdateProcessor {
 
   @Override
   public void reset() {
-    this.frequencies.clear();
+    for (Clause clause : recentClauses) {
+      if (clause != null) {
+        removeClause(clause);
+      }
+    }
     this.recentClauses = new Clause[recentClauses.length];
     this.cursor = 0;
   }
