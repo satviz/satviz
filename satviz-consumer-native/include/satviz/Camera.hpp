@@ -11,11 +11,25 @@ namespace video {
  */
 class Camera {
 private:
+  constexpr static const float SMOOTH_SPEED = 1.0f / 0.3f;
+
+  struct SmoothedValue {
+    sf::Clock clock;
+    float oldValue;
+    float newValue;
+    float curValue;
+
+    explicit SmoothedValue(float v = 0.0f);
+
+    void update();
+    void set(float v);
+
+    inline float get() const { return newValue; }
+    inline float current() const { return curValue; }
+  };
+
   float position[2];
-  sf::Clock clock;
-  float oldZoom;
-  float newZoom;
-  float curZoom;
+  SmoothedValue zoom;
 
 public:
   Camera();
@@ -24,8 +38,8 @@ public:
   inline void setX(float v) { position[0] = v; }
   inline float getY() { return position[1]; }
   inline void setY(float v) { position[1] = v; }
-  float getZoom() { return newZoom; }
-  void setZoom(float z);
+  float getZoom() { return zoom.get(); }
+  void setZoom(float z) { zoom.set(z); }
 
   void update();
 
