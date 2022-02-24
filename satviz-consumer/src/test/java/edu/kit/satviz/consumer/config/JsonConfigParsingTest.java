@@ -61,6 +61,7 @@ class JsonConfigParsingTest {
     config1 = new ConsumerConfig();
     config1.setModeConfig(modeConfig);
     config1.setInstancePath(INSTANCE_PATH);
+    config1.setBufferSize(100);
     config1.setVideoTemplatePath(VIDEO_TEMPLATE_PATH);
   }
 
