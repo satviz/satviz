@@ -13,6 +13,7 @@ dependencies {
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
     implementation("net.lingala.zip4j:zip4j:2.9.1")
     implementation(project(":satviz-parsers"))
+    implementation(project(":satviz-common"))
 }
 
 javafx {
