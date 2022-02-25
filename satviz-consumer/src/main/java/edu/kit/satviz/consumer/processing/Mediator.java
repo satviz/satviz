@@ -34,6 +34,8 @@ public class Mediator implements ConsumerConnectionListener {
   private volatile boolean visualizationPaused;
   private int recordedVideos;
   private volatile int clausesPerAdvance;
+  private volatile int snapshotPeriod;
+  private int clauseCount;
 
   private Mediator(
       ScheduledExecutorService glScheduler,
@@ -57,6 +59,8 @@ public class Mediator implements ConsumerConnectionListener {
     this.visualizationPaused = true;
     this.clausesPerAdvance = config.getBufferSize();
     this.period = config.getPeriod();
+    this.clauseCount = 0;
+    this.snapshotPeriod = clausesPerAdvance * 500;
     this.taskQueue = new LinkedBlockingQueue<>();
     //System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
     coordinator.addProcessor(heatmap);
@@ -176,16 +180,17 @@ public class Mediator implements ConsumerConnectionListener {
 
   private void render() {
     try {
-      //System.out.println("Advance call");
       if (!visualizationPaused) {
-        coordinator.advanceVisualization(clausesPerAdvance);
+        clauseCount += coordinator.advanceVisualization(clausesPerAdvance);
       }
-      //System.out.println("Post advance");
       videoController.nextFrame();
       while (!taskQueue.isEmpty()) {
         taskQueue.poll().run();
       }
-      //System.out.println("Post nextframe");
+      if (clauseCount >= snapshotPeriod) {
+        coordinator.takeSnapshot();
+        clauseCount = 0;
+      }
     } catch (Throwable e) {
       e.printStackTrace();
     }

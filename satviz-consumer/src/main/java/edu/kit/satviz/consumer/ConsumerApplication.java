@@ -27,6 +27,7 @@ import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -197,7 +198,7 @@ public final class ConsumerApplication {
       EmbeddedModeConfig embedConfig = (EmbeddedModeConfig) modeConfig;
       try {
         String sourcePath = embedConfig.getSourcePath().toString();
-        List<String> baseArgs = List.of("-H", "localhost",
+        List<String> baseArgs = List.of("-H", InetAddress.getLocalHost().getHostAddress(),
             "-P", String.valueOf(connection.getPort()));
         List<String> additionalArgs = switch (embedConfig.getSource()) {
           case SOLVER -> List.of("-s", sourcePath, "-i", config.getInstancePath().toString());
