@@ -13,18 +13,40 @@ class Camera {
 private:
   constexpr static const float SMOOTH_SPEED = 1.0f / 0.3f;
 
+  /**
+   * Encapsulates a float value that is smoothed (interpolated) over time.
+   */
   struct SmoothedValue {
     sf::Clock clock;
     float oldValue;
     float newValue;
     float curValue;
 
+    /**
+     * Constructor for SmoothedValue.
+     * @param v the starting value
+     */
     explicit SmoothedValue(float v = 0.0f);
 
+    /**
+     * Update the interpolation factor based on elapsed time.
+     */
     void update();
+    /**
+     * Set the desired (target) value.
+     * @param v the desired value
+     */
     void set(float v);
 
+    /**
+     * Get the desired (target) value.
+     * @return the desired value
+     */
     inline float get() const { return newValue; }
+    /**
+     * Get the current (interpolated) value.
+     * @return the current value
+     */
     inline float current() const { return curValue; }
   };
 
