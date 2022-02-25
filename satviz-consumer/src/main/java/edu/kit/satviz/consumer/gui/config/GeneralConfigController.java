@@ -76,7 +76,7 @@ public class GeneralConfigController extends ConfigController {
   private File satInstanceFile;
   private ConfigController modeConfigController;
 
-  private ConsumerConfig currentConfig = null;
+  private ConsumerConfig currentConfig = new ConsumerConfig();
   private ConsumerConfig runConfig = null;
   private boolean run = false;
 
