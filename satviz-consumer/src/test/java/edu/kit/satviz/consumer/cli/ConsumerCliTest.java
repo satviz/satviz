@@ -39,7 +39,7 @@ class ConsumerCliTest {
 
   @Test
   void test_parseArgs_validArgumentsWithValidation()
-      throws ArgumentParserException, ConstraintValidationException {
+      throws ArgumentParserException, ConstraintValidationException, IOException {
     ConsumerConfig config = ConsumerCli.parseArgs(arguments1);
     Constraint<ConsumerConfig> inputConstraint = ConsumerConstraints.paramConstraints();
     inputConstraint.validate(config);

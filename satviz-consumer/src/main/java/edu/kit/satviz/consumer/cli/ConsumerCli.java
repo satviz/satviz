@@ -1,5 +1,9 @@
 package edu.kit.satviz.consumer.cli;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import edu.kit.satviz.common.PathArgumentType;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -8,6 +12,8 @@ import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Locale;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
@@ -89,9 +95,21 @@ public class ConsumerCli {
 
   }
 
-  public static ConsumerConfig parseArgs(String[] args) throws ArgumentParserException {
+  public static ConsumerConfig parseArgs(String[] args)
+      throws ArgumentParserException, IOException {
     Namespace namespace = PARSER.parseArgs(args);
-    return getConsumerConfig(namespace);
+    ConsumerConfig config;
+    if (namespace.get("file") != null) {
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+      SimpleModule m = new SimpleModule("PathToString");
+      m.addSerializer(Path.class, new ToStringSerializer());
+      mapper.registerModule(m);
+      config = mapper.readValue(((Path) namespace.get("file")).toFile(), ConsumerConfig.class);
+    } else {
+      config = getConsumerConfig(namespace);
+    }
+    return config;
   }
 
   private static ConsumerConfig getConsumerConfig(Namespace namespace) {
