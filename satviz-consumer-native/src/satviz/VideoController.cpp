@@ -30,9 +30,9 @@ void VideoController::processEvent(sf::Event &event) {
   if (event.type == sf::Event::MouseWheelScrolled) {
     float factor = 1.0f;
     if (event.mouseWheelScroll.delta < 0.0f) {
-      factor = 1.0f / 1.5f;
+      factor = 1.0f / 1.3f;
     } else {
-      factor = 1.0f * 1.5f;
+      factor = 1.0f * 1.3f;
     }
     camera.setZoom(camera.getZoom() * factor);
   }
@@ -54,13 +54,14 @@ void VideoController::processEvent(sf::Event &event) {
       ogdf::node node1 = og.chooseNode();
       ogdf::node node2 = og.chooseNode();
       ogdf::edge edge = og.searchEdge(node1, node2, false);
-      if (edge == nullptr) {
-        ogdf::edge edge = og.newEdge(node1, node2);
-        renderer->onEdgeAdded(edge);
-      } else {
-        renderer->onEdgeDeleted(edge);
-        og.delEdge(edge);
+      double old_weight = 0.0;
+      if (edge) {
+        old_weight = graph.getOgdfAttrs().doubleWeight(edge);
       }
+      double new_weight = (double) rand() / (double) RAND_MAX;
+      graph::WeightUpdate wu;
+      wu.values.push_back(std::make_tuple(node1->index(), node2->index(), new_weight - old_weight));
+      graph.submitWeightUpdate(wu);
     }
     if (event.key.code == sf::Keyboard::R) {
       switch (recording_state) {
@@ -74,6 +75,9 @@ void VideoController::processEvent(sf::Event &event) {
           break;
       }
     }
+    if (event.key.code == sf::Keyboard::L) {
+      graph.recalculateLayout();
+    }
   }
 }
 
@@ -82,6 +86,7 @@ void VideoController::nextFrame() {
   while (display->pollEvent(event)) {
     processEvent(event);
   }
+  camera.update();
   display->startFrame();
   renderer->draw(camera, display->getWidth(), display->getHeight());
   if (recording_state == REC_ON || recording_state == REC_WINDUP) {

@@ -6,6 +6,7 @@ build
 
 .idea
 
+/satviz-consumer/src/test/temp/
 .ogdf-build
 
 # Ignore crash files

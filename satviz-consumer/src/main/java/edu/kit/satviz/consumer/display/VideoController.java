@@ -9,7 +9,6 @@ import java.lang.invoke.MethodType;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
-import jdk.incubator.foreign.MemoryHandles;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 import jdk.incubator.foreign.SegmentAllocator;
@@ -20,6 +19,11 @@ import jdk.incubator.foreign.SegmentAllocator;
  * instance in C++.
  */
 public class VideoController extends NativeObject {
+
+  private static final Struct START_RECORDING_RESULT = Struct.builder()
+      .field("encoder", long.class, CLinker.C_POINTER)
+      .field("code", int.class, CLinker.C_INT)
+      .build();
 
   private static final MethodHandle NEW_CONTROLLER = lookupFunction(
       "new_video_controller",
@@ -39,7 +43,7 @@ public class VideoController extends NativeObject {
       "start_recording",
       MethodType.methodType(MemorySegment.class, MemoryAddress.class,
           MemoryAddress.class, MemoryAddress.class),
-      FunctionDescriptor.of(CLinker.C_INT, CLinker.C_POINTER,
+      FunctionDescriptor.of(START_RECORDING_RESULT.getLayout(), CLinker.C_POINTER,
           CLinker.C_POINTER, CLinker.C_POINTER)
   );
 
@@ -61,10 +65,17 @@ public class VideoController extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
 
-  private static final Struct START_RECORDING_RESULT = Struct.builder()
-      .field("encoder", long.class, CLinker.C_POINTER)
-      .field("code", int.class, CLinker.C_INT)
-      .build();
+  private static final MethodHandle NEXT_FRAME = lookupFunction(
+      "next_frame",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
+  private static final MethodHandle RELEASE_ENCODER = lookupFunction(
+      "release_encoder",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
 
   private MemoryAddress currentEncoderAddr;
 
@@ -113,8 +124,8 @@ public class VideoController extends NativeObject {
       MemorySegment res = (MemorySegment) START_RECORDING.invokeExact(
           SegmentAllocator.ofScope(local),
           getPointer(),
-          CLinker.toCString(fileName, local),
-          CLinker.toCString(encoder, local)
+          CLinker.toCString(fileName, local).address(),
+          CLinker.toCString(encoder, local).address()
       );
       int resultCode = (int) START_RECORDING_RESULT.varHandle("code").get(res);
       if (resultCode == -1) {
@@ -163,6 +174,17 @@ public class VideoController extends NativeObject {
   }
 
   /**
+   * Progress to the next frame in the visualisation.
+   */
+  public void nextFrame() {
+    try {
+      NEXT_FRAME.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while progressing to next frame", e);
+    }
+  }
+
+  /**
    * Destroy the underlying resources.<br>
    * To clean up {@code VideoController} instances, you should generally
    * use {@link #close()} instead.
@@ -176,7 +198,11 @@ public class VideoController extends NativeObject {
   }
 
   private void freeEncoder() {
-    CLinker.freeMemory(currentEncoderAddr);
+    try {
+      RELEASE_ENCODER.invokeExact(currentEncoderAddr);
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while releasing encoder", e);
+    }
   }
 
   @Override

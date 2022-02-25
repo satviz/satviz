@@ -61,7 +61,7 @@ protected:
 
       // Set every other edge weight to 0
       if (i % 2 == 0) {
-        weightUpdate2.values.push_back(std::make_tuple(i, (i + 1) % numNodes, 0.0f));
+        weightUpdate2.values.push_back(std::make_tuple(i, (i + 1) % numNodes, -((float) (i + 1) / (float) numNodes)));
       }
       // Set every other heat value to 0
       if (i % 2 == 0) {
@@ -77,24 +77,24 @@ protected:
 };
 
 TEST_F(GraphTest, WeightUpdate) {
-  ASSERT_TRUE(observer.sequenceHappened("+++++w---w"));
-  ASSERT_EQ(graph.numEdges(), weightUpdate1.values.size() - weightUpdate2.values.size());
+  EXPECT_TRUE(observer.sequenceHappened("+++++w---w"));
+  EXPECT_EQ(graph.numEdges(), weightUpdate1.values.size() - weightUpdate2.values.size());
   for (int i = 0; i < numNodes; i++) {
     if (i % 2 != 0) {
       EdgeInfo info = graph.queryEdge(i, (i + 1) % numNodes);
-      ASSERT_EQ(info.weight, (float) (i + 1) / (float) numNodes);
+      EXPECT_EQ(info.weight, (float) (i + 1) / (float) numNodes);
     }
   }
 }
 
 TEST_F(GraphTest, HeatUpdate) {
-  ASSERT_TRUE(observer.sequenceHappened("hh"));
+  EXPECT_TRUE(observer.sequenceHappened("hh"));
   for (int i = 0; i < numNodes; i++) {
     NodeInfo info = graph.queryNode(i);
     if (i % 2 == 0) {
-      ASSERT_EQ(info.heat, 0);
+      EXPECT_EQ(info.heat, 0);
     } else {
-      ASSERT_EQ(info.heat, i + 1);
+      EXPECT_EQ(info.heat, i + 1);
     }
   }
 }

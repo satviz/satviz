@@ -26,12 +26,17 @@ public class ConsumerConfig {
   }
 
   public static final boolean DEFAULT_RECORD_IMMEDIATELY = false;
-  public static final int DEFAULT_BUFFER_SIZE = 100;
+  public static final int DEFAULT_BUFFER_SIZE = 10;
   public static final WeightFactor DEFAULT_WEIGHT_FACTOR = WeightFactor.RECIPROCAL;
+  public static final int MIN_BUFFER_SIZE = 1;
+  public static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE;
   public static final int MIN_WINDOW_SIZE = 0;
   public static final int MAX_WINDOW_SIZE = Integer.MAX_VALUE;
   public static final int DEFAULT_WINDOW_SIZE = 1000;
+  public static final long DEFAULT_PERIOD = 33;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
+  // TODO: set to proper path
+  public static final String DEFAULT_SCREENSHOT_FOLDER = "path/to/screenshots";
 
   // mandatory settings
   private ConsumerModeConfig modeConfig;
@@ -47,6 +52,7 @@ public class ConsumerConfig {
   private WeightFactor weightFactor = DEFAULT_WEIGHT_FACTOR;
   private int windowSize = DEFAULT_WINDOW_SIZE;
   private HeatmapColors heatmapColors = new HeatmapColors(); // this contains the default colors
+  private long period = DEFAULT_PERIOD;
 
 
   /**
@@ -132,6 +138,14 @@ public class ConsumerConfig {
     this.heatmapColors = heatmapColors;
   }
 
+  /**
+   * Setter-method for the minimal time period in ms between advancing the animation.
+   *
+   * @param period The minimal time period in ms between advancing the animation.
+   */
+  public void setPeriod(long period) {
+    this.period = period;
+  }
 
   /**
    * Getter-method for more settings set within an instance of
@@ -217,6 +231,15 @@ public class ConsumerConfig {
     return heatmapColors;
   }
 
+  /**
+   * Getter-method for the minimal time period in ms between advancing the animation.
+   *
+   * @return The minimal time period in ms between advancing the animation.
+   */
+  public long getPeriod() {
+    return period;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -234,13 +257,14 @@ public class ConsumerConfig {
         && Objects.equals(instancePath, config.instancePath)
         && Objects.equals(videoTemplatePath, config.videoTemplatePath)
         && weightFactor == config.weightFactor
-        && Objects.equals(heatmapColors, config.heatmapColors);
+        && Objects.equals(heatmapColors, config.heatmapColors)
+        && period == config.period;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
-        recordImmediately, bufferSize, weightFactor, windowSize, heatmapColors);
+        recordImmediately, bufferSize, weightFactor, windowSize, heatmapColors, period);
   }
 
 }

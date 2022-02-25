@@ -378,6 +378,19 @@ public abstract class AbstractConnectionManager {
     return null;
   }
 
+  /**
+   * Closes a connection context associated with the given ID.
+   * Closing is silent, which means that the context listener will not be notified.
+   *
+   * @param cid the ID of the connection
+   */
+  public final void close(ConnectionId cid) {
+    ConnectionContext ctx = getContextFrom(cid);
+    if (ctx != null) {
+      ctx.closeSilent(false);
+    }
+  }
+
   protected abstract void processTerminateGlobal(boolean abnormal, String reason);
 
   protected abstract void processStart(); // synchronize as needed

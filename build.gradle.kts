@@ -33,4 +33,9 @@ subprojects {
         toolVersion = "9.2.1"
     }
 
+    tasks {
+        compileJava {
+            options.encoding = "UTF-8"
+        }
+    }
 }

@@ -78,7 +78,8 @@ public class Graph extends NativeObject {
           CLinker.C_POINTER, CLinker.C_INT, CLinker.C_INT)
   );
 
-  private Graph(MemoryAddress pointer) {
+  // Only protected because of mockup
+  protected Graph(MemoryAddress pointer) {
     super(pointer);
   }
 

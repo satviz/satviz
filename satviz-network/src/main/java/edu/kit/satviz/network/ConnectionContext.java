@@ -141,6 +141,20 @@ public class ConnectionContext {
    */
   public void close(boolean abnormal) {
     synchronized (syncState) {
+      closeSilent(abnormal);
+      callListener(abnormal ? NetworkMessage.createFail() : NetworkMessage.createTerm());
+    }
+  }
+
+  /**
+   * Closes the connection context, including the socket channel.
+   * Sends no message to the listener.
+   * Returns immediately if this context is already closed.
+   *
+   * @param abnormal whether the close is abnormal or planned
+   */
+  public void closeSilent(boolean abnormal) {
+    synchronized (syncState) {
       if (state == State.FINISHED || state == State.FAILED) {
         return;
       }
@@ -153,8 +167,6 @@ public class ConnectionContext {
           // if the channel doesn't want to be closed that's not our problem
         }
       }
-
-      callListener(abnormal ? NetworkMessage.createFail() : NetworkMessage.createTerm());
     }
   }
 

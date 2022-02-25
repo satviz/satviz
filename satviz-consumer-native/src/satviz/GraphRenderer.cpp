@@ -105,12 +105,10 @@ void GraphRenderer::init() {
   }
 
   // Set up heatmap color palette
-  const int heat_palette_width = 4;
+  const int heat_palette_width = 2;
   const GLuint palette_colors[] = {
-      0xFFA0A0A0,
-      0xFF8C8000,
-      0xFF4DB3F2,
-      0xFF00A0FF,
+      0xFFFF0000,
+      0xFF0000FF,
   };
   glBindTexture(GL_TEXTURE_1D, heat_palette);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -153,25 +151,37 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
 }
 
 void GraphRenderer::onWeightUpdate(graph::WeightUpdate &update) {
-  (void) update;
-  // TODO update & use this attribute.
+  ogdf::GraphAttributes &attrs = my_graph.getOgdfAttrs();
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_EDGE_WEIGHT]);
+  unsigned char *area = (unsigned char *) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+  for (auto row : update.values) {
+    auto e = my_graph.getEdgeHandle(std::get<0>(row), std::get<1>(row));
+    if (!e) continue;
+    int idx = edge_mapping[e];
+    area[idx] = (unsigned char) (attrs.doubleWeight(e) * 255.0f);
+  }
+  glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void GraphRenderer::onHeatUpdate(graph::HeatUpdate &update) {
-  (void) update;
-  // TODO update this attribute.
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_HEAT]);
+  unsigned char *area = (unsigned char *) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+  for (auto row : update.values) {
+    int idx = std::get<0>(row);
+    area[idx] = (unsigned char) std::get<1>(row);
+  }
+  glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void GraphRenderer::onLayoutChange(ogdf::Array<ogdf::node> &changed) {
   glBindBuffer(GL_ARRAY_BUFFER, buffer_objects[BO_NODE_OFFSET]);
   float (*area)[2] = (float (*)[2]) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
-  // TODO proper mapping of nodes to indices!
-  printf("onLayoutChange():\n");
+  //printf("onLayoutChange():\n");
   for (ogdf::node node : changed) {
     int idx = node->index();
     area[idx][0] = (float) my_graph.getX(node);
     area[idx][1] = (float) my_graph.getY(node);
-    printf("\t[%03d] = %f, %f\n", idx, area[idx][0], area[idx][1]);
+    //printf("\t[%03d] = %f, %f\n", idx, area[idx][0], area[idx][1]);
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
@@ -223,7 +233,6 @@ void GraphRenderer::onEdgeAdded(ogdf::edge e) {
   }
   int offset = index * sizeof(unsigned[2]);
 
-  // TODO proper mapping of nodes to indices!
   std::array<ogdf::node, 2> nodes = e->nodes();
   int data[2] = { nodes[0]->index(), nodes[1]->index() };
 
@@ -252,8 +261,11 @@ void GraphRenderer::onReload() {
   for (auto edge : edges) {
     onEdgeDeleted(edge);
   }
+  //graph::WeightUpdate wu(my_graph.numEdges());
+  //int idx = 0;
   for (auto edge : edges) {
     onEdgeAdded(edge);
+    //wu.values[idx++] = std::make_tuple(edge->source()->index(), edge->target()->index(), );
   }
 }
 
