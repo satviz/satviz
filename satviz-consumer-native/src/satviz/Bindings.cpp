@@ -104,10 +104,7 @@ RecordingStartResult satviz_start_recording(void *controller, const char *filena
         -1
     };
   }
-  return RecordingStartResult {
-      encoder,
-      reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder)
-  };
+  return reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder);
 }
 
 void satviz_stop_recording(void *controller) {

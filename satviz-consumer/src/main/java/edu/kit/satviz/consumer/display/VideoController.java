@@ -20,11 +20,6 @@ import jdk.incubator.foreign.SegmentAllocator;
  */
 public class VideoController extends NativeObject {
 
-  private static final Struct START_RECORDING_RESULT = Struct.builder()
-      .field("encoder", long.class, CLinker.C_POINTER)
-      .field("code", int.class, CLinker.C_INT)
-      .build();
-
   private static final MethodHandle NEW_CONTROLLER = lookupFunction(
       "new_video_controller",
       MethodType.methodType(MemoryAddress.class, MemoryAddress.class,
@@ -41,9 +36,9 @@ public class VideoController extends NativeObject {
 
   private static final MethodHandle START_RECORDING = lookupFunction(
       "start_recording",
-      MethodType.methodType(MemorySegment.class, MemoryAddress.class,
+      MethodType.methodType(int.class, MemoryAddress.class,
           MemoryAddress.class, MemoryAddress.class),
-      FunctionDescriptor.of(START_RECORDING_RESULT.getLayout(), CLinker.C_POINTER,
+      FunctionDescriptor.of(CLinker.C_INT, CLinker.C_POINTER,
           CLinker.C_POINTER, CLinker.C_POINTER)
   );
 
@@ -112,17 +107,16 @@ public class VideoController extends NativeObject {
    */
   public boolean startRecording(String fileName, String encoder) {
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
-      MemorySegment res = (MemorySegment) START_RECORDING.invokeExact(
+      int res = (int) START_RECORDING.invokeExact(
           SegmentAllocator.ofScope(local),
           getPointer(),
           CLinker.toCString(fileName, local).address(),
           CLinker.toCString(encoder, local).address()
       );
-      int resultCode = (int) START_RECORDING_RESULT.varHandle("code").get(res);
-      if (resultCode == -1) {
+      if (res == -1) {
         throw new IllegalArgumentException("Unsupported encoder " + encoder);
       }
-      return resultCode != 0;
+      return res != 0;
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while starting a recording", e);
     }
