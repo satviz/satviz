@@ -2,17 +2,20 @@ package edu.kit.satviz.consumer.cli;
 
 import edu.kit.satviz.common.PathArgumentType;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
-import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
+import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Map;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
 
@@ -31,7 +34,7 @@ public class ConsumerCli {
             A clause consumer for satviz.
             Can be started with an external or embedded producer and a SAT instance.""");
 
-    Subparsers subparsers = PARSER.addSubparsers();
+    Subparsers subparsers = PARSER.addSubparsers().dest("subparser_name");
 
     Subparser embeddedParser = subparsers.addParser("embedded");
     embeddedParser.addArgument("--solver", "-s")
@@ -49,7 +52,8 @@ public class ConsumerCli {
 
     PARSER.addArgument("--instance", "-i")
         .type(PathArgumentType.get())
-        .help("Path to a DIMACS CNF instance file");
+        .help("Path to a DIMACS CNF instance file")
+        .required(true);
     PARSER.addArgument("--file", "-f")
         .type(PathArgumentType.get())
         .help("Path to configuration file");
@@ -74,6 +78,7 @@ public class ConsumerCli {
         .type(int.class)
         .help("Initial heatmap window size");
     PARSER.addArgument("--colors", "-c")
+        .setDefault(new HeatmapColors())
         .type(HeatmapColorsType.get())
         .help("Initial colors for the heatmap gradient");
     PARSER.addArgument("--start-rec")
@@ -88,33 +93,34 @@ public class ConsumerCli {
 
   public static ConsumerConfig parseArgs(String[] args) throws ArgumentParserException {
     ConsumerConfig config = new ConsumerConfig();
-    ModeConfigParameters modeConfigParams = new ModeConfigParameters();
     PARSER.parseArgs(args, config);
-    PARSER.parseArgs(args, modeConfigParams);
-
-    // TODO: 25.02.2022 get ConsumerMode
-    ConsumerMode mode = null;
-
-    config.setModeConfig(getModeConfig(mode, modeConfigParams));
+    Namespace namespace = PARSER.parseArgs(args);
+    Map<String, Object> map = namespace.getAttrs();
+    ConsumerModeConfig modeConfig = getConsumerModeConfig(map);
+    config.setModeConfig(modeConfig);
     return config;
   }
 
-  private static ConsumerModeConfig getModeConfig(ConsumerMode mode, ModeConfigParameters params) {
+  private static ConsumerModeConfig getConsumerModeConfig(Map<String, Object> map) {
     ConsumerModeConfig modeConfig;
-    if (mode == ConsumerMode.EMBEDDED) {
-      EmbeddedModeConfig embeddedConfig = new EmbeddedModeConfig();
-      if (params.getProofFile() == null) {
-        embeddedConfig.setSource(EmbeddedModeSource.SOLVER);
-        embeddedConfig.setSourcePath(params.getSolverFile());
-      } else {
-        embeddedConfig.setSource(EmbeddedModeSource.PROOF);
-        embeddedConfig.setSourcePath(params.getProofFile());
+    switch ((String) map.get("subparser_name")) {
+      case "embedded" -> {
+        EmbeddedModeConfig embeddedConfig = new EmbeddedModeConfig();
+        if (map.get("solver") != null) {
+          embeddedConfig.setSource(EmbeddedModeSource.SOLVER);
+          embeddedConfig.setSourcePath((Path) map.get("solver"));
+        } else {
+          embeddedConfig.setSource(EmbeddedModeSource.PROOF);
+          embeddedConfig.setSourcePath((Path) map.get("proof"));
+        }
+        modeConfig = embeddedConfig;
       }
-      modeConfig = embeddedConfig;
-    } else {
-      ExternalModeConfig externalConfig = new ExternalModeConfig();
-      externalConfig.setPort(params.getPort());
-      modeConfig = externalConfig;
+      case "external" -> {
+        ExternalModeConfig externalConfig = new ExternalModeConfig();
+        externalConfig.setPort((int) map.get("port"));
+        modeConfig = externalConfig;
+      }
+      default -> throw new IllegalArgumentException("No valid mode set.");
     }
     return modeConfig;
   }
