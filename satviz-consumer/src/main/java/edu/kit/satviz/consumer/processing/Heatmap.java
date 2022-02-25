@@ -62,7 +62,10 @@ public abstract class Heatmap implements ClauseUpdateProcessor {
       }
       /* Decrement [c, ..., n] */
       for (int i = cursor; i < prevSize; i++) {
-        removeClause(recentClauses[i]);
+        Clause clause = recentClauses[i];
+        if (clause != null) {
+          removeClause(clause);
+        }
       }
       cursor = 0;
     } else {
@@ -73,7 +76,10 @@ public abstract class Heatmap implements ClauseUpdateProcessor {
       System.arraycopy(recentClauses, prevSize - remaining, temp, cursor, remaining);
       /* Decrement [c, ..., s-1] */
       for (int i = cursor; i < prevSize - remaining; i++) {
-        removeClause(recentClauses[i]);
+        Clause clause = recentClauses[i];
+        if (clause != null) {
+          removeClause(recentClauses[i]);
+        }
       }
     }
     recentClauses = temp;
