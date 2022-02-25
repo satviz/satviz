@@ -124,9 +124,6 @@ public final class ConsumerApplication {
 
     logger.finer("Initialising OpenGL window");
 
-    ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
-        tempDir, variableAmount);
-
     logger.info("Calculating initial layout");
     glScheduler.submit(() -> {
       //System.out.println(initialUpdate);
@@ -145,6 +142,9 @@ public final class ConsumerApplication {
         e.printStackTrace();
       }
     }).get();
+
+    ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
+        tempDir, variableAmount);
 
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)
