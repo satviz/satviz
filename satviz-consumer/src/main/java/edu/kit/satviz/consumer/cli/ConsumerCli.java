@@ -8,9 +8,7 @@ import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
-import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Map;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -92,37 +90,44 @@ public class ConsumerCli {
   }
 
   public static ConsumerConfig parseArgs(String[] args) throws ArgumentParserException {
-    ConsumerConfig config = new ConsumerConfig();
-    PARSER.parseArgs(args, config);
     Namespace namespace = PARSER.parseArgs(args);
-    Map<String, Object> map = namespace.getAttrs();
-    ConsumerModeConfig modeConfig = getConsumerModeConfig(map);
-    config.setModeConfig(modeConfig);
+    return getConsumerConfig(namespace);
+  }
+
+  private static ConsumerConfig getConsumerConfig(Namespace namespace) {
+    ConsumerConfig config = new ConsumerConfig();
+    config.setModeConfig(getConsumerModeConfig(namespace));
+    config.setInstancePath(namespace.get("instance"));
+    config.setNoGui(namespace.getBoolean("no_gui"));
+    config.setVideoTemplatePath(namespace.getString("out"));
+    config.setRecordImmediately(namespace.getBoolean("start_rec"));
+    config.setBufferSize(namespace.getInt("buffer"));
+    config.setWeightFactor(namespace.get("weight"));
+    config.setWindowSize(namespace.getInt("window"));
+    config.setHeatmapColors(namespace.get("colors"));
     return config;
   }
 
-  private static ConsumerModeConfig getConsumerModeConfig(Map<String, Object> map) {
-    ConsumerModeConfig modeConfig;
-    switch ((String) map.get("subparser_name")) {
+  private static ConsumerModeConfig getConsumerModeConfig(Namespace namespace) {
+    return switch (namespace.getString("subparser_name")) {
       case "embedded" -> {
         EmbeddedModeConfig embeddedConfig = new EmbeddedModeConfig();
-        if (map.get("solver") != null) {
+        if (namespace.get("solver") != null) {
           embeddedConfig.setSource(EmbeddedModeSource.SOLVER);
-          embeddedConfig.setSourcePath((Path) map.get("solver"));
+          embeddedConfig.setSourcePath(namespace.get("solver"));
         } else {
           embeddedConfig.setSource(EmbeddedModeSource.PROOF);
-          embeddedConfig.setSourcePath((Path) map.get("proof"));
+          embeddedConfig.setSourcePath(namespace.get("proof"));
         }
-        modeConfig = embeddedConfig;
+        yield embeddedConfig;
       }
       case "external" -> {
         ExternalModeConfig externalConfig = new ExternalModeConfig();
-        externalConfig.setPort((int) map.get("port"));
-        modeConfig = externalConfig;
+        externalConfig.setPort(namespace.get("port"));
+        yield externalConfig;
       }
       default -> throw new IllegalArgumentException("No valid mode set.");
-    }
-    return modeConfig;
+    };
   }
 
 }

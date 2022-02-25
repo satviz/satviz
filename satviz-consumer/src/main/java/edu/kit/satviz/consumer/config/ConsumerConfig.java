@@ -1,8 +1,9 @@
 package edu.kit.satviz.consumer.config;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import net.sourceforge.argparse4j.annotation.Arg;
 
 /**
  * This class contains the starting configuration for the consumer.
@@ -10,8 +11,20 @@ import net.sourceforge.argparse4j.annotation.Arg;
 public class ConsumerConfig {
 
   public static final boolean DEFAULT_NO_GUI = false;
-  // DEFINITELY NEED TO CHANGE!
-  public static final String DEFAULT_VIDEO_TEMPLATE_PATH = "/cool/yes.ogv";
+  public static final String DEFAULT_VIDEO_TEMPLATE_PATH;
+
+  static {
+    String path = System.getProperty("user.home") + "/satviz/recordings/";
+
+    try {
+      Files.createDirectories(Path.of(path));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    DEFAULT_VIDEO_TEMPLATE_PATH = path + System.currentTimeMillis() + "video-{}.ogv";
+  }
+
   public static final boolean DEFAULT_RECORD_IMMEDIATELY = false;
   public static final int DEFAULT_BUFFER_SIZE = 100;
   public static final WeightFactor DEFAULT_WEIGHT_FACTOR = WeightFactor.RECIPROCAL;
@@ -22,25 +35,17 @@ public class ConsumerConfig {
 
   // mandatory settings
   private ConsumerModeConfig modeConfig;
-  @Arg(dest = "instance")
   private Path instancePath;
 
   // workflow settings
-  @Arg(dest = "no_gui")
   private boolean noGui = DEFAULT_NO_GUI;
-  @Arg(dest = "out")
   private String videoTemplatePath = DEFAULT_VIDEO_TEMPLATE_PATH;
-  @Arg(dest = "start_rec")
   private boolean recordImmediately = DEFAULT_RECORD_IMMEDIATELY;
 
   // cosmetic settings
-  @Arg(dest = "buffer")
   private int bufferSize = DEFAULT_BUFFER_SIZE;
-  @Arg(dest = "weight")
   private WeightFactor weightFactor = DEFAULT_WEIGHT_FACTOR;
-  @Arg(dest = "window")
   private int windowSize = DEFAULT_WINDOW_SIZE;
-  @Arg(dest = "colors")
   private HeatmapColors heatmapColors = new HeatmapColors(); // this contains the default colors
 
 
