@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.paint.Color;
@@ -31,9 +32,10 @@ public class VisualizationController {
 
   private static final int MIN_HIGHLIGHT_VARIABLE = 1;
   private static final int DEFAULT_HIGHLIGHT_VARIABLE = 1;
-  private static final int MIN_RECEIVED_CLAUSES = 0;
+  private static final int MIN_PROCESSED_CLAUSES = 0;
   private static final String PLAY_SYMBOL = "▶";
   private static final String PAUSE_SYMBOL = "⏸";
+  private static final String TOTAL_CLAUSES_DELIMITER = "/ ";
 
   // ATTRIBUTES (FXML)
 
@@ -60,9 +62,11 @@ public class VisualizationController {
   @FXML
   private Button pauseOrContinueVisualizationButton;
   @FXML
-  private Spinner<Integer> receivedClausesSpinner; // TODO: convert to Spinner<Long>
+  private Spinner<Integer> processedClausesSpinner; // TODO: convert to Spinner<Long>
   @FXML
-  private Slider receivedClausesSlider;
+  private Label totalClausesLabel;
+  @FXML
+  private Slider processedClausesSlider;
   @FXML
   private Button relayoutButton;
 
@@ -76,7 +80,7 @@ public class VisualizationController {
   private boolean recordingPaused;
   private boolean visualizationRunning;
 
-  private ChangeListener<String> receivedClausesSpinnerIntegerValidationListener;
+  private ChangeListener<String> processedClausesSpinnerIntegerValidationListener;
 
 
   // CONSTRUCTORS
@@ -128,25 +132,27 @@ public class VisualizationController {
     visualizationRunning = true;
     updateVisualizationRunningDisplay();
 
-    long totalClausesReceived = mediator.numberOfUpdates();
-    long currentClausesReceived = mediator.currentUpdate();
+    long totalClauses = mediator.numberOfUpdates();
+    long processedClauses = mediator.currentUpdate();
 
-    receivedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
-        receivedClausesSpinner,
-        MIN_RECEIVED_CLAUSES,
-        (int) totalClausesReceived,
-        (int) currentClausesReceived);
+    processedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+        processedClausesSpinner,
+        MIN_PROCESSED_CLAUSES,
+        (int) totalClauses,
+        (int) processedClauses);
 
-    GuiUtils.setOnFocusLost(receivedClausesSpinner, this::updateReceivedClausesSpinner);
+    GuiUtils.setOnFocusLost(processedClausesSpinner, this::updateProcessedClausesSpinner);
 
-    receivedClausesSlider.setMin(MIN_RECEIVED_CLAUSES);
-    receivedClausesSlider.setMax(totalClausesReceived);
-    receivedClausesSlider.setValue(currentClausesReceived);
+    totalClausesLabel.setText(TOTAL_CLAUSES_DELIMITER + totalClauses);
+
+    processedClausesSlider.setMin(MIN_PROCESSED_CLAUSES);
+    processedClausesSlider.setMax(totalClauses);
+    processedClausesSlider.setValue(processedClauses);
     // make slider move in discrete steps
-    receivedClausesSlider.setSnapToTicks(true);
-    receivedClausesSlider.setMajorTickUnit(1.0);
-    receivedClausesSlider.setBlockIncrement(1.0);
-    receivedClausesSlider.setMinorTickCount(0); // Disable minor ticks
+    processedClausesSlider.setSnapToTicks(true);
+    processedClausesSlider.setMajorTickUnit(1.0);
+    processedClausesSlider.setBlockIncrement(1.0);
+    processedClausesSlider.setMinorTickCount(0); // Disable minor ticks
   }
 
   @FXML
@@ -220,16 +226,16 @@ public class VisualizationController {
   }
 
   @FXML
-  private void updateReceivedClausesSpinner() {
-    long currentUpdate = receivedClausesSpinner.getValue();
-    receivedClausesSlider.setValue(currentUpdate);
+  private void updateProcessedClausesSpinner() {
+    long currentUpdate = processedClausesSpinner.getValue();
+    processedClausesSlider.setValue(currentUpdate);
     mediator.seekToUpdate(currentUpdate);
   }
 
   @FXML
-  private void updateReceivedClausesSlider() {
-    long currentUpdate = (long) receivedClausesSlider.getValue();
-    receivedClausesSpinner.getValueFactory().setValue((int) currentUpdate);
+  private void updateProcessedClausesSlider() {
+    long currentUpdate = (long) processedClausesSlider.getValue();
+    processedClausesSpinner.getValueFactory().setValue((int) currentUpdate);
     mediator.seekToUpdate(currentUpdate);
   }
 
@@ -250,17 +256,20 @@ public class VisualizationController {
     // execute on JavaFX application thread
     Platform.runLater(() -> {
       // update spinner
-      receivedClausesSpinner.getEditor().textProperty().removeListener(
-          receivedClausesSpinnerIntegerValidationListener);
-      receivedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
-          receivedClausesSpinner,
-          MIN_RECEIVED_CLAUSES,
+      processedClausesSpinner.getEditor().textProperty().removeListener(
+          processedClausesSpinnerIntegerValidationListener);
+      processedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+          processedClausesSpinner,
+          MIN_PROCESSED_CLAUSES,
           (int) totalUpdates,
           (int) currentUpdate);
 
+      // update label
+      totalClausesLabel.setText(TOTAL_CLAUSES_DELIMITER + totalUpdates);
+
       // update slider
-      receivedClausesSlider.setMax(totalUpdates);
-      receivedClausesSlider.setValue(currentUpdate);
+      processedClausesSlider.setMax(totalUpdates);
+      processedClausesSlider.setValue(currentUpdate);
     });
   }
 

@@ -9,7 +9,7 @@ namespace video {
 
 VideoController::VideoController(graph::Graph &gr, Display *dpy)
   : graph(gr), display(dpy), camera(), wantToClose(false) {
-  logGlDebugMessages();
+  //logGlDebugMessages();
   video::GraphRenderer::initializeResources();
   renderer = new GraphRenderer(graph);
   graph.addObserver(renderer);
@@ -49,6 +49,7 @@ void VideoController::processEvent(sf::Event &event) {
     if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
       camera.setY(camera.getY() + 0.2f / camera.getZoom());
     }
+#if 0
     if (event.key.code == sf::Keyboard::K) {
       ogdf::Graph &og = graph.getOgdfGraph();
       ogdf::node node1 = og.chooseNode();
@@ -78,6 +79,7 @@ void VideoController::processEvent(sf::Event &event) {
     if (event.key.code == sf::Keyboard::L) {
       graph.recalculateLayout();
     }
+#endif
   }
 }
 
