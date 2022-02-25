@@ -92,7 +92,7 @@ public abstract class ClauseParsingIterator implements Iterator<ClauseUpdate> {
    * @param isIncluded Set to <i>true</i>, if the final clause update should be included,
    *                   to <i>false</i>, if not.
    */
-  public void setFinalClauseUpdateIncluded(boolean isIncluded) {
+  public void setFinalUpdateIncluded(boolean isIncluded) {
     isFinalUpdateIncluded = isIncluded;
   }
 

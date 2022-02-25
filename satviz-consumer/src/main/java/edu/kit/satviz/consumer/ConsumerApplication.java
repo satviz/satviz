@@ -1,7 +1,6 @@
 package edu.kit.satviz.consumer;
 
 import edu.kit.satviz.common.Hashing;
-import edu.kit.satviz.consumer.bindings.NativeInvocationException;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -17,8 +16,9 @@ import edu.kit.satviz.consumer.gui.config.ConfigStarter;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationController;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationStarter;
 import edu.kit.satviz.consumer.processing.ClauseCoordinator;
-import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.Mediator;
+import edu.kit.satviz.consumer.processing.RecencyHeatmap;
+import edu.kit.satviz.consumer.processing.RingInteractionGraph;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
 import edu.kit.satviz.network.ConsumerConnection;
 import edu.kit.satviz.network.OfferType;
@@ -26,17 +26,11 @@ import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
 import edu.kit.satviz.sat.ClauseUpdate;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -44,8 +38,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
-import java.util.zip.ZipInputStream;
-import javafx.application.Application;
 import net.lingala.zip4j.ZipFile;
 
 public final class ConsumerApplication {
@@ -89,9 +81,8 @@ public final class ConsumerApplication {
 
     int variableAmount;
     logger.finer("Reading SAT instance file");
-    VariableInteractionGraph vig = new VariableInteractionGraph(config.getWeightFactor());;
+    VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());;
     WeightUpdate initialUpdate;
-    // TODO: 21/02/2022 initial layout
     try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
       variableAmount = dimacsFile.getVariableAmount();
       logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
@@ -122,9 +113,6 @@ public final class ConsumerApplication {
 
     logger.finer("Initialising OpenGL window");
 
-    ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
-        tempDir, variableAmount);
-
     logger.info("Calculating initial layout");
     glScheduler.submit(() -> {
       //System.out.println(initialUpdate);
@@ -144,13 +132,16 @@ public final class ConsumerApplication {
       }
     }).get();
 
+    ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
+        tempDir, variableAmount);
+
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)
         .setGlScheduler(glScheduler)
         .setController(components.controller)
         .setGraph(components.graph)
         .setCoordinator(coordinator)
-        .setHeatmap(new Heatmap(variableAmount))
+        .setHeatmap(new RecencyHeatmap(config.getWindowSize()))
         .setVig(vig)
         .createMediator();
 
@@ -207,7 +198,7 @@ public final class ConsumerApplication {
       EmbeddedModeConfig embedConfig = (EmbeddedModeConfig) modeConfig;
       try {
         String sourcePath = embedConfig.getSourcePath().toString();
-        List<String> baseArgs = List.of("-H", InetAddress.getLocalHost().getHostName(),
+        List<String> baseArgs = List.of("-H", InetAddress.getLocalHost().getHostAddress(),
             "-P", String.valueOf(connection.getPort()));
         List<String> additionalArgs = switch (embedConfig.getSource()) {
           case SOLVER -> List.of("-s", sourcePath, "-i", config.getInstancePath().toString());

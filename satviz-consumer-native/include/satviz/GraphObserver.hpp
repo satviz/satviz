@@ -16,8 +16,8 @@ protected:
   GraphObserver(Graph &gr) : my_graph(gr) {}
 
 public:
-  virtual void onWeightUpdate(WeightUpdate &update) { (void) update; }
-  virtual void onHeatUpdate(HeatUpdate &update) { (void) update; }
+  virtual void onWeightChange(ogdf::Array<ogdf::edge> &changed) { (void) changed; }
+  virtual void onHeatChange(ogdf::Array<ogdf::node> &changed) { (void) changed; }
   virtual void onLayoutChange(ogdf::Array<ogdf::node> &changed) { (void) changed; }
   virtual void onEdgeAdded(ogdf::edge e) { (void) e; }
   virtual void onEdgeDeleted(ogdf::edge e) { (void) e; }

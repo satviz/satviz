@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -56,7 +55,7 @@ public class ClauseCoordinator implements AutoCloseable {
   private final ReentrantLock stateLock;
   // processorLock provides mutual exclusion for addProcessor and takeSnapshot to coordinate
   // change detection in the list of processors. it is not needed to access the list elsewhere.
-  private final Lock processorLock;
+  private final ReentrantLock processorLock;
 
   // currentUpdate is volatile, even though the stateLock prevents concurrent modification already.
   // this is because while updates to currentUpdate need to be consistent and coordinated,
@@ -123,15 +122,17 @@ public class ClauseCoordinator implements AutoCloseable {
    * @throws SerializationException If the updates can't be deserialised from the external buffer.
    *                                This may only happen as a result of external interference with
    *                                the internal files used by this object.
+   * @return the amount of clauses that were actually advanced.
    */
-  public void advanceVisualization(int numUpdates)
+  public int advanceVisualization(int numUpdates)
       throws IOException, SerializationException {
     // to prevent alien call processor.process from looping back
     if (stateLock.isHeldByCurrentThread()) {
-      return;
+      return 0;
     }
-    advance(numUpdates);
+    int num = advance(numUpdates);
     changeListener.run();
+    return num;
   }
 
   /**
@@ -196,17 +197,19 @@ public class ClauseCoordinator implements AutoCloseable {
     changeListener.run();
   }
 
-  private void advance(int numUpdates) throws SerializationException, IOException {
+  private int advance(int numUpdates) throws SerializationException, IOException {
     if (numUpdates < 1 || currentUpdate == buffer.size()) {
-      return;
+      return 0;
     }
 
     // the state needs to be locked to synchronise advancements.
     // snapshots need to be locked to prevent snapshot creation of half-updated graphs
     snapshotLock.lock();
     stateLock.lock();
+    int actual;
     try {
       ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
+      actual = updates.length;
       for (ClauseUpdateProcessor processor : processors) {
         graph.submitUpdate(processor.process(updates, graph));
       }
@@ -218,6 +221,7 @@ public class ClauseCoordinator implements AutoCloseable {
       stateLock.unlock();
       snapshotLock.unlock();
     }
+    return actual;
   }
 
   /**
@@ -246,6 +250,7 @@ public class ClauseCoordinator implements AutoCloseable {
           processor.serialize(stream);
         }
         graph.serialize(stream);
+        stream.flush();
       }
 
       // if the processor list has changed since the last snapshot, create a new snapshot array.
@@ -298,7 +303,7 @@ public class ClauseCoordinator implements AutoCloseable {
     changeListener = Objects.requireNonNull(action);
   }
 
-  private long loadClosestSnapshot(long index) throws IOException {
+  private long loadClosestSnapshot(long index) throws IOException, SerializationException {
     // snapshots need to be locked - we don't want to create a snapshot while in the middle of
     // restoring some previous state.
     snapshotLock.lock();
@@ -342,7 +347,9 @@ public class ClauseCoordinator implements AutoCloseable {
         return entry.getKey();
       } finally {
         stateLock.unlock();
-        processorLock.unlock();
+        if (processorLock.isHeldByCurrentThread()) {
+          processorLock.unlock();
+        }
       }
     } finally {
       snapshotLock.unlock();

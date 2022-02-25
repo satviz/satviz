@@ -19,7 +19,7 @@ import java.util.Arrays;
  *
  * @see WeightUpdate
  */
-public class VariableInteractionGraph implements ClauseUpdateProcessor {
+public abstract class VariableInteractionGraph implements ClauseUpdateProcessor {
 
   private WeightFactor weightFactor;
   private final StringSerializer serializer;
@@ -29,7 +29,7 @@ public class VariableInteractionGraph implements ClauseUpdateProcessor {
    *
    * @param weightFactor An instance of the {@code WeightFactor} enum.
    */
-  public VariableInteractionGraph(WeightFactor weightFactor) {
+  protected VariableInteractionGraph(WeightFactor weightFactor) {
     this.weightFactor = weightFactor;
     this.serializer = new StringSerializer();
   }
@@ -55,48 +55,23 @@ public class VariableInteractionGraph implements ClauseUpdateProcessor {
   @Override
   public WeightUpdate process(ClauseUpdate[] clauseUpdates, Graph graph) {
     WeightUpdate weightUpdate = new WeightUpdate();
-    int[] literals;
-    float weight;
     for (ClauseUpdate clauseUpdate : clauseUpdates) {
-      literals = clauseUpdate.clause().literals();
-      if (literals.length == 0) {
+      int[] literals = clauseUpdate.clause().literals();
+      if (literals.length < 2) {
         continue;
       }
       for (int i = 0; i < literals.length; i++) {
         literals[i] = Math.abs(literals[i]);
       }
-      Arrays.sort(literals);
-      weight = (float) weightFactor.apply(literals.length);
+
+      float weight = (float) weightFactor.apply(literals.length);
       weight = (clauseUpdate.type() == ClauseUpdate.Type.ADD) ? weight : -weight;
-      for (int i = 0; i < literals.length - 1; i++) {
-        weightUpdate.add(
-            literals[i] - 1,
-            literals[i + 1] - 1,
-            weight
-        );
-      }
-      weightUpdate.add(literals[0] - 1, literals[literals.length - 1] - 1, weight);
+      process(weightUpdate, literals, weight);
     }
     return weightUpdate;
-    /*WeightUpdate weightUpdate = new WeightUpdate();
-    int[] literals;
-    float weight;
-    for (ClauseUpdate clauseUpdate : clauseUpdates) {
-      literals = clauseUpdate.clause().literals();
-      weight = (float) weightFactor.apply(literals.length);
-      weight = (clauseUpdate.type() == ClauseUpdate.Type.ADD) ? weight : -weight;
-      for (int i = 0; i < literals.length; i++) {
-        for (int j = i + 1; j < literals.length; j++) {
-          weightUpdate.add(
-              Math.abs(literals[i]) - 1,
-              Math.abs(literals[j]) - 1,
-              weight
-          );
-        }
-      }
-    }
-    return weightUpdate;*/
   }
+
+  protected abstract void process(WeightUpdate weightUpdate, int[] variables, float weight);
 
   @Override
   public void serialize(OutputStream out) {

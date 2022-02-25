@@ -9,7 +9,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class HeatmapTest {
+class FrequencyHeatmapTest {
 
   private static final Clause[] CLAUSES = {
       new Clause(new int[] {1, 6, -5, 3}),
@@ -27,7 +27,7 @@ class HeatmapTest {
 
   @BeforeEach
   void setUp() {
-    heatmap = new Heatmap(3);
+    heatmap = new FrequencyHeatmap(3, FrequencyHeatmap.HeatStrategy.SIZE);
   }
 
   @Test

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.FunctionDescriptor;
@@ -148,6 +149,7 @@ public class Graph extends NativeObject {
           (long) SERIALIZED_DATA.varHandle("data").get(segment));
       byte[] byteData = data.asSegment(n, localScope).toByteArray();
       stream.write(byteData);
+      CLinker.freeMemory(data);
     } catch (IOException e) {
       throw e;
     } catch (Throwable e) {
@@ -163,17 +165,16 @@ public class Graph extends NativeObject {
    * @see #serialize(OutputStream)
    */
   public void deserialize(InputStream stream) throws IOException {
-    MemoryAddress dataAddr = MemoryAddress.NULL;
-    try {
+    try (var localScope = ResourceScope.newConfinedScope()) {
       byte[] byteData = stream.readAllBytes();
-      dataAddr = MemorySegment.ofArray(byteData).address();
-      DESERIALIZE.invokeExact(getPointer(), dataAddr, byteData.length);
+      // TODO: 25/02/2022 figure out if this is a memory leak
+      MemorySegment nativeBytes = MemorySegment.allocateNative(byteData.length, localScope);
+      nativeBytes.copyFrom(MemorySegment.ofArray(byteData));
+      DESERIALIZE.invokeExact(getPointer(), nativeBytes.address(), (long) byteData.length);
     } catch (IOException e) {
       throw e;
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while deserializing graph representation", e);
-    } finally {
-      CLinker.freeMemory(dataAddr);
     }
 
   }

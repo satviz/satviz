@@ -3,6 +3,8 @@ package edu.kit.satviz.consumer.processing;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.consumer.graph.GraphUpdate;
 import edu.kit.satviz.sat.ClauseUpdate;
+import edu.kit.satviz.serial.SerializationException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -27,7 +29,7 @@ public interface ClauseUpdateProcessor {
    *
    * @param out The {@code OutputStream} this processor's state is serialized to.
    */
-  default void serialize(OutputStream out) {
+  default void serialize(OutputStream out) throws IOException {
 
   }
 
@@ -36,7 +38,7 @@ public interface ClauseUpdateProcessor {
    *
    * @param in The {@code InputStream} this processor's state is deserialized from.
    */
-  default void deserialize(InputStream in) {
+  default void deserialize(InputStream in) throws IOException, SerializationException {
 
   }
 
