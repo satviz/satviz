@@ -11,6 +11,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
     implementation("net.sourceforge.argparse4j:argparse4j:0.9.0")
     implementation(project(":satviz-parsers"))
+    implementation(project(":satviz-common"))
 }
 
 javafx {
