@@ -167,12 +167,7 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void quit() {
-    try {
-      coordinator.close();
-    } catch (IOException e) { // TODO: 10/02/2022
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
+    videoController.close();
   }
 
   private void render() {
