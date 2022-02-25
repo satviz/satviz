@@ -93,21 +93,15 @@ void satviz_release_video_controller(void *controller) {
   delete (VideoController*) controller;
 }
 
-RecordingStartResult satviz_start_recording(void *controller, const char *filename, const char *encoder_name) {
+int satviz_start_recording(void *controller, const char *filename, const char *encoder_name) {
   VideoEncoder *encoder;
   std::string enc_name_str { encoder_name };
   if (enc_name_str == "theora") {
     encoder = new TheoraEncoder;
   } else {
-    return RecordingStartResult {
-        nullptr,
-        -1
-    };
+    return -1;
   }
-  return RecordingStartResult {
-      encoder,
-      reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder)
-  };
+  return reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder);
 }
 
 void satviz_stop_recording(void *controller) {
@@ -124,10 +118,6 @@ void satviz_finish_recording(void *controller) {
 
 void satviz_next_frame(void *controller) {
   reinterpret_cast<VideoController*>(controller)->nextFrame();
-}
-
-void satviz_release_encoder(void *encoder) {
-  delete (VideoEncoder*) encoder;
 }
 
 }

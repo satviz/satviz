@@ -10,6 +10,8 @@ import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import edu.kit.satviz.serial.SerializationException;
 import java.io.IOException;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -24,13 +26,14 @@ public class Mediator implements ConsumerConnectionListener {
   private final VariableInteractionGraph vig;
   private final ConsumerConfig config;
   private final ScheduledExecutorService glScheduler;
+  private final long period;
+  private final Queue<Runnable> taskQueue;
 
   private boolean recording;
   private boolean recordingPaused;
   private volatile boolean visualizationPaused;
   private int recordedVideos;
   private volatile int clausesPerAdvance;
-  private volatile long period;
 
   private Mediator(
       ScheduledExecutorService glScheduler,
@@ -54,6 +57,7 @@ public class Mediator implements ConsumerConnectionListener {
     this.visualizationPaused = true;
     this.clausesPerAdvance = config.getBufferSize();
     this.period = config.getPeriod();
+    this.taskQueue = new LinkedBlockingQueue<>();
     //System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
@@ -64,7 +68,7 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void updateWindowSize(int windowSize) {
-    glScheduler.submit(() -> heatmap.setHeatmapSize(windowSize));
+    taskQueue.offer(() -> heatmap.setHeatmapSize(windowSize));
   }
 
   public void updateHeatmapColdColor(Color color) {
@@ -73,10 +77,6 @@ public class Mediator implements ConsumerConnectionListener {
 
   public void updateHeatmapHotColor(Color color) {
     // TODO: 19/02/2022
-  }
-
-  public void setPeriod(long period) {
-    this.period = period;
   }
 
   public void setClausesPerAdvance(int clausesPerAdvance) {
@@ -105,14 +105,14 @@ public class Mediator implements ConsumerConnectionListener {
 
   public void startOrStopRecording() {
     if (recording) {
-      glScheduler.submit(videoController::finishRecording);
+      if (recordingPaused) {
+        taskQueue.offer(videoController::resumeRecording);
+      }
+      taskQueue.offer(videoController::finishRecording);
     } else {
       String filename = config.getVideoTemplatePath()
           .replace("{}", String.valueOf(++recordedVideos));
-      glScheduler.submit(() -> {
-        videoController.startRecording(filename, "theora");
-        System.out.println("Recording started");
-      });
+      taskQueue.offer(() -> videoController.startRecording(filename, "theora"));
     }
     recordingPaused = false;
     recording = !recording;
@@ -121,9 +121,9 @@ public class Mediator implements ConsumerConnectionListener {
   public void pauseOrContinueRecording() {
     if (recording) {
       if (recordingPaused) {
-        glScheduler.submit(videoController::resumeRecording);
+        taskQueue.offer(videoController::resumeRecording);
       } else {
-        glScheduler.submit(videoController::stopRecording);
+        taskQueue.offer(videoController::stopRecording);
       }
       recordingPaused = !recordingPaused;
     }
@@ -144,11 +144,11 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void relayout() {
-    glScheduler.submit(graph::recalculateLayout);
+    taskQueue.offer(graph::recalculateLayout);
   }
 
   public void seekToUpdate(long index) {
-    glScheduler.submit(() -> {
+    taskQueue.offer(() -> {
       try {
         coordinator.seekToUpdate(index);
       } catch (Throwable e) { // TODO: 10/02/2022
@@ -182,6 +182,9 @@ public class Mediator implements ConsumerConnectionListener {
       }
       //System.out.println("Post advance");
       videoController.nextFrame();
+      while (!taskQueue.isEmpty()) {
+        taskQueue.poll().run();
+      }
       //System.out.println("Post nextframe");
     } catch (Throwable e) {
       e.printStackTrace();
