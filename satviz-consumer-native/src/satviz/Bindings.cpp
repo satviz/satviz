@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <cstdlib>
+#include <cstring>
 
 #include <satviz/Graph.hpp>
 #include <satviz/Display.hpp>
@@ -39,7 +40,7 @@ SerializedData satviz_serialize(void *graph) {
   reinterpret_cast<Graph*>(graph)->serialize(stream);
   auto size = stream.tellp();
   char *buf = (char*) malloc(static_cast<size_t>(size));
-  stream.get(buf, size);
+  memcpy(buf, stream.str().c_str(), size);
   return SerializedData { buf, static_cast<unsigned long>(size) };
 }
 

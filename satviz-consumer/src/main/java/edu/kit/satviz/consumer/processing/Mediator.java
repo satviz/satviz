@@ -151,9 +151,8 @@ public class Mediator implements ConsumerConnectionListener {
     glScheduler.submit(() -> {
       try {
         coordinator.seekToUpdate(index);
-      } catch (IOException | SerializationException e) { // TODO: 10/02/2022
+      } catch (Throwable e) { // TODO: 10/02/2022
         e.printStackTrace();
-        glScheduler.shutdown();
       }
     });
   }

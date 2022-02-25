@@ -56,7 +56,7 @@ public class ClauseCoordinator implements AutoCloseable {
   private final ReentrantLock stateLock;
   // processorLock provides mutual exclusion for addProcessor and takeSnapshot to coordinate
   // change detection in the list of processors. it is not needed to access the list elsewhere.
-  private final Lock processorLock;
+  private final ReentrantLock processorLock;
 
   // currentUpdate is volatile, even though the stateLock prevents concurrent modification already.
   // this is because while updates to currentUpdate need to be consistent and coordinated,
@@ -246,6 +246,7 @@ public class ClauseCoordinator implements AutoCloseable {
           processor.serialize(stream);
         }
         graph.serialize(stream);
+        stream.flush();
       }
 
       // if the processor list has changed since the last snapshot, create a new snapshot array.
@@ -342,7 +343,9 @@ public class ClauseCoordinator implements AutoCloseable {
         return entry.getKey();
       } finally {
         stateLock.unlock();
-        processorLock.unlock();
+        if (processorLock.isHeldByCurrentThread()) {
+          processorLock.unlock();
+        }
       }
     } finally {
       snapshotLock.unlock();
