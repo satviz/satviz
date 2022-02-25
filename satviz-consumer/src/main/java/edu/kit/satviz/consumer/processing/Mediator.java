@@ -24,13 +24,13 @@ public class Mediator implements ConsumerConnectionListener {
   private final VariableInteractionGraph vig;
   private final ConsumerConfig config;
   private final ScheduledExecutorService glScheduler;
+  private final long period;
 
   private boolean recording;
   private boolean recordingPaused;
   private volatile boolean visualizationPaused;
   private int recordedVideos;
   private volatile int clausesPerAdvance;
-  private volatile long period;
 
   private Mediator(
       ScheduledExecutorService glScheduler,
@@ -75,10 +75,6 @@ public class Mediator implements ConsumerConnectionListener {
     // TODO: 19/02/2022
   }
 
-  public void setPeriod(long period) {
-    this.period = period;
-  }
-
   public void setClausesPerAdvance(int clausesPerAdvance) {
     this.clausesPerAdvance = clausesPerAdvance;
   }
@@ -109,10 +105,7 @@ public class Mediator implements ConsumerConnectionListener {
     } else {
       String filename = config.getVideoTemplatePath()
           .replace("{}", String.valueOf(++recordedVideos));
-      glScheduler.submit(() -> {
-        videoController.startRecording(filename, "theora");
-        System.out.println("Recording started");
-      });
+      glScheduler.submit(() -> videoController.startRecording(filename, "theora"));
     }
     recordingPaused = false;
     recording = !recording;

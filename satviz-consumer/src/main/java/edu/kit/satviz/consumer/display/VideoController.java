@@ -71,17 +71,8 @@ public class VideoController extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
 
-  private static final MethodHandle RELEASE_ENCODER = lookupFunction(
-      "release_encoder",
-      MethodType.methodType(void.class, MemoryAddress.class),
-      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
-  );
-
-  private MemoryAddress currentEncoderAddr;
-
   private VideoController(MemoryAddress pointer) {
     super(pointer);
-    currentEncoderAddr = MemoryAddress.NULL;
   }
 
   /**
@@ -131,8 +122,6 @@ public class VideoController extends NativeObject {
       if (resultCode == -1) {
         throw new IllegalArgumentException("Unsupported encoder " + encoder);
       }
-      currentEncoderAddr = MemoryAddress.ofLong(
-          (long) START_RECORDING_RESULT.varHandle("encoder").get(res));
       return resultCode != 0;
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while starting a recording", e);
@@ -167,7 +156,6 @@ public class VideoController extends NativeObject {
   public void finishRecording() {
     try {
       FINISH_RECORDING.invokeExact(getPointer());
-      freeEncoder();
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while finishing a recording", e);
     }
@@ -197,17 +185,8 @@ public class VideoController extends NativeObject {
     }
   }
 
-  private void freeEncoder() {
-    try {
-      RELEASE_ENCODER.invokeExact(currentEncoderAddr);
-    } catch (Throwable e) {
-      throw new NativeInvocationException("Error while releasing encoder", e);
-    }
-  }
-
   @Override
   public void close() {
-    freeEncoder();
     destroy();
   }
 }
