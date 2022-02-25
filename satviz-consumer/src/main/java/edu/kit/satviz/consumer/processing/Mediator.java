@@ -4,6 +4,7 @@ import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
+import edu.kit.satviz.network.ConsumerConnection;
 import edu.kit.satviz.network.ConsumerConnectionListener;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.sat.ClauseUpdate;
@@ -25,6 +26,7 @@ public class Mediator implements ConsumerConnectionListener {
   private final Heatmap heatmap;
   private final VariableInteractionGraph vig;
   private final ConsumerConfig config;
+  private final ConsumerConnection connection;
   private final ScheduledExecutorService glScheduler;
   private final long period;
   private final Queue<Runnable> taskQueue;
@@ -44,6 +46,7 @@ public class Mediator implements ConsumerConnectionListener {
       ClauseCoordinator coordinator,
       Heatmap heatmap,
       VariableInteractionGraph vig,
+      ConsumerConnection connection,
       ConsumerConfig config
   ) {
     this.glScheduler = glScheduler;
@@ -52,6 +55,7 @@ public class Mediator implements ConsumerConnectionListener {
     this.coordinator = coordinator;
     this.heatmap = heatmap;
     this.vig = vig;
+    this.connection = connection;
     this.config = config;
     this.recording = false;
     this.recordedVideos = 0;
@@ -170,12 +174,16 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void quit() {
-    try {
-      coordinator.close();
-    } catch (IOException e) { // TODO: 10/02/2022
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    }
+    taskQueue.offer(() -> {
+      try {
+        videoController.close();
+        connection.stop();
+        coordinator.close();
+        glScheduler.shutdown();
+      } catch (Throwable e) {
+        e.printStackTrace();
+      }
+    });
   }
 
   private void render() {
@@ -242,6 +250,7 @@ public class Mediator implements ConsumerConnectionListener {
     private ClauseCoordinator coordinator;
     private Heatmap heatmap;
     private VariableInteractionGraph vig;
+    private ConsumerConnection connection;
     private ConsumerConfig config;
     private ScheduledExecutorService glScheduler;
 
@@ -280,6 +289,11 @@ public class Mediator implements ConsumerConnectionListener {
       return this;
     }
 
+    public MediatorBuilder setConnection(ConsumerConnection connection) {
+      this.connection = connection;
+      return this;
+    }
+
     public Mediator createMediator() {
       return new Mediator(
           glScheduler,
@@ -288,6 +302,7 @@ public class Mediator implements ConsumerConnectionListener {
           coordinator,
           heatmap,
           vig,
+          connection,
           config
       );
     }

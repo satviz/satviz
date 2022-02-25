@@ -43,14 +43,15 @@ public class ExternalConfigController extends ConfigController {
   }
 
   @Override
-  protected ConsumerConfig saveConsumerConfig() {
+  protected void setConsumerConfigValues(ConsumerConfig config) {
+    if (config == null) {
+      config = new ConsumerConfig();
+    }
+
     ExternalModeConfig modeConfig = new ExternalModeConfig();
     modeConfig.setPort(portSpinner.getValue());
 
-    ConsumerConfig config = new ConsumerConfig();
     config.setModeConfig(modeConfig);
-
-    return config;
   }
 
   @Override

@@ -18,6 +18,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.TitledPane;
 import javafx.scene.paint.Color;
 
 /**
@@ -39,6 +40,8 @@ public class VisualizationController {
 
   // ATTRIBUTES (FXML)
 
+  @FXML
+  private TitledPane windowPane;
   @FXML
   private ChoiceBox<WeightFactor> weightFactorChoiceBox;
   @FXML
@@ -240,6 +243,11 @@ public class VisualizationController {
   }
 
   // METHODS (OTHER)
+
+  public void quit() {
+    mediator.quit();
+    Platform.exit();
+  }
 
   /**
    * A callback method to update the {@link Spinner} and {@link Slider} of the GUI
