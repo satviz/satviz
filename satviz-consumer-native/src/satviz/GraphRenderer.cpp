@@ -156,6 +156,7 @@ void GraphRenderer::onWeightUpdate(graph::WeightUpdate &update) {
   unsigned char *area = (unsigned char *) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
   for (auto row : update.values) {
     auto e = my_graph.getEdgeHandle(std::get<0>(row), std::get<1>(row));
+    if (!e) continue;
     int idx = edge_mapping[e];
     area[idx] = (unsigned char) (attrs.doubleWeight(e) * 255.0f);
   }
