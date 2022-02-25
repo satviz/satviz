@@ -23,6 +23,7 @@ public class VisualizationStarter extends Application {
     primaryStage.setTitle("Visualization");
     primaryStage.setScene(scene);
     primaryStage.setResizable(false);
+    primaryStage.getScene().getWindow().setOnCloseRequest(event -> visualizationController.quit());
     primaryStage.show();
   }
 

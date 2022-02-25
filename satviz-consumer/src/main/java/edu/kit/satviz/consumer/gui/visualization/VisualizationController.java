@@ -156,11 +156,6 @@ public class VisualizationController {
     processedClausesSlider.setMajorTickUnit(1.0);
     processedClausesSlider.setBlockIncrement(1.0);
     processedClausesSlider.setMinorTickCount(0); // Disable minor ticks
-
-    windowPane.getScene().getWindow().setOnCloseRequest(event -> {
-      mediator.quit();
-      Platform.exit();
-    });
   }
 
   @FXML
@@ -248,6 +243,11 @@ public class VisualizationController {
   }
 
   // METHODS (OTHER)
+
+  public void quit() {
+    mediator.quit();
+    Platform.exit();
+  }
 
   /**
    * A callback method to update the {@link Spinner} and {@link Slider} of the GUI
