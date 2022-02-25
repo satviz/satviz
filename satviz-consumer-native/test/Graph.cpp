@@ -12,14 +12,14 @@ class DummyObserver : public GraphObserver {
 public:
   std::string log;
 
-  DummyObserver(Graph &gr) : GraphObserver(gr) {}
+  explicit DummyObserver(Graph &gr) : GraphObserver(gr) {}
 
-  virtual void onWeightUpdate(WeightUpdate &update) { (void) update; log.push_back('w'); }
-  virtual void onHeatUpdate(HeatUpdate &update) { (void) update; log.push_back('h'); }
-  virtual void onLayoutChange(ogdf::Array<ogdf::node> &changed) { (void) changed; log.push_back('l'); }
-  virtual void onEdgeAdded(ogdf::edge e) { (void) e; log.push_back('+'); }
-  virtual void onEdgeDeleted(ogdf::edge e) { (void) e; log.push_back('-'); }
-  virtual void onReload() { log.push_back('r'); }
+  virtual void onWeightUpdate(WeightUpdate &update) override { (void) update; log.push_back('w'); }
+  virtual void onHeatUpdate(HeatUpdate &update) override { (void) update; log.push_back('h'); }
+  virtual void onLayoutChange(ogdf::Array<ogdf::node> &changed) override { (void) changed; log.push_back('l'); }
+  virtual void onEdgeAdded(ogdf::edge e) override { (void) e; log.push_back('+'); }
+  virtual void onEdgeDeleted(ogdf::edge e) override { (void) e; log.push_back('-'); }
+  virtual void onReload() override { log.push_back('r'); }
 
   /**
    * Check whether a sequence of events happened (in that specific order).
