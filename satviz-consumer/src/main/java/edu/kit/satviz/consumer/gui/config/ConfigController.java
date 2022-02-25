@@ -35,18 +35,23 @@ public abstract class ConfigController {
   protected abstract void loadConsumerConfig(ConsumerConfig config);
 
   /**
-   * Create a {@link ConsumerConfig} object containing all the information that is currently
-   * provided by the fxml components of the window which this controller controls.
-   * May result in some attributes of the {@link ConsumerConfig} object being null.
-   *
-   * @return The {@link ConsumerConfig} object.
+   * Use the values currently provided by the fxml components of the window which this
+   * controller controls to set the respective values of a {@link ConsumerConfig} object.
+   * May leave some attributes of the {@link ConsumerConfig} object unchanged.
    */
-  protected abstract ConsumerConfig saveConsumerConfig();
+  protected abstract void setConsumerConfigValues(ConsumerConfig config);
 
   /**
    * Validates that a given {@link ConsumerConfig} object contains all the necessary information
-   * to start the visualization.
-   * This method is only to be called after {@link ConfigController#saveConsumerConfig()}.
+   * that this controller can (and should) provide.
+   *
+   * <p>
+   *   This method is supposed to be called after
+   *   {@link ConfigController#setConsumerConfigValues(ConsumerConfig)}.
+   *   If there is a guarantee that
+   *   {@link ConfigController#setConsumerConfigValues(ConsumerConfig)} always properly sets
+   *   certain values, then these values don't have to be validated.
+   * </p>
    *
    * @param config The {@link ConsumerConfig} object to be validated.
    * @throws ConfigArgumentException If the {@link ConsumerConfig} object doesn't contain

@@ -84,17 +84,18 @@ public class EmbeddedConfigController extends ConfigController {
   }
 
   @Override
-  protected ConsumerConfig saveConsumerConfig() {
+  protected void setConsumerConfigValues(ConsumerConfig config) {
+    if (config == null) {
+      config = new ConsumerConfig();
+    }
+
     EmbeddedModeConfig modeConfig = new EmbeddedModeConfig();
     modeConfig.setSource(producerModeChoiceBox.getValue());
     if (producerModeFile != null) {
       modeConfig.setSourcePath(producerModeFile.toPath());
     }
 
-    ConsumerConfig config = new ConsumerConfig();
     config.setModeConfig(modeConfig);
-
-    return config;
   }
 
   @Override

@@ -76,7 +76,8 @@ public class GeneralConfigController extends ConfigController {
   private File satInstanceFile;
   private ConfigController modeConfigController;
 
-  private ConsumerConfig consumerConfig = null;
+  private ConsumerConfig currentConfig = null;
+  private ConsumerConfig runConfig = null;
   private boolean run = false;
 
 
@@ -118,10 +119,10 @@ public class GeneralConfigController extends ConfigController {
       return;
     }
 
-    ConsumerConfig config = saveConsumerConfig();
+    setConsumerConfigValues(currentConfig);
 
     try {
-      getMapper().writeValue(file, config);
+      getMapper().writeValue(file, currentConfig);
     } catch (IOException e) {
       errorLabel.setText("The settings file could not be saved.");
     }
@@ -179,10 +180,10 @@ public class GeneralConfigController extends ConfigController {
 
   @FXML
   private void run() {
-    ConsumerConfig config = saveConsumerConfig();
+    setConsumerConfigValues(currentConfig);
     try {
-      validateConsumerConfig(config);
-      consumerConfig = config;
+      validateConsumerConfig(currentConfig);
+      runConfig = currentConfig;
       ((Stage) runButton.getScene().getWindow()).close(); //runButton is just an arbitrary component
       synchronized (GuiUtils.CONFIG_MONITOR) {
         run = true;
@@ -242,6 +243,9 @@ public class GeneralConfigController extends ConfigController {
       return;
     }
 
+    // assume the given config contains all relevant values -> no validation
+    currentConfig = config;
+
     ConsumerModeConfig modeConfig = config.getModeConfig();
     if (modeConfig != null && modeConfig.getMode() != null) {
       setConsumerMode(modeConfig.getMode());
@@ -279,9 +283,9 @@ public class GeneralConfigController extends ConfigController {
   }
 
   @Override
-  protected ConsumerConfig saveConsumerConfig() {
-    // creates config where ConsumerModeConfig has already been set
-    ConsumerConfig config = modeConfigController.saveConsumerConfig();
+  protected void setConsumerConfigValues(ConsumerConfig config) {
+    // set ConsumerModeConfig
+    modeConfigController.setConsumerConfigValues(config);
 
     if (satInstanceFile != null) {
       config.setInstancePath(satInstanceFile.toPath());
@@ -303,8 +307,6 @@ public class GeneralConfigController extends ConfigController {
     colors.setFromColor(GuiUtils.colorToInt(coldColorColorPicker.getValue()));
     colors.setToColor(GuiUtils.colorToInt(hotColorColorPicker.getValue()));
     config.setHeatmapColors(colors);
-
-    return config;
   }
 
   @Override
@@ -364,7 +366,7 @@ public class GeneralConfigController extends ConfigController {
    *         the user.
    */
   public ConsumerConfig getConsumerConfig() {
-    return consumerConfig;
+    return runConfig;
   }
 
 }
