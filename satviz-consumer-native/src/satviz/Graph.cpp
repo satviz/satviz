@@ -48,8 +48,7 @@ void Graph::removeObserver(GraphObserver *o) {
 }
 
 void Graph::submitWeightUpdate(WeightUpdate &update) {
-  ogdf::Array<ogdf::edge> changed(update.values.size());
-  int chg_idx = 0;
+  std::vector<ogdf::edge> changed;
 
   for (auto row : update.values) {
     auto v = node_handles[std::get<0>(row)];
@@ -75,14 +74,19 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
       graph.delEdge(e);
       continue;
     } else {
-      changed[chg_idx++] = e;
+      changed.push_back(e);
     }
   }
 
-  changed.resize(chg_idx);
+  // This is a workaround to an awful design decision of OGDF
+  // (OGDF containers/iterators having a non-standard interface),
+  // which in itself is only something we need to work around another bug in OGDF
+  // (shrinking an Array with resize() results in a double free).
+  ogdf::Array<ogdf::edge> ogdfIsTerrible(changed.size());
+  for (int i = 0; i < changed.size(); i++) { ogdfIsTerrible[i] = changed[i]; }
 
   for (auto o : observers) {
-    o->onWeightChange(changed);
+    o->onWeightChange(ogdfIsTerrible);
   }
 }
 

@@ -14,8 +14,8 @@ public:
 
   explicit DummyObserver(Graph &gr) : GraphObserver(gr) {}
 
-  virtual void onWeightUpdate(WeightUpdate &update) override { (void) update; log.push_back('w'); }
-  virtual void onHeatUpdate(HeatUpdate &update) override { (void) update; log.push_back('h'); }
+  virtual void onWeightChange(ogdf::Array<ogdf::edge> &changed) override { (void) changed; log.push_back('w'); }
+  virtual void onHeatChange(ogdf::Array<ogdf::node> &changed) override { (void) changed; log.push_back('h'); }
   virtual void onLayoutChange(ogdf::Array<ogdf::node> &changed) override { (void) changed; log.push_back('l'); }
   virtual void onEdgeAdded(ogdf::edge e) override { (void) e; log.push_back('+'); }
   virtual void onEdgeDeleted(ogdf::edge e) override { (void) e; log.push_back('-'); }
