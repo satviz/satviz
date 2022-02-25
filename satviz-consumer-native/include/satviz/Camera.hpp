@@ -1,6 +1,8 @@
 #ifndef SATVIZ_CAMERA_HPP_
 #define SATVIZ_CAMERA_HPP_
 
+#include <SFML/System/Clock.hpp>
+
 namespace satviz {
 namespace video {
 
@@ -9,18 +11,38 @@ namespace video {
  */
 class Camera {
 private:
-  float position[2];
-  float zoom;
+  constexpr static const float SMOOTH_SPEED = 1.0f / 0.3f;
+
+  struct SmoothedValue {
+    sf::Clock clock;
+    float oldValue;
+    float newValue;
+    float curValue;
+
+    explicit SmoothedValue(float v = 0.0f);
+
+    void update();
+    void set(float v);
+
+    inline float get() const { return newValue; }
+    inline float current() const { return curValue; }
+  };
+
+  SmoothedValue xpos;
+  SmoothedValue ypos;
+  SmoothedValue zoom;
 
 public:
-  Camera() : position{0.0f, 0.0f}, zoom(2.0f) {}
+  Camera();
 
-  inline float getX() { return position[0]; }
-  inline void setX(float v) { position[0] = v; }
-  inline float getY() { return position[1]; }
-  inline void setY(float v) { position[1] = v; }
-  inline float getZoom() { return zoom; }
-  inline void setZoom(float z) { zoom = z; }
+  inline float getX() { return xpos.get(); }
+  inline void setX(float v) { xpos.set(v); }
+  inline float getY() { return ypos.get(); }
+  inline void setY(float v) { ypos.set(v); }
+  float getZoom() { return zoom.get(); }
+  void setZoom(float z) { zoom.set(z); }
+
+  void update();
 
   /**
    * Create an OpenGL world-to-view matrix based on this camera.
