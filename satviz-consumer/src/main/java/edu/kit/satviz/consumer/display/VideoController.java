@@ -108,7 +108,6 @@ public class VideoController extends NativeObject {
   public boolean startRecording(String fileName, String encoder) {
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
       int res = (int) START_RECORDING.invokeExact(
-          SegmentAllocator.ofScope(local),
           getPointer(),
           CLinker.toCString(fileName, local).address(),
           CLinker.toCString(encoder, local).address()
