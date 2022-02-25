@@ -18,6 +18,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.TitledPane;
 import javafx.scene.paint.Color;
 
 /**
@@ -39,6 +40,8 @@ public class VisualizationController {
 
   // ATTRIBUTES (FXML)
 
+  @FXML
+  private TitledPane windowPane;
   @FXML
   private ChoiceBox<WeightFactor> weightFactorChoiceBox;
   @FXML
@@ -153,6 +156,11 @@ public class VisualizationController {
     processedClausesSlider.setMajorTickUnit(1.0);
     processedClausesSlider.setBlockIncrement(1.0);
     processedClausesSlider.setMinorTickCount(0); // Disable minor ticks
+
+    windowPane.getScene().getWindow().setOnCloseRequest(event -> {
+      mediator.quit();
+      Platform.exit();
+    });
   }
 
   @FXML
