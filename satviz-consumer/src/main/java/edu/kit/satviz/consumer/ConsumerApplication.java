@@ -143,6 +143,7 @@ public final class ConsumerApplication {
         .setCoordinator(coordinator)
         .setHeatmap(new RecencyHeatmap(config.getWindowSize()))
         .setVig(vig)
+        .setConnection(connection)
         .createMediator();
 
     if (!config.isNoGui()) {
