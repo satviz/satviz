@@ -298,7 +298,7 @@ public class ClauseCoordinator implements AutoCloseable {
     changeListener = Objects.requireNonNull(action);
   }
 
-  private long loadClosestSnapshot(long index) throws IOException {
+  private long loadClosestSnapshot(long index) throws IOException, SerializationException {
     // snapshots need to be locked - we don't want to create a snapshot while in the middle of
     // restoring some previous state.
     snapshotLock.lock();
