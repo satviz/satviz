@@ -1,6 +1,10 @@
 package edu.kit.satviz.consumer;
 
+import edu.kit.satviz.common.Constraint;
+import edu.kit.satviz.common.ConstraintValidationException;
 import edu.kit.satviz.common.Hashing;
+import edu.kit.satviz.consumer.cli.ConsumerCli;
+import edu.kit.satviz.consumer.cli.ConsumerConstraints;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -39,6 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import net.lingala.zip4j.ZipFile;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
 public final class ConsumerApplication {
 
@@ -46,7 +51,12 @@ public final class ConsumerApplication {
   private static ProducerId pid = null;
   private static final Object SYNC_OBJECT = new Object();
 
-  public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
+  public static void main(String[] args) throws
+      IOException,
+      InterruptedException,
+      ExecutionException,
+      ConstraintValidationException,
+      ArgumentParserException {
     /*Graph g = Graph.create(1040);
     VideoController c = VideoController.create(g, DisplayType.ONSCREEN, 1000, 700);
     new Thread(() -> {
@@ -79,13 +89,13 @@ public final class ConsumerApplication {
       }
     }
 
-    int variableAmount;
+    int varAmount;
     logger.finer("Reading SAT instance file");
-    VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());;
+    VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());
     WeightUpdate initialUpdate;
     try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
-      variableAmount = dimacsFile.getVariableAmount();
-      logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
+      varAmount = dimacsFile.getVariableAmount();
+      logger.log(Level.INFO, "Instance contains {0} variables", varAmount);
       ClauseUpdate[] clauses = StreamSupport.stream(dimacsFile.spliterator(), false)
           .toArray(ClauseUpdate[]::new);
       initialUpdate = vig.process(clauses, null);
@@ -101,7 +111,7 @@ public final class ConsumerApplication {
     record GlComponents(Graph graph, VideoController controller) {}
 
     GlComponents components = glScheduler.submit(() -> {
-      Graph graph = Graph.create(variableAmount);
+      Graph graph = Graph.create(varAmount);
       VideoController videoController = VideoController.create(
           graph,
           (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN,
@@ -120,7 +130,7 @@ public final class ConsumerApplication {
         //WeightUpdate update = new WeightUpdate();
         //update.add(256, 257, 1);
         HeatUpdate u = new HeatUpdate();
-        for (int i = 0; i < variableAmount; i++) {
+        for (int i = 0; i < varAmount; i++) {
           u.add(i, 0);
         }
         components.graph.submitUpdate(u);
@@ -133,7 +143,7 @@ public final class ConsumerApplication {
     }).get();
 
     ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
-        tempDir, variableAmount);
+        tempDir, varAmount);
 
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)
@@ -147,13 +157,13 @@ public final class ConsumerApplication {
         .createMediator();
 
     if (!config.isNoGui()) {
-      VisualizationController visController = new VisualizationController(mediator, config, variableAmount);
+      VisualizationController visController = new VisualizationController(
+          mediator, config, varAmount
+      );
       coordinator.registerChangeListener(visController::onClauseUpdate);
 
-      // TODO: 21/02/2022 add back in
       VisualizationStarter.setVisualizationController(visController);
       GuiUtils.launch(VisualizationStarter.class);
-      //Application.launch(VisualizationStarter.class);
     }
 
     connection.connect(ConsumerApplication.pid, mediator);
@@ -170,7 +180,11 @@ public final class ConsumerApplication {
     //videoController.close();
   }
 
-  private static ConsumerConfig getStartingConfig(String[] args) throws InterruptedException {
+  private static ConsumerConfig getStartingConfig(String[] args) throws
+      InterruptedException,
+      ArgumentParserException,
+      IOException,
+      ConstraintValidationException {
     if (args.length == 0) {
       GuiUtils.launch(ConfigStarter.class);
       synchronized (GuiUtils.CONFIG_MONITOR) {
@@ -180,8 +194,10 @@ public final class ConsumerApplication {
       }
       return ConfigStarter.getConsumerConfig();
     } else {
-      // TODO: parse Arguments from CLI
-      return null;
+      ConsumerConfig config = ConsumerCli.parseArgs(args);
+      Constraint<ConsumerConfig> inputConstraint = ConsumerConstraints.paramConstraints();
+      inputConstraint.validate(config);
+      return config;
     }
   }
 
