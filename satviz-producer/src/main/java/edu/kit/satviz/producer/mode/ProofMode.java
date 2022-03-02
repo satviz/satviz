@@ -1,7 +1,7 @@
 package edu.kit.satviz.producer.mode;
 
-import edu.kit.satviz.network.OfferType;
-import edu.kit.satviz.network.ProducerId;
+import edu.kit.satviz.network.pub.OfferType;
+import edu.kit.satviz.network.pub.ProducerId;
 import edu.kit.satviz.parsers.DratFile;
 import edu.kit.satviz.producer.ProducerMode;
 import edu.kit.satviz.producer.ProducerModeData;

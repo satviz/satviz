@@ -1,4 +1,4 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.general;
 
 import java.io.IOException;
 import java.net.ConnectException;

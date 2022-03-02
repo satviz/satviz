@@ -1,5 +1,6 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.pub;
 
+import edu.kit.satviz.network.general.NetworkBlueprint;
 import edu.kit.satviz.serial.*;
 
 import java.util.Map;

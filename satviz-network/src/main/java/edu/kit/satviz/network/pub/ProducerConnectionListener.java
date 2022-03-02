@@ -1,4 +1,4 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.pub;
 
 /**
  * Callback methods for the producer side listening on a consumer connection.

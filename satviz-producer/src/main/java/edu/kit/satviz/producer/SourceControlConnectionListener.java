@@ -1,7 +1,7 @@
 package edu.kit.satviz.producer;
 
-import edu.kit.satviz.network.ProducerConnection;
-import edu.kit.satviz.network.ProducerConnectionListener;
+import edu.kit.satviz.network.pub.ProducerConnection;
+import edu.kit.satviz.network.pub.ProducerConnectionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

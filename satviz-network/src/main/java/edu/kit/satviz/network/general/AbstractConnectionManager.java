@@ -1,4 +1,4 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.general;
 
 import edu.kit.satviz.serial.SerializationException;
 import java.io.ByteArrayOutputStream;

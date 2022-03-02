@@ -1,4 +1,6 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.pub;
+
+import edu.kit.satviz.network.general.ConnectionId;
 
 /**
  * An identifier for a producer connection, with associated data.

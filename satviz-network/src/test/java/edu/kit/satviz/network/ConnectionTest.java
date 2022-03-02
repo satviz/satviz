@@ -1,5 +1,6 @@
 package edu.kit.satviz.network;
 
+import edu.kit.satviz.network.general.*;
 import edu.kit.satviz.serial.NullSerializer;
 import edu.kit.satviz.serial.Serializer;
 import org.junit.jupiter.api.BeforeAll;

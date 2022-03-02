@@ -2,7 +2,7 @@ package edu.kit.satviz.producer;
 
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
-import edu.kit.satviz.network.ProducerConnection;
+import edu.kit.satviz.network.pub.ProducerConnection;
 import edu.kit.satviz.producer.cli.ProducerCli;
 import edu.kit.satviz.producer.cli.ProducerConstraints;
 import edu.kit.satviz.producer.cli.ProducerParameters;

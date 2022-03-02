@@ -1,5 +1,8 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.pub;
 
+import edu.kit.satviz.network.general.ClientConnectionManager;
+import edu.kit.satviz.network.general.ConnectionId;
+import edu.kit.satviz.network.general.NetworkMessage;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
