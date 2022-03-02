@@ -1,6 +1,7 @@
 package edu.kit.satviz.network;
 
-import edu.kit.satviz.serial.SerialBuilder;
+import edu.kit.satviz.serial.NullSerialBuilder;
+import edu.kit.satviz.serial.NullSerializer;
 import edu.kit.satviz.serial.SerializationException;
 import org.junit.jupiter.api.Test;
 
