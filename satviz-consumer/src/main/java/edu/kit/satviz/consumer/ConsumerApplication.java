@@ -51,12 +51,8 @@ public final class ConsumerApplication {
   private static ProducerId pid = null;
   private static final Object SYNC_OBJECT = new Object();
 
-  public static void main(String[] args) throws
-      IOException,
-      InterruptedException,
-      ExecutionException,
-      ConstraintValidationException,
-      ArgumentParserException {
+  public static void main(String[] args)
+      throws IOException, InterruptedException, ExecutionException {
     /*Graph g = Graph.create(1040);
     VideoController c = VideoController.create(g, DisplayType.ONSCREEN, 1000, 700);
     new Thread(() -> {
@@ -181,10 +177,7 @@ public final class ConsumerApplication {
   }
 
   private static ConsumerConfig getStartingConfig(String[] args) throws
-      InterruptedException,
-      ArgumentParserException,
-      IOException,
-      ConstraintValidationException {
+      InterruptedException {
     if (args.length == 0) {
       GuiUtils.launch(ConfigStarter.class);
       synchronized (GuiUtils.CONFIG_MONITOR) {
@@ -194,10 +187,29 @@ public final class ConsumerApplication {
       }
       return ConfigStarter.getConsumerConfig();
     } else {
-      ConsumerConfig config = ConsumerCli.parseArgs(args);
-      Constraint<ConsumerConfig> inputConstraint = ConsumerConstraints.paramConstraints();
-      inputConstraint.validate(config);
+      ConsumerConfig config = parseArgs(args);
+      validateArgs(config);
       return config;
+    }
+  }
+
+  private static ConsumerConfig parseArgs(String[] args) {
+    try {
+      return ConsumerCli.parseArgs(args);
+    } catch (ArgumentParserException e) {
+      ConsumerCli.PARSER.handleError(e);
+      System.exit(1);
+      return null;
+    }
+  }
+
+  private static void validateArgs(ConsumerConfig config) {
+    Constraint<ConsumerConfig> inputConstraint = ConsumerConstraints.paramConstraints();
+    try {
+      inputConstraint.validate(config);
+    } catch (ConstraintValidationException e) {
+      logger.severe(e.getMessage());
+      System.exit(1);
     }
   }
 
