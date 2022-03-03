@@ -118,7 +118,7 @@ public class ConsumerCli {
     try {
       return mapper.readValue(configFile, ConsumerConfig.class);
     } catch (IOException e) {
-      throw new ArgumentParserException("Invalid config file was entered.", PARSER);
+      throw new ArgumentParserException("Invalid configuration file.", PARSER);
     }
   }
 
