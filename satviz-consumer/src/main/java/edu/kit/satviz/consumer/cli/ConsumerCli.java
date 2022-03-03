@@ -24,7 +24,10 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
 
-public class ConsumerCli {
+/**
+ * A utility class defining the command line {@code ArgumentParser} used by the consumer.
+ */
+public final class ConsumerCli {
 
   /**
    * The {@code ArgumentParser}.
@@ -96,6 +99,14 @@ public class ConsumerCli {
 
   }
 
+  /**
+   * Parses some arguments given as a string array to an instance of {@link ConsumerConfig}
+   * using the {@code ArgumentParser} defined by this class.
+   *
+   * @param args The command line args.
+   * @return The parsed arguments as a {@link ConsumerConfig} instance.
+   * @throws ArgumentParserException if the underlying {@code ArgumentParser} throws.
+   */
   public static ConsumerConfig parseArgs(String[] args)
       throws ArgumentParserException {
     Namespace namespace = PARSER.parseArgs(args);
