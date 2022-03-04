@@ -9,7 +9,6 @@ import edu.kit.satviz.serial.StringSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 
 /**
  * An implementation of {@code ClauseUpdateProcessor} that realises weight-changes for a
@@ -20,6 +19,8 @@ import java.util.Arrays;
  * @see WeightUpdate
  */
 public abstract class VariableInteractionGraph implements ClauseUpdateProcessor {
+
+  public static final float MIN_WEIGHT = 1e-10f;
 
   private WeightFactor weightFactor;
   private final StringSerializer serializer;
@@ -64,7 +65,7 @@ public abstract class VariableInteractionGraph implements ClauseUpdateProcessor 
         literals[i] = Math.abs(literals[i]);
       }
 
-      float weight = (float) weightFactor.apply(literals.length);
+      float weight = (float) weightFactor.apply(literals.length, MIN_WEIGHT);
       weight = (clauseUpdate.type() == ClauseUpdate.Type.ADD) ? weight : -weight;
       process(weightUpdate, literals, weight);
     }
