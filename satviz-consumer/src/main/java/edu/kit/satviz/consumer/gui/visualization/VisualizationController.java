@@ -100,6 +100,7 @@ public class VisualizationController {
   public VisualizationController(Mediator mediator, ConsumerConfig config, int variableCount) {
     this.variableCount = variableCount;
     this.mediator = mediator;
+    this.mediator.registerCloseAction(Platform::exit);
     this.config = config;
   }
 
@@ -250,7 +251,6 @@ public class VisualizationController {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    Platform.exit();
   }
 
   /**

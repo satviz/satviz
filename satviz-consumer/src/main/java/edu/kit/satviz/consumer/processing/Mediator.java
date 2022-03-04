@@ -10,11 +10,14 @@ import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
-import java.util.Queue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Queue;
+
 import javafx.scene.paint.Color;
 
 public class Mediator implements ConsumerConnectionListener, AutoCloseable {
@@ -29,6 +32,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   private final ScheduledExecutorService glScheduler;
   private final long period;
   private final Queue<Runnable> taskQueue;
+  private final List<Runnable> closeActions;
 
   private boolean recording;
   private boolean recordingPaused;
@@ -66,7 +70,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.clauseCount = 0;
     this.snapshotPeriod = clausesPerAdvance * 500;
     this.taskQueue = new LinkedBlockingQueue<>();
-    //System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
+    this.closeActions = new CopyOnWriteArrayList<>();
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -173,17 +177,8 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     return coordinator.totalUpdateCount();
   }
 
-  public void quit() {
-    taskQueue.offer(() -> {
-      try {
-        videoController.close();
-        connection.stop();
-        coordinator.close();
-        glScheduler.shutdown();
-      } catch (Throwable e) {
-        e.printStackTrace();
-      }
-    });
+  public void registerCloseAction(Runnable closeAction) {
+    closeActions.add(closeAction);
   }
 
   private void render() {
@@ -251,6 +246,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     coordinator.close();
     connection.stop();
     glScheduler.shutdown();
+    closeActions.forEach(Runnable::run);
   }
 
 
