@@ -245,7 +245,11 @@ public class VisualizationController {
   // METHODS (OTHER)
 
   public void quit() {
-    mediator.quit();
+    try {
+      mediator.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     Platform.exit();
   }
 

@@ -47,16 +47,6 @@ public final class ConsumerApplication {
   private static final Object SYNC_OBJECT = new Object();
 
   public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
-    /*Graph g = Graph.create(1040);
-    VideoController c = VideoController.create(g, DisplayType.ONSCREEN, 1000, 700);
-    new Thread(() -> {
-      HeatUpdate u = new HeatUpdate();
-      u.add(1025, 1);
-      g.submitUpdate(u);
-    }).start();
-    if (true) {
-      return;
-    }*/
     logger.setLevel(Level.FINER);
     logger.log(Level.FINER, "Starting consumer with arguments {0}", args);
     ConsumerConfig config = getStartingConfig(args);
@@ -163,11 +153,6 @@ public final class ConsumerApplication {
     }
 
     mediator.startRendering();
-
-
-
-    //coordinator.close();
-    //videoController.close();
   }
 
   private static ConsumerConfig getStartingConfig(String[] args) throws InterruptedException {

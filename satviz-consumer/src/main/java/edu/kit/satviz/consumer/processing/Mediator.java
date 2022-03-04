@@ -9,7 +9,6 @@ import edu.kit.satviz.network.ConsumerConnectionListener;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
-import edu.kit.satviz.serial.SerializationException;
 import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,7 +17,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javafx.scene.paint.Color;
 
-public class Mediator implements ConsumerConnectionListener {
+public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
   private final Graph graph;
   private final VideoController videoController;
@@ -38,6 +37,7 @@ public class Mediator implements ConsumerConnectionListener {
   private volatile int clausesPerAdvance;
   private volatile int snapshotPeriod;
   private int clauseCount;
+  private ScheduledFuture<?> renderTask;
 
   private Mediator(
       ScheduledExecutorService glScheduler,
@@ -138,7 +138,7 @@ public class Mediator implements ConsumerConnectionListener {
   }
 
   public void startRendering() {
-    glScheduler.scheduleAtFixedRate(
+    renderTask = glScheduler.scheduleAtFixedRate(
         this::render,
         0,
         period,
@@ -217,32 +217,42 @@ public class Mediator implements ConsumerConnectionListener {
 
   @Override
   public void onTerminateSolved(ProducerId pid, SatAssignment sol) {
-    advanceRestAndShutdown();
+    connection.disconnect(pid);
   }
 
   @Override
   public void onTerminateRefuted(ProducerId pid) {
-    advanceRestAndShutdown();
+    connection.disconnect(pid);
   }
 
   @Override
   public void onTerminateOtherwise(ProducerId pid, String reason) {
-    advanceRestAndShutdown();
+    connection.disconnect(pid);
+    try {
+      close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    // TODO: 04.03.2022 error & close gui
   }
 
-  private void advanceRestAndShutdown() {
-    if (true) { // TODO: 22/02/2022 remove
-      return;
-    }
-    System.out.println("shutdown");
+  @Override
+  public void close() throws Exception {
+    renderTask.cancel(false);
+    boolean isRecording = recording;
+    glScheduler.submit(() -> {
+      if (isRecording) {
+        videoController.finishRecording();
+      }
+      videoController.close();
+      graph.close();
+    }).get();
+
+    coordinator.close();
+    connection.stop();
     glScheduler.shutdown();
-    int updateAmount = (int) (coordinator.totalUpdateCount() - coordinator.currentUpdate());
-    try {
-      coordinator.advanceVisualization(updateAmount);
-    } catch (IOException | SerializationException e) { // TODO: 19/02/2022
-      throw new RuntimeException(e);
-    }
   }
+
 
   public static class MediatorBuilder {
     private Graph graph;
