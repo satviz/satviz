@@ -59,6 +59,9 @@ public class ConsumerConnection {
    * @throws InterruptedException if this thread is interrupted waiting on others
    */
   public void stop() throws InterruptedException {
+    for (ProducerId pid : idMap.values()) {
+      disconnect(pid);
+    }
     conman.finishStop();
   }
 
