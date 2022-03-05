@@ -1,6 +1,9 @@
 #include <satviz/Camera.hpp>
 
 #include <cstring>
+#include <cmath>
+
+#include <iostream>
 
 namespace satviz {
 namespace video {
@@ -25,6 +28,16 @@ void Camera::SmoothedValue::set(float v) {
 
 Camera::Camera() : xpos(), ypos(), zoom(2.0f) {}
 
+void Camera::zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight) {
+  float xZoom = boxWidth  ? (float) dpyWidth  / boxWidth  : INFINITY;
+  float yZoom = boxHeight ? (float) dpyHeight / boxHeight : INFINITY;
+  float mZoom = xZoom < yZoom ? xZoom : yZoom;
+  if (std::isinf(mZoom)) mZoom = 2.0f;
+  else mZoom *= 0.95f;
+  std::cout << "ZOOM TO FIT: " << boxWidth << " " << boxHeight << " " << dpyWidth << " " << dpyHeight << " " << mZoom << std::endl;
+  setZoom(mZoom);
+}
+
 void Camera::update() {
   xpos.update();
   ypos.update();
@@ -33,12 +46,14 @@ void Camera::update() {
 
 void Camera::toMatrix(float matrix[16], int width, int height) {
   float zoom = this->zoom.current();
+  float xScale = 2.0f / (float) width  * zoom;
+  float yScale = 2.0f / (float) height * zoom;
   memset(matrix, 0, 16 * sizeof (float));
-  matrix[ 0] = 2.0f / (float) width  * zoom;
-  matrix[ 5] = 2.0f / (float) height * zoom;
+  matrix[ 0] = xScale;
+  matrix[ 5] = yScale;
   matrix[10] = -1.0f;
-  matrix[12] = -xpos.current() * zoom;
-  matrix[13] = -ypos.current() * zoom;
+  matrix[12] = -xpos.current() * xScale;
+  matrix[13] = -ypos.current() * yScale;
   matrix[15] = 1.0f;
 }
 

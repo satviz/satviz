@@ -4,6 +4,8 @@
 
 #include <satviz/TheoraEncoder.hpp>
 
+#include <iostream>
+
 namespace satviz {
 namespace video {
 
@@ -23,6 +25,17 @@ VideoController::~VideoController() {
   delete display;
 }
 
+void VideoController::resetCamera() {
+  std::cout << "CAMERA BEFORE: " << camera.getX() << " " << camera.getY() << " " << camera.getZoom() << std::endl;
+  ogdf::DRect box = graph.getOgdfAttrs().boundingBox();
+  double cx = 0.5 * (box.p1().m_x + box.p2().m_x);
+  double cy = 0.5 * (box.p1().m_y + box.p2().m_y);
+  std::cout << "CAMERA RESET: " << cx << " | " << cy << std::endl;
+  camera.setX((float) cx);
+  camera.setY((float) cy);
+  camera.zoomToFit((float) box.width(), (float) box.height(), display->getWidth(), display->getHeight());
+}
+
 void VideoController::processEvent(sf::Event &event) {
   if (event.type == sf::Event::Closed) {
     wantToClose = true;
@@ -37,17 +50,21 @@ void VideoController::processEvent(sf::Event &event) {
     camera.setZoom(camera.getZoom() * factor);
   }
   if (event.type == sf::Event::KeyPressed) {
+    const float SPEED = 200.0f;
     if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) {
-      camera.setX(camera.getX() - 0.2f / camera.getZoom());
+      camera.setX(camera.getX() - SPEED / camera.getZoom());
     }
     if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
-      camera.setX(camera.getX() + 0.2f / camera.getZoom());
+      camera.setX(camera.getX() + SPEED / camera.getZoom());
     }
     if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
-      camera.setY(camera.getY() - 0.2f / camera.getZoom());
+      camera.setY(camera.getY() - SPEED / camera.getZoom());
     }
     if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
-      camera.setY(camera.getY() + 0.2f / camera.getZoom());
+      camera.setY(camera.getY() + SPEED / camera.getZoom());
+    }
+    if (event.key.code == sf::Keyboard::Space) {
+      resetCamera();
     }
 #if 0
     if (event.key.code == sf::Keyboard::K) {
