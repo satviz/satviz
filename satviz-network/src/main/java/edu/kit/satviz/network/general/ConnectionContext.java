@@ -211,8 +211,8 @@ public class ConnectionContext {
       if (!signaled) {
         signaled = true;
       }
+      callListener(msg);
     }
-    callListener(msg);
   }
 
   /**
@@ -224,10 +224,11 @@ public class ConnectionContext {
    * The buffer is cleared before and after using it.
    *
    * @param bb the buffer to use for reading and writing
-   * @return the number of bytes read, -1 if end-of-stream or fail
+   * @return the number of bytes read, -1 if end-of-stream
    * @throws NotYetConnectedException if the socket is not connected
+   * @throws IOException if an I/O error occurs
    */
-  public int read(ByteBuffer bb) throws NotYetConnectedException {
+  public int read(ByteBuffer bb) throws NotYetConnectedException, IOException {
     synchronized (syncState) { // no concurrent tryConnect
       if (state != State.CONNECTED) {
         throw new NotYetConnectedException();
@@ -244,7 +245,7 @@ public class ConnectionContext {
         throw e;
       } catch (IOException | IllegalArgumentException | NonReadableChannelException e) {
         close(true);
-        return -1;
+        throw new IOException(e);
       }
       if (numRead == -1) {
         // stream closed?
@@ -272,10 +273,11 @@ public class ConnectionContext {
    * Writes the specified data to this socket channel.
    *
    * @param bb the buffer holding the data
-   * @return the number of bytes written, -1 on fail
+   * @return the number of bytes written
    * @throws NotYetConnectedException if the channel is not connected
+   * @throws IOException if an I/O error occurs
    */
-  public int write(ByteBuffer bb) throws IOException {
+  public int write(ByteBuffer bb) throws NotYetConnectedException, IOException {
     synchronized (syncState) {
       if (state != State.CONNECTED) {
         throw new NotYetConnectedException();
@@ -292,7 +294,7 @@ public class ConnectionContext {
           throw e;
         } catch (IOException e) {
           close(true);
-          return -1;
+          throw e;
         }
       }
       return remaining;
