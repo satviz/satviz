@@ -156,7 +156,9 @@ void GraphRenderer::onWeightChange(ogdf::Array<ogdf::edge> &changed) {
   unsigned char *area = (unsigned char *) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
   for (auto e : changed) {
     int idx = edge_mapping[e];
-    area[idx] = (unsigned char) (attrs.doubleWeight(e) * 255.0f);
+    double w = attrs.doubleWeight(e);
+    double I = w / (1.0 + w);
+    area[idx] = (unsigned char) (I * 256.0);
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
