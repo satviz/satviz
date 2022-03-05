@@ -37,7 +37,13 @@ public class NetworkBlueprint {
    */
   public void serialize(byte type, Object obj, OutputStream out) throws IOException,
       SerializationException, ClassCastException {
-    Serializer<?> serial = serializers[type];
+    // have to do conversion because java has no unsigned bytes
+    int unsignedType = type;
+    if (unsignedType < 0) {
+      unsignedType += 256;
+    }
+    
+    Serializer<?> serial = serializers[unsignedType];
     if (serial != null) {
       serial.serializeUnsafe(obj, out);
     } else {
