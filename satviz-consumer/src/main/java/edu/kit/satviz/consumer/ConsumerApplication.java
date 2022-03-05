@@ -53,21 +53,8 @@ public final class ConsumerApplication {
     if (config == null) {
       return;
     }
-    Path tempDir = Files.createTempDirectory("satviz");
+    Path tempDir = Files.createTempDirectory("satviz"); // TODO: 05.03.2022 make own temp?
     tempDir.toFile().deleteOnExit();
-    logger.info("Setting up network connection");
-    ConsumerConnection connection = setupNetworkConnection(config, tempDir);
-    logger.log(Level.INFO, "Producer {0} connected", pid);
-    if (pid.type() == OfferType.SOLVER) {
-      long hash = Hashing.hashContent(Files.newInputStream(config.getInstancePath()));
-      if (hash != pid.instanceHash()) {
-        logger.log(Level.SEVERE, "SAT instance mismatch: {0} (local) vs {1} (remote)",
-            new Object[] { hash, pid.instanceHash() });
-        connection.disconnect(pid);
-        System.exit(1);
-        return;
-      }
-    }
 
     int variableAmount;
     logger.finer("Reading SAT instance file");
@@ -135,21 +122,9 @@ public final class ConsumerApplication {
         .setVig(vig)
         .createMediator();
 
-    if (!config.isNoGui()) {
-      VisualizationController visController = new VisualizationController(
-          mediator,
-          config,
-          variableAmount
-      );
-      coordinator.registerChangeListener(visController::onClauseUpdate);
 
-      // TODO: 21/02/2022 add back in
-      VisualizationStarter.setVisualizationController(visController);
-      GuiUtils.launch(VisualizationStarter.class);
-      //Application.launch(VisualizationStarter.class);
-    }
-
-    connection.connect(ConsumerApplication.pid, mediator);
+    logger.info("Setting up network connection");
+    ConsumerConnection connection = setupNetworkConnection(config, tempDir);
     mediator.registerCloseAction(() -> {
       try {
         connection.stop();
@@ -157,11 +132,25 @@ public final class ConsumerApplication {
         e.printStackTrace();
       }
     }); // TODO: 05.03.2022 remove try catch after merging with latest network version
+    logger.log(Level.INFO, "Producer {0} connected", pid);
+    if (!verifyInstanceHash(config.getInstancePath())) {
+      connection.disconnect(pid);
+      System.exit(1);
+      return;
+    }
+
+
+    if (!config.isNoGui()) {
+      startVisualisationGui(mediator, config, variableAmount, coordinator);
+    }
+
+
+    connection.connect(ConsumerApplication.pid, mediator);
+
 
     if (config.isRecordImmediately() || config.isNoGui()) {
       mediator.startOrStopRecording();
     }
-
     mediator.startRendering();
   }
 
@@ -248,4 +237,36 @@ public final class ConsumerApplication {
     }
   }
 
+  private static boolean verifyInstanceHash(Path instancePath)
+      throws IOException {
+    if (pid.type() != OfferType.SOLVER) {
+      return true;
+    }
+    long hash = Hashing.hashContent(Files.newInputStream(instancePath));
+    if (hash != pid.instanceHash()) {
+      logger.log(Level.SEVERE, "SAT instance mismatch: {0} (local) vs {1} (remote)",
+          new Object[] { hash, pid.instanceHash() });
+      return false;
+    }
+    return true;
+  }
+
+  private static void startVisualisationGui(
+      Mediator mediator,
+      ConsumerConfig config,
+      int variableAmount,
+      ClauseCoordinator coordinator
+  ) {
+    VisualizationController visController = new VisualizationController(
+        mediator,
+        config,
+        variableAmount
+    );
+    coordinator.registerChangeListener(visController::onClauseUpdate);
+
+    // TODO: 21/02/2022 add back in
+    VisualizationStarter.setVisualizationController(visController);
+    GuiUtils.launch(VisualizationStarter.class);
+    //Application.launch(VisualizationStarter.class);
+  }
 }
