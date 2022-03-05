@@ -4,8 +4,6 @@
 
 #include <satviz/TheoraEncoder.hpp>
 
-#include <iostream>
-
 namespace satviz {
 namespace video {
 
@@ -26,11 +24,9 @@ VideoController::~VideoController() {
 }
 
 void VideoController::resetCamera() {
-  std::cout << "CAMERA BEFORE: " << camera.getX() << " " << camera.getY() << " " << camera.getZoom() << std::endl;
   ogdf::DRect box = graph.getOgdfAttrs().boundingBox();
   double cx = 0.5 * (box.p1().m_x + box.p2().m_x);
   double cy = 0.5 * (box.p1().m_y + box.p2().m_y);
-  std::cout << "CAMERA RESET: " << cx << " | " << cy << std::endl;
   camera.setX((float) cx);
   camera.setY((float) cy);
   camera.zoomToFit((float) box.width(), (float) box.height(), display->getWidth(), display->getHeight());

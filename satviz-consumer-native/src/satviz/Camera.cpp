@@ -3,8 +3,6 @@
 #include <cstring>
 #include <cmath>
 
-#include <iostream>
-
 namespace satviz {
 namespace video {
 
@@ -34,7 +32,6 @@ void Camera::zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHei
   float mZoom = xZoom < yZoom ? xZoom : yZoom;
   if (std::isinf(mZoom)) mZoom = 2.0f;
   else mZoom *= 0.95f;
-  std::cout << "ZOOM TO FIT: " << boxWidth << " " << boxHeight << " " << dpyWidth << " " << dpyHeight << " " << mZoom << std::endl;
   setZoom(mZoom);
 }
 
