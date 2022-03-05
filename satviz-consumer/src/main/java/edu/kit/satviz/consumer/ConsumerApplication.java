@@ -71,7 +71,7 @@ public final class ConsumerApplication {
 
     int variableAmount;
     logger.finer("Reading SAT instance file");
-    VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());;
+    VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());
     WeightUpdate initialUpdate;
     try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
       variableAmount = dimacsFile.getVariableAmount();
@@ -133,11 +133,14 @@ public final class ConsumerApplication {
         .setCoordinator(coordinator)
         .setHeatmap(new RecencyHeatmap(config.getWindowSize()))
         .setVig(vig)
-        .setConnection(connection)
         .createMediator();
 
     if (!config.isNoGui()) {
-      VisualizationController visController = new VisualizationController(mediator, config, variableAmount);
+      VisualizationController visController = new VisualizationController(
+          mediator,
+          config,
+          variableAmount
+      );
       coordinator.registerChangeListener(visController::onClauseUpdate);
 
       // TODO: 21/02/2022 add back in
@@ -147,6 +150,13 @@ public final class ConsumerApplication {
     }
 
     connection.connect(ConsumerApplication.pid, mediator);
+    mediator.registerCloseAction(() -> {
+      try {
+        connection.stop();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }); // TODO: 05.03.2022 remove try catch after merging with latest network version
 
     if (config.isRecordImmediately() || config.isNoGui()) {
       mediator.startOrStopRecording();

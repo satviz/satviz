@@ -4,20 +4,17 @@ import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
-import edu.kit.satviz.network.ConsumerConnection;
 import edu.kit.satviz.network.ConsumerConnectionListener;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.sat.ClauseUpdate;
-import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.List;
-import java.util.Queue;
-
 import javafx.scene.paint.Color;
 
 public class Mediator implements ConsumerConnectionListener, AutoCloseable {
@@ -28,7 +25,6 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   private final Heatmap heatmap;
   private final VariableInteractionGraph vig;
   private final ConsumerConfig config;
-  private final ConsumerConnection connection;
   private final ScheduledExecutorService glScheduler;
   private final long period;
   private final Queue<Runnable> taskQueue;
@@ -50,7 +46,6 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
       ClauseCoordinator coordinator,
       Heatmap heatmap,
       VariableInteractionGraph vig,
-      ConsumerConnection connection,
       ConsumerConfig config
   ) {
     this.glScheduler = glScheduler;
@@ -59,7 +54,6 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.coordinator = coordinator;
     this.heatmap = heatmap;
     this.vig = vig;
-    this.connection = connection;
     this.config = config;
     this.recording = false;
     this.recordedVideos = 0;
@@ -201,7 +195,6 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
   @Override
   public void onClauseUpdate(ProducerId pid, ClauseUpdate c) {
-    //System.out.println("Clause " + c);
     try {
       coordinator.addClauseUpdate(c);
     } catch (IOException e) { // TODO: 10/02/2022
@@ -211,18 +204,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   }
 
   @Override
-  public void onTerminateSolved(ProducerId pid, SatAssignment sol) {
-    connection.disconnect(pid);
-  }
-
-  @Override
-  public void onTerminateRefuted(ProducerId pid) {
-    connection.disconnect(pid);
-  }
-
-  @Override
   public void onTerminateOtherwise(ProducerId pid, String reason) {
-    connection.disconnect(pid);
     try {
       close();
     } catch (Exception e) {
@@ -243,10 +225,10 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
       graph.close();
     }).get();
 
+    // TODO: 05.03.2022 Race conditions?
     coordinator.close();
-    connection.stop();
-    glScheduler.shutdown();
     closeActions.forEach(Runnable::run);
+    glScheduler.shutdown();
   }
 
 
@@ -256,7 +238,6 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     private ClauseCoordinator coordinator;
     private Heatmap heatmap;
     private VariableInteractionGraph vig;
-    private ConsumerConnection connection;
     private ConsumerConfig config;
     private ScheduledExecutorService glScheduler;
 
@@ -295,11 +276,6 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
       return this;
     }
 
-    public MediatorBuilder setConnection(ConsumerConnection connection) {
-      this.connection = connection;
-      return this;
-    }
-
     public Mediator createMediator() {
       return new Mediator(
           glScheduler,
@@ -308,7 +284,6 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
           coordinator,
           heatmap,
           vig,
-          connection,
           config
       );
     }
