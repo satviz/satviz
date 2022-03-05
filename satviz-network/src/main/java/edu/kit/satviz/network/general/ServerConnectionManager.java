@@ -64,7 +64,7 @@ public class ServerConnectionManager extends AbstractConnectionManager {
         serverChan = ServerSocketChannel.open();
         serverChan.configureBlocking(false);
         addAcceptable(serverChan);
-        serverChan.bind(port != 0 ? new InetSocketAddress("localhost", port) : null);
+        serverChan.bind(port != 0 ? new InetSocketAddress(port) : null);
       } catch (IOException e) {
         terminateGlobal(true, "unable to create server socket");
         return;
