@@ -82,6 +82,7 @@ public final class ConsumerApplication {
         // Error window.
       }
       logger.log(Level.SEVERE, "Could not read DIMACS file", e);
+      connection.stop();
       System.exit(1);
       return;
     }
@@ -90,6 +91,7 @@ public final class ConsumerApplication {
 
     record GlComponents(Graph graph, VideoController controller) {}
 
+    logger.finer("Initialising OpenGL window");
     GlComponents components = glScheduler.submit(() -> {
       Graph graph = Graph.create(variableAmount);
       VideoController videoController = VideoController.create(
@@ -101,7 +103,7 @@ public final class ConsumerApplication {
       return new GlComponents(graph, videoController);
     }).get();
 
-    logger.finer("Initialising OpenGL window");
+
 
     logger.info("Calculating initial layout");
     glScheduler.submit(() -> {
