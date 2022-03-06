@@ -51,6 +51,7 @@ public final class ConsumerApplication {
     logger.log(Level.FINER, "Starting consumer with arguments {0}", args);
     ConsumerConfig config = getStartingConfig(args);
     if (config == null) {
+      System.exit(0);
       return;
     }
 
