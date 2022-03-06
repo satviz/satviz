@@ -27,8 +27,8 @@ void Camera::SmoothedValue::set(float v) {
 Camera::Camera() : xpos(), ypos(), zoom(2.0f) {}
 
 void Camera::zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight) {
-  float xZoom = boxWidth  ? (float) dpyWidth  / boxWidth  : INFINITY;
-  float yZoom = boxHeight ? (float) dpyHeight / boxHeight : INFINITY;
+  float xZoom = (float) dpyWidth  / boxWidth;
+  float yZoom = (float) dpyHeight / boxHeight;
   float mZoom = xZoom < yZoom ? xZoom : yZoom;
   if (std::isinf(mZoom)) mZoom = 2.0f;
   else mZoom *= 0.95f;
