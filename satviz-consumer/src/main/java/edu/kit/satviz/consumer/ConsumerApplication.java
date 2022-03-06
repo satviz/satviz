@@ -58,15 +58,6 @@ public final class ConsumerApplication {
     Path tempDir = Files.createTempDirectory("satviz"); // TODO: 05.03.2022 make own temp?
     tempDir.toFile().deleteOnExit();
 
-    logger.info("Setting up network connection");
-    ConsumerConnection connection = setupNetworkConnection(config, tempDir);
-    logger.log(Level.INFO, "Producer {0} connected", pid);
-    if (!verifyInstanceHash(config.getInstancePath())) {
-      connection.disconnect(pid);
-      System.exit(1);
-      return;
-    }
-
     int variableAmount;
     logger.finer("Reading SAT instance file");
     VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());
@@ -82,7 +73,15 @@ public final class ConsumerApplication {
         // Error window.
       }
       logger.log(Level.SEVERE, "Could not read DIMACS file", e);
-      connection.stop();
+      System.exit(1);
+      return;
+    }
+
+    logger.info("Setting up network connection");
+    ConsumerConnection connection = setupNetworkConnection(config, tempDir);
+    logger.log(Level.INFO, "Producer {0} connected", pid);
+    if (!verifyInstanceHash(config.getInstancePath())) {
+      connection.disconnect(pid);
       System.exit(1);
       return;
     }
