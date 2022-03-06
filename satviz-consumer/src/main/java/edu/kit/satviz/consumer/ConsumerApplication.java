@@ -53,8 +53,18 @@ public final class ConsumerApplication {
     if (config == null) {
       return;
     }
+
     Path tempDir = Files.createTempDirectory("satviz"); // TODO: 05.03.2022 make own temp?
     tempDir.toFile().deleteOnExit();
+
+    logger.info("Setting up network connection");
+    ConsumerConnection connection = setupNetworkConnection(config, tempDir);
+    logger.log(Level.INFO, "Producer {0} connected", pid);
+    if (!verifyInstanceHash(config.getInstancePath())) {
+      connection.disconnect(pid);
+      System.exit(1);
+      return;
+    }
 
     int variableAmount;
     logger.finer("Reading SAT instance file");
@@ -122,9 +132,6 @@ public final class ConsumerApplication {
         .setVig(vig)
         .createMediator();
 
-
-    logger.info("Setting up network connection");
-    ConsumerConnection connection = setupNetworkConnection(config, tempDir);
     mediator.registerCloseAction(() -> {
       try {
         connection.stop();
@@ -132,21 +139,12 @@ public final class ConsumerApplication {
         e.printStackTrace();
       }
     }); // TODO: 05.03.2022 remove try catch after merging with latest network version
-    logger.log(Level.INFO, "Producer {0} connected", pid);
-    if (!verifyInstanceHash(config.getInstancePath())) {
-      connection.disconnect(pid);
-      System.exit(1);
-      return;
-    }
-
 
     if (!config.isNoGui()) {
       startVisualisationGui(mediator, config, variableAmount, coordinator);
     }
 
-
     connection.connect(ConsumerApplication.pid, mediator);
-
 
     if (config.isRecordImmediately() || config.isNoGui()) {
       mediator.startOrStopRecording();
