@@ -224,11 +224,10 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
       videoController.close();
       graph.close();
     }).get();
-
-    // TODO: 05.03.2022 Race conditions?
-    coordinator.close();
-    closeActions.forEach(Runnable::run);
     glScheduler.shutdown();
+    // TODO: 05.03.2022 Race conditions?
+    closeActions.forEach(Runnable::run);
+    coordinator.close();
   }
 
 
