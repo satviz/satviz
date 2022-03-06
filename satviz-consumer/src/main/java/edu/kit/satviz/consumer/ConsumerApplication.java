@@ -26,6 +26,7 @@ import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
 import edu.kit.satviz.sat.ClauseUpdate;
+import java.awt.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.file.Files;
@@ -39,6 +40,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
+import javafx.application.Platform;
 import net.lingala.zip4j.ZipFile;
 
 public final class ConsumerApplication {
@@ -89,6 +91,10 @@ public final class ConsumerApplication {
         .setVig(vig)
         .createMediator();
 
+    if (!config.isNoGui()) {
+      startVisualisationGui(mediator, config, initialData.variables, coordinator);
+    }
+
     mediator.registerCloseAction(() -> {
       try {
         connection.stop();
@@ -96,10 +102,6 @@ public final class ConsumerApplication {
         e.printStackTrace();
       }
     }); // TODO: 05.03.2022 remove try catch after merging with latest network version
-
-    if (!config.isNoGui()) {
-      startVisualisationGui(mediator, config, initialData.variables, coordinator);
-    }
 
     connection.connect(ConsumerApplication.pid, mediator);
 
