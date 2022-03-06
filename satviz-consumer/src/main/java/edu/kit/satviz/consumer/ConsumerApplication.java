@@ -33,6 +33,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
@@ -58,24 +59,9 @@ public final class ConsumerApplication {
     Path tempDir = Files.createTempDirectory("satviz"); // TODO: 05.03.2022 make own temp?
     tempDir.toFile().deleteOnExit();
 
-    int variableAmount;
     logger.finer("Reading SAT instance file");
     VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());
-    WeightUpdate initialUpdate;
-    try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
-      variableAmount = dimacsFile.getVariableAmount();
-      logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
-      ClauseUpdate[] clauses = StreamSupport.stream(dimacsFile.spliterator(), false)
-          .toArray(ClauseUpdate[]::new);
-      initialUpdate = vig.process(clauses, null);
-    } catch (ParsingException e) {
-      if (!config.isNoGui()) {
-        // Error window.
-      }
-      logger.log(Level.SEVERE, "Could not read DIMACS file", e);
-      System.exit(1);
-      return;
-    }
+    InitialGraphInfo initialData = readDimacsFile(vig, config);
 
     logger.info("Setting up network connection");
     ConsumerConnection connection = setupNetworkConnection(config, tempDir);
@@ -88,41 +74,10 @@ public final class ConsumerApplication {
 
     ScheduledExecutorService glScheduler = Executors.newSingleThreadScheduledExecutor();
 
-    record GlComponents(Graph graph, VideoController controller) {}
-
-    logger.finer("Initialising OpenGL window");
-    GlComponents components = glScheduler.submit(() -> {
-      Graph graph = Graph.create(variableAmount);
-      VideoController videoController = VideoController.create(
-          graph,
-          (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN,
-          1920,
-          1080
-      );
-      return new GlComponents(graph, videoController);
-    }).get();
-
-
-
-    logger.info("Calculating initial layout");
-    glScheduler.submit(() -> {
-      try {
-        HeatUpdate u = new HeatUpdate();
-        for (int i = 0; i < variableAmount; i++) {
-          u.add(i, 0);
-        }
-        components.graph.submitUpdate(u);
-        components.graph.submitUpdate(initialUpdate);
-        components.graph.recalculateLayout();
-        components.controller.nextFrame();
-      } catch (Throwable e) {
-        e.printStackTrace();
-        System.exit(1);
-      }
-    }).get();
+    GlComponents components = initializeRendering(config, initialData, glScheduler);
 
     ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
-        tempDir, variableAmount);
+        tempDir, initialData.variables);
 
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)
@@ -143,7 +98,7 @@ public final class ConsumerApplication {
     }); // TODO: 05.03.2022 remove try catch after merging with latest network version
 
     if (!config.isNoGui()) {
-      startVisualisationGui(mediator, config, variableAmount, coordinator);
+      startVisualisationGui(mediator, config, initialData.variables, coordinator);
     }
 
     connection.connect(ConsumerApplication.pid, mediator);
@@ -152,6 +107,59 @@ public final class ConsumerApplication {
       mediator.startOrStopRecording();
     }
     mediator.startRendering();
+  }
+
+  private static GlComponents initializeRendering(
+      ConsumerConfig config, InitialGraphInfo initialData, ExecutorService glScheduler
+  ) throws InterruptedException, ExecutionException {
+    logger.finer("Initialising OpenGL window");
+    GlComponents components = glScheduler.submit(() -> {
+      Graph graph = Graph.create(initialData.variables);
+      VideoController videoController = VideoController.create(
+          graph,
+          (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN,
+          1920,
+          1080
+      );
+      return new GlComponents(graph, videoController);
+    }).get();
+
+
+    logger.info("Calculating initial layout");
+    glScheduler.submit(() -> {
+      try {
+        HeatUpdate u = new HeatUpdate();
+        for (int i = 0; i < initialData.variables; i++) {
+          u.add(i, 0);
+        }
+        components.graph.submitUpdate(u);
+        components.graph.submitUpdate(initialData.initialUpdate);
+        components.graph.recalculateLayout();
+        components.controller.nextFrame();
+      } catch (Throwable e) {
+        e.printStackTrace();
+        System.exit(1);
+      }
+    }).get();
+    return components;
+  }
+
+  private static InitialGraphInfo readDimacsFile(VariableInteractionGraph vig, ConsumerConfig config) throws IOException {
+    try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
+      int variableAmount = dimacsFile.getVariableAmount();
+      logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
+      ClauseUpdate[] clauses = StreamSupport.stream(dimacsFile.spliterator(), false)
+          .toArray(ClauseUpdate[]::new);
+      WeightUpdate initialUpdate = vig.process(clauses, null);
+      return new InitialGraphInfo(variableAmount, initialUpdate);
+    } catch (ParsingException e) {
+      if (!config.isNoGui()) {
+        // Error window.
+      }
+      logger.log(Level.SEVERE, "Could not read DIMACS file", e);
+      System.exit(1);
+      return null;
+    }
   }
 
   private static ConsumerConfig getStartingConfig(String[] args) throws InterruptedException {
@@ -268,5 +276,13 @@ public final class ConsumerApplication {
     VisualizationStarter.setVisualizationController(visController);
     GuiUtils.launch(VisualizationStarter.class);
     //Application.launch(VisualizationStarter.class);
+  }
+
+  private record GlComponents(Graph graph, VideoController controller) {
+
+  }
+
+  private record InitialGraphInfo(int variables, WeightUpdate initialUpdate) {
+
   }
 }
