@@ -81,7 +81,9 @@ public final class ConsumerApplication {
       if (!config.isNoGui()) {
         // Error window.
       }
-      throw e;
+      logger.log(Level.SEVERE, "Could not read DIMACS file", e);
+      System.exit(1);
+      return;
     }
 
     ScheduledExecutorService glScheduler = Executors.newSingleThreadScheduledExecutor();
@@ -103,10 +105,7 @@ public final class ConsumerApplication {
 
     logger.info("Calculating initial layout");
     glScheduler.submit(() -> {
-      //System.out.println(initialUpdate);
       try {
-        //WeightUpdate update = new WeightUpdate();
-        //update.add(256, 257, 1);
         HeatUpdate u = new HeatUpdate();
         for (int i = 0; i < variableAmount; i++) {
           u.add(i, 0);
@@ -117,6 +116,7 @@ public final class ConsumerApplication {
         components.controller.nextFrame();
       } catch (Throwable e) {
         e.printStackTrace();
+        System.exit(1);
       }
     }).get();
 
