@@ -1,6 +1,7 @@
 package edu.kit.satviz.consumer;
 
 import edu.kit.satviz.common.Hashing;
+import edu.kit.satviz.consumer.cli.ConsumerCli;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -40,6 +41,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import net.lingala.zip4j.ZipFile;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
 public final class ConsumerApplication {
 
@@ -47,7 +49,8 @@ public final class ConsumerApplication {
   private static ProducerId pid = null;
   private static final Object SYNC_OBJECT = new Object();
 
-  public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
+  public static void main(String[] args)
+      throws IOException, InterruptedException, ExecutionException {
     logger.setLevel(Level.FINER);
     logger.log(Level.FINER, "Starting consumer with arguments {0}", args);
     ConsumerConfig config = getStartingConfig(args);
@@ -144,7 +147,10 @@ public final class ConsumerApplication {
     return components;
   }
 
-  private static InitialGraphInfo readDimacsFile(VariableInteractionGraph vig, ConsumerConfig config) throws IOException {
+  private static InitialGraphInfo readDimacsFile(
+      VariableInteractionGraph vig,
+      ConsumerConfig config
+  ) throws IOException {
     try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
       int variableAmount = dimacsFile.getVariableAmount();
       logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
@@ -172,8 +178,13 @@ public final class ConsumerApplication {
       }
       return ConfigStarter.getConsumerConfig();
     } else {
-      // TODO: parse Arguments from CLI
-      return null;
+      try {
+        return ConsumerCli.parseArgs(args);
+      } catch (ArgumentParserException e) {
+        ConsumerCli.PARSER.handleError(e);
+        System.exit(1);
+        return null;
+      }
     }
   }
 
@@ -226,7 +237,9 @@ public final class ConsumerApplication {
 
   private static Path extractProducer(Path tempDir) throws IOException {
     Path producerDir = Files.createTempDirectory(tempDir, "producer");
-    try (var producerStream = ConsumerApplication.class.getResourceAsStream("/satviz-producer.zip")) {
+    var producerStream
+        = ConsumerApplication.class.getResourceAsStream("/satviz-producer.zip");
+    try (producerStream) {
       Path producerZip = producerDir.resolve("producer.zip");
       Files.copy(producerStream, producerZip);
       try (ZipFile zip = new ZipFile(producerZip.toFile())) {
@@ -271,11 +284,8 @@ public final class ConsumerApplication {
         variableAmount
     );
     coordinator.registerChangeListener(visController::onClauseUpdate);
-
-    // TODO: 21/02/2022 add back in
     VisualizationStarter.setVisualizationController(visController);
     GuiUtils.launch(VisualizationStarter.class);
-    //Application.launch(VisualizationStarter.class);
   }
 
   private record GlComponents(Graph graph, VideoController controller) {

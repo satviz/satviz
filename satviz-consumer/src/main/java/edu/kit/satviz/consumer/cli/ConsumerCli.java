@@ -1,9 +1,6 @@
 package edu.kit.satviz.consumer.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import edu.kit.satviz.common.PathArgumentType;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -12,6 +9,7 @@ import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
@@ -23,7 +21,10 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
 
-public class ConsumerCli {
+/**
+ * A utility class defining the command line {@code ArgumentParser} used by the consumer.
+ */
+public final class ConsumerCli {
 
   /**
    * The {@code ArgumentParser}.
@@ -95,24 +96,37 @@ public class ConsumerCli {
 
   }
 
+  /**
+   * Parses some arguments given as a string array to an instance of {@link ConsumerConfig}
+   * using the {@code ArgumentParser} defined by this class.
+   *
+   * @param args The command line args.
+   * @return The parsed arguments as a {@link ConsumerConfig} instance.
+   * @throws ArgumentParserException if the underlying {@code ArgumentParser} throws.
+   */
   public static ConsumerConfig parseArgs(String[] args)
-      throws ArgumentParserException, IOException {
+      throws ArgumentParserException {
     Namespace namespace = PARSER.parseArgs(args);
     ConsumerConfig config;
     if (namespace.get("file") != null) {
-      ObjectMapper mapper = new ObjectMapper();
-      mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-      SimpleModule m = new SimpleModule("PathToString");
-      m.addSerializer(Path.class, new ToStringSerializer());
-      mapper.registerModule(m);
-      config = mapper.readValue(((Path) namespace.get("file")).toFile(), ConsumerConfig.class);
+      config = parseConfigFile(((Path) namespace.get("file")).toFile());
     } else {
-      config = getConsumerConfig(namespace);
+      config = getConsumerConfigFromArgs(namespace);
     }
     return config;
   }
 
-  private static ConsumerConfig getConsumerConfig(Namespace namespace) {
+  private static ConsumerConfig parseConfigFile(File configFile)
+      throws ArgumentParserException {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.readValue(configFile, ConsumerConfig.class);
+    } catch (IOException e) {
+      throw new ArgumentParserException("Invalid configuration file.", PARSER);
+    }
+  }
+
+  private static ConsumerConfig getConsumerConfigFromArgs(Namespace namespace) {
     ConsumerConfig config = new ConsumerConfig();
     config.setModeConfig(getConsumerModeConfig(namespace));
     config.setInstancePath(namespace.get("instance"));
