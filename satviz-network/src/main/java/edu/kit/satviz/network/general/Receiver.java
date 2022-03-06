@@ -30,15 +30,14 @@ public class Receiver {
    * The bytes previously read are taken into account, so that a long stream
    *     of bytes can be received by subsequent calls to <code>receive</code>.
    * Reads bytes as long as the buffer is not empty and an object is not finished.
-   * If something goes wrong, the receiver returns a <code>FAIL</code> network message.
-   * In that case, the number of bytes read may be <code>0</code>.
    *
    * @param bb the buffer to read from
    * @return a message if one was received in its entirety, <code>null</code> otherwise
+   * @throws SerializationException if the deserialization fails or has failed previously
    */
-  public NetworkMessage receive(ByteBuffer bb) {
+  public NetworkMessage receive(ByteBuffer bb) throws SerializationException {
     if (failed) {
-      return null;
+      throw new SerializationException("serialization failed previously");
     }
 
     int nb = bb.remaining();
@@ -52,7 +51,7 @@ public class Receiver {
       builder = gen.apply(type); // get new builder according to type
       if (builder == null) { // didn't get one
         failed = true;
-        return NetworkMessage.createFail();
+        throw new SerializationException("no builder available for this type: " + type);
       }
     }
 
@@ -63,7 +62,7 @@ public class Receiver {
         done = builder.addByte(bb.get());
       } catch (SerializationException e) {
         failed = true;
-        return NetworkMessage.createFail();
+        throw e;
       }
 
       if (done) {

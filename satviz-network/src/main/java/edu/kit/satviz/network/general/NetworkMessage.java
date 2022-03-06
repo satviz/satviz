@@ -6,23 +6,7 @@ package edu.kit.satviz.network.general;
  * Additionally, each message can carry an object.
  */
 public class NetworkMessage {
-  /**
-   * The state of this message.
-   */
-  public enum State {
-    /** An object or message is present. */
-    PRESENT,
-    /** Indicates that the corresponding connection has failed. */
-    FAIL,
-    /** Indicates that the corresponding connection has terminated. */
-    TERM
-  }
 
-  // single instances for performance
-  private static final NetworkMessage objFail = new NetworkMessage(State.FAIL);
-  private static final NetworkMessage objTerm = new NetworkMessage(State.TERM);
-
-  private final State state;
   private final byte type;
   /** The object contained in this message. Only relevant if state is <code>PRESENT</code> */
   private final Object obj;
@@ -34,47 +18,8 @@ public class NetworkMessage {
    * @param obj the message object
    */
   public NetworkMessage(byte type, Object obj) {
-    this.state = State.PRESENT;
     this.type = type;
     this.obj = obj;
-  }
-
-  /**
-   * Creates a new message with a specific state.
-   *
-   * @param state the message state
-   */
-  private NetworkMessage(State state) {
-    this.state = state;
-    this.type = 0;
-    this.obj = null;
-  }
-
-  /**
-   * Gets a network object with the <code>FAIL</code> state.
-   *
-   * @return a network object
-   */
-  public static NetworkMessage createFail() {
-    return objFail;
-  }
-
-  /**
-   * Gets a network object with the <code>TERM</code> state.
-   *
-   * @return a network object
-   */
-  public static NetworkMessage createTerm() {
-    return objTerm;
-  }
-
-  /**
-   * Returns the state of this message.
-   *
-   * @return the state
-   */
-  public State getState() {
-    return state;
   }
 
   /**
