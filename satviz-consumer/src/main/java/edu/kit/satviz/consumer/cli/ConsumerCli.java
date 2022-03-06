@@ -1,9 +1,6 @@
 package edu.kit.satviz.consumer.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import edu.kit.satviz.common.PathArgumentType;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -122,10 +119,6 @@ public final class ConsumerCli {
   private static ConsumerConfig parseConfigFile(File configFile)
       throws ArgumentParserException {
     ObjectMapper mapper = new ObjectMapper();
-    mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-    SimpleModule m = new SimpleModule("PathToString");
-    m.addSerializer(Path.class, new ToStringSerializer());
-    mapper.registerModule(m);
     try {
       return mapper.readValue(configFile, ConsumerConfig.class);
     } catch (IOException e) {
