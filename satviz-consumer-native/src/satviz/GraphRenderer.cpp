@@ -5,6 +5,7 @@ namespace satviz {
 namespace video {
 
 #define UNIFORM_WORLD_TO_VIEW 0
+#define UNIFORM_EDGE_COLOR    1
 #define UNIFORM_NODE_SIZE     1
 
 #define ATTR_NODE_POSITION 0
@@ -104,19 +105,16 @@ void GraphRenderer::init() {
     glBufferSubData(GL_ARRAY_BUFFER, i * sizeof (unsigned[2]), sizeof (unsigned[2]), data);
   }
 
-  // Set up heatmap color palette
-  const int heat_palette_width = 2;
-  const GLuint palette_colors[] = {
-      0xFFFF0000,
-      0xFF0000FF,
-  };
+  // Allocate the heatmap color palette
   glBindTexture(GL_TEXTURE_1D, heat_palette);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, heat_palette_width, 0, GL_RGBA, GL_UNSIGNED_BYTE, palette_colors);
-  glUseProgram(resources.node_prog);
-  glUniform1i(glGetUniformLocation(resources.node_prog, "heat_palette"), 0);
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, 2, 0, GL_RGB, GL_FLOAT, NULL);
+  //glUseProgram(resources.node_prog);
+  //glUniform1i(glGetUniformLocation(resources.node_prog, "heat_palette"), 0);
+
+  applyTheme(Theme());
 }
 
 void GraphRenderer::deinit() {
@@ -125,6 +123,17 @@ void GraphRenderer::deinit() {
   glDeleteBuffers(NUM_BUFFER_OBJECTS, buffer_objects);
   glDeleteTextures(1, &heat_palette);
   glDeleteTextures(1, &offset_texview);
+}
+
+void GraphRenderer::applyTheme(const Theme &theme) {
+  glBindTexture(GL_TEXTURE_1D, heat_palette);
+  glTexSubImage1D(GL_TEXTURE_1D, 0, 0, 1, GL_RGB, GL_FLOAT, theme.coldColor);
+  glTexSubImage1D(GL_TEXTURE_1D, 0, 1, 1, GL_RGB, GL_FLOAT, theme.hotColor);
+
+  glUseProgram(resources.edge_prog);
+  glUniform3fv(UNIFORM_EDGE_COLOR, 1, theme.edgeColor);
+
+  node_size = theme.nodeSize;
 }
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {
@@ -144,7 +153,7 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
   // Draw nodes
   glUseProgram(resources.node_prog);
   glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
-  glUniform2f(UNIFORM_NODE_SIZE, 10.0f / (float) width, 10.0f / (float) height);
+  glUniform2f(UNIFORM_NODE_SIZE, node_size / (float) width, node_size / (float) height);
   glBindVertexArray(node_state);
   glBindTexture(GL_TEXTURE_1D, heat_palette);
   glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, node_count);

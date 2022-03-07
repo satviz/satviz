@@ -9,6 +9,15 @@
 namespace satviz {
 namespace video {
 
+struct Theme {
+  // All colors are R, G, B in order, sRGB color space
+  //float bgColor  [3] = {  };
+  float coldColor[3] = { 0.0f, 0.0f, 1.0f };
+  float hotColor [3] = { 1.0f, 0.0f, 0.0f };
+  float edgeColor[3] = { 1.0f, 1.0f, 1.0f };
+  float nodeSize     = 10.0f;
+};
+
 /**
  * Visual representation of a graph. Implements hardware-accelerated graphics.
  *
@@ -47,6 +56,8 @@ private:
   /// List of free/unused edge indices
   std::vector<int> free_edges;
 
+  float node_size;
+
   /**
    * Initialize rendering data.
    *
@@ -84,6 +95,8 @@ public:
    */
   GraphRenderer(graph::Graph &gr);
   virtual ~GraphRenderer();
+
+  void applyTheme(const Theme &theme);
 
   /**
    * Draw the associated graph onto the OpenGL framebuffer.
