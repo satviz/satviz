@@ -28,16 +28,16 @@ void satviz_release_graph(void *graph) {
 }
 
 void satviz_recalculate_layout(void *graph) {
-  reinterpret_cast<Graph*>(graph)->recalculateLayout();
+  static_cast<Graph*>(graph)->recalculateLayout();
 }
 
 void satviz_adapt_layout(void *graph) {
-  reinterpret_cast<Graph*>(graph)->adaptLayout();
+  static_cast<Graph*>(graph)->adaptLayout();
 }
 
 SerializedData satviz_serialize(void *graph) {
   std::stringstream stream {};
-  reinterpret_cast<Graph*>(graph)->serialize(stream);
+  static_cast<Graph*>(graph)->serialize(stream);
   auto size = stream.tellp();
   char *buf = (char*) malloc(static_cast<size_t>(size));
   memcpy(buf, stream.str().c_str(), size);
@@ -46,7 +46,7 @@ SerializedData satviz_serialize(void *graph) {
 
 void satviz_deserialize(void *graph, const char *data, unsigned long n) {
   std::stringstream stream { std::string { data, n } };
-  reinterpret_cast<Graph*>(graph)->deserialize(stream);
+  static_cast<Graph*>(graph)->deserialize(stream);
 }
 
 void satviz_submit_weight_update(void *graph, CWeightUpdate *update) {
@@ -54,7 +54,7 @@ void satviz_submit_weight_update(void *graph, CWeightUpdate *update) {
   for (size_t i = 0; i < update->n; i++) {
     realUpdate.values.emplace_back(update->index1[i], update->index2[i], update->weight[i]);
   }
-  reinterpret_cast<Graph*>(graph)->submitWeightUpdate(realUpdate);
+  static_cast<Graph*>(graph)->submitWeightUpdate(realUpdate);
 }
 
 void satviz_submit_heat_update(void *graph, CHeatUpdate *update) {
@@ -62,15 +62,15 @@ void satviz_submit_heat_update(void *graph, CHeatUpdate *update) {
   for (size_t i = 0; i < update->n; i++) {
     realUpdate.values.emplace_back(update->index[i], update->heat[i] * 0xff);
   }
-  reinterpret_cast<Graph*>(graph)->submitHeatUpdate(realUpdate);
+  static_cast<Graph*>(graph)->submitHeatUpdate(realUpdate);
 }
 
 NodeInfo satviz_query_node(void *graph, int index) {
-  return reinterpret_cast<Graph*>(graph)->queryNode(index);
+  return static_cast<Graph*>(graph)->queryNode(index);
 }
 
 EdgeInfo satviz_query_edge(void *graph, int index1, int index2) {
-  return reinterpret_cast<Graph*>(graph)->queryEdge(index1, index2);
+  return static_cast<Graph*>(graph)->queryEdge(index1, index2);
 }
 
 void *satviz_new_video_controller(void *graph, int display_type, int width, int height) {
@@ -86,7 +86,7 @@ void *satviz_new_video_controller(void *graph, int display_type, int width, int 
       return nullptr;
   }
 
-  return new VideoController { *reinterpret_cast<Graph*>(graph), display };
+  return new VideoController { *static_cast<Graph*>(graph), display };
 }
 
 void satviz_release_video_controller(void *controller) {
@@ -101,27 +101,27 @@ int satviz_start_recording(void *controller, const char *filename, const char *e
   } else {
     return -1;
   }
-  return reinterpret_cast<VideoController*>(controller)->startRecording(filename, encoder);
+  return static_cast<VideoController*>(controller)->startRecording(filename, encoder);
 }
 
 void satviz_stop_recording(void *controller) {
-  reinterpret_cast<VideoController*>(controller)->stopRecording();
+  static_cast<VideoController*>(controller)->stopRecording();
 }
 
 void satviz_resume_recording(void *controller) {
-  reinterpret_cast<VideoController*>(controller)->resumeRecording();
+  static_cast<VideoController*>(controller)->resumeRecording();
 }
 
 void satviz_finish_recording(void *controller) {
-  reinterpret_cast<VideoController*>(controller)->finishRecording();
+  static_cast<VideoController*>(controller)->finishRecording();
 }
 
 void satviz_reset_camera(void *controller) {
-  reinterpret_cast<VideoController*>(controller)->resetCamera();
+  static_cast<VideoController*>(controller)->resetCamera();
 }
 
 void satviz_next_frame(void *controller) {
-  reinterpret_cast<VideoController*>(controller)->nextFrame();
+  static_cast<VideoController*>(controller)->nextFrame();
 }
 
 }
