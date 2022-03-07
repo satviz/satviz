@@ -32,7 +32,7 @@ public final class ConsumerCli {
   public static final ArgumentParser PARSER;
 
   static {
-    PARSER = ArgumentParsers.newFor("sat-consumer").locale(Locale.ENGLISH).build()
+    PARSER = ArgumentParsers.newFor("satviz").locale(Locale.ENGLISH).build()
         .defaultHelp(true)
         .version("0.1.0-SNAPSHOT")
         .description("""
