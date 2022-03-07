@@ -20,7 +20,7 @@ public interface ClauseUpdateProcessor {
    *
    * @param clauseUpdates An array of {@code ClauseUpdate}s.
    * @param graph An instance of the {@code Graph} class.
-   * @param nodeMapping A mapping from variables to nodes.
+   * @param nodeMapping A mapping from literals to nodes in the {@code graph}.
    * @return An instance of the {@code GraphUpdate} class.
    */
   GraphUpdate process(ClauseUpdate[] clauseUpdates, Graph graph, IntUnaryOperator nodeMapping);
