@@ -116,6 +116,10 @@ void satviz_finish_recording(void *controller) {
   reinterpret_cast<VideoController*>(controller)->finishRecording();
 }
 
+void satviz_reset_camera(void *controller) {
+  reinterpret_cast<VideoController*>(controller)->resetCamera();
+}
+
 void satviz_next_frame(void *controller) {
   reinterpret_cast<VideoController*>(controller)->nextFrame();
 }
