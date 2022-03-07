@@ -1,8 +1,6 @@
 package edu.kit.satviz.network.pub;
 
-import edu.kit.satviz.network.general.ConnectionId;
 import edu.kit.satviz.network.general.NetworkMessage;
-import edu.kit.satviz.network.general.ServerConnectionManager;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
@@ -161,7 +159,8 @@ public class ConsumerConnection {
 
 
   private void connectListener(ConnectionId cid) {
-    conman.register(cid, this::messageListener);
+    // TODO fix the connection issue
+    // TODO register other listener here
   }
 
   private ProducerId generatePid(ConnectionId cid, Map<String, String> offerData) {

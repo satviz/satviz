@@ -38,15 +38,14 @@ public class NetworkBlueprint {
    * @param out the stream to write to
    * @throws IOException if the stream cannot be used
    * @throws SerializationException if the serialization didn't work
-   * @throws ClassCastException if the type is invalid or unknown
    */
   public void serialize(byte type, Object obj, OutputStream out) throws IOException,
-      SerializationException, ClassCastException {
+      SerializationException {
     Serializer<?> serial = serializers[unsignedType(type)];
     if (serial != null) {
       serial.serializeUnsafe(obj, out);
     } else {
-      throw new ClassCastException("unknown type");
+      throw new SerializationException("no serializer available");
     }
   }
 

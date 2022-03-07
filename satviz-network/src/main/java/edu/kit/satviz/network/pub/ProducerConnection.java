@@ -1,7 +1,5 @@
 package edu.kit.satviz.network.pub;
 
-import edu.kit.satviz.network.general.ClientConnectionManager;
-import edu.kit.satviz.network.general.ConnectionId;
 import edu.kit.satviz.network.general.NetworkMessage;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
@@ -160,7 +158,8 @@ public class ProducerConnection {
   private void connectListener(ConnectionId cid) {
     // called once the connection to the server is established
     this.cid = cid;
-    conman.register(cid, this::messageListener);
+    // TODO fix the connect issue here
+    // TODO connect to other listener
 
     Map<String, String> offerData = new HashMap<>();
     offerData.put("version", "1");
