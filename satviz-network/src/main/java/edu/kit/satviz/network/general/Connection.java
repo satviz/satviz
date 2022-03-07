@@ -17,7 +17,6 @@ public class Connection {
   private byte currentType;
   private SerialBuilder<?> currentBuilder = null;
   private final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
-  private int numBytesAhead = 0;
   private boolean failed = false;
 
   public Connection(String address, int port, NetworkBlueprint bp) throws IOException {
@@ -36,21 +35,12 @@ public class Connection {
     return (InetSocketAddress) chan.getRemoteAddress();
   }
 
+  public void register(Selector sel, int ops) throws ClosedChannelException {
+    chan.register(sel, ops);
+  }
+
   public void close() throws IOException {
     chan.close();
-  }
-
-  public boolean failed() {
-    return failed;
-  }
-
-  private void fillBuffer() throws IOException {
-    readBuffer.clear();
-    numBytesAhead = chan.read(readBuffer);
-    readBuffer.flip();
-    if (numBytesAhead == -1) { // closed socket means we cannot read anything
-      numBytesAhead = 0;
-    }
   }
 
   private NetworkMessage processByte(byte b) throws SerializationException {
@@ -85,10 +75,14 @@ public class Connection {
       throw new SerializationException("failed previously");
     }
 
+    readBuffer.clear();
+    int numBytesAhead = chan.read(readBuffer);
+    readBuffer.flip();
+    if (numBytesAhead == -1) { // closed socket means we cannot read anything
+      numBytesAhead = 0;
+    }
+
     Queue<NetworkMessage> messages = new ArrayDeque<>();
-
-    fillBuffer();
-
     while (numBytesAhead-- > 0) {
       NetworkMessage msg = processByte(readBuffer.get());
       if (msg != null) {
