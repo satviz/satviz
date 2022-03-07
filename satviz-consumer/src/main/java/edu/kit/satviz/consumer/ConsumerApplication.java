@@ -88,7 +88,7 @@ public final class ConsumerApplication {
       logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
       ClauseUpdate[] clauses = StreamSupport.stream(dimacsFile.spliterator(), false)
           .toArray(ClauseUpdate[]::new);
-      initialUpdate = vig.process(clauses, null);
+      initialUpdate = vig.process(clauses, null, literal -> Math.abs(literal) - 1);
     } catch (ParsingException e) {
       if (!config.isNoGui()) {
         // Error window.
@@ -133,7 +133,7 @@ public final class ConsumerApplication {
     }).get();
 
     ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
-        tempDir, variableAmount);
+        tempDir, variableAmount, literal -> Math.abs(literal) - 1);
 
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)

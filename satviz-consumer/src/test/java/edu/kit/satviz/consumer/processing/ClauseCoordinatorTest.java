@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntUnaryOperator;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +28,7 @@ import static org.mockito.Mockito.verify;
 class ClauseCoordinatorTest {
 
   private static final String TEMP_DIR = "src/test/temp";
+  private static final IntUnaryOperator DEFAULT_NODE_MAPPING = literal -> Math.abs(literal) - 1;
 
   private int clausesAdded;
   private int currentlyAdvanced;
@@ -61,7 +64,7 @@ class ClauseCoordinatorTest {
     changeListenerCallAmount = new AtomicInteger();
 
     Path tempDir = Files.createDirectory(Paths.get(TEMP_DIR));
-    coordinator = new ClauseCoordinator(graph, tempDir, 6);
+    coordinator = new ClauseCoordinator(graph, tempDir, 6, DEFAULT_NODE_MAPPING);
     coordinator.addProcessor(processor1);
 
     coordinator.registerChangeListener(changeListenerCallAmount::getAndIncrement);
@@ -75,15 +78,21 @@ class ClauseCoordinatorTest {
       addUpdatesAndAdvance(Arrays.copyOfRange(clauseUpdates, i - 4, i));
       processor1AdvanceCalls++;
     }
-    verify(processor1, times(processor1AdvanceCalls)).process(notNull(), eq(graph));
+    verify(processor1, times(processor1AdvanceCalls)).process(
+        notNull(), eq(graph), DEFAULT_NODE_MAPPING
+    );
     coordinator.addProcessor(processor2);
     while (clausesAdded < clauseUpdates.length) {
       addUpdatesAndAdvance(Arrays.copyOfRange(clauseUpdates, clausesAdded, clausesAdded + 1));
       processor1AdvanceCalls++;
       processor2AdvanceCalls++;
     }
-    verify(processor1, times(processor1AdvanceCalls)).process(notNull(), eq(graph));
-    verify(processor2, times(processor2AdvanceCalls)).process(notNull(), eq(graph));
+    verify(processor1, times(processor1AdvanceCalls)).process(
+            notNull(), eq(graph), DEFAULT_NODE_MAPPING
+    );
+    verify(processor2, times(processor2AdvanceCalls)).process(
+        notNull(), eq(graph), DEFAULT_NODE_MAPPING
+    );
   }
 
   private void addUpdatesAndAdvance(ClauseUpdate[] clauseUpdatesToAdd)
@@ -106,9 +115,11 @@ class ClauseCoordinatorTest {
       coordinator.addClauseUpdate(update);
     }
     assertEquals(4, coordinator.totalUpdateCount());
-    verify(processor1, never()).process(notNull(), eq(graph));
+    verify(processor1, never()).process(notNull(), eq(graph), DEFAULT_NODE_MAPPING);
     coordinator.advanceVisualization(1);
-    verify(processor1).process(eq(Arrays.copyOfRange(clauseUpdates, 0, 1)), eq(graph));
+    verify(processor1).process(
+        eq(Arrays.copyOfRange(clauseUpdates, 0, 1)), eq(graph), DEFAULT_NODE_MAPPING
+    );
   }
 
   // registerChangeListener
@@ -182,7 +193,7 @@ class ClauseCoordinatorTest {
     }
     assertEquals(0, coordinator.currentUpdate());
     coordinator.seekToUpdate(4);
-    verify(processor1).process(eq(someUpdates), eq(graph));
+    verify(processor1).process(eq(someUpdates), eq(graph), DEFAULT_NODE_MAPPING);
     assertEquals(4, coordinator.currentUpdate());
     // unnecessary deserialization should be avoided
     verify(graph, never()).deserialize(any());
@@ -241,8 +252,8 @@ class ClauseCoordinatorTest {
     coordinator.takeSnapshot(); // first serialization of processor2
     // -  -  -  p  =  =  =  = >pp ~  ~
 
-    verify(processor1, times(2)).process(any(), any());
-    verify(processor2, times(1)).process(any(), any());
+    verify(processor1, times(2)).process(any(), any(), DEFAULT_NODE_MAPPING);
+    verify(processor2, times(1)).process(any(), any(), DEFAULT_NODE_MAPPING);
 
     // -  -  -  p  =  =  =  = >pp ~  ~
     coordinator.seekToUpdate(5);
@@ -253,8 +264,8 @@ class ClauseCoordinatorTest {
     verify(processor1, times(0)).reset();
     verify(processor2, times(0)).deserialize(any());
     verify(processor2, times(1)).reset();
-    verify(processor1, times(3)).process(any(), any());
-    verify(processor2, times(2)).process(any(), any());
+    verify(processor1, times(3)).process(any(), any(), DEFAULT_NODE_MAPPING);
+    verify(processor2, times(2)).process(any(), any(), DEFAULT_NODE_MAPPING);
 
     // -  -  -  p >c  =  =  =  pp ~  ~
     coordinator.takeSnapshot(); // serializing reset state of processor2 (not necessary)
@@ -270,8 +281,8 @@ class ClauseCoordinatorTest {
     verify(processor1, times(1)).reset();
     verify(processor2, times(0)).deserialize(any());
     verify(processor2, times(2)).reset();
-    verify(processor1, times(4)).process(any(), any());
-    verify(processor2, times(3)).process(any(), any());
+    verify(processor1, times(4)).process(any(), any(), DEFAULT_NODE_MAPPING);
+    verify(processor2, times(3)).process(any(), any(), DEFAULT_NODE_MAPPING);
 
     // = >c  -  p  pp =  =  =  pp ~  ~
     coordinator.seekToUpdate(7);
@@ -283,8 +294,8 @@ class ClauseCoordinatorTest {
     verify(processor1, times(1)).reset();
     verify(processor2, times(1)).deserialize(any());
     verify(processor2, times(2)).reset();
-    verify(processor1, times(5)).process(any(), any());
-    verify(processor2, times(4)).process(any(), any());
+    verify(processor1, times(5)).process(any(), any(), DEFAULT_NODE_MAPPING);
+    verify(processor2, times(4)).process(any(), any(), DEFAULT_NODE_MAPPING);
   }
 
   @Test

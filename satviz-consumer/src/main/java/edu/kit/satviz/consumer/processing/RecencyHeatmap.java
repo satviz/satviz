@@ -4,10 +4,9 @@ import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.function.IntUnaryOperator;
 
 /**
  * A specialisation of {@link Heatmap}.
@@ -29,7 +28,7 @@ public class RecencyHeatmap extends Heatmap {
   }
 
   @Override
-  public HeatUpdate process(ClauseUpdate[] updates, Graph graph) {
+  public HeatUpdate process(ClauseUpdate[] updates, Graph graph, IntUnaryOperator nodeMapping) {
 
     for (ClauseUpdate update : updates) {
       Clause previous = recentClauses[cursor];
@@ -42,22 +41,22 @@ public class RecencyHeatmap extends Heatmap {
 
     int size = recentClauses.length;
     HeatUpdate update = new HeatUpdate();
-    zeroPendingVariables(update);
+    zeroPendingVariables(update, nodeMapping);
     for (int i = 0; i < size; i++) {
       Clause subject = recentClauses[(i + cursor) % size];
       if (subject == null) {
         continue;
       }
       for (int literal : subject.literals()) {
-        update.add(Math.abs(literal) - 1, (float) i / size);
+        update.add(nodeMapping.applyAsInt(literal), (float) i / size);
       }
     }
     return update;
   }
 
-  private void zeroPendingVariables(HeatUpdate update) {
+  private void zeroPendingVariables(HeatUpdate update, IntUnaryOperator nodeMapping) {
     for (int variable : setToZero) {
-      update.add(variable - 1, 0);
+      update.add(nodeMapping.applyAsInt(variable), 0);
     }
     setToZero.clear();
   }
