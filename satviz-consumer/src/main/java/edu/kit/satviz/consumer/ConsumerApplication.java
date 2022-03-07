@@ -40,6 +40,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
+import javafx.application.Application;
 import net.lingala.zip4j.ZipFile;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
@@ -92,17 +93,18 @@ public final class ConsumerApplication {
         .setVig(vig)
         .createMediator();
 
-    if (!config.isNoGui()) {
-      startVisualisationGui(mediator, config, initialData.variables, coordinator);
-    }
-
     mediator.registerCloseAction(() -> {
       try {
+        logger.info("Closing connection (this may take a few seconds...)");
         connection.stop();
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
     }); // TODO: 05.03.2022 remove try catch after merging with latest network version
+
+    if (!config.isNoGui()) {
+      startVisualisationGui(mediator, config, initialData.variables, coordinator);
+    }
 
     connection.connect(ConsumerApplication.pid, mediator);
 

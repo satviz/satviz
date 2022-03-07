@@ -8,6 +8,7 @@ import edu.kit.satviz.consumer.processing.Mediator;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ForkJoinPool;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -246,11 +247,13 @@ public class VisualizationController {
   // METHODS (OTHER)
 
   public void quit() {
-    try {
-      mediator.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    ForkJoinPool.commonPool().execute(() -> {
+      try {
+        mediator.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    });
   }
 
   /**
