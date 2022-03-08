@@ -2,7 +2,6 @@ package edu.kit.satviz.network.general;
 
 import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -60,10 +59,11 @@ public class Connection {
   /**
    * Returns the remote address.
    * @return remote address
+   * @throws ClosedChannelException if the channel is closed
    * @throws IOException if an I/O error occurs
    */
-  public SocketAddress getRemoteAddress() throws IOException {
-    return chan.getRemoteAddress();
+  public InetSocketAddress getRemoteAddress() throws IOException {
+    return (InetSocketAddress) chan.getRemoteAddress();
   }
 
   /**
@@ -82,8 +82,8 @@ public class Connection {
   public void close() {
     try {
       chan.close();
-    } catch (IOException e) {
-      // do nothing more; don't propagate this error to the outside
+    } catch (Exception e) {
+      // do nothing more; don't propagate exceptions to the outside
       // shutdown should not throw exceptions
     }
   }
