@@ -16,7 +16,6 @@ class ConnectionTest {
 
   @Test
   void testLocalhost() {
-    System.out.println("starting testLocalhost");
     try {
       server = new ConnectionServer(PORT, MessageTypes.satvizBlueprint);
       client = new Connection("localhost", PORT, MessageTypes.satvizBlueprint);
@@ -30,6 +29,8 @@ class ConnectionTest {
       assertEquals(0, event.id());
       assertNull(event.obj());
 
+      // send two clauses in quick succession
+      // note: this implicitly assumes that the server's receive buffer can hold both clauses
       Clause c1 = new Clause(new int[]{1,2,3,4,5,-1,-2,-3,-4,400000});
       Clause c2 = new Clause(new int[]{42});
       client.write(MessageTypes.CLAUSE_ADD, c1);
@@ -51,6 +52,10 @@ class ConnectionTest {
       assertEquals(0, event.id());
       assertEquals(MessageTypes.CLAUSE_DEL, ((NetworkMessage) event.obj()).getType());
       assertEquals(c2, ((NetworkMessage) event.obj()).getObject());
+
+      // make sure nothing else comes through
+      event = server.poll();
+      assertNull(event);
 
     } catch (Throwable t) {
       fail(t);
