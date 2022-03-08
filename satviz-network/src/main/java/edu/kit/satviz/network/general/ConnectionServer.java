@@ -15,6 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Accepting new connections and reading from active connections is done asynchronously, while
  *     writing to connections is synchronous.
  * The active connections are identified by an ID, which is a small, non-negative integer.
+ * IDs are passed out sequentially, starting at 0. No ID is ever reused for another connection.
  */
 public class ConnectionServer implements AutoCloseable {
 
