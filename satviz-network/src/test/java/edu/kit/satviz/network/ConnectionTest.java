@@ -59,10 +59,4 @@ class ConnectionTest {
       if (server != null) server.close();
     }
   }
-
-  @Test
-  void testTrue() {
-    System.out.println("Sanity!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    assertEquals(1, 1);
-  }
 }
