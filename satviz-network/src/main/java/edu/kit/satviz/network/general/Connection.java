@@ -18,7 +18,7 @@ import java.util.Queue;
  *     messages are sent in their entirety.
  * This is a wrapper around {@link SocketChannel}.
  */
-public class Connection {
+public class Connection implements AutoCloseable {
   private final SocketChannel chan;
   private final NetworkBlueprint bp;
   private byte currentType;
@@ -39,7 +39,9 @@ public class Connection {
     this.bp = bp;
     this.chan = SocketChannel.open();
     this.chan.configureBlocking(false);
-    this.chan.connect(new InetSocketAddress(address, port));
+    if (!this.chan.connect(new InetSocketAddress(address, port))) {
+      this.chan.finishConnect();
+    }
   }
 
   /**

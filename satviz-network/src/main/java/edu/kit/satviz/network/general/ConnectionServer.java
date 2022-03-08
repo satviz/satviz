@@ -16,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *     writing to connections is synchronous.
  * The active connections are identified by an ID, which is a small, non-negative integer.
  */
-public abstract class ConnectionServer {
+public class ConnectionServer implements AutoCloseable {
 
   /**
    * An event on a {@link ConnectionServer}.
@@ -54,7 +54,7 @@ public abstract class ConnectionServer {
    * @param port the server port, 0 for automatic assignment
    * @throws IOException if an I/O error occurs
    */
-  public ConnectionServer(NetworkBlueprint bp, int port) throws IOException {
+  public ConnectionServer(int port, NetworkBlueprint bp) throws IOException {
     this.bp = bp;
     this.sel = Selector.open();
     this.serverChan = ServerSocketChannel.open();
