@@ -75,13 +75,13 @@ public final class ConsumerApplication {
       System.exit(1);
       return;
     }
-
+    
     ScheduledExecutorService glScheduler = Executors.newSingleThreadScheduledExecutor();
 
     GlComponents components = initializeRendering(config, initialData, glScheduler);
 
     ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
-        tempDir, initialData.variables);
+        tempDir, initialData.variables, literal -> Math.abs(literal) - 1);
 
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)
@@ -158,7 +158,7 @@ public final class ConsumerApplication {
       logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
       ClauseUpdate[] clauses = StreamSupport.stream(dimacsFile.spliterator(), false)
           .toArray(ClauseUpdate[]::new);
-      WeightUpdate initialUpdate = vig.process(clauses, null);
+      WeightUpdate initialUpdate = vig.process(clauses, null, literal -> Math.abs(literal) - 1);
       return new InitialGraphInfo(variableAmount, initialUpdate);
     } catch (ParsingException e) {
       if (!config.isNoGui()) {

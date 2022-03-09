@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntUnaryOperator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CliqueInteractionGraphTest {
 
   private static final WeightFactor INITIAL_FACTOR = WeightFactor.CONSTANT;
+  private static final IntUnaryOperator DEFAULT_NODE_MAPPING = literal -> Math.abs(literal) - 1;
 
   /**
    * Clauses, that could be interpreted as an entire DRAT proof:
@@ -79,7 +81,9 @@ class CliqueInteractionGraphTest {
   void test_process_eachWeightFactor() {
     for (WeightFactor factor : WeightFactor.values()) {
       vig.setWeightFactor(factor);
-      assertEquals(WEIGHT_UPDATES.get(factor), vig.process(clauseUpdates, null));
+      assertEquals(WEIGHT_UPDATES.get(factor), vig.process(
+          clauseUpdates, null, DEFAULT_NODE_MAPPING)
+      );
     }
   }
 
