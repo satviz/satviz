@@ -83,6 +83,9 @@ public class VisualizationController {
   private boolean recording;
   private boolean recordingPaused;
   private boolean visualizationRunning;
+  // a single variable instead of two separate ones will most likely also suffice
+  private boolean processedClausesSliderMousePressed;
+  private boolean processedClausesSliderKeyPressed;
 
   private ChangeListener<String> processedClausesSpinnerIntegerValidationListener;
 
@@ -238,10 +241,25 @@ public class VisualizationController {
   }
 
   @FXML
-  private void updateProcessedClausesSlider() {
-    long currentUpdate = (long) processedClausesSlider.getValue();
-    processedClausesSpinner.getValueFactory().setValue((int) currentUpdate);
-    mediator.seekToUpdate(currentUpdate);
+  private void processedClausesSliderOnMousePressed() {
+    processedClausesSliderMousePressed = true;
+  }
+
+  @FXML
+  private void processedClausesSliderOnKeyPressed() {
+    processedClausesSliderKeyPressed = true;
+  }
+
+  @FXML
+  private void processedClausesSliderOnMouseReleased() {
+    processedClausesSliderMousePressed = false;
+    updateProcessedClausesSlider();
+  }
+
+  @FXML
+  private void processedClausesSliderOnKeyReleased() {
+    processedClausesSliderKeyPressed = false;
+    updateProcessedClausesSlider();
   }
 
   // METHODS (OTHER)
@@ -254,6 +272,12 @@ public class VisualizationController {
         e.printStackTrace();
       }
     });
+  }
+
+  private void updateProcessedClausesSlider() {
+    long currentUpdate = (long) processedClausesSlider.getValue();
+    processedClausesSpinner.getValueFactory().setValue((int) currentUpdate);
+    mediator.seekToUpdate(currentUpdate);
   }
 
   /**
@@ -282,9 +306,11 @@ public class VisualizationController {
       // update label
       totalClausesLabel.setText(TOTAL_CLAUSES_DELIMITER + totalUpdates);
 
-      // update slider
-      processedClausesSlider.setMax(totalUpdates);
-      processedClausesSlider.setValue(currentUpdate);
+      // update slider (allow slider to be moved even if clauses are currently coming in)
+      if (!(processedClausesSliderMousePressed || processedClausesSliderKeyPressed)) {
+        processedClausesSlider.setMax(totalUpdates);
+        processedClausesSlider.setValue(currentUpdate);
+      }
     });
   }
 
