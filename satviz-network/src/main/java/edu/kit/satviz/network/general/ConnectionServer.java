@@ -28,11 +28,11 @@ public class ConnectionServer implements AutoCloseable {
   public record PollEvent(EventType type, int id, Object obj) {
     /** The type of the event. */
     public enum EventType {
-      /** A new connection is accepted. <code>obj</code> is <code>null</code>. */
+      /** A new connection is accepted. {@code obj} is {@code null}. */
       ACCEPT,
-      /** A message was read from a connection. <code>obj</code> is a {@link NetworkMessage} */
+      /** A message was read from a connection. {@code obj} is a {@link NetworkMessage} */
       READ,
-      /** A connection (or the entire server) failed. <code>obj</code> is an {@link Exception} */
+      /** A connection (or the entire server) failed. {@code obj} is an {@link Exception} */
       FAIL
     }
   }
@@ -47,7 +47,8 @@ public class ConnectionServer implements AutoCloseable {
   private int currentReadId;
   private Queue<NetworkMessage> currentRead;
 
-  private final Object SYNC = new Object();
+  private final Object SYNC_READ = new Object();
+  private final Object SYNC_CONNECTIONS = new Object();
 
   /**
    * Creates a new connection server by opening a server socket channel.
@@ -67,7 +68,7 @@ public class ConnectionServer implements AutoCloseable {
 
   /**
    * Returns the local address that this server is bound to.
-   * @return local address
+   * @return local address, {@code null} if not bound
    * @throws ClosedChannelException if the channel is closed
    * @throws IOException if an I/O error occurs
    */
@@ -77,7 +78,7 @@ public class ConnectionServer implements AutoCloseable {
 
   private PollEvent accept() {
     // synchronized to avoid new connections being made while we shut down
-    synchronized (SYNC) {
+    synchronized (SYNC_CONNECTIONS) {
       try {
         SocketChannel client = serverChan.accept();
         client.configureBlocking(false);
@@ -101,7 +102,7 @@ public class ConnectionServer implements AutoCloseable {
       }
 
       SelectionKey key = selectedEvents.next();
-      selectedEvents.remove();
+      selectedEvents.remove(); // avoid processing the same key twice
 
       if (key.isAcceptable()) {
         return accept();
@@ -122,30 +123,36 @@ public class ConnectionServer implements AutoCloseable {
 
   /**
    * Polls for a single event on the server socket or on any of the registered connections.
-   * If there are no events pending, waits for at most 1000 s for new events occurring.
-   * This method does not throw any exceptions, but rather returns them as events.
-   * This way, the caller can find out which connection produced the exception.
-   * @return an event, possibly <code>null</code>
+   * If there are no events pending, waits for at most 1000 ms for new events occurring.
+   * This method is thread-safe; concurrent calls will always block until the pending poll
+   *     operation is complete.
+   * This method does not throw any exceptions, but rather returns them as events. This way, the
+   *     caller can find out which connection produced the exception.
+   * @return an event, possibly {@code null}
    */
   public PollEvent poll() {
-    PollEvent event = processPending();
-    if (event != null) {
-      return event;
-    }
+    synchronized (SYNC_READ) {
+      PollEvent event = processPending();
+      if (event != null) {
+        return event;
+      }
 
-    // found no events remaining; poll new
-    try {
-      sel.select(1000);
-    } catch (Exception e) {
-      return new PollEvent(PollEvent.EventType.FAIL, -1, e);
-    }
-    selectedEvents = sel.selectedKeys().iterator();
+      // found no events remaining; poll new
+      try {
+        sel.select(1000);
+      } catch (Exception e) {
+        return new PollEvent(PollEvent.EventType.FAIL, -1, e);
+      }
+      selectedEvents = sel.selectedKeys().iterator();
 
-    return processPending();
+      return processPending();
+    }
   }
 
   /**
    * Writes a {@link NetworkMessage} to one of the registered connections.
+   * Concurrent writes to different connections are possible. Writes to the same connection are
+   *     always synchronized.
    * @param id the connection ID
    * @param type the message type
    * @param obj the message object
@@ -161,6 +168,9 @@ public class ConnectionServer implements AutoCloseable {
   /**
    * Closes one of the registered connections.
    * If the passed ID is not associated with a connection, nothing happens.
+   * It is usually not necessary to call this method. It is invoked automatically for all
+   *     connections if {@code close} is called.
+   * Calling this method may cause concurrent polls or writes to fail.
    * @param id the connection ID
    */
   public void close(int id) {
@@ -174,10 +184,11 @@ public class ConnectionServer implements AutoCloseable {
 
   /**
    * Closes all registered connections, and the server socket itself.
+   * Calling this method may cause concurrent polls or writes to fail.
    */
   public void close() {
     // synchronized to avoid new connections being made while we shut down
-    synchronized (SYNC) {
+    synchronized (SYNC_CONNECTIONS) {
       for (int i = 0; i < numConnections; i++) {
         close(i);
       }

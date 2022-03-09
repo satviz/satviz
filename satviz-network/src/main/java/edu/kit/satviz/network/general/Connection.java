@@ -80,19 +80,6 @@ public class Connection implements AutoCloseable {
     chan.register(sel, ops);
   }
 
-  /**
-   * Closes this channel.
-   * Calling this method may cause concurrent reads or writes to fail.
-   */
-  public void close() {
-    try {
-      chan.close();
-    } catch (Exception e) {
-      // do nothing more; don't propagate exceptions to the outside
-      // shutdown should not throw exceptions
-    }
-  }
-
   private NetworkMessage processByte(byte b) throws SerializationException {
     if (currentBuilder == null) {
       currentType = b;
@@ -188,6 +175,19 @@ public class Connection implements AutoCloseable {
         // ClosedChannelException or AsynchronousCloseException
         chan.write(writeBuffer);
       }
+    }
+  }
+
+  /**
+   * Closes this channel.
+   * Calling this method may cause concurrent reads or writes to fail.
+   */
+  public void close() {
+    try {
+      chan.close();
+    } catch (Exception e) {
+      // do nothing more; don't propagate exceptions to the outside
+      // shutdown should not throw exceptions
     }
   }
 }
