@@ -6,7 +6,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.ArrayDeque;
@@ -14,8 +13,7 @@ import java.util.Queue;
 
 /**
  * A client connection to send and receive {@link NetworkMessage}s.
- * Reading is done asynchronously, while writing is done synchronously to ensure that
- *     messages are sent in their entirety.
+ * Reading is done asynchronously, while writing is done synchronously.
  * This is a wrapper around {@link SocketChannel}.
  */
 public class Connection implements AutoCloseable {
@@ -24,7 +22,11 @@ public class Connection implements AutoCloseable {
   private byte currentType;
   private SerialBuilder<?> currentBuilder = null;
   private final ByteBuffer readBuffer = ByteBuffer.allocate(1024);
-  private boolean failed = false;
+
+  private boolean readingFailed = false;
+  private boolean writingFailed = false;
+  private final Object SYNC_READ = new Object();
+  private final Object SYNC_WRITE = new Object();
 
   /**
    * Creates a new connection by opening a socket channel and connecting to the specified address.
@@ -60,7 +62,7 @@ public class Connection implements AutoCloseable {
 
   /**
    * Returns the remote address.
-   * @return remote address
+   * @return remote address, {@code null} if not connected
    * @throws ClosedChannelException if the channel is closed
    * @throws IOException if an I/O error occurs
    */
@@ -80,6 +82,7 @@ public class Connection implements AutoCloseable {
 
   /**
    * Closes this channel.
+   * Calling this method may cause concurrent reads or writes to fail.
    */
   public void close() {
     try {
@@ -95,7 +98,7 @@ public class Connection implements AutoCloseable {
       currentType = b;
       currentBuilder = bp.getBuilder(b);
       if (currentBuilder == null) { // didn't get builder
-        failed = true;
+        readingFailed = true;
         throw new SerializationException("no builder available for type " + b);
       }
       return null;
@@ -105,7 +108,7 @@ public class Connection implements AutoCloseable {
     try {
       done = currentBuilder.addByte(b);
     } catch (SerializationException e) {
-      failed = true;
+      readingFailed = true;
       throw e;
     }
 
@@ -119,54 +122,72 @@ public class Connection implements AutoCloseable {
 
   /**
    * Reads a sequence of {@link NetworkMessage}s from this connection asynchronously.
-   * The sequence might be empty.
-   * If a serialization error occurs, subsequent calls to <code>read()</code> will always
-   *     throw a {@link SerializationException}, which means no further messages can be read.
-   * This does not affect writing, and it does not close the underlying socket.
+   * Only processes bytes that are available immediately, which means the sequence might be empty.
+   * If a serialization error occurs, subsequent calls to this method will always throw a
+   *     {@link SerializationException}. This does not affect writing, and it does not close the
+   *     underlying socket.
+   * This method is thread-safe; concurrent calls will always block until the pending read
+   *     operation is complete.
    * @return sequence of messages in a queue
    * @throws IOException if an I/O error occurs
    * @throws SerializationException if the incoming bytes do not encode valid messages
    */
   public Queue<NetworkMessage> read() throws IOException, SerializationException {
-    if (failed) {
-      // a fail in reading doesn't affect socket writing
-      throw new SerializationException("failed previously");
-    }
-
-    readBuffer.clear();
-    int numBytesAhead = chan.read(readBuffer);
-    readBuffer.flip();
-    if (numBytesAhead == -1) { // closed socket means we cannot read anything
-      numBytesAhead = 0;
-    }
-
-    Queue<NetworkMessage> messages = new ArrayDeque<>();
-    while (numBytesAhead-- > 0) {
-      NetworkMessage msg = processByte(readBuffer.get());
-      if (msg != null) {
-        messages.add(msg);
+    synchronized (SYNC_READ) {
+      if (readingFailed) {
+        throw new SerializationException("failed previously");
       }
+
+      readBuffer.clear();
+      int numBytesAhead = chan.read(readBuffer);
+      readBuffer.flip();
+
+      Queue<NetworkMessage> messages = new ArrayDeque<>();
+      while (numBytesAhead-- > 0) { // if chan.read() returned 0 or -1 we do nothing
+        NetworkMessage msg = processByte(readBuffer.get());
+        if (msg != null) {
+          messages.add(msg);
+        }
+      }
+      return messages;
     }
-    return messages;
   }
 
   /**
    * Writes a {@link NetworkMessage} to this connection.
-   * If a serialization error occurs, no bytes will be written. Further messages can be written;
-   *     the underlying socket is not closed.
+   * Writing is synchronous, which means that either the entire message is written or an exception
+   *     is thrown.
+   * If a serialization error occurs, subsequent calls to this method will always throw a
+   *     {@link SerializationException}. This does not affect reading, and it does not close the
+   *     underlying socket.
+   * This method is thread-safe; concurrent calls will always block until the pending write
+   *     operation is complete.
    * @param type the message type
    * @param obj the message object
    * @throws IOException if an I/O error occurs
    * @throws SerializationException if the message cannot be encoded for this connection
    */
   public void write(byte type, Object obj) throws IOException, SerializationException {
-    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-    byteOut.write(type);
-    bp.serialize(type, obj, byteOut);
-    ByteBuffer writeBuffer = ByteBuffer.wrap(byteOut.toByteArray());
+    synchronized (SYNC_WRITE) {
+      if (writingFailed) {
+        throw new SerializationException("failed previously");
+      }
 
-    while (writeBuffer.hasRemaining()) { // force synchronous
-      chan.write(writeBuffer);
+      ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+      byteOut.write(type);
+      try {
+        bp.serialize(type, obj, byteOut);
+      } catch (SerializationException e) {
+        writingFailed = true;
+        throw e;
+      }
+      ByteBuffer writeBuffer = ByteBuffer.wrap(byteOut.toByteArray());
+
+      while (writeBuffer.hasRemaining()) { // force synchronous
+        // if another thread calls close(), this method may throw
+        // ClosedChannelException or AsynchronousCloseException
+        chan.write(writeBuffer);
+      }
     }
   }
 }
