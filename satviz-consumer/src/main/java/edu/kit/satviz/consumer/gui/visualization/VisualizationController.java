@@ -245,6 +245,7 @@ public class VisualizationController {
     processedClausesSliderMousePressed = true;
   }
 
+  // this is constantly firing if key is held down...
   @FXML
   private void processedClausesSliderOnKeyPressed() {
     processedClausesSliderKeyPressed = true;
