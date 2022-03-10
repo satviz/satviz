@@ -155,6 +155,10 @@ public class Mediator implements ConsumerConnectionListener {
     taskQueue.offer(graph::recalculateLayout);
   }
 
+  public void resetCamera() {
+    taskQueue.offer(videoController::resetCamera);
+  }
+
   public void seekToUpdate(long index) {
     taskQueue.offer(() -> {
       try {
