@@ -9,7 +9,7 @@ import edu.kit.satviz.serial.StringSerializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
+import java.util.function.IntUnaryOperator;
 
 /**
  * An implementation of {@code ClauseUpdateProcessor} that realises weight-changes for a
@@ -53,7 +53,9 @@ public abstract class VariableInteractionGraph implements ClauseUpdateProcessor 
   }
 
   @Override
-  public WeightUpdate process(ClauseUpdate[] clauseUpdates, Graph graph) {
+  public WeightUpdate process(
+      ClauseUpdate[] clauseUpdates, Graph graph, IntUnaryOperator nodeMapping
+  ) {
     WeightUpdate weightUpdate = new WeightUpdate();
     for (ClauseUpdate clauseUpdate : clauseUpdates) {
       int[] literals = clauseUpdate.clause().literals();
@@ -66,12 +68,14 @@ public abstract class VariableInteractionGraph implements ClauseUpdateProcessor 
 
       float weight = (float) weightFactor.apply(literals.length);
       weight = (clauseUpdate.type() == ClauseUpdate.Type.ADD) ? weight : -weight;
-      process(weightUpdate, literals, weight);
+      process(weightUpdate, literals, weight, nodeMapping);
     }
     return weightUpdate;
   }
 
-  protected abstract void process(WeightUpdate weightUpdate, int[] variables, float weight);
+  protected abstract void process(
+      WeightUpdate weightUpdate, int[] variables, float weight, IntUnaryOperator nodeMapping
+  );
 
   @Override
   public void serialize(OutputStream out) {

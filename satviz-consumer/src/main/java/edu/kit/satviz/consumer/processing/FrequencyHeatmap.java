@@ -6,6 +6,7 @@ import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.IntUnaryOperator;
 
 /**
  * A specialisation of {@link Heatmap}.
@@ -46,7 +47,7 @@ public class FrequencyHeatmap extends Heatmap {
   }
 
   @Override
-  public HeatUpdate process(ClauseUpdate[] updates, Graph graph) {
+  public HeatUpdate process(ClauseUpdate[] updates, Graph graph, IntUnaryOperator nodeMapping) {
     int totalAmount = cursor;
     boolean full = false;
     for (ClauseUpdate update : updates) {
@@ -67,7 +68,8 @@ public class FrequencyHeatmap extends Heatmap {
         switch (strategy) {
           case MAX_FREQUENCY -> frequencies.values().stream().reduce(1, Math::max);
           case SIZE -> full ? recentClauses.length : totalAmount;
-        });
+        },
+        nodeMapping);
   }
 
   public HeatStrategy getStrategy() {
@@ -85,13 +87,12 @@ public class FrequencyHeatmap extends Heatmap {
 
   /* Calculate the updated heat values for each node based on its frequency and the total amount
    of nodes currently being updated. */
-  private HeatUpdate populateUpdate(int totalAmount) {
+  private HeatUpdate populateUpdate(int totalAmount, IntUnaryOperator nodeMapping) {
     HeatUpdate update = new HeatUpdate();
     var iterator = frequencies.entrySet().iterator();
     while (iterator.hasNext()) {
       var entry = iterator.next();
-      // key - 1 here to convert between 1-indexed variables and 0-indexed graph nodes
-      update.add(entry.getKey() - 1, (float) entry.getValue() / totalAmount);
+      update.add(nodeMapping.applyAsInt(entry.getKey()), (float) entry.getValue() / totalAmount);
       if (entry.getValue() == 0) {
         iterator.remove();
       }

@@ -59,6 +59,7 @@ public class ConsumerConnection {
    * @throws InterruptedException if this thread is interrupted waiting on others
    */
   public void stop() throws InterruptedException {
+    listeners.keySet().forEach(this::disconnect);
     conman.finishStop();
   }
 
@@ -105,7 +106,9 @@ public class ConsumerConnection {
    * @return whether the operation succeeded or not
    */
   public boolean disconnect(ProducerId pid) {
-    listeners.remove(pid);
+    if (listeners.remove(pid) == null) {
+      return true;
+    }
     try {
       conman.send(pid.cid(), MessageTypes.STOP, null);
     } catch (IOException e) {

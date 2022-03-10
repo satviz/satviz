@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.graph.WeightUpdate;
+import java.util.function.IntUnaryOperator;
 
 public class CliqueInteractionGraph extends VariableInteractionGraph {
 
@@ -15,10 +16,14 @@ public class CliqueInteractionGraph extends VariableInteractionGraph {
   }
 
   @Override
-  protected void process(WeightUpdate weightUpdate, int[] variables, float weight) {
+  protected void process(
+      WeightUpdate weightUpdate, int[] variables, float weight, IntUnaryOperator nodeMapping
+  ) {
     for (int i = 0; i < variables.length; i++) {
       for (int j = i + 1; j < variables.length; j++) {
-        weightUpdate.add(variables[i] - 1, variables[j] - 1, weight);
+        weightUpdate.add(
+            nodeMapping.applyAsInt(variables[i]), nodeMapping.applyAsInt(variables[j]), weight
+        );
       }
     }
   }
