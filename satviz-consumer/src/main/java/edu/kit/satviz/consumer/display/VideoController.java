@@ -160,6 +160,9 @@ public class VideoController extends NativeObject {
     }
   }
 
+  /**
+   * Resets the camera to include the entire graph.
+   */
   public void resetCamera() {
     try {
       RESET_CAMERA.invokeExact(getPointer());
