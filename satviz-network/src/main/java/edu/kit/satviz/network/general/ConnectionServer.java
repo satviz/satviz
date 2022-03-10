@@ -39,7 +39,7 @@ public class ConnectionServer implements AutoCloseable {
 
   private final NetworkBlueprint bp;
   private int numConnections = 0;
-  private final List<Connection> connections = new CopyOnWriteArrayList<>();
+  private final List<Connection> connections = new CopyOnWriteArrayList<>(); // thread-safe
   private final Selector sel;
   private final ServerSocketChannel serverChan;
 

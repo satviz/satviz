@@ -2,6 +2,7 @@ package edu.kit.satviz.network.general;
 
 import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -31,10 +32,11 @@ public class Connection implements AutoCloseable {
   /**
    * Creates a new connection by opening a socket channel and connecting to the specified address.
    * Throws {@link ConnectException} if the connection is refused remotely, i.e., no-one is
-   *     listening on the remote port.
+   * listening on the remote port.
+   *
    * @param address the remote address
-   * @param port the remote port
-   * @param bp the types of messages
+   * @param port    the remote port
+   * @param bp      the types of messages
    * @throws IOException if an I/O error occurs
    */
   public Connection(String address, int port, NetworkBlueprint bp) throws IOException {
@@ -48,8 +50,9 @@ public class Connection implements AutoCloseable {
 
   /**
    * Creates a new connection with an already connected socket.
+   *
    * @param chan the socket channel
-   * @param bp the types of messages
+   * @param bp   the types of messages
    * @throws IllegalArgumentException if the channel is blocking or not connected
    */
   public Connection(SocketChannel chan, NetworkBlueprint bp) {
@@ -62,9 +65,10 @@ public class Connection implements AutoCloseable {
 
   /**
    * Returns the remote address.
+   *
    * @return remote address, {@code null} if not connected
    * @throws ClosedChannelException if the channel is closed
-   * @throws IOException if an I/O error occurs
+   * @throws IOException            if an I/O error occurs
    */
   public InetSocketAddress getRemoteAddress() throws IOException {
     return (InetSocketAddress) chan.getRemoteAddress();
@@ -72,6 +76,7 @@ public class Connection implements AutoCloseable {
 
   /**
    * Registers this channel with the given selector.
+   *
    * @param sel the selector
    * @param ops the interest set
    * @throws ClosedChannelException if the channel is closed
@@ -111,12 +116,13 @@ public class Connection implements AutoCloseable {
    * Reads a sequence of {@link NetworkMessage}s from this connection asynchronously.
    * Only processes bytes that are available immediately, which means the sequence might be empty.
    * If a serialization error occurs, subsequent calls to this method will always throw a
-   *     {@link SerializationException}. This does not affect writing, and it does not close the
-   *     underlying socket.
+   * {@link SerializationException}. This does not affect writing, and it does not close the
+   * underlying socket.
    * This method is thread-safe; concurrent calls will always block until the pending read
-   *     operation is complete.
+   * operation is complete.
+   *
    * @return sequence of messages in a queue
-   * @throws IOException if an I/O error occurs
+   * @throws IOException            if an I/O error occurs
    * @throws SerializationException if the incoming bytes do not encode valid messages
    */
   public Queue<NetworkMessage> read() throws IOException, SerializationException {
@@ -143,15 +149,16 @@ public class Connection implements AutoCloseable {
   /**
    * Writes a {@link NetworkMessage} to this connection.
    * Writing is synchronous, which means that either the entire message is written or an exception
-   *     is thrown.
+   * is thrown.
    * If a serialization error occurs, subsequent calls to this method will always throw a
-   *     {@link SerializationException}. This does not affect reading, and it does not close the
-   *     underlying socket.
+   * {@link SerializationException}. This does not affect reading, and it does not close the
+   * underlying socket.
    * This method is thread-safe; concurrent calls will always block until the pending write
-   *     operation is complete.
+   * operation is complete.
+   *
    * @param type the message type
-   * @param obj the message object
-   * @throws IOException if an I/O error occurs
+   * @param obj  the message object
+   * @throws IOException            if an I/O error occurs
    * @throws SerializationException if the message cannot be encoded for this connection
    */
   public void write(byte type, Object obj) throws IOException, SerializationException {
