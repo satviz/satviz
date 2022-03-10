@@ -151,6 +151,11 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
   public void relayout() {
     taskQueue.offer(graph::recalculateLayout);
+    resetCamera();
+  }
+
+  public void resetCamera() {
+    taskQueue.offer(videoController::resetCamera);
   }
 
   public void seekToUpdate(long index) {
