@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.display.Theme;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.network.ConsumerConnection;
@@ -69,6 +70,7 @@ public class Mediator implements ConsumerConnectionListener {
     //System.out.println("Period: " + period + ", buffer: " + clausesPerAdvance);
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
+    controller.applyTheme(new Theme());
   }
 
   public void updateWeightFactor(WeightFactor factor) {

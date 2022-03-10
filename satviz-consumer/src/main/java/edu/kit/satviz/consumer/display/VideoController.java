@@ -66,6 +66,12 @@ public class VideoController extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
 
+  private static final MethodHandle APPLY_THEME = lookupFunction(
+      "apply_theme",
+      MethodType.methodType(void.class, MemoryAddress.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER)
+  );
+
   private VideoController(MemoryAddress pointer) {
     super(pointer);
   }
@@ -162,6 +168,15 @@ public class VideoController extends NativeObject {
       NEXT_FRAME.invokeExact(getPointer());
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while progressing to next frame", e);
+    }
+  }
+
+  public void applyTheme(Theme theme) {
+    try (ResourceScope local = ResourceScope.newConfinedScope()) {
+      MemorySegment segment = theme.toSegment(local);
+      APPLY_THEME.invokeExact(getPointer(), segment.address());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while applying theme", e);
     }
   }
 

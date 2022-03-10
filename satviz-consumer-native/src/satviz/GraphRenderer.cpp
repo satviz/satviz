@@ -113,8 +113,6 @@ void GraphRenderer::init() {
   glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, 2, 0, GL_RGB, GL_FLOAT, NULL);
   //glUseProgram(resources.node_prog);
   //glUniform1i(glGetUniformLocation(resources.node_prog, "heat_palette"), 0);
-
-  applyTheme(Theme());
 }
 
 void GraphRenderer::deinit() {
