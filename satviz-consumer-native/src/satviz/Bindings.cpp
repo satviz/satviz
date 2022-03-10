@@ -93,6 +93,10 @@ void satviz_release_video_controller(void *controller) {
   delete (VideoController*) controller;
 }
 
+void satviz_apply_theme(void *controller, const Theme *theme) {
+  reinterpret_cast<VideoController*>(controller)->applyTheme(*theme);
+}
+
 int satviz_start_recording(void *controller, const char *filename, const char *encoder_name) {
   VideoEncoder *encoder;
   std::string enc_name_str { encoder_name };

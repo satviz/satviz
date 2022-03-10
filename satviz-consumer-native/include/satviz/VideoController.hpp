@@ -37,6 +37,8 @@ public:
   VideoController(graph::Graph &gr, Display *dpy);
   ~VideoController();
 
+  void applyTheme(const Theme &theme) { renderer->applyTheme(theme); }
+
   /**
    * Move the camera so that the entire graph is in view.
    */
