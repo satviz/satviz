@@ -10,15 +10,26 @@ import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 
-public class ConsumerModeConstraint implements Constraint<ConsumerConfig> {
+/**
+ * This class defines the constraints for a valid {@code ConsumerConfig} instance.
+ */
+public class ConsumerConstraint implements Constraint<ConsumerConfig> {
 
   @Override
   public void validate(ConsumerConfig config) throws ConstraintValidationException {
+    if (config.getInstancePath() == null) {
+      fail("No instance is set");
+    }
+    fileExists().validate(config.getInstancePath());
+    fileExists().validate(Paths.get(config.getVideoTemplatePath()).getParent());
     ConsumerModeConfig modeConfig = config.getModeConfig();
     if (modeConfig.getMode() == ConsumerMode.EMBEDDED) {
       EmbeddedModeConfig embeddedConfig = (EmbeddedModeConfig) modeConfig;
-      if (Files.isDirectory(embeddedConfig.getSourcePath())) {
+      if (embeddedConfig.getSourcePath() == null) {
+        fail("No source path is set");
+      } else if (Files.isDirectory(embeddedConfig.getSourcePath())) {
         fail("Directory is set as source");
       }
       fileExists().validate(embeddedConfig.getSourcePath());
