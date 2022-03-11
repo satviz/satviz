@@ -65,8 +65,11 @@ public class VisualizationController {
   private Button pauseOrContinueRecordingButton;
   @FXML
   private Button pauseOrContinueVisualizationButton;
+  // This is actually meant to be a Spinner<Long>.
+  // However, there is no default implementation of a LongSpinnerValueFactory.
+  // Hence, a DoubleSpinnerValueFactory is used in which all values are basically treated as long values.
   @FXML
-  private Spinner<Integer> processedClausesSpinner; // TODO: convert to Spinner<Long>
+  private Spinner<Double> processedClausesSpinner;
   @FXML
   private Label totalClausesLabel;
   @FXML
@@ -87,7 +90,7 @@ public class VisualizationController {
   private boolean processedClausesSliderMousePressed;
   private boolean processedClausesSliderKeyPressed;
 
-  private ChangeListener<String> processedClausesSpinnerIntegerValidationListener;
+  private ChangeListener<String> processedClausesSpinnerLongValidationListener;
 
 
   // CONSTRUCTORS
@@ -143,7 +146,7 @@ public class VisualizationController {
     long totalClauses = mediator.numberOfUpdates();
     long processedClauses = mediator.currentUpdate();
 
-    processedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+    processedClausesSpinnerLongValidationListener = GuiUtils.initializeLongSpinnerAsDouble(
         processedClausesSpinner,
         MIN_PROCESSED_CLAUSES,
         (int) totalClauses,
@@ -235,9 +238,9 @@ public class VisualizationController {
 
   @FXML
   private void updateProcessedClausesSpinner() {
-    long currentUpdate = processedClausesSpinner.getValue();
+    double currentUpdate = processedClausesSpinner.getValue();
     processedClausesSlider.setValue(currentUpdate);
-    mediator.seekToUpdate(currentUpdate);
+    mediator.seekToUpdate((long) currentUpdate);
   }
 
   @FXML
@@ -276,9 +279,9 @@ public class VisualizationController {
   }
 
   private void updateProcessedClausesSlider() {
-    long currentUpdate = (long) processedClausesSlider.getValue();
-    processedClausesSpinner.getValueFactory().setValue((int) currentUpdate);
-    mediator.seekToUpdate(currentUpdate);
+    double currentUpdate = processedClausesSlider.getValue();
+    processedClausesSpinner.getValueFactory().setValue(currentUpdate);
+    mediator.seekToUpdate((long) currentUpdate);
   }
 
   /**
@@ -297,8 +300,8 @@ public class VisualizationController {
     Platform.runLater(() -> {
       // update spinner
       processedClausesSpinner.getEditor().textProperty().removeListener(
-          processedClausesSpinnerIntegerValidationListener);
-      processedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+          processedClausesSpinnerLongValidationListener);
+      processedClausesSpinnerLongValidationListener = GuiUtils.initializeLongSpinnerAsDouble(
           processedClausesSpinner,
           MIN_PROCESSED_CLAUSES,
           (int) totalUpdates,

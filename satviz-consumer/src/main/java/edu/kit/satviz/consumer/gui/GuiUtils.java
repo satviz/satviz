@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.gui;
 
+import java.text.DecimalFormat;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -135,6 +136,90 @@ public final class GuiUtils {
         Integer value = null;
         try {
           value = Integer.parseInt(newValue);
+        } catch (NumberFormatException e) {
+          spinner.getEditor().setText(oldValue);
+        }
+
+        // check if newValue is in bounds
+        if (value != null && (value < min || value > max)) {
+          spinner.getEditor().setText(oldValue);
+        }
+      }
+    };
+  }
+
+  /**
+   * Initializes a {@code spinner} (with the initial value {@code init}) so that the user can only
+   * enter valid long integers within the given range (from {@code min} to {@code max}) while
+   * allowing the {@code spinner} to be empty if the user is currently entering a new value
+   * (i.e., has just erased an old value).
+   * <p>If the user attempts to keep the {@code spinner} empty,
+   * the {@code spinner} is reset to {@code init}.</p>
+   *
+   * @param spinner The {@code spinner} to be initialized.
+   * @param min The minimum value of the {@code spinner}.
+   * @param max The maximum value of the {@code spinner}.
+   * @param init The initial value of the {@code spinner}.
+   * @return The {@link ChangeListener} which validates that the input of the {@code spinner}
+   *         is either a valid long integer or empty.
+   */
+  public static ChangeListener<String> initializeLongSpinnerAsDouble(Spinner<Double> spinner,
+                                                                long min,
+                                                                long max,
+                                                                long init) {
+    SpinnerValueFactory<Double> spinnerValueFactory
+            = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, init);
+
+    // prevent exception when [value is null & (enter/arrow up/arrow down) is pressed]
+    spinnerValueFactory.setConverter(new StringConverter<>() {
+      private DecimalFormat df = new DecimalFormat("#");
+
+      @Override
+      public String toString(Double object) {
+        return object == null ? "" : df.format(object);
+      }
+
+      @Override
+      public Double fromString(String string) {
+        try {
+          return (double) Long.parseLong(string);
+        } catch (NumberFormatException e) {
+          spinner.getEditor().setText("" + init);
+          return (double) init;
+        }
+      }
+    });
+
+    spinner.setValueFactory(spinnerValueFactory);
+
+    // prevent user from entering invalid characters
+    ChangeListener<String> listener = createLongValidationListenerAsDouble(spinner, min, max);
+    spinner.getEditor().textProperty().addListener(listener);
+
+    // this must be returned so that it can be removed again later when the spinner is updated
+    // see: VisualizationController#onClauseUpdate
+    return listener;
+  }
+
+  /**
+   * Creates a new {@link ChangeListener} which validates user input of a given {@code spinner}.
+   * It confirms that the given input is either a valid long integer or empty.
+   * If the new input is invalid it rejects it and keeps the old value.
+   *
+   * @param spinner The {@code spinner} whose input is supposed to be validated.
+   * @param min The minimum value of the {@code spinner}.
+   * @param max The maximum value of the {@code spinner}.
+   * @return The validating {@link ChangeListener}.
+   */
+  private static ChangeListener<String> createLongValidationListenerAsDouble(Spinner<Double> spinner,
+                                                                        long min,
+                                                                        long max) {
+    return (observable, oldValue, newValue) -> {
+      if (!newValue.equals("")) { // allow empty spinner
+        // check if newValue is a long integer
+        Long value = null;
+        try {
+          value = Long.parseLong(newValue);
         } catch (NumberFormatException e) {
           spinner.getEditor().setText(oldValue);
         }
