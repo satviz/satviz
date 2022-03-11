@@ -36,7 +36,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   private boolean recordingPaused;
   private int recordedVideos;
   private int clauseCount;
-  private Future<?> currentRender;
+  private volatile Future<?> currentRender;
   private boolean isRendering;
 
   private volatile boolean visualizationPaused;
@@ -201,8 +201,10 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
         clauseCount = 0;
       }
       long end = System.currentTimeMillis();
+      // mutual exclusion for isRendering: only schedule next frame if isRendering=true
       synchronized (renderLock) {
         if (isRendering) {
+          // next frame in frame period - time it took to render this frame
           currentRender = glScheduler.schedule(
               this::render, Math.max(0, period - (end - start)), TimeUnit.MILLISECONDS
           );
@@ -235,13 +237,18 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
   @Override
   public void close() throws Exception {
+    // this guarantees that isRendering is set to false before
+    // or after a new frame rendering task has been set
     synchronized (renderLock) {
       isRendering = false;
-      if (currentRender != null) {
-        currentRender.get();
-      }
+    }
+    // wait for current frame to end
+    if (currentRender != null) {
+      currentRender.get();
     }
     boolean isRecording = recording;
+
+    // close all opengl related stuff
     glScheduler.submit(() -> {
       if (isRecording) {
         videoController.finishRecording();
