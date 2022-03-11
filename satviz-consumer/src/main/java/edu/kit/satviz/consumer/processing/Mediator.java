@@ -11,14 +11,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javafx.scene.paint.Color;
 
 public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
+  private final Object renderLock = new Object();
   private final Graph graph;
   private final VideoController videoController;
   private final ClauseCoordinator coordinator;
@@ -32,12 +33,14 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
   private boolean recording;
   private boolean recordingPaused;
-  private volatile boolean visualizationPaused;
   private int recordedVideos;
+  private int clauseCount;
+  private Future<?> currentRender;
+  private boolean isRendering;
+
+  private volatile boolean visualizationPaused;
   private volatile int clausesPerAdvance;
   private volatile int snapshotPeriod;
-  private int clauseCount;
-  private ScheduledFuture<?> renderTask;
 
   private Mediator(
       ScheduledExecutorService glScheduler,
@@ -59,6 +62,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.recordedVideos = 0;
     this.recordingPaused = false;
     this.visualizationPaused = true;
+    this.isRendering = false;
     this.clausesPerAdvance = config.getBufferSize();
     this.period = config.getPeriod();
     this.clauseCount = 0;
@@ -136,12 +140,10 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   }
 
   public void startRendering() {
-    renderTask = glScheduler.scheduleAtFixedRate(
-        this::render,
-        0,
-        period,
-        TimeUnit.MILLISECONDS
-    );
+    synchronized (renderLock) {
+      isRendering = true;
+      currentRender = glScheduler.submit(this::render);
+    }
     visualizationPaused = false;
   }
 
@@ -177,6 +179,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
   private void render() {
     try {
+      long start = System.currentTimeMillis();
       if (!visualizationPaused) {
         clauseCount += coordinator.advanceVisualization(clausesPerAdvance);
       }
@@ -187,6 +190,14 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
       if (clauseCount >= snapshotPeriod) {
         coordinator.takeSnapshot();
         clauseCount = 0;
+      }
+      long end = System.currentTimeMillis();
+      synchronized (renderLock) {
+        if (isRendering) {
+          currentRender = glScheduler.schedule(
+              this::render, Math.max(0, period - (end - start)), TimeUnit.MILLISECONDS
+          );
+        }
       }
     } catch (Throwable e) {
       e.printStackTrace();
@@ -215,7 +226,12 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
   @Override
   public void close() throws Exception {
-    renderTask.cancel(false);
+    synchronized (renderLock) {
+      isRendering = false;
+      if (currentRender != null) {
+        currentRender.get();
+      }
+    }
     boolean isRecording = recording;
     glScheduler.submit(() -> {
       if (isRecording) {
