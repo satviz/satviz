@@ -3,6 +3,7 @@ package edu.kit.satviz.consumer.processing;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.graph.WeightUpdate;
 import java.util.Arrays;
+import java.util.function.IntUnaryOperator;
 
 public class RingInteractionGraph extends VariableInteractionGraph {
 
@@ -16,11 +17,19 @@ public class RingInteractionGraph extends VariableInteractionGraph {
   }
 
   @Override
-  protected void process(WeightUpdate weightUpdate, int[] variables, float weight) {
+  protected void process(
+      WeightUpdate weightUpdate, int[] variables, float weight, IntUnaryOperator nodeMapping
+  ) {
     Arrays.sort(variables);
     for (int i = 0; i < variables.length - 1; i++) {
-      weightUpdate.add(variables[i] - 1, variables[i + 1] - 1, weight);
+      weightUpdate.add(
+          nodeMapping.applyAsInt(variables[i]), nodeMapping.applyAsInt(variables[i + 1]), weight
+      );
     }
-    weightUpdate.add(variables[0] - 1, variables[variables.length - 1] - 1, weight);
+    weightUpdate.add(
+        nodeMapping.applyAsInt(variables[0]),
+        nodeMapping.applyAsInt(variables[variables.length - 1]),
+        weight
+    );
   }
 }

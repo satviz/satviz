@@ -46,6 +46,7 @@ int satviz_start_recording(void *controller, const char *filename, const char *e
 void satviz_stop_recording(void *controller);
 void satviz_resume_recording(void *controller);
 void satviz_finish_recording(void *controller);
+void satviz_reset_camera(void *controller);
 void satviz_next_frame(void *controller);
 
 #ifdef __cplusplus
