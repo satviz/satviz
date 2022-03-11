@@ -1,16 +1,12 @@
 package edu.kit.satviz.consumer.display;
 
-import edu.kit.satviz.consumer.bindings.Struct;
+import edu.kit.satviz.consumer.bindings.NativeObject;
 import jdk.incubator.foreign.*;
+import jdk.incubator.foreign.MemoryLayout.PathElement;
+
+import java.lang.invoke.VarHandle;
 
 public class Theme {
-  private static final Struct STRUCT = Struct.builder()
-      .field("coldColor", float.class, MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT))
-      .field("hotColor",  float.class, MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT))
-      .field("edgeColor", float.class, MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT))
-      .field("nodeSize",  float.class, CLinker.C_FLOAT)
-      .build();
-
   private float[] coldColor = { 0.0f, 0.0f, 1.0f };
   private float[] hotColor  = { 1.0f, 0.0f, 0.0f };
   private float[] edgeColor = { 1.0f, 1.0f, 1.0f };
@@ -27,18 +23,38 @@ public class Theme {
   public float   getNodeSize () { return nodeSize; }
 
   public MemorySegment toSegment(ResourceScope scope) {
-    MemorySegment segment = STRUCT.allocateNew(scope);
+    MemoryLayout layout = NativeObject.paddedStruct(
+        MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT).withName("coldColor"),
+        MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT).withName("hotColor"),
+        MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT).withName("edgeColor"),
+        CLinker.C_FLOAT.withName("nodeSize")
+    );
+
+    MemorySegment segment = MemorySegment.allocateNative(layout, scope);
 
     for (int i = 0; i < 3; i++) {
-      STRUCT.varHandle("coldColor").set(segment, i, coldColor[i]);
+      VarHandle handle = layout.varHandle(float.class,
+          PathElement.groupElement("coldColor"),
+          PathElement.sequenceElement(i));
+      handle.set(segment, coldColor[i]);
     }
+
     for (int i = 0; i < 3; i++) {
-      STRUCT.varHandle("hotColor").set(segment, i, hotColor[i]);
+      VarHandle handle = layout.varHandle(float.class,
+          PathElement.groupElement("hotColor"),
+          PathElement.sequenceElement(i));
+      handle.set(segment, hotColor[i]);
     }
+
     for (int i = 0; i < 3; i++) {
-      STRUCT.varHandle("edgeColor").set(segment, i, edgeColor[i]);
+      VarHandle handle = layout.varHandle(float.class,
+          PathElement.groupElement("edgeColor"),
+          PathElement.sequenceElement(i));
+      handle.set(segment, edgeColor[i]);
     }
-    STRUCT.varHandle("nodeSize").set(segment, nodeSize);
+
+    layout.varHandle(float.class, PathElement.groupElement("nodeSize"))
+        .set(segment, nodeSize);
 
     return segment;
   }

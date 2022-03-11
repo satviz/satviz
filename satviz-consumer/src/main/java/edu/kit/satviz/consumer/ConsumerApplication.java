@@ -7,6 +7,7 @@ import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.display.DisplayType;
+import edu.kit.satviz.consumer.display.Theme;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.consumer.graph.HeatUpdate;
@@ -126,6 +127,7 @@ public final class ConsumerApplication {
         components.graph.submitUpdate(u);
         components.graph.submitUpdate(initialUpdate);
         components.graph.recalculateLayout();
+        components.controller.applyTheme(new Theme());
         components.controller.nextFrame();
       } catch (Throwable e) {
         e.printStackTrace();
