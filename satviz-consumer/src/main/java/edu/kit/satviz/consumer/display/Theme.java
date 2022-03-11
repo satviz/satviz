@@ -12,9 +12,9 @@ public class Theme {
   private float[] edgeColor = { 1.0f, 1.0f, 1.0f };
   private float   nodeSize  = 10.0f;
 
-  public void setColdColor(float[] color) { coldColor = color; }
-  public void setHotColor (float[] color) { hotColor  = color; }
-  public void setEdgeColor(float[] color) { edgeColor = color; }
+  public void setColdColor(float r, float g, float b) { coldColor = new float[]{r, g, b}; }
+  public void setHotColor (float r, float g, float b) { hotColor  = new float[]{r, g, b}; }
+  public void setEdgeColor(float r, float g, float b) { edgeColor = new float[]{r, g, b}; }
   public void setNodeSize (float size) { nodeSize = size; }
 
   public float[] getColdColor() { return coldColor; }

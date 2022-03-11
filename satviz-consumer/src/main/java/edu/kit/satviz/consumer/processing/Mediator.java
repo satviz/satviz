@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.display.Theme;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.network.ConsumerConnectionListener;
@@ -26,6 +27,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   private final long period;
   private final Queue<Runnable> taskQueue;
   private final List<Runnable> closeActions;
+  private final Theme theme;
 
   private boolean recording;
   private boolean recordingPaused;
@@ -62,6 +64,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.snapshotPeriod = clausesPerAdvance * 500;
     this.taskQueue = new LinkedBlockingQueue<>();
     this.closeActions = new CopyOnWriteArrayList<>();
+    this.theme = new Theme();
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -75,11 +78,13 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   }
 
   public void updateHeatmapColdColor(Color color) {
-    // TODO: 19/02/2022
+    theme.setColdColor((float) color.getRed(), (float) color.getGreen(), (float) color.getBlue());
+    taskQueue.offer(() -> videoController.applyTheme(theme));
   }
 
   public void updateHeatmapHotColor(Color color) {
-    // TODO: 19/02/2022
+    theme.setHotColor((float) color.getRed(), (float) color.getGreen(), (float) color.getBlue());
+    taskQueue.offer(() -> videoController.applyTheme(theme));
   }
 
   public void setClausesPerAdvance(int clausesPerAdvance) {
