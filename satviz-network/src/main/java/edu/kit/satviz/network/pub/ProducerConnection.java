@@ -17,7 +17,11 @@ import java.util.Queue;
 
 /**
  * The producer part of a satviz network connection.
- * TODO
+ * State changes are communicated via the {@link ProducerConnectionListener}. {@code onConnect} is
+ *     called once the consumer sends the START signal. {@code onDisconnect} has the following
+ *     contract: it is only called if {@code onConnect} has been called before, and it is only
+ *     called if the user did not use one of the terminate methods (i.e., it is only called if a
+ *     STOP signal was received, or on an internal error).
  */
 public class ProducerConnection {
   private enum State {
@@ -52,6 +56,17 @@ public class ProducerConnection {
     this.ls = Objects.requireNonNull(ls);
   }
 
+  /**
+   * Closes the underlying connection, optionally sending a last message to the consumer, and
+   *     making an {@code onDisconnect()} call.
+   * Calling {@code onDisconnect} and sending a last message are independent; you may do only one
+   *    of the two.
+   * This method only performs its actions exactly once; subsequent calls do nothing.
+   * @param onDisconnectMessage the {@code onDisconnect} message, {@code null} if not desired
+   * @param type the type of the last message, 0 if not desired
+   * @param obj the object of the last message (may be {@code null})
+   * @return whether the last message was sent or not
+   */
   private boolean doClose(String onDisconnectMessage, byte type, Object obj) {
     synchronized (SYNC_STATE) {
       if (state == State.CLOSED) {
@@ -86,6 +101,13 @@ public class ProducerConnection {
     return doClose(msg, MessageTypes.TERM_OTHER, msg);
   }
 
+  /**
+   * Establishes the connection to the consumer.
+   * Repeatedly creates {@link Connection}s until one successfully connects to the consumer. Then
+   *     the offer message is sent.
+   * Closes this producer connection if something goes wrong.
+   * @return true if the establishing was successful, false if not
+   */
   private boolean doEstablish() {
     Map<String, String> offerData = new HashMap<>();
     offerData.put("version", "1");
@@ -201,6 +223,8 @@ public class ProducerConnection {
   }
 
   /**
+   * Establishes the connection to the consumer by spawning a worker thread to read messages.
+   * The thread terminates if an internal error occurs or one of the terminate methods is called.
    * @throws IllegalStateException if {@code establish()} has already been called or this
    *     ProducerConnection is closed
    */
@@ -258,6 +282,12 @@ public class ProducerConnection {
     }
   }
 
+  /**
+   * Sends a satisfying variable assignment to the consumer and closes this connection.
+   * @param assign the satisfying assignment
+   * @return whether the assignment was sent or not
+   * @throws IllegalStateException if the connection has not been started yet
+   */
   public boolean terminateSolved(SatAssignment assign) {
     synchronized (SYNC_STATE) {
       switch (state) {
@@ -270,6 +300,11 @@ public class ProducerConnection {
     }
   }
 
+  /**
+   * Sends a refutation message to the consumer and closes this connection.
+   * @return whether the message was sent or not
+   * @throws IllegalStateException if the connection has not been started yet
+   */
   public boolean terminateRefuted() {
     synchronized (SYNC_STATE) {
       switch (state) {
@@ -282,6 +317,12 @@ public class ProducerConnection {
     }
   }
 
+  /**
+   * Sends a termination message to the consumer and closes this connection.
+   * Note: unlike the other terminate methods, this one may be called at any time.
+   * @param reason the reason for termination
+   * @return whether the message was sent or not
+   */
   public boolean terminateOtherwise(String reason) {
     return doClose(null, MessageTypes.TERM_OTHER, reason);
   }
