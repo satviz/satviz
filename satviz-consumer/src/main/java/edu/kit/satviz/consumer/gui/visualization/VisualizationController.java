@@ -67,7 +67,8 @@ public class VisualizationController {
   private Button pauseOrContinueVisualizationButton;
   // This is actually meant to be a Spinner<Long>.
   // However, there is no default implementation of a LongSpinnerValueFactory.
-  // Hence, a DoubleSpinnerValueFactory is used in which all values are basically treated as long values.
+  // Hence, a DoubleSpinnerValueFactory is used in which all values
+  // are basically treated as long values.
   @FXML
   private Spinner<Double> processedClausesSpinner;
   @FXML
@@ -268,6 +269,9 @@ public class VisualizationController {
 
   // METHODS (OTHER)
 
+  /**
+   * Closes the application.
+   */
   public void quit() {
     ForkJoinPool.commonPool().execute(() -> {
       try {
