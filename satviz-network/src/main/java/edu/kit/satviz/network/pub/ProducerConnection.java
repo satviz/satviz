@@ -5,67 +5,85 @@ import edu.kit.satviz.network.general.NetworkMessage;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import edu.kit.satviz.serial.SerializationException;
-
 import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 
+/**
+ * The producer part of a satviz network connection.
+ * TODO
+ */
 public class ProducerConnection {
   private enum State {
     INIT,
     ESTABLISHING,
     ESTABLISHED,
     STARTED,
-    CLOSING,
     CLOSED
   }
 
   private final String address;
   private final int port;
-  private Connection client = null;
   private final ProducerId pid;
   private final ProducerConnectionListener ls;
 
+  private Connection client = null;
   private final Object SYNC_STATE = new Object();
   private volatile State state = State.INIT;
 
+  /**
+   * Creates a new connection to a consumer.
+   * {@code pid} and {@code ls} should not be {@code null}.
+   * @param address the consumer address
+   * @param port the consumer port
+   * @param pid the type of clause source that this producer represents
+   * @param ls the event listener
+   */
   public ProducerConnection(String address, int port, ProducerId pid, ProducerConnectionListener ls) {
     this.address = address;
     this.port = port;
-    this.pid = pid;
+    this.pid = Objects.requireNonNull(pid);
     this.ls = Objects.requireNonNull(ls);
   }
 
-  private void doClose(String onDisconnectMessage, byte type, Object msg) {
+  private boolean doClose(String onDisconnectMessage, byte type, Object obj) {
     synchronized (SYNC_STATE) {
       if (state == State.CLOSED) {
-        return;
+        return false;
       }
       state = State.CLOSED;
 
+      boolean sent = false;
       if (client != null) {
         if (type != 0) {
+          sent = true;
           try {
-            client.write(type, msg);
+            client.write(type, obj);
           } catch (Exception e) {
             // ignore because there is nothing we can do now
+            sent = false;
           }
         }
         client.close();
       }
 
-      if (onDisconnectMessage != null) {
+      if (onDisconnectMessage != null && state == State.STARTED) {
+        // only send onDisconnect if onConnect has been sent previously
+        // TODO both should come from the same thread
         ls.onDisconnect(onDisconnectMessage);
       }
+      return sent;
     }
   }
 
-  private void doFail() {
-    doClose("internal failure", MessageTypes.TERM_FAIL, "internal failure");
+  private boolean doFail(String msg) {
+    return doClose(msg, MessageTypes.TERM_OTHER, msg);
   }
 
   private boolean doEstablish() {
@@ -94,24 +112,23 @@ public class ProducerConnection {
             SYNC_STATE.wait(1000);
           } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            doFail();
+            doFail("interrupted");
             return false;
           }
         } catch (Exception e) {
-          doFail();
+          doFail("connection create fail");
           return false;
         }
       }
 
-      if (client == null) { // got signal from user that we should close
-        doClose(null, MessageTypes.TERM_FAIL, "closed");
+      if (client == null) { // state must be State.CLOSED
         return false;
       }
 
       try {
         client.write(MessageTypes.OFFER, offerData);
       } catch (Exception e) {
-        doFail();
+        doFail("offer send fail");
         return false;
       }
 
@@ -122,6 +139,7 @@ public class ProducerConnection {
 
   private void threadMain() {
     if (!doEstablish()) {
+      // some sort of fatal error occurred
       // state is set to closed and connection is closed
       return;
     }
@@ -131,22 +149,33 @@ public class ProducerConnection {
     // This means we have to be careful here, as we may read past a close(). Sometimes this is
     // unavoidable, and not indicative of a synchronization mistake.
 
-    Queue<NetworkMessage> readQueue;
-    while (true) {
-      synchronized (SYNC_STATE) {
-        if (state == State.CLOSING) {
-          doClose(null, MessageTypes.TERM_FAIL, "closed");
-          return;
+    Selector sel = null;
+    try {
+      sel = Selector.open();
+      client.register(sel, SelectionKey.OP_READ);
+    } catch (Exception e) {
+      if (sel != null) {
+        try {
+          sel.close();
+        } catch (Exception ex) {
+          // nothing
         }
       }
+      doFail("selector init fail");
+      return;
+    }
 
+    Queue<NetworkMessage> readQueue;
+    while (true) {
       try {
+        sel.select(1000); // avoid busy-wait
+        sel.selectedKeys().clear(); // act like we took care of everything
         readQueue = client.read();
       } catch (ClosedChannelException e) { // includes AsynchronousCloseException
         // someone called close; we don't need to do that here
         return;
-      } catch (IOException | SerializationException e) {
-        doFail();
+      } catch (Exception e) {
+        doFail("read fail");
         return;
       }
 
@@ -154,11 +183,11 @@ public class ProducerConnection {
         switch (msg.getType()) {
           case MessageTypes.START -> {
             synchronized (SYNC_STATE) {
-              if (state == State.CLOSING || state == State.CLOSED) {
-                doClose(null, MessageTypes.TERM_FAIL, "closed");
+              if (state == State.CLOSED) {
                 return;
               }
               state = State.STARTED;
+              ls.onConnect();
             }
           }
           case MessageTypes.STOP -> {
@@ -185,7 +214,20 @@ public class ProducerConnection {
     }
   }
 
-  public void sendClauseUpdate(ClauseUpdate c) throws SerializationException {
+  /**
+   * Sends a clause update over this connection.
+   * If an exception is thrown, nothing will be written and the connection is not terminated.
+   * The return value indicates if a message has actually been sent or not. There are two cases in
+   *     which the message might not be sent. First, there might be an internal socket error. In
+   *     this case, onDisconnect() is called. Second, the connection has been terminated. In that
+   *     case, onDisconnect() is not called, as it has either been called before or the termination
+   *     was initiated using one of the terminate methods (i.e., the user is aware of this).
+   * @param c the clause update
+   * @return true if sent, false otherwise
+   * @throws IllegalStateException if the connection has not been started from the consumer
+   * @throws SerializationException if the clause update cannot be serialized
+   */
+  public boolean sendClauseUpdate(ClauseUpdate c) throws SerializationException {
     // Note: I thought about using something like a ReadWriteLock here to allow more than one
     // concurrent clause writer, but I decided against it since all writes happen in serial order
     // in the Connection anyway.
@@ -196,47 +238,51 @@ public class ProducerConnection {
         MessageTypes.CLAUSE_ADD : MessageTypes.CLAUSE_DEL;
 
     synchronized (SYNC_STATE) {
-      if (state != State.STARTED) {
-        // do something. Don't throw an exception, because we may not be able to avoid
-        // clauses being written after close() is called. We usually just want to ignore them.
-        // but the user needs some kind of signal if something went wrong
-        // TODO isn't this exactly what the onDisconnect is for?
-        // TODO make sure that onDisconnect is not ignored, if you use it (2nd call to doClose)
+      switch (state) {
+        case INIT, ESTABLISHING, ESTABLISHED -> throw
+            new IllegalStateException("terminate before connection is established and started");
+        case STARTED -> {
+          try {
+            client.write(type, c.clause());
+            return true;
+          } catch (IOException e) { // note: SerializationException does not close this connection
+            doClose("fail: clause", MessageTypes.TERM_OTHER, "fail: clause");
+            return false;
+          }
+        } default -> {
+          // case CLOSED
+          // no error message, but indication in return value
+          return false;
+        }
       }
-      try {
-        client.write(type, c.clause());
-      } catch (IOException e) {
-        doFail();
-      }
-      // note: socket is not closed on a SerializationException
     }
   }
 
-  public void terminateSolved(SatAssignment assign) {
+  public boolean terminateSolved(SatAssignment assign) {
     synchronized (SYNC_STATE) {
-      if (state == State.INIT || state == State.ESTABLISHING || state == State.ESTABLISHED) {
-        throw new IllegalStateException("terminate before connection is established and started");
+      switch (state) {
+        case INIT, ESTABLISHING, ESTABLISHED -> throw
+            new IllegalStateException("terminate before connection is established and started");
+        default -> {
+          return doClose(null, MessageTypes.TERM_SOLVE, assign);
+        }
       }
-      if (state == State.STARTED) {
-        doClose(null, MessageTypes.TERM_SOLVE, assign); // TODO remove send there
-      }
-      // otherwise we do nothing
-      // TODO don't we want the reader thread to handle termination?
-      // TODO if so, do we even want direct doClose() calls in any of these methods?
-
-      // TODO are there different conventions for terminateFailed and the others?
     }
   }
 
-  public void terminateRefuted() {
+  public boolean terminateRefuted() {
     synchronized (SYNC_STATE) {
-      // TODO
+      switch (state) {
+        case INIT, ESTABLISHING, ESTABLISHED -> throw
+            new IllegalStateException("terminate before connection is established and started");
+        default -> {
+          return doClose(null, MessageTypes.TERM_REFUTE, null);
+        }
+      }
     }
   }
 
-  public void terminateOtherwise(String reason) {
-    synchronized (SYNC_STATE) {
-      // TODO
-    }
+  public boolean terminateOtherwise(String reason) {
+    return doClose(null, MessageTypes.TERM_OTHER, reason);
   }
 }

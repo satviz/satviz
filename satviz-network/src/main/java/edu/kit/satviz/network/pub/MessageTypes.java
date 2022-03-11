@@ -20,7 +20,7 @@ public final class MessageTypes {
 
   public static final byte TERM_SOLVE = 8;
   public static final byte TERM_REFUTE = 9;
-  public static final byte TERM_FAIL = 10;
+  public static final byte TERM_OTHER = 10;
 
   public static final byte CLAUSE_ADD = 'a';
   public static final byte CLAUSE_DEL = 'd';
@@ -35,7 +35,7 @@ public final class MessageTypes {
           Map.entry(STOP, new NullSerializer()),
           Map.entry(TERM_SOLVE, new SatAssignmentSerializer()),
           Map.entry(TERM_REFUTE, new NullSerializer()),
-          Map.entry(TERM_FAIL, new StringSerializer()),
+          Map.entry(TERM_OTHER, new StringSerializer()),
           Map.entry(CLAUSE_ADD, new ClauseSerializer()),
           Map.entry(CLAUSE_DEL, new ClauseSerializer())
       )
