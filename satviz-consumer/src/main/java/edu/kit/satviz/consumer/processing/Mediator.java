@@ -30,6 +30,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   private final long period;
   private final Queue<Runnable> taskQueue;
   private final List<Runnable> closeActions;
+  private final List<Runnable> frameActions;
 
   private boolean recording;
   private boolean recordingPaused;
@@ -69,6 +70,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.snapshotPeriod = clausesPerAdvance * 500;
     this.taskQueue = new LinkedBlockingQueue<>();
     this.closeActions = new CopyOnWriteArrayList<>();
+    this.frameActions = new CopyOnWriteArrayList<>();
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -177,6 +179,10 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     closeActions.add(closeAction);
   }
 
+  public void registerFrameAction(Runnable frameAction) {
+    frameActions.add(frameAction);
+  }
+
   private void render() {
     try {
       long start = System.currentTimeMillis();
@@ -187,6 +193,9 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
       while (!taskQueue.isEmpty()) {
         taskQueue.poll().run();
       }
+
+      frameActions.forEach(Runnable::run);
+
       if (clauseCount >= snapshotPeriod) {
         coordinator.takeSnapshot();
         clauseCount = 0;
