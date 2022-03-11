@@ -22,15 +22,15 @@ public abstract class ProducerId {
     this.type = type;
   }
 
-  public final int id() {
+  public final int getId() {
     return id;
   }
 
-  public final InetSocketAddress address() {
+  public final InetSocketAddress getAddress() {
     return address;
   }
 
-  public final OfferType type() {
+  public final OfferType getType() {
     return type;
   }
 }

@@ -22,15 +22,15 @@ public final class SolverId extends ProducerId {
     this.instanceHash = instanceHash;
   }
 
-  public String solverName() {
-    return solverName();
+  public String getSolverName() {
+    return solverName;
   }
 
-  public boolean solverDelayed() {
+  public boolean isSolverDelayed() {
     return solverDelayed;
   }
 
-  public long instanceHash() {
-    return instanceHash();
+  public long getInstanceHash() {
+    return instanceHash;
   }
 }

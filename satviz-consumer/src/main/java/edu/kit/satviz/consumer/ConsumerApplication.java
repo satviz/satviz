@@ -68,7 +68,7 @@ public final class ConsumerApplication {
     logger.info("Setting up network connection");
     ConsumerConnection connection = setupNetworkConnection(config, tempDir);
     logger.log(Level.INFO, "Producer {0} connected", pid);
-    if (pid.type() == OfferType.SOLVER) {
+    if (pid.getType() == OfferType.SOLVER) {
       long hash = Hashing.hashContent(Files.newInputStream(config.getInstancePath()));
       if (hash != pid.instanceHash()) {
         logger.log(Level.SEVERE, "SAT instance mismatch: {0} (local) vs {1} (remote)",

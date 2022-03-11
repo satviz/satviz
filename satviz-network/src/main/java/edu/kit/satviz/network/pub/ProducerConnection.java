@@ -40,33 +40,43 @@ public class ProducerConnection {
     this.ls = Objects.requireNonNull(ls);
   }
 
-  private void doClose() {
+  private void doClose(String onDisconnectMessage, byte type, Object msg) {
     synchronized (SYNC_STATE) {
       if (state == State.CLOSED) {
         return;
       }
       state = State.CLOSED;
 
-      try {
-        client.write(MessageTypes.TERM_FAIL, "internal failure");
-      } catch (Exception e) {
-        // ignore because there is nothing we can do now
-      }
       if (client != null) {
+        if (type != 0) {
+          try {
+            client.write(type, msg);
+          } catch (Exception e) {
+            // ignore because there is nothing we can do now
+          }
+        }
         client.close();
       }
+
+      if (onDisconnectMessage != null) {
+        ls.onDisconnect(onDisconnectMessage);
+      }
     }
+  }
+
+  private void doFail() {
+    doClose("internal failure", MessageTypes.TERM_FAIL, "internal failure");
   }
 
   private boolean doEstablish() {
     Map<String, String> offerData = new HashMap<>();
     offerData.put("version", "1");
-    if (pid.type() == OfferType.SOLVER) {
+    if (pid.getType() == OfferType.SOLVER) {
       SolverId solverId = (SolverId) pid;
       offerData.put("type", "solver");
-      offerData.put("name", solverId.solverName());
-      offerData.put("hash", Long.toString(solverId.instanceHash()));
-      offerData.put("delayed", solverId.solverDelayed() ? "true" : "false");
+      offerData.put("name", solverId.getSolverName());
+      offerData.put("hash", Long.toString(solverId.getInstanceHash()));
+      offerData.put("delayed", solverId.isSolverDelayed() ? "true" : "false");
     } else {
       offerData.put("type", "proof");
     }
@@ -84,24 +94,24 @@ public class ProducerConnection {
             SYNC_STATE.wait(1000);
           } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            doClose();
+            doFail();
             return false;
           }
         } catch (Exception e) {
-          doClose();
+          doFail();
           return false;
         }
       }
 
-      if (client == null) { // got signal that we should close
-        doClose();
+      if (client == null) { // got signal from user that we should close
+        doClose(null, MessageTypes.TERM_FAIL, "closed");
         return false;
       }
 
       try {
         client.write(MessageTypes.OFFER, offerData);
       } catch (Exception e) {
-        doClose();
+        doFail();
         return false;
       }
 
@@ -125,7 +135,7 @@ public class ProducerConnection {
     while (true) {
       synchronized (SYNC_STATE) {
         if (state == State.CLOSING) {
-          doClose();
+          doClose(null, MessageTypes.TERM_FAIL, "closed");
           return;
         }
       }
@@ -136,7 +146,7 @@ public class ProducerConnection {
         // someone called close; we don't need to do that here
         return;
       } catch (IOException | SerializationException e) {
-        doClose();
+        doFail();
         return;
       }
 
@@ -145,14 +155,14 @@ public class ProducerConnection {
           case MessageTypes.START -> {
             synchronized (SYNC_STATE) {
               if (state == State.CLOSING || state == State.CLOSED) {
-                doClose();
+                doClose(null, MessageTypes.TERM_FAIL, "closed");
                 return;
               }
               state = State.STARTED;
             }
           }
           case MessageTypes.STOP -> {
-            doClose();
+            doClose("stop", (byte) 0, null);
             return;
           }
           default -> { /* ignore */ }
@@ -196,7 +206,7 @@ public class ProducerConnection {
       try {
         client.write(type, c.clause());
       } catch (IOException e) {
-        doClose();
+        doFail();
       }
       // note: socket is not closed on a SerializationException
     }
@@ -208,12 +218,7 @@ public class ProducerConnection {
         throw new IllegalStateException("terminate before connection is established and started");
       }
       if (state == State.STARTED) {
-        try {
-          client.write(MessageTypes.TERM_SOLVE, assign);
-        } catch (Exception e) {
-          // nothing more we can do
-        }
-        doClose(); // TODO remove send there
+        doClose(null, MessageTypes.TERM_SOLVE, assign); // TODO remove send there
       }
       // otherwise we do nothing
       // TODO don't we want the reader thread to handle termination?
@@ -229,19 +234,9 @@ public class ProducerConnection {
     }
   }
 
-  public void terminateFailed(String reason) {
+  public void terminateOtherwise(String reason) {
     synchronized (SYNC_STATE) {
       // TODO
-    }
-  }
-
-  public void close() {
-    // TODO
-    synchronized (SYNC_STATE) {
-      if (state == State.CLOSING || state == State.CLOSED) {
-        return;
-      }
-      state = State.CLOSING;
     }
   }
 }
