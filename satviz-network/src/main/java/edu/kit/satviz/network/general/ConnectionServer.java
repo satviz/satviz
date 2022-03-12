@@ -19,27 +19,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class ConnectionServer implements AutoCloseable {
 
-  /**
-   * An event on a {@link ConnectionServer}.
-   * @param type the event type
-   * @param id the id of the connection that this event concerns, -1 if global
-   * @param obj the object of the event
-   */
-  public record PollEvent(EventType type, int id, Object obj) {
-    /** The type of the event. */
-    public enum EventType {
-      /** A new connection is accepted. {@code obj} is {@code null}. */
-      ACCEPT,
-      /** A message was read from a connection. {@code obj} is a {@link NetworkMessage} */
-      READ,
-      /** A connection (or the entire server) failed. {@code obj} is an {@link Exception} */
-      FAIL
-    }
-  }
-
   private final NetworkBlueprint bp;
   private int numConnections = 0;
-  private final List<Connection> connections = new CopyOnWriteArrayList<>(); // thread-safe
+  private final List<Connection> connections = new CopyOnWriteArrayList<>();
   private final Selector sel;
   private final ServerSocketChannel serverChan;
 
@@ -78,7 +60,10 @@ public class ConnectionServer implements AutoCloseable {
 
   private PollEvent accept() {
     // synchronized to avoid new connections being made while we shut down
+    // this is still needed even though we have a concurrent list
     synchronized (SYNC_CONNECTIONS) {
+      // TODO perhaps we have to catch the case here where serverChan is closed by close()
+      // TODO or we just say it's a feature that the user can't close and poll at the same time
       try {
         SocketChannel client = serverChan.accept();
         client.configureBlocking(false);
