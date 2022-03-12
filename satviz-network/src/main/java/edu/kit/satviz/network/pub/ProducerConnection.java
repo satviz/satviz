@@ -115,8 +115,8 @@ public class ProducerConnection {
       SolverId solverId = (SolverId) pid;
       offerData.put("type", "solver");
       offerData.put("name", solverId.getSolverName());
-      offerData.put("hash", Long.toString(solverId.getInstanceHash()));
       offerData.put("delayed", solverId.isSolverDelayed() ? "true" : "false");
+      offerData.put("hash", Long.toString(solverId.getInstanceHash()));
     } else {
       offerData.put("type", "proof");
     }
