@@ -151,6 +151,18 @@ public class ConnectionServer implements AutoCloseable {
   }
 
   /**
+   * Returns the remove address of one of the registered connections.
+   * @param id the connection ID
+   * @return the address of the connection
+   * @throws IndexOutOfBoundsException if the ID is invalid
+   * @throws IOException if an I/O error occurs
+   */
+  public InetSocketAddress getRemoteAddress(int id) throws IOException {
+    Connection conn = connections.get(id);
+    return (InetSocketAddress) conn.getRemoteAddress();
+  }
+
+  /**
    * Closes one of the registered connections.
    * If the passed ID is not associated with a connection, nothing happens.
    * It is usually not necessary to call this method. It is invoked automatically for all
