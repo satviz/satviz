@@ -3,6 +3,7 @@ package edu.kit.satviz.network;
 import edu.kit.satviz.network.general.Connection;
 import edu.kit.satviz.network.general.ConnectionServer;
 import edu.kit.satviz.network.general.NetworkMessage;
+import edu.kit.satviz.network.general.PollEvent;
 import edu.kit.satviz.network.pub.MessageTypes;
 import edu.kit.satviz.sat.Clause;
 import org.junit.jupiter.api.Test;
@@ -20,12 +21,12 @@ class ConnectionTest {
       server = new ConnectionServer(PORT, MessageTypes.satvizBlueprint);
       client = new Connection("localhost", PORT, MessageTypes.satvizBlueprint);
 
-      ConnectionServer.PollEvent event = null;
+      PollEvent event = null;
       while (event == null) {
         event = server.poll();
       }
       // client is connected with ID 0
-      assertEquals(ConnectionServer.PollEvent.EventType.ACCEPT, event.type());
+      assertEquals(PollEvent.EventType.ACCEPT, event.type());
       assertEquals(0, event.id());
       assertNull(event.obj());
 
@@ -40,7 +41,7 @@ class ConnectionTest {
       while (event == null) {
         event = server.poll();
       }
-      assertEquals(ConnectionServer.PollEvent.EventType.READ, event.type());
+      assertEquals(PollEvent.EventType.READ, event.type());
       assertEquals(0, event.id());
       assertEquals(MessageTypes.CLAUSE_ADD, ((NetworkMessage) event.obj()).getType());
       assertEquals(c1, ((NetworkMessage) event.obj()).getObject());
@@ -48,7 +49,7 @@ class ConnectionTest {
       while (event == null) {
         event = server.poll();
       }
-      assertEquals(ConnectionServer.PollEvent.EventType.READ, event.type());
+      assertEquals(PollEvent.EventType.READ, event.type());
       assertEquals(0, event.id());
       assertEquals(MessageTypes.CLAUSE_DEL, ((NetworkMessage) event.obj()).getType());
       assertEquals(c2, ((NetworkMessage) event.obj()).getObject());
