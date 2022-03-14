@@ -80,7 +80,7 @@ public class ConsumerConnection {
 
   private void read (int id, NetworkMessage msg) {
     ConnectionData conn = connections.get(id);
-    switch (msg.getType()) {
+    switch (msg.type()) {
       case MessageTypes.OFFER -> {
         InetSocketAddress remote;
         try {
@@ -90,7 +90,7 @@ public class ConsumerConnection {
           break; // we can't do anything with this new connection
         }
         @SuppressWarnings("unchecked")
-        Map<String, String> offerData = (Map<String, String>) msg.getObject();
+        Map<String, String> offerData = (Map<String, String>) msg.object();
         if (offerData.get("type").equals("solver")) {
           connections.get(id).pid = new SolverId(
               id, remote,
@@ -115,7 +115,7 @@ public class ConsumerConnection {
             break;
           }
           conn.ls.onClauseUpdate(conn.pid, new ClauseUpdate(
-              (Clause) msg.getObject(), ClauseUpdate.Type.ADD
+              (Clause) msg.object(), ClauseUpdate.Type.ADD
           ));
         }
       }
@@ -125,7 +125,7 @@ public class ConsumerConnection {
             break;
           }
           conn.ls.onClauseUpdate(conn.pid, new ClauseUpdate(
-              (Clause) msg.getObject(), ClauseUpdate.Type.REMOVE
+              (Clause) msg.object(), ClauseUpdate.Type.REMOVE
           ));
         }
       }
@@ -136,7 +136,7 @@ public class ConsumerConnection {
           }
           conn.isDisconnected = true;
           if (conn.ls != null) {
-            conn.ls.onTerminateSolved(conn.pid, (SatAssignment) msg.getObject());
+            conn.ls.onTerminateSolved(conn.pid, (SatAssignment) msg.object());
           }
         }
       }
@@ -158,7 +158,7 @@ public class ConsumerConnection {
           }
           conn.isDisconnected = true;
           if (conn.ls != null) {
-            conn.ls.onTerminateOtherwise(conn.pid, (String) msg.getObject());
+            conn.ls.onTerminateOtherwise(conn.pid, (String) msg.object());
           }
         }
       }

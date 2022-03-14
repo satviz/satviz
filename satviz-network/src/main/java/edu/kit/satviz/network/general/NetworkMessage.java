@@ -5,5 +5,5 @@ package edu.kit.satviz.network.general;
  * Each message has a type, which denotes the information this message carries.
  * Additionally, each message may carry an object.
  */
-public record NetworkMessage(byte type, Object obj) {
+public record NetworkMessage(byte type, Object object) {
 }

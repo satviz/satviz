@@ -202,7 +202,7 @@ public class ProducerConnection {
       }
 
       for (NetworkMessage msg: readQueue) {
-        switch (msg.getType()) {
+        switch (msg.type()) {
           case MessageTypes.START -> {
             synchronized (SYNC_STATE) {
               if (state == State.CLOSED) {
