@@ -69,6 +69,9 @@ public class VisualizationController {
   // However, there is no default implementation of a LongSpinnerValueFactory.
   // Hence, a DoubleSpinnerValueFactory is used in which all values
   // are basically treated as long values.
+  // Furthermore, since JavaFX-Spinners also only work with double values
+  // (see processedClausesSlider), this simplifies setting one component to
+  // the value of the respective other.
   @FXML
   private Spinner<Double> processedClausesSpinner;
   @FXML
