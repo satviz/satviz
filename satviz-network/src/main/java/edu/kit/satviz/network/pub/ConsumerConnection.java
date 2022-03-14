@@ -17,6 +17,13 @@ import java.util.function.Consumer;
 // TODO if there is time, make sure serialization or class cast errors are properly handled
 // (they appear if the client and server NetworkBlueprint instances differ, so not in our code)
 
+/**
+ * The consumer part of a satviz network connection.
+ * Events are communicated via listeners. Each single producer connection may have its own
+ * {@link ConsumerConnectionListener}, and can be started or stopped independently.
+ * The common use case of the connect listener is to install a {@link ConsumerConnectionListener}
+ * for the new connection. Additionally, a fail listener is called when a global error occurs.
+ */
 public class ConsumerConnection {
   private final Object SYNC_START = new Object();
   private boolean started = false;
@@ -25,7 +32,7 @@ public class ConsumerConnection {
   private static class ConnectionData {
     public ProducerId pid = null;
     public ConsumerConnectionListener ls = null;
-    public boolean isDisconnected = false; // TODO use instead of listener
+    public boolean isDisconnected = false;
   }
 
   private final int port;
@@ -35,13 +42,26 @@ public class ConsumerConnection {
 
   private ConnectionServer server = null;
 
+  /**
+   * Creates a new connection servicing an arbitrary number of producers.
+   * {@code lsConnect} should not be {@code null}.
+   * @param port the port on which to listen for producers
+   * @param lsConnect the connect listener
+   * @param lsFail the fail listener
+   */
   public ConsumerConnection(int port, Consumer<ProducerId> lsConnect, Consumer<String> lsFail) {
     this.port = port;
     this.lsConnect = Objects.requireNonNull(lsConnect);
     this.lsFail = Objects.requireNonNullElse(lsFail, (s) -> {});
   }
 
-  public void doClose(String failMessage) {
+  /**
+   * Closes all producer connections by sending them a stop message, and closes the underlying
+   * server sockets.
+   * Listeners are called optionally, if this close is abnormal.
+   * @param failMessage the fail message, {@code null} if orderly close
+   */
+  private void doClose(String failMessage) {
     // Note: at the moment this is only called from the worker thread! This has numerous
     // advantages: not having to check that no new connections arrive while we close, no
     // global synchronization, no checking if server != null, ...
@@ -51,9 +71,7 @@ public class ConsumerConnection {
       disconnect(conn, failMessage);
     }
 
-    if (server != null) {
-      server.close();
-    }
+    server.close();
 
     if (failMessage != null) {
       lsFail.accept(failMessage);
@@ -75,15 +93,17 @@ public class ConsumerConnection {
         Map<String, String> offerData = (Map<String, String>) msg.getObject();
         if (offerData.get("type").equals("solver")) {
           connections.get(id).pid = new SolverId(
-              id, remote
-              offerData.get("name"), offerData.get("delayed"), offerData.get("hash")
+              id, remote,
+              offerData.get("name"),
+              offerData.get("delayed").equals("true"),
+              Long.parseLong(offerData.get("hash"))
           );
         } else {
           connections.get(id).pid = new ProofId(
               id, remote
           );
         }
-        // note: because this thread is busy executing the listener, no messages will be lost
+        // Note: because this thread is busy executing the listener, no messages will be lost
         // while the listener runs.
         // This also means that the listeners should be as fast as possible to avoid becoming a
         // bottleneck
@@ -168,7 +188,7 @@ public class ConsumerConnection {
 
       switch (event.type()) {
         case ACCEPT -> {
-          // note: we would need to synchronize this if the close action could be performed on
+          // Note: we would need to synchronize this if the close action could be performed on
           // another thread than this one
           connections.add(new ConnectionData());
         }
@@ -193,9 +213,11 @@ public class ConsumerConnection {
   }
 
   /**
+   * Starts this ConsumerConnection by creating a {@link ConnectionServer} and worker thread to
+   * read messages.
    * This method has no effect if {@code stop()} was called before.
-   * @throws IllegalStateException
-   * @throws IOException
+   * @throws IllegalStateException if {@code start()} has already been called
+   * @throws IOException if an I/O error occurs
    */
   public void start() throws IOException {
     // Note: currently, this method cannot be used more than once, even if connection creation
@@ -209,8 +231,8 @@ public class ConsumerConnection {
       if (shouldClose) {
         // not perfectly synchronized, but doesn't matter. worst case, we create the thread and
         // immediately exit
-        // TODO perhaps the user wants to know if this case occurred, but throwing an exception
-        // TODO seems pretty harsh
+        // perhaps the user wants to know if this case occurred, but throwing an exception seems
+        // pretty harsh
         return;
       }
 
@@ -230,6 +252,7 @@ public class ConsumerConnection {
   /**
    * Registers a listener for a producer and signals the producer to start sending clauses.
    * If the start message cannot be sent, the listener is not registered.
+   * If a listener is already registered, the new one will be ignored.
    * @param pid the ID of the connection
    * @param ls the listener
    * @return whether the message was sent or not
@@ -239,7 +262,7 @@ public class ConsumerConnection {
     // no need to test if server != null
     ConnectionData conn = connections.get(pid.getId());
     synchronized (conn) {
-      if (conn.isDisconnected) {
+      if (conn.isDisconnected || conn.ls != null) {
         return false;
       }
       conn.ls = ls;
