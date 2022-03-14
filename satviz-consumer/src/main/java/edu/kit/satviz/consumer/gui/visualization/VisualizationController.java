@@ -204,11 +204,14 @@ public class VisualizationController {
 
   @FXML
   private void openScreenshotFolder() {
+    // TODO: implement screenshot feature
+    /*
     try {
       Desktop.getDesktop().open(new File(ConsumerConfig.DEFAULT_SCREENSHOT_FOLDER));
     } catch (IOException e) {
       e.printStackTrace();
     }
+     */
   }
 
   @FXML
