@@ -6,24 +6,26 @@ import edu.kit.satviz.network.general.PollEvent;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
-
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-public class ConsumerConnection {
-  private enum State {
-    INIT,
-    STARTED,
-    CLOSED
-  }
+// TODO if there is time, make sure serialization or class cast errors are properly handled
+// (they appear if the client and server NetworkBlueprint instances differ, so not in our code)
 
-  private class ConnectionData {
+public class ConsumerConnection {
+  private final Object SYNC_START = new Object();
+  private boolean started = false;
+  private volatile boolean shouldClose = false;
+
+  private static class ConnectionData {
     public ProducerId pid = null;
     public ConsumerConnectionListener ls = null;
+    public boolean isDisconnected = false; // TODO use instead of listener
   }
 
   private final int port;
@@ -32,31 +34,29 @@ public class ConsumerConnection {
   private final List<ConnectionData> connections = new CopyOnWriteArrayList<>();
 
   private ConnectionServer server = null;
-  private final Object SYNC_STATE = new Object();
-  private volatile State state = State.INIT;
 
   public ConsumerConnection(int port, Consumer<ProducerId> lsConnect, Consumer<String> lsFail) {
     this.port = port;
     this.lsConnect = Objects.requireNonNull(lsConnect);
-    this.lsFail = Objects.requireNonNull(lsFail);
+    this.lsFail = Objects.requireNonNullElse(lsFail, (s) -> {});
   }
 
-  public void doClose() {
+  public void doClose(String failMessage) {
+    // Note: at the moment this is only called from the worker thread! This has numerous
+    // advantages: not having to check that no new connections arrive while we close, no
+    // global synchronization, no checking if server != null, ...
+
     // close all single connections
     for (ConnectionData conn : connections) {
-      // TODO sync
-      if (conn.ls != null) {
-        try {
-          server.write(conn.pid.getId(), MessageTypes.STOP, null);
-        } catch (Exception e) {
-          // nothing more to do
-        }
-      }
+      disconnect(conn, failMessage);
     }
 
-    // TODO make sure that no new are added
     if (server != null) {
       server.close();
+    }
+
+    if (failMessage != null) {
+      lsFail.accept(failMessage);
     }
   }
 
@@ -64,15 +64,23 @@ public class ConsumerConnection {
     ConnectionData conn = connections.get(id);
     switch (msg.getType()) {
       case MessageTypes.OFFER -> {
+        InetSocketAddress remote;
+        try {
+          remote = server.getRemoteAddress(id);
+        } catch (Exception e) {
+          lsFail.accept("error accepting " + id);
+          break; // we can't do anything with this new connection
+        }
+        @SuppressWarnings("unchecked")
         Map<String, String> offerData = (Map<String, String>) msg.getObject();
         if (offerData.get("type").equals("solver")) {
           connections.get(id).pid = new SolverId(
-              id, server.getRemoteAddress(id),
+              id, remote
               offerData.get("name"), offerData.get("delayed"), offerData.get("hash")
           );
         } else {
           connections.get(id).pid = new ProofId(
-              id, server.getRemoteAddress(id)
+              id, remote
           );
         }
         // note: because this thread is busy executing the listener, no messages will be lost
@@ -83,7 +91,7 @@ public class ConsumerConnection {
       }
       case MessageTypes.CLAUSE_ADD -> {
         synchronized (conn) {
-          if (conn.ls == null) {
+          if (conn.isDisconnected || conn.ls == null) {
             break;
           }
           conn.ls.onClauseUpdate(conn.pid, new ClauseUpdate(
@@ -93,7 +101,7 @@ public class ConsumerConnection {
       }
       case MessageTypes.CLAUSE_DEL -> {
         synchronized (conn) {
-          if (conn.ls == null) {
+          if (conn.isDisconnected || conn.ls == null) {
             break;
           }
           conn.ls.onClauseUpdate(conn.pid, new ClauseUpdate(
@@ -103,29 +111,35 @@ public class ConsumerConnection {
       }
       case MessageTypes.TERM_SOLVE -> {
         synchronized (conn) {
-          if (conn.ls == null) {
+          if (conn.isDisconnected) {
             break;
           }
-          conn.ls.onTerminateSolved(conn.pid, (SatAssignment) msg.getObject());
-          conn.ls = null;
+          conn.isDisconnected = true;
+          if (conn.ls != null) {
+            conn.ls.onTerminateSolved(conn.pid, (SatAssignment) msg.getObject());
+          }
         }
       }
       case MessageTypes.TERM_REFUTE -> {
         synchronized (conn) {
-          if (conn.ls == null) {
+          if (conn.isDisconnected) {
             break;
           }
-          conn.ls.onTerminateRefuted(conn.pid);
-          conn.ls = null;
+          conn.isDisconnected = true;
+          if (conn.ls != null) {
+            conn.ls.onTerminateRefuted(conn.pid);
+          }
         }
       }
       case MessageTypes.TERM_OTHER -> {
         synchronized (conn) {
-          if (conn.ls == null) {
+          if (conn.isDisconnected) {
             break;
           }
-          conn.ls.onTerminateOtherwise(conn.pid, (String) msg.getObject());
-          conn.ls = null;
+          conn.isDisconnected = true;
+          if (conn.ls != null) {
+            conn.ls.onTerminateOtherwise(conn.pid, (String) msg.getObject());
+          }
         }
       }
     }
@@ -134,18 +148,30 @@ public class ConsumerConnection {
   private void threadMain() {
     PollEvent event;
     while (true) {
+      if (shouldClose) {
+        // TODO performance-wise, don't do this in every loop iteration
+        // only if the server has to wait (methods for that are already in place)
+        doClose(null);
+        return;
+      }
       event = server.poll();
       if (event == null) {
         continue;
       }
 
       if (event.id() == -1) {
-        // TODO global error handling
-        // TODO handle errors that appeared because of sync issues (ignore)
+        // global fail. try our best to close the connections, even though the sends will probably
+        // not go through
+        doClose("internal server error");
+        return;
       }
 
       switch (event.type()) {
-        case ACCEPT -> connections.add(new ConnectionData());
+        case ACCEPT -> {
+          // note: we would need to synchronize this if the close action could be performed on
+          // another thread than this one
+          connections.add(new ConnectionData());
+        }
         case READ -> {
           NetworkMessage msg = (NetworkMessage) event.obj();
           read(event.id(), msg);
@@ -153,40 +179,69 @@ public class ConsumerConnection {
         case FAIL -> {
           ConnectionData conn = connections.get(event.id());
           synchronized (conn) {
-            if (conn.ls == null) {
+            if (conn.isDisconnected) {
               break;
             }
-            conn.ls.onTerminateOtherwise(conn.pid, ((Exception) event.obj()).getMessage());
-            conn.ls = null;
+            conn.isDisconnected = true;
+            if (conn.ls != null) {
+              conn.ls.onTerminateOtherwise(conn.pid, ((Exception) event.obj()).getMessage());
+            }
           }
         }
       }
     }
   }
 
+  /**
+   * This method has no effect if {@code stop()} was called before.
+   * @throws IllegalStateException
+   * @throws IOException
+   */
   public void start() throws IOException {
-    synchronized (SYNC_STATE) {
-      if (state != State.INIT) {
-        throw new IllegalStateException("start already called or connection closed");
+    // Note: currently, this method cannot be used more than once, even if connection creation
+    // fails. Maybe we want to use this differently
+    synchronized(SYNC_START) {
+      if (started) {
+        throw new IllegalStateException("start already called");
       }
-      try {
-        server = new ConnectionServer(port, MessageTypes.satvizBlueprint);
-      } catch (Exception e) {
-        state = State.CLOSED;
-        throw e;
+      started = true;
+
+      if (shouldClose) {
+        // not perfectly synchronized, but doesn't matter. worst case, we create the thread and
+        // immediately exit
+        // TODO perhaps the user wants to know if this case occurred, but throwing an exception
+        // TODO seems pretty harsh
+        return;
       }
-      state = State.STARTED;
+
+      server = new ConnectionServer(port, MessageTypes.satvizBlueprint);
+
       new Thread(this::threadMain).start();
     }
   }
 
-  public void stop() throws IOException {
-
+  /**
+   * Signals this server that it should disconnect all producers and close all underlying sockets.
+   */
+  public void stop() {
+      shouldClose = true;
   }
 
+  /**
+   * Registers a listener for a producer and signals the producer to start sending clauses.
+   * If the start message cannot be sent, the listener is not registered.
+   * @param pid the ID of the connection
+   * @param ls the listener
+   * @return whether the message was sent or not
+   */
   public boolean connect(ProducerId pid, ConsumerConnectionListener ls) {
+    // Note: this method can only be called if the worker thread already runs
+    // no need to test if server != null
     ConnectionData conn = connections.get(pid.getId());
     synchronized (conn) {
+      if (conn.isDisconnected) {
+        return false;
+      }
       conn.ls = ls;
       try {
         server.write(pid.getId(), MessageTypes.START, null);
@@ -198,18 +253,35 @@ public class ConsumerConnection {
     return true;
   }
 
-  public boolean disconnect(ProducerId pid) {
-    ConnectionData conn = connections.get(pid.getId());
+  private boolean disconnect(ConnectionData conn, String failMessage) {
     synchronized (conn) {
-      conn.ls = null;
+      if (conn.isDisconnected) {
+        return false;
+      }
+      conn.isDisconnected = true;
+
+      if (failMessage != null && conn.ls != null) {
+        conn.ls.onTerminateOtherwise(conn.pid, failMessage);
+      }
+
       try {
-        server.write(pid.getId(), MessageTypes.STOP, null);
+        // send this message even if no listener is registered
+        server.write(conn.pid.getId(), MessageTypes.STOP, null);
       } catch (Exception e) {
         // listener stays removed in any case
         return false;
       }
     }
     return true;
+  }
+
+  /**
+   * Removes a listener from a producer and signals the producer to stop sending clauses.
+   * @param pid the ID of the connection
+   * @return whether the message was sent or not
+   */
+  public boolean disconnect(ProducerId pid) {
+    return disconnect(connections.get(pid.getId()), null);
   }
 
   public int getPort() throws IOException {
