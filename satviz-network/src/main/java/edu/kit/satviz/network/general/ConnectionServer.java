@@ -77,7 +77,11 @@ public class ConnectionServer implements AutoCloseable {
     }
   }
 
-  private PollEvent processPending() {
+  /**
+   * Returns the next of the previously polled events, without polling for new ones.
+   * @return pending event, possibly {@code null}
+   */
+  public PollEvent pollPrevious() {
     do {
       if (currentRead != null && !currentRead.isEmpty()) {
         return new PollEvent(PollEvent.EventType.READ, currentReadId, currentRead.poll());
@@ -117,7 +121,7 @@ public class ConnectionServer implements AutoCloseable {
    */
   public PollEvent poll() {
     synchronized (SYNC_READ) {
-      PollEvent event = processPending();
+      PollEvent event = pollPrevious();
       if (event != null) {
         return event;
       }
@@ -130,7 +134,7 @@ public class ConnectionServer implements AutoCloseable {
       }
       selectedEvents = sel.selectedKeys().iterator();
 
-      return processPending();
+      return pollPrevious();
     }
   }
 
@@ -162,15 +166,7 @@ public class ConnectionServer implements AutoCloseable {
     return (InetSocketAddress) conn.getRemoteAddress();
   }
 
-  /**
-   * Closes one of the registered connections.
-   * If the passed ID is not associated with a connection, nothing happens.
-   * It is usually not necessary to call this method. It is invoked automatically for all
-   *     connections if {@code close} is called.
-   * Calling this method may cause concurrent polls or writes to fail.
-   * @param id the connection ID
-   */
-  public void close(int id) {
+  private void close(int id) {
     try {
       Connection conn = connections.get(id);
       conn.close();
