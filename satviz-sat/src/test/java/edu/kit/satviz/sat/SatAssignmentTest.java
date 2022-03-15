@@ -182,12 +182,12 @@ class SatAssignmentTest {
     satAssignment5.set(4, VariableState.UNSET);
 
     assertEquals(satAssignment1, satAssignment1);
+    assertEquals(satAssignment1, satAssignment2);
     assertNotEquals(satAssignment1, null);
     assertNotEquals(satAssignment1, new Object());
     assertNotEquals(satAssignment1, satAssignment3);
     assertNotEquals(satAssignment1, satAssignment4);
     assertNotEquals(satAssignment1, satAssignment5);
-    assertEquals(satAssignment1, satAssignment2);
   }
 
   /**
@@ -212,11 +212,7 @@ class SatAssignmentTest {
     statusMap.put(satAssignment2, "status: 2.1");
     assertEquals("status: 2.1", statusMap.get(satAssignment1));
     statusMap.put(satAssignment3, "status: 3.1");
-    int counter = 0;
-    for (SatAssignment assignment : statusMap.keySet()) {
-      counter++;
-    }
-    assertEquals(2, counter);
+    assertEquals(2, statusMap.keySet().size());
   }
 
   /**
@@ -228,9 +224,7 @@ class SatAssignmentTest {
     satAssignment.set(3, VariableState.SET);
     satAssignment.set(4, VariableState.UNSET);
 
-    String expected = "[DONTCARE, DONTCARE, SET, UNSET, DONTCARE]";
-
-    assertEquals(expected, satAssignment.toString());
+    assertEquals("[DONTCARE, DONTCARE, SET, UNSET, DONTCARE]", satAssignment.toString());
   }
 
 }

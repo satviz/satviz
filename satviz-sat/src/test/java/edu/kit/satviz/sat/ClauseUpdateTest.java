@@ -3,6 +3,7 @@ package edu.kit.satviz.sat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import edu.kit.satviz.sat.ClauseUpdate.Type;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 
@@ -19,9 +20,9 @@ class ClauseUpdateTest {
   void of_test() {
     int[] literals = new int[] {1, 2, 3};
     Clause clause = new Clause(literals);
-    ClauseUpdate update = new ClauseUpdate(clause, ClauseUpdate.Type.ADD);
+    ClauseUpdate update = new ClauseUpdate(clause, Type.ADD);
 
-    assertEquals(update, ClauseUpdate.of(ClauseUpdate.Type.ADD, 1, 2, 3));
+    assertEquals(update, ClauseUpdate.of(Type.ADD, 1, 2, 3));
   }
 
   // Tests for the nested enum Type
@@ -31,8 +32,8 @@ class ClauseUpdateTest {
    */
   @Test
   void getId_test() {
-    assertEquals('a', ClauseUpdate.Type.ADD.getId());
-    assertEquals('d', ClauseUpdate.Type.REMOVE.getId());
+    assertEquals('a', Type.ADD.getId());
+    assertEquals('d', Type.REMOVE.getId());
   }
 
   /**
@@ -41,8 +42,8 @@ class ClauseUpdateTest {
    */
   @Test
   void getById_valid_test() {
-    assertEquals(ClauseUpdate.Type.ADD, ClauseUpdate.Type.getById((byte) 'a'));
-    assertEquals(ClauseUpdate.Type.REMOVE, ClauseUpdate.Type.getById((byte) 'd'));
+    assertEquals(Type.ADD, Type.getById((byte) 'a'));
+    assertEquals(Type.REMOVE, Type.getById((byte) 'd'));
   }
 
   /**
@@ -51,8 +52,8 @@ class ClauseUpdateTest {
    */
   @Test
   void getById_illegalId_test() {
-    assertThrows(NoSuchElementException.class, () -> ClauseUpdate.Type.getById((byte) 'r'));
-    assertThrows(NoSuchElementException.class, () -> ClauseUpdate.Type.getById((byte) '\0'));
+    assertThrows(NoSuchElementException.class, () -> Type.getById((byte) 'r'));
+    assertThrows(NoSuchElementException.class, () -> Type.getById((byte) '\0'));
   }
 
 }
