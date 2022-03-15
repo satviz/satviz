@@ -22,14 +22,26 @@ public abstract class ProducerId {
     this.type = type;
   }
 
+  /**
+   * Returns the ID number the producer described by this ID.
+   * @return ID number
+   */
   public final int getId() {
     return id;
   }
 
+  /**
+   * Returns the remote address of the producer described by this ID.
+   * @return remote address
+   */
   public final InetSocketAddress getAddress() {
     return address;
   }
 
+  /**
+   * Returns the type of the producer described by this ID.
+   * @return producer type
+   */
   public final OfferType getType() {
     return type;
   }
