@@ -33,10 +33,9 @@ public class Connection implements AutoCloseable {
    * Creates a new connection by opening a socket channel and connecting to the specified address.
    * Throws {@link ConnectException} if the connection is refused remotely, i.e., no-one is
    * listening on the remote port.
-   *
    * @param address the remote address
-   * @param port    the remote port
-   * @param bp      the types of messages
+   * @param port the remote port
+   * @param bp the types of messages
    * @throws IOException if an I/O error occurs
    */
   public Connection(String address, int port, NetworkBlueprint bp) throws IOException {
@@ -50,9 +49,8 @@ public class Connection implements AutoCloseable {
 
   /**
    * Creates a new connection with an already connected socket.
-   *
    * @param chan the socket channel
-   * @param bp   the types of messages
+   * @param bp the types of messages
    * @throws IllegalArgumentException if the channel is blocking or not connected
    */
   public Connection(SocketChannel chan, NetworkBlueprint bp) {
@@ -65,10 +63,9 @@ public class Connection implements AutoCloseable {
 
   /**
    * Returns the remote address.
-   *
    * @return remote address, {@code null} if not connected
    * @throws ClosedChannelException if the channel is closed
-   * @throws IOException            if an I/O error occurs
+   * @throws IOException if an I/O error occurs
    */
   public InetSocketAddress getRemoteAddress() throws IOException {
     return (InetSocketAddress) chan.getRemoteAddress();
@@ -76,7 +73,6 @@ public class Connection implements AutoCloseable {
 
   /**
    * Registers this channel with the given selector.
-   *
    * @param sel the selector
    * @param ops the interest set
    * @throws ClosedChannelException if the channel is closed
@@ -120,9 +116,8 @@ public class Connection implements AutoCloseable {
    * underlying socket.
    * This method is thread-safe; concurrent calls will always block until the pending read
    * operation is complete.
-   *
    * @return sequence of messages in a queue
-   * @throws IOException            if an I/O error occurs
+   * @throws IOException if an I/O error occurs
    * @throws SerializationException if the incoming bytes do not encode valid messages
    */
   public Queue<NetworkMessage> read() throws IOException, SerializationException {
@@ -155,10 +150,9 @@ public class Connection implements AutoCloseable {
    * underlying socket.
    * This method is thread-safe; concurrent calls will always block until the pending write
    * operation is complete.
-   *
    * @param type the message type
-   * @param obj  the message object
-   * @throws IOException            if an I/O error occurs
+   * @param obj the message object
+   * @throws IOException if an I/O error occurs
    * @throws SerializationException if the message cannot be encoded for this connection
    */
   public void write(byte type, Object obj) throws IOException, SerializationException {

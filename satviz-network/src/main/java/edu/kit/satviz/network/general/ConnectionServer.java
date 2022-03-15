@@ -45,12 +45,12 @@ public class ConnectionServer implements AutoCloseable {
     this.serverChan.configureBlocking(false);
     this.serverChan.register(this.sel, SelectionKey.OP_ACCEPT);
     // bind to wildcard IP address
-    this.serverChan.bind(port == 0 ? null : new InetSocketAddress(port));
+    this.serverChan.bind(new InetSocketAddress(port));
   }
 
   /**
    * Returns the local address that this server is bound to.
-   * @return local address, {@code null} if not bound
+   * @return local address
    * @throws ClosedChannelException if the channel is closed
    * @throws IOException if an I/O error occurs
    */
@@ -62,8 +62,6 @@ public class ConnectionServer implements AutoCloseable {
     // synchronized to avoid new connections being made while we shut down
     // this is still needed even though we have a concurrent list
     synchronized (SYNC_CONNECTIONS) {
-      // TODO perhaps we have to catch the case here where serverChan is closed by close()
-      // TODO or we just say it's a feature that the user can't close and poll at the same time
       try {
         SocketChannel client = serverChan.accept();
         client.configureBlocking(false);
@@ -163,7 +161,7 @@ public class ConnectionServer implements AutoCloseable {
    */
   public InetSocketAddress getRemoteAddress(int id) throws IOException {
     Connection conn = connections.get(id);
-    return (InetSocketAddress) conn.getRemoteAddress();
+    return conn.getRemoteAddress();
   }
 
   private void close(int id) {
