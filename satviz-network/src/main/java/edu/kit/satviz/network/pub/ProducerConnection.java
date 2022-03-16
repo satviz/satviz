@@ -43,11 +43,11 @@ public class ProducerConnection {
 
   /**
    * Creates a new connection to a consumer.
-   * {@code pid} and {@code ls} should not be {@code null}.
+   * Does not try to connect to the consumer; this is done in {@code establish()}.
    * @param address the consumer address
    * @param port the consumer port
-   * @param pid the type of clause source that this producer represents
-   * @param ls the event listener
+   * @param pid the type of clause source that this producer represents, not {@code null}
+   * @param ls the event listener, not {@code null}
    */
   public ProducerConnection(String address, int port, ProducerId pid, ProducerConnectionListener ls) {
     this.address = address;
@@ -59,9 +59,9 @@ public class ProducerConnection {
   /**
    * Closes the underlying connection, optionally sending a last message to the consumer, and
    *     making an {@code onDisconnect()} call.
-   * Calling {@code onDisconnect} and sending a last message are independent; you may do only one
-   *    of the two.
-   * This method only performs its actions exactly once; subsequent calls do nothing.
+   * Calling {@code onDisconnect} and sending a last message are independent; sometimes we only
+   *     want to do of the two.
+   * This method performs its actions exactly once; subsequent calls do nothing.
    * @param onDisconnectMessage the {@code onDisconnect} message, {@code null} if not desired
    * @param type the type of the last message, 0 if not desired
    * @param obj the object of the last message (may be {@code null})
@@ -81,7 +81,6 @@ public class ProducerConnection {
           try {
             client.write(type, obj);
           } catch (Exception e) {
-            // ignore because there is nothing we can do now
             sent = false;
           }
         }
@@ -256,8 +255,7 @@ public class ProducerConnection {
     // concurrent clause writer, but I decided against it since all writes happen in serial order
     // in the Connection anyway.
     // We still need to synchronize here to make sure that no clause updates are sent after a
-    // termination message. Most likely the monitor is free, as the only other synchronization-
-    // expensive operation (establishing) has finished already.
+    // termination message.
     byte type = c.type() == ClauseUpdate.Type.ADD ?
         MessageTypes.CLAUSE_ADD : MessageTypes.CLAUSE_DEL;
 
