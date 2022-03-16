@@ -33,6 +33,9 @@ int main() {
   graph.submitWeightUpdate(wu);
   graph.submitHeatUpdate(hu);
   graph.recalculateLayout();
+
+  graph::computeContraction(graph, 3);
+
   while (!controller.wantToClose) {
     controller.nextFrame();
   }

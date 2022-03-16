@@ -150,6 +150,8 @@ public:
   ogdf::edge getEdgeHandle(int index1, int index2);
 };
 
+std::vector<int> computeContraction(Graph &graph, int iterations);
+
 } // namespace graph
 } // namespace satviz
 

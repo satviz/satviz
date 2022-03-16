@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <assert.h>
 
 namespace satviz {
 namespace graph {
@@ -13,10 +14,11 @@ struct Conn {
 
 class UnionFind {
 private:
+  int num;
   int *parents;
 
 public:
-  UnionFind(int num) {
+  UnionFind(int num) : num(num) {
     parents = new int[num];
     for (int i = 0; i < num; i++) {
       parents[i] = i;
@@ -35,6 +37,7 @@ public:
   }
 
   int find(int i) {
+    assert(i < num);
     if (parents[i] == i) {
       return i;
     } else {
@@ -63,11 +66,11 @@ static std::vector<Conn> mergeConnections(const std::vector<Conn> &a, const std:
   return d;
 }
 
-static std::vector<Conn> removeSelfLoops(int index, std::vector<Conn> &adj, UnionFind &uf) {
+static std::vector<Conn> removeSelfLoops(int index, std::vector<Conn> &adj, UnionFind *uf) {
   std::vector<Conn> d;
-  int repr = uf.find(index);
+  int repr = uf->find(index);
   std::copy_if(adj.begin(), adj.end(), std::back_inserter(d),
-               [uf, repr](Conn c) mutable { return uf.find(c.index) != repr; });
+               [uf, repr](Conn c) mutable { return uf->find(c.index) != repr; });
   return d;
 }
 
@@ -113,7 +116,7 @@ std::vector<int> computeContraction(Graph &graph, int iterations) {
       } else {
         std::vector<Conn> adj;
         adj = mergeConnections(conn[repr], conn[v]);
-        adj = removeSelfLoops(repr, adj, uf);
+        adj = removeSelfLoops(repr, adj, &uf);
         conn[repr] = adj;
       }
     }
