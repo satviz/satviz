@@ -91,6 +91,10 @@ std::vector<int> computeContraction(Graph &graph, int iterations) {
     conn[a].push_back(Conn{ b, weight });
     conn[b].push_back(Conn{ a, weight });
   }
+  for (int i = 0; i < numNodes; i++) {
+    std::sort(conn[i].begin(), conn[i].end(),
+              [](Conn a, Conn b) { return a.index < b.index; });
+  }
 
   while (iterations--) {
     for (int v : participants) {
