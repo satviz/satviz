@@ -7,7 +7,6 @@ import edu.kit.satviz.sat.SatAssignment;
 import edu.kit.satviz.serial.SerializationException;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.HashMap;
@@ -18,10 +17,8 @@ import java.util.Queue;
 /**
  * The producer part of a satviz network connection.
  * State changes are communicated via the {@link ProducerConnectionListener}. {@code onConnect} is
- *     called once the consumer sends the START signal. {@code onDisconnect} has the following
- *     contract: it is only called if {@code onConnect} has been called before, and it is only
- *     called if the user did not use one of the terminate methods (i.e., it is only called if a
- *     STOP signal was received, or on an internal error).
+ *     called once the consumer sends the START signal. {@code onDisconnect} is called if an
+ *     internal error occurs or the consumer sends the STOP signal.
  */
 public class ProducerConnection {
   private enum State {
@@ -41,6 +38,10 @@ public class ProducerConnection {
   private final Object SYNC_STATE = new Object();
   private volatile State state = State.INIT;
 
+  private String termMessage = null;
+  private byte termByte = 0;
+  private Object termObject = null;
+
   /**
    * Creates a new connection to a consumer.
    * Does not try to connect to the consumer; this is done in {@code establish()}.
@@ -56,48 +57,32 @@ public class ProducerConnection {
     this.ls = Objects.requireNonNull(ls);
   }
 
-  /**
-   * Closes the underlying connection, optionally sending a last message to the consumer, and
-   *     making an {@code onDisconnect()} call.
-   * Calling {@code onDisconnect} and sending a last message are independent; sometimes we only
-   *     want to do of the two.
-   * This method performs its actions exactly once; subsequent calls do nothing.
-   * @param onDisconnectMessage the {@code onDisconnect} message, {@code null} if not desired
-   * @param type the type of the last message, 0 if not desired
-   * @param obj the object of the last message (may be {@code null})
-   * @return whether the last message was sent or not
-   */
-  private boolean doClose(String onDisconnectMessage, byte type, Object obj) {
+  private void doCloseFromThread(String termMessage, byte termByte, Object termObject) {
+    // TODO check that this is only called once, but exactly once
+
     synchronized (SYNC_STATE) {
-      if (state == State.CLOSED) {
-        return false;
+      if (state == State.CLOSED) { // user closed
+        termMessage = this.termMessage;
+        termByte = this.termByte;
+        termObject = this.termObject;
       }
       state = State.CLOSED;
 
-      boolean sent = false;
       if (client != null) {
-        if (type != 0) {
-          sent = true;
+        if (termByte != 0) {
           try {
-            client.write(type, obj);
+            client.write(termByte, termObject);
           } catch (Exception e) {
-            sent = false;
+            // nothing
           }
         }
         client.close();
       }
 
-      if (onDisconnectMessage != null && state == State.STARTED) {
-        // only send onDisconnect if onConnect has been sent previously
-        // TODO both should come from the same thread
-        ls.onDisconnect(onDisconnectMessage);
+      if (termMessage != null) {
+        ls.onDisconnect(termMessage);
       }
-      return sent;
     }
-  }
-
-  private boolean doFail(String msg) {
-    return doClose(msg, MessageTypes.TERM_OTHER, msg);
   }
 
   /**
@@ -128,28 +113,31 @@ public class ProducerConnection {
           // connection refused by remote machine (no-one listening on port)
           // try again later
           client = null;
-          // we do not expect to be woken up here, but spurious wake-ups don't matter
           try {
             SYNC_STATE.wait(1000);
           } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            doFail("interrupted");
+            state = State.CLOSED;
+            ls.onDisconnect("fail: establish interrupted");
             return false;
           }
         } catch (Exception e) {
-          doFail("connection create fail");
+          state = State.CLOSED;
+          ls.onDisconnect("fail: establish connect");
           return false;
         }
       }
 
-      if (client == null) { // state must be State.CLOSED
+      if (client == null) { // state must have been set to State.CLOSED by the user
+        // nothing we need to do here
         return false;
       }
 
       try {
         client.write(MessageTypes.OFFER, offerData);
       } catch (Exception e) {
-        doFail("offer send fail");
+        state = State.CLOSED;
+        ls.onDisconnect("fail: establish offer");
         return false;
       }
 
@@ -182,21 +170,25 @@ public class ProducerConnection {
           // nothing
         }
       }
-      doFail("selector init fail");
+      doCloseFromThread("fail: selector", MessageTypes.TERM_OTHER, "fail: selector");
       return;
     }
 
     Queue<NetworkMessage> readQueue;
     while (true) {
+      synchronized (SYNC_STATE) {
+        if (state == State.CLOSED) {
+          doCloseFromThread(null, (byte) 0, null);
+          return;
+        }
+      }
+
       try {
         sel.select(1000); // avoid busy-wait
         sel.selectedKeys().clear(); // act like we took care of everything
         readQueue = client.read();
-      } catch (ClosedChannelException e) { // includes AsynchronousCloseException
-        // someone called close; we don't need to do that here
-        return;
       } catch (Exception e) {
-        doFail("read fail");
+        doCloseFromThread("fail: read", MessageTypes.TERM_OTHER, "fail: read");
         return;
       }
 
@@ -205,6 +197,7 @@ public class ProducerConnection {
           case MessageTypes.START -> {
             synchronized (SYNC_STATE) {
               if (state == State.CLOSED) {
+                doCloseFromThread(null, (byte) 0, null);
                 return;
               }
               state = State.STARTED;
@@ -212,7 +205,7 @@ public class ProducerConnection {
             }
           }
           case MessageTypes.STOP -> {
-            doClose("stop", (byte) 0, null);
+            doCloseFromThread("stop", (byte) 0, null);
             return;
           }
           default -> { /* ignore */ }
@@ -251,9 +244,6 @@ public class ProducerConnection {
    * @throws SerializationException if the clause update cannot be serialized
    */
   public boolean sendClauseUpdate(ClauseUpdate c) throws SerializationException {
-    // Note: I thought about using something like a ReadWriteLock here to allow more than one
-    // concurrent clause writer, but I decided against it since all writes happen in serial order
-    // in the Connection anyway.
     // We still need to synchronize here to make sure that no clause updates are sent after a
     // termination message.
     byte type = c.type() == ClauseUpdate.Type.ADD ?
@@ -268,7 +258,10 @@ public class ProducerConnection {
             client.write(type, c.clause());
             return true;
           } catch (IOException e) { // note: SerializationException does not close this connection
-            doClose("fail: clause", MessageTypes.TERM_OTHER, "fail: clause");
+            state = State.CLOSED;
+            termMessage = "fail: clause";
+            termByte = MessageTypes.TERM_OTHER; // probably not necessary because we failed anyway
+            termObject = "fail: clause";
             return false;
           }
         } default -> {
@@ -283,34 +276,40 @@ public class ProducerConnection {
   /**
    * Sends a satisfying variable assignment to the consumer and closes this connection.
    * @param assign the satisfying assignment
-   * @return whether the assignment was sent or not
    * @throws IllegalStateException if the connection has not been started yet
    */
-  public boolean terminateSolved(SatAssignment assign) {
+  public void terminateSolved(SatAssignment assign) {
     synchronized (SYNC_STATE) {
       switch (state) {
         case INIT, ESTABLISHING, ESTABLISHED -> throw
             new IllegalStateException("terminate before connection is established and started");
-        default -> {
-          return doClose(null, MessageTypes.TERM_SOLVE, assign);
+        case STARTED -> {
+          state = State.CLOSED;
+          termMessage = null;
+          termByte = MessageTypes.TERM_SOLVE;
+          termObject = assign;
         }
+        // do nothing if state is CLOSED
       }
     }
   }
 
   /**
    * Sends a refutation message to the consumer and closes this connection.
-   * @return whether the message was sent or not
    * @throws IllegalStateException if the connection has not been started yet
    */
-  public boolean terminateRefuted() {
+  public void terminateRefuted() {
     synchronized (SYNC_STATE) {
       switch (state) {
         case INIT, ESTABLISHING, ESTABLISHED -> throw
             new IllegalStateException("terminate before connection is established and started");
-        default -> {
-          return doClose(null, MessageTypes.TERM_REFUTE, null);
+        case STARTED -> {
+          state = State.CLOSED;
+          termMessage = null;
+          termByte = MessageTypes.TERM_REFUTE;
+          termObject = null;
         }
+        // do nothing if state is CLOSED
       }
     }
   }
@@ -319,9 +318,19 @@ public class ProducerConnection {
    * Sends a termination message to the consumer and closes this connection.
    * Note: unlike the other terminate methods, this one may be called at any time.
    * @param reason the reason for termination
-   * @return whether the message was sent or not
    */
-  public boolean terminateOtherwise(String reason) {
-    return doClose(null, MessageTypes.TERM_OTHER, reason);
+  public void terminateOtherwise(String reason) {
+    synchronized (SYNC_STATE) {
+      switch (state) {
+        case INIT -> state = State.CLOSED; // do nothing else
+        case ESTABLISHING, ESTABLISHED, STARTED -> {
+          state = State.CLOSED;
+          termMessage = null;
+          termByte = MessageTypes.TERM_OTHER;
+          termObject = reason;
+        }
+        // do nothing if state is CLOSED
+      }
+    }
   }
 }
