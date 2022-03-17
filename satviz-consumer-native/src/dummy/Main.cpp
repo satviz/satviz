@@ -1,4 +1,5 @@
 #include <satviz/Graph.hpp>
+#include <satviz/GraphContraction.hpp>
 #include <satviz/OnscreenDisplay.hpp>
 #include <satviz/VideoController.hpp>
 
