@@ -1,6 +1,5 @@
 package edu.kit.satviz.consumer.gui;
 
-import java.text.DecimalFormat;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -172,11 +171,9 @@ public final class GuiUtils {
 
     // prevent exception when [value is null & (enter/arrow up/arrow down) is pressed]
     spinnerValueFactory.setConverter(new StringConverter<>() {
-      private DecimalFormat df = new DecimalFormat("#");
-
       @Override
       public String toString(Double object) {
-        return object == null ? "" : df.format(object);
+        return object == null ? "" : String.valueOf(object.longValue());
       }
 
       @Override
@@ -211,9 +208,10 @@ public final class GuiUtils {
    * @param max The maximum value of the {@code spinner}.
    * @return The validating {@link ChangeListener}.
    */
-  private static ChangeListener<String> createLongValidationListenerAsDouble(Spinner<Double> spinner,
-                                                                        long min,
-                                                                        long max) {
+  private static ChangeListener<String> createLongValidationListenerAsDouble(
+      Spinner<Double> spinner,
+      long min,
+      long max) {
     return (observable, oldValue, newValue) -> {
       if (!newValue.equals("")) { // allow empty spinner
         // check if newValue is a long integer
