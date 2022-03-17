@@ -68,16 +68,14 @@ public class ProducerConnection {
       }
       state = State.CLOSED;
 
-      if (client != null) {
-        if (termByte != 0) {
-          try {
-            client.write(termByte, termObject);
-          } catch (Exception e) {
-            // nothing
-          }
+      if (termByte != 0) {
+        try {
+          client.write(termByte, termObject);
+        } catch (Exception e) {
+          // nothing
         }
-        client.close();
       }
+      client.close();
 
       if (termMessage != null) {
         ls.onDisconnect(termMessage);

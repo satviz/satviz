@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-// TODO if there is time, make sure serialization or class cast errors are properly handled
+// if there is time, make sure serialization or class cast errors are properly handled
 // (they appear if the client and server NetworkBlueprint instances differ, so not in our code)
 
 /**
@@ -44,9 +44,8 @@ public class ConsumerConnection {
 
   /**
    * Creates a new connection servicing an arbitrary number of producers.
-   * {@code lsConnect} should not be {@code null}.
    * @param port the port on which to listen for producers
-   * @param lsConnect the connect listener
+   * @param lsConnect the connect listener, not {@code null}
    * @param lsFail the fail listener
    */
   public ConsumerConnection(int port, Consumer<ProducerId> lsConnect, Consumer<String> lsFail) {
@@ -78,7 +77,7 @@ public class ConsumerConnection {
     }
   }
 
-  private void read (int id, NetworkMessage msg) {
+  private void read(int id, NetworkMessage msg) {
     ConnectionData conn = connections.get(id);
     switch (msg.type()) {
       case MessageTypes.OFFER -> {
@@ -92,14 +91,14 @@ public class ConsumerConnection {
         @SuppressWarnings("unchecked")
         Map<String, String> offerData = (Map<String, String>) msg.object();
         if (offerData.get("type").equals("solver")) {
-          connections.get(id).pid = new SolverId(
+          conn.pid = new SolverId(
               id, remote,
               offerData.get("name"),
               offerData.get("delayed").equals("true"),
               Long.parseLong(offerData.get("hash"))
           );
         } else {
-          connections.get(id).pid = new ProofId(
+          conn.pid = new ProofId(
               id, remote
           );
         }
@@ -107,7 +106,7 @@ public class ConsumerConnection {
         // while the listener runs.
         // This also means that the listeners should be as fast as possible to avoid becoming a
         // bottleneck
-        lsConnect.accept(connections.get(id).pid);
+        lsConnect.accept(conn.pid);
       }
       case MessageTypes.CLAUSE_ADD -> {
         synchronized (conn) {
