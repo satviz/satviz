@@ -31,8 +31,8 @@ public class ProducerConnection {
 
   private final String address;
   private final int port;
-  private final ProducerId pid;
-  private final ProducerConnectionListener ls;
+  private ProducerId pid = null;
+  private ProducerConnectionListener ls = null;
 
   private Connection client = null;
   private final Object SYNC_STATE = new Object();
@@ -47,10 +47,8 @@ public class ProducerConnection {
    * Does not try to connect to the consumer; this is done in {@code establish()}.
    * @param address the consumer address
    * @param port the consumer port
-   * @param pid the type of clause source that this producer represents, not {@code null}
-   * @param ls the event listener, not {@code null}
    */
-  public ProducerConnection(String address, int port, ProducerId pid, ProducerConnectionListener ls) {
+  public ProducerConnection(String address, int port) {
     this.address = address;
     this.port = port;
     this.pid = Objects.requireNonNull(pid);
@@ -215,14 +213,18 @@ public class ProducerConnection {
   /**
    * Establishes the connection to the consumer by spawning a worker thread to read messages.
    * The thread terminates if an internal error occurs or one of the terminate methods is called.
+   * @param pid the type of clause source that this producer represents, not {@code null}
+   * @param ls the event listener, not {@code null}
    * @throws IllegalStateException if {@code establish()} has already been called or this
    *     ProducerConnection is closed
    */
-  public void establish() {
+  public void establish(ProducerId pid, ProducerConnectionListener ls) {
     synchronized (SYNC_STATE) {
       if (state != State.INIT) {
         throw new IllegalStateException("establish already called or connection closed");
       }
+      this.pid = Objects.requireNonNull(pid);
+      this.ls = Objects.requireNonNull(ls);
       state = State.ESTABLISHING;
       new Thread(this::threadMain).start();
     }
@@ -231,17 +233,18 @@ public class ProducerConnection {
   /**
    * Sends a clause update over this connection.
    * If an exception is thrown, nothing will be written and the connection is not terminated.
-   * The return value indicates if a message has actually been sent or not. There are two cases in
-   *     which the message might not be sent. First, there might be an internal socket error. In
+   * The return value indicates if a message has actually been sent or not. There are three cases
+   *     in which the message might not be sent. First, there might be an internal socket error. In
    *     this case, onDisconnect() is called. Second, the connection has been terminated. In that
    *     case, onDisconnect() is not called, as it has either been called before or the termination
    *     was initiated using one of the terminate methods (i.e., the user is aware of this).
+   *     Lastly, the clause update is not sent if a {@link SerializationException} occurs. In this
+   *     case, the connection is closed with a failure.
    * @param c the clause update
    * @return true if sent, false otherwise
    * @throws IllegalStateException if the connection has not been started from the consumer
-   * @throws SerializationException if the clause update cannot be serialized
    */
-  public boolean sendClauseUpdate(ClauseUpdate c) throws SerializationException {
+  public boolean sendClauseUpdate(ClauseUpdate c) {
     // We still need to synchronize here to make sure that no clause updates are sent after a
     // termination message.
     byte type = c.type() == ClauseUpdate.Type.ADD ?
@@ -255,10 +258,10 @@ public class ProducerConnection {
           try {
             client.write(type, c.clause());
             return true;
-          } catch (IOException e) { // note: SerializationException does not close this connection
+          } catch (Exception e) { // note: SerializationException DOES close this connection
             state = State.CLOSED;
             termMessage = "fail: clause";
-            termByte = MessageTypes.TERM_OTHER; // probably not necessary because we failed anyway
+            termByte = MessageTypes.TERM_OTHER;
             termObject = "fail: clause";
             return false;
           }
