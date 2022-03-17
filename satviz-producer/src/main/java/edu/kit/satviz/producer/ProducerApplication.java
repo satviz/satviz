@@ -43,9 +43,10 @@ public class ProducerApplication {
       logger.info("Clause source opened");
       ProducerConnection connection = new ProducerConnection(
           parameters.getHost(), parameters.getPort());
-      connection.register(new SourceControlConnectionListener(connection, data.source()));
+      SourceControlConnectionListener ls = new SourceControlConnectionListener(connection,
+          data.source());
       logger.info("Waiting for network connection...");
-      connection.establish(data.id());
+      connection.establish(data.id(), ls);
     } catch (SourceException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       System.exit(1);

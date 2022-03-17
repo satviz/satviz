@@ -47,8 +47,8 @@ public class ProducerConsumerTest2 implements ProducerConnectionListener, Consum
   void testConsTerminate() {
     final int PORT = 34315;
     try {
-      prod = new ProducerConnection("localhost", PORT, new ProofId(), this);
-      prod.establish();
+      prod = new ProducerConnection("localhost", PORT);
+      prod.establish(new ProofId(), this);
 
       cons = new ConsumerConnection(PORT, this::lsConnect, this::lsFail);
       cons.start();

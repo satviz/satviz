@@ -48,11 +48,8 @@ public class ProducerConsumerTest implements ProducerConnectionListener, Consume
   void testProdTerminate() {
     final int PORT = 34314;
     try {
-      prod = new ProducerConnection("localhost", PORT,
-          new SolverId("cadical", false, 42),
-          this
-          );
-      prod.establish();
+      prod = new ProducerConnection("localhost", PORT);
+      prod.establish(new SolverId("cadical", false, 42), this);
 
       cons = new ConsumerConnection(PORT, this::lsConnect, this::lsFail);
       cons.start();

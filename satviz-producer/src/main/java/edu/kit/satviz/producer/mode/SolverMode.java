@@ -4,8 +4,7 @@ import edu.kit.ipasir4j.Ipasir;
 import edu.kit.ipasir4j.IpasirNotFoundException;
 import edu.kit.ipasir4j.Solver;
 import edu.kit.satviz.common.Hashing;
-import edu.kit.satviz.network.pub.OfferType;
-import edu.kit.satviz.network.pub.ProducerId;
+import edu.kit.satviz.network.pub.SolverId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
 import edu.kit.satviz.producer.ProducerMode;
@@ -36,7 +35,7 @@ public class SolverMode implements ProducerMode {
       configureSolver(solver, instance);
       return new ProducerModeData(
           new SolverSource(solver, instance.getVariableAmount()),
-          new ProducerId(null, OfferType.SOLVER, Ipasir.signature(),
+          new SolverId(Ipasir.signature(),
               parameters.isNoWait(),
               Hashing.hashContent(Files.newInputStream(parameters.getInstanceFile())))
       );
