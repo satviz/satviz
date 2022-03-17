@@ -51,8 +51,6 @@ public class ProducerConnection {
   public ProducerConnection(String address, int port) {
     this.address = address;
     this.port = port;
-    this.pid = Objects.requireNonNull(pid);
-    this.ls = Objects.requireNonNull(ls);
   }
 
   private void doCloseFromThread(String termMessage, byte termByte, Object termObject) {
