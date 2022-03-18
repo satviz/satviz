@@ -54,7 +54,16 @@ std::vector<Conn> removeSelfLoops(int index, std::vector<Conn> &adj, UnionFind *
   return d;
 }
 
+/** An axis along which to collapse. */
+struct Axis {
+  int  node;
+  Conn conn;
+  Axis(int node, Conn conn) : node(node), conn(conn) {}
+};
+
 int computeContraction(int numNodes, std::vector<Conn> *conn, int iterations, int *mapping) {
+  const float AGGRESSION = 0.3f;
+
   UnionFind uf(numNodes);
 
   std::vector<int> participants;
@@ -63,12 +72,20 @@ int computeContraction(int numNodes, std::vector<Conn> *conn, int iterations, in
   }
 
   while (iterations--) {
+    std::vector<Axis> choices;
     for (int v : participants) {
       Conn best{ v, 0.0f };
       for (auto c : conn[v]) {
         if (c.weight > best.weight) best = c;
       }
-      uf.unite(v, best.index);
+      choices.emplace_back(v, best);
+    }
+
+    std::sort(choices.begin(), choices.end(), [](Axis a, Axis b) { return a.conn.weight > b.conn.weight; });
+
+    for (int i = 0; i < (int) (choices.size() * AGGRESSION); i++) {
+      auto axis = choices[i];
+      uf.unite(axis.node, axis.conn.index);
     }
 
     std::vector<int> reprs;
