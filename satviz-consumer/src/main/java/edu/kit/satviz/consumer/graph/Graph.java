@@ -19,6 +19,8 @@ import jdk.incubator.foreign.*;
  */
 public class Graph extends NativeObject {
 
+  public record Contraction(int remainingNodes, int[] mapping) {}
+
   private static final Struct SERIALIZED_DATA = Struct.builder()
       .field("data", long.class, CLinker.C_POINTER)
       .field("n", long.class, CLinker.C_LONG)
@@ -81,8 +83,8 @@ public class Graph extends NativeObject {
 
   private static final MethodHandle COMPUTE_CONTRACTION = lookupFunction(
       "compute_contraction",
-      MethodType.methodType(void.class, MemoryAddress.class, int.class, MemoryAddress.class),
-      FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_INT, CLinker.C_POINTER)
+      MethodType.methodType(int.class, MemoryAddress.class, int.class, MemoryAddress.class),
+      FunctionDescriptor.of(CLinker.C_INT, CLinker.C_POINTER, CLinker.C_INT, CLinker.C_POINTER)
   );
 
   // Only protected because of mockup
@@ -231,16 +233,15 @@ public class Graph extends NativeObject {
     }
   }
 
-  public int[] computeContraction(int iterations) {
-    int[] mapping;
+  public Contraction computeContraction(int iterations) {
     try (var localScope = ResourceScope.newConfinedScope()) {
       var segment = MemorySegment.allocateNative(CLinker.C_INT.byteSize() * numNodes(), localScope);
-      COMPUTE_CONTRACTION.invokeExact(getPointer(), iterations, segment.address());
-      mapping = segment.toIntArray();
+      int remainingNodes = (int) COMPUTE_CONTRACTION.invokeExact(getPointer(), iterations, segment.address());
+      int[] mapping = segment.toIntArray();
+      return new Contraction(remainingNodes, mapping);
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while computing graph contraction", e);
     }
-    return mapping;
   }
 
   /**

@@ -51,8 +51,8 @@ std::vector<Conn> *extractConnections(Graph &graph);
 std::vector<Conn> mergeConnections(const std::vector<Conn> &a, const std::vector<Conn> &b);
 std::vector<Conn> removeSelfLoops(int index, std::vector<Conn> &adj, UnionFind *uf);
 
-void computeContraction(int numNodes, std::vector<Conn> *conn, int iterations, int *mapping);
-void computeContraction(Graph &graph, int iterations, int *mapping);
+int computeContraction(int numNodes, std::vector<Conn> *conn, int iterations, int *mapping);
+int computeContraction(Graph &graph, int iterations, int *mapping);
 
 } // namespace graph
 } // namespace satviz

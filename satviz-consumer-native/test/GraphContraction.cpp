@@ -118,10 +118,11 @@ TEST(GraphContraction, ComputeContraction) {
   graph.submitWeightUpdate(wu);
 
   int *mapping = new int[graph.numNodes()];
-  computeContraction(graph, 1, mapping);
+  int remainingNodes = computeContraction(graph, 1, mapping);
 
+  EXPECT_EQ(remainingNodes, 2);
   for (int i = 0; i < graph.numNodes(); i++) {
-    EXPECT_LT(mapping[i], 2);
+    EXPECT_LT(mapping[i], remainingNodes);
   }
 
   EXPECT_EQ(mapping[0], mapping[1]);

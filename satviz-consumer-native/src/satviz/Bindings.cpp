@@ -78,8 +78,8 @@ EdgeInfo satviz_query_edge(void *graph, int index1, int index2) {
   return static_cast<Graph*>(graph)->queryEdge(index1, index2);
 }
 
-void satviz_compute_contraction(void *graph, int iterations, int *mapping) {
-  computeContraction(*static_cast<Graph*>(graph), iterations, mapping);
+int satviz_compute_contraction(void *graph, int iterations, int *mapping) {
+  return computeContraction(*static_cast<Graph*>(graph), iterations, mapping);
 }
 
 void *satviz_new_video_controller(void *graph, int display_type, int width, int height) {
