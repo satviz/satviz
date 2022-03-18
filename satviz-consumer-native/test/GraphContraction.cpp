@@ -24,6 +24,35 @@ TEST(GraphContraction, UnionFind) {
 	EXPECT_EQ(uf.find(1), uf.find(3));
 }
 
+TEST(GraphContraction, ExtractConnections) {
+	WeightUpdate wu;
+	wu.values.push_back(std::make_tuple(0, 1, 1.0f));
+	wu.values.push_back(std::make_tuple(1, 2, 2.0f));
+	
+	Graph graph(4);
+	graph.submitWeightUpdate(wu);
+
+	auto conn = extractConnections(graph);
+
+	ASSERT_EQ(conn[0].size(), 1);
+	ASSERT_EQ(conn[1].size(), 2);
+	ASSERT_EQ(conn[2].size(), 1);
+	ASSERT_EQ(conn[3].size(), 0);
+
+	EXPECT_EQ(conn[0][0].index, 1);
+	EXPECT_EQ(conn[0][0].weight, 1.0f);
+
+	EXPECT_EQ(conn[1][0].index, 0);
+	EXPECT_EQ(conn[1][0].weight, 1.0f);
+	EXPECT_EQ(conn[1][1].index, 2);
+	EXPECT_EQ(conn[1][1].weight, 2.0f);
+
+	EXPECT_EQ(conn[2][0].index, 1);
+	EXPECT_EQ(conn[2][0].weight, 2.0f);
+
+	delete[] conn;
+}
+
 TEST(GraphContraction, MergeConnections) {
 	std::vector<Conn> a;
 	a.emplace_back( 0, 1.0f);
@@ -80,9 +109,22 @@ TEST(GraphContraction, RemoveSelfLoopsWithUnions) {
 	EXPECT_EQ(res[1].index, 2);
 }
 
-#if 0
 TEST(GraphContraction, ComputeContraction) {
-	auto res = computeContraction();
+	WeightUpdate wu;
+	wu.values.push_back(std::make_tuple(0, 1, 1.0f));
+	wu.values.push_back(std::make_tuple(1, 2, 2.0f));
+	
+	Graph graph(4);
+	graph.submitWeightUpdate(wu);
+
+	auto res = computeContraction(graph, 1);
+
+	ASSERT_EQ(res.size(), graph.numNodes());
+
+	int max = -1;
+	for (int m : res) {
+		if (m > max) max = m;
+	}
+	EXPECT_EQ(max, 1);
 }
-#endif
 

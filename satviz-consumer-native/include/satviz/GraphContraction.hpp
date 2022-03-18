@@ -46,9 +46,11 @@ public:
   }
 };
 
-std::vector<Conn> mergeConnections(const std::vector<Conn> &a, const std::vector<Conn> &b);
-std::vector<Conn> removeSelfLoops(int index, std::vector<Conn> &adj, UnionFind *uf);
-std::vector<int>  computeContraction(Graph &graph, int iterations);
+std::vector<Conn> *extractConnections(Graph &graph);
+std::vector<Conn>  mergeConnections(const std::vector<Conn> &a, const std::vector<Conn> &b);
+std::vector<Conn>  removeSelfLoops(int index, std::vector<Conn> &adj, UnionFind *uf);
+std::vector<int>   computeContraction(int numNodes, std::vector<Conn> *conn, int iterations);
+std::vector<int>   computeContraction(Graph &graph, int iterations);
 
 } // namespace graph
 } // namespace satviz
