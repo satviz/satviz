@@ -31,11 +31,11 @@ public class Connection implements AutoCloseable {
 
   /**
    * Creates a new connection by opening a socket channel and connecting to the specified address.
-   * Throws {@link ConnectException} if the connection is refused remotely, i.e., no-one is
-   * listening on the remote port.
    * @param address the remote address
    * @param port the remote port
    * @param bp the types of messages
+   * @throws ConnectException if the connection is refused remotely, i.e., no-one is listening on
+   *     the remote port.
    * @throws IOException if an I/O error occurs
    */
   public Connection(String address, int port, NetworkBlueprint bp) throws IOException {

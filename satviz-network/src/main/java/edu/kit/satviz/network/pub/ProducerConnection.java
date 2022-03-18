@@ -5,7 +5,6 @@ import edu.kit.satviz.network.general.NetworkMessage;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
 import edu.kit.satviz.serial.SerializationException;
-import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -36,7 +35,7 @@ public class ProducerConnection {
 
   private Connection client = null;
   private final Object SYNC_STATE = new Object();
-  private volatile State state = State.INIT;
+  private State state = State.INIT;
 
   private String termMessage = null;
   private byte termByte = 0;
@@ -53,8 +52,8 @@ public class ProducerConnection {
     this.port = port;
   }
 
-  private void doCloseFromThread(String termMessage, byte termByte, Object termObject) {
-    // TODO check that this is only called once, but exactly once
+  private void doClose(String termMessage, byte termByte, Object termObject) {
+    // Note: at the moment this is only called from the worker thread!
 
     synchronized (SYNC_STATE) {
       if (state == State.CLOSED) { // user closed
@@ -90,11 +89,11 @@ public class ProducerConnection {
     Map<String, String> offerData = new HashMap<>();
     offerData.put("version", "1");
     if (pid.getType() == OfferType.SOLVER) {
-      SolverId solverId = (SolverId) pid;
+      SolverId sid = (SolverId) pid;
       offerData.put("type", "solver");
-      offerData.put("name", solverId.getSolverName());
-      offerData.put("delayed", solverId.isSolverDelayed() ? "true" : "false");
-      offerData.put("hash", Long.toString(solverId.getInstanceHash()));
+      offerData.put("name", sid.getSolverName());
+      offerData.put("delayed", sid.isSolverDelayed() ? "true" : "false");
+      offerData.put("hash", Long.toString(sid.getInstanceHash()));
     } else {
       offerData.put("type", "proof");
     }
@@ -147,11 +146,6 @@ public class ProducerConnection {
       return;
     }
 
-    // Note: we cannot have the read() call in a synchronized block, as this would interfere
-    // with writing. Waiting for up to one second in read() while we cannot write is not desirable.
-    // This means we have to be careful here, as we may read past a close(). Sometimes this is
-    // unavoidable, and not indicative of a synchronization mistake.
-
     Selector sel = null;
     try {
       sel = Selector.open();
@@ -164,7 +158,7 @@ public class ProducerConnection {
           // nothing
         }
       }
-      doCloseFromThread("fail: selector", MessageTypes.TERM_OTHER, "fail: selector");
+      doClose("fail: selector", MessageTypes.TERM_OTHER, "fail: selector");
       return;
     }
 
@@ -172,17 +166,22 @@ public class ProducerConnection {
     while (true) {
       synchronized (SYNC_STATE) {
         if (state == State.CLOSED) {
-          doCloseFromThread(null, (byte) 0, null);
+          doClose(null, (byte) 0, null);
           return;
         }
       }
+
+      // Note: we cannot have the read() call in a synchronized block, as this would interfere
+      // with writing. Waiting for up to one second in read() while we cannot write is not desirable.
+      // This means we have to be careful here, as we may read past a close(). Sometimes this is
+      // unavoidable, and not indicative of a synchronization mistake.
 
       try {
         sel.select(1000); // avoid busy-wait
         sel.selectedKeys().clear(); // act like we took care of everything
         readQueue = client.read();
       } catch (Exception e) {
-        doCloseFromThread("fail: read", MessageTypes.TERM_OTHER, "fail: read");
+        doClose("fail: read", MessageTypes.TERM_OTHER, "fail: read");
         return;
       }
 
@@ -191,7 +190,7 @@ public class ProducerConnection {
           case MessageTypes.START -> {
             synchronized (SYNC_STATE) {
               if (state == State.CLOSED) {
-                doCloseFromThread(null, (byte) 0, null);
+                doClose(null, (byte) 0, null);
                 return;
               }
               state = State.STARTED;
@@ -199,7 +198,7 @@ public class ProducerConnection {
             }
           }
           case MessageTypes.STOP -> {
-            doCloseFromThread("stop", (byte) 0, null);
+            doClose("stop", (byte) 0, null);
             return;
           }
           default -> { /* ignore */ }
