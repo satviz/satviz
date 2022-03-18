@@ -56,6 +56,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private ColorPicker hotColorColorPicker;
   @FXML
+  private Spinner<Integer> contractionIterationsSpinner;
+  @FXML
   private Button satInstanceFileButton;
   @FXML
   private Label satInstanceFileLabel;
@@ -210,6 +212,11 @@ public class GeneralConfigController extends ConfigController {
         ConsumerConfig.MAX_WINDOW_SIZE,
         ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
+    GuiUtils.initializeIntegerSpinner(contractionIterationsSpinner,
+        ConsumerConfig.MIN_CONTRACTION_ITERATIONS,
+        ConsumerConfig.MAX_CONTRACTION_ITERATIONS,
+        ConsumerConfig.DEFAULT_CONTRACTION_ITERATIONS);
+
     modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
   }
 
@@ -230,6 +237,9 @@ public class GeneralConfigController extends ConfigController {
     coldColorColorPicker.setValue(GuiUtils.intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
 
     hotColorColorPicker.setValue(GuiUtils.intToColor(HeatmapColors.DEFAULT_TO_COLOR));
+
+    contractionIterationsSpinner.getValueFactory().setValue(
+        ConsumerConfig.DEFAULT_CONTRACTION_ITERATIONS);
 
     satInstanceFile = null;
     satInstanceFileLabel.setText("");
@@ -280,6 +290,8 @@ public class GeneralConfigController extends ConfigController {
       coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
       hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
     }
+
+    contractionIterationsSpinner.getValueFactory().setValue(config.getContractionIterations());
   }
 
   @Override
@@ -307,6 +319,8 @@ public class GeneralConfigController extends ConfigController {
     colors.setFromColor(GuiUtils.colorToInt(coldColorColorPicker.getValue()));
     colors.setToColor(GuiUtils.colorToInt(hotColorColorPicker.getValue()));
     config.setHeatmapColors(colors);
+
+    config.setContractionIterations(contractionIterationsSpinner.getValue());
   }
 
   @Override
