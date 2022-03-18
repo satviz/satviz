@@ -54,7 +54,7 @@ std::vector<Conn> removeSelfLoops(int index, std::vector<Conn> &adj, UnionFind *
   return d;
 }
 
-std::vector<int> computeContraction(int numNodes, std::vector<Conn> *conn, int iterations) {
+int *computeContraction(int numNodes, std::vector<Conn> *conn, int iterations) {
   UnionFind uf(numNodes);
 
   std::vector<int> participants;
@@ -93,16 +93,16 @@ std::vector<int> computeContraction(int numNodes, std::vector<Conn> *conn, int i
       renumbering[i] = current++;
     }
   }
-  std::vector<int> mapping;
+  int *mapping = new int[numNodes];
   for (int i = 0; i < numNodes; i++) {
-    mapping.push_back(renumbering[uf.find(i)]);
+    mapping[i] = renumbering[uf.find(i)];
   }
   delete[] renumbering;
 
   return mapping;
 }
 
-std::vector<int> computeContraction(Graph &graph, int iterations) {
+int *computeContraction(Graph &graph, int iterations) {
   auto conn = extractConnections(graph);
   auto mapping = computeContraction(graph.numNodes(), conn, iterations);
   delete[] conn;

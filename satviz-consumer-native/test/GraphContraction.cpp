@@ -117,14 +117,12 @@ TEST(GraphContraction, ComputeContraction) {
 	Graph graph(4);
 	graph.submitWeightUpdate(wu);
 
-	auto res = computeContraction(graph, 1);
+	auto mapping = computeContraction(graph, 1);
 
-	ASSERT_EQ(res.size(), graph.numNodes());
-
-	int max = -1;
-	for (int m : res) {
-		if (m > max) max = m;
+	for (int i = 0; i < graph.numNodes(); i++) {
+		EXPECT_LT(mapping[i], 2);
 	}
-	EXPECT_EQ(max, 1);
+
+	delete[] mapping;
 }
 
