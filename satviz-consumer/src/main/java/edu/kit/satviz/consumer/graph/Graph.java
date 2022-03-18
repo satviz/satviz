@@ -8,10 +8,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-
-import jdk.incubator.foreign.*;
+import jdk.incubator.foreign.CLinker;
+import jdk.incubator.foreign.FunctionDescriptor;
+import jdk.incubator.foreign.MemoryAddress;
+import jdk.incubator.foreign.MemorySegment;
+import jdk.incubator.foreign.ResourceScope;
+import jdk.incubator.foreign.SegmentAllocator;
 
 /**
  * The graph model used by satviz. Every instance of this class is bound to a
