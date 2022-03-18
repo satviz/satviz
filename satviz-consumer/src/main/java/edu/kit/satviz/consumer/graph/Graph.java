@@ -10,14 +10,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import jdk.incubator.foreign.CLinker;
-import jdk.incubator.foreign.FunctionDescriptor;
-import jdk.incubator.foreign.MemoryAccess;
-import jdk.incubator.foreign.MemoryAddress;
-import jdk.incubator.foreign.MemoryHandles;
-import jdk.incubator.foreign.MemorySegment;
-import jdk.incubator.foreign.ResourceScope;
-import jdk.incubator.foreign.SegmentAllocator;
+
+import jdk.incubator.foreign.*;
 
 /**
  * The graph model used by satviz. Every instance of this class is bound to a
@@ -66,6 +60,12 @@ public class Graph extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER, CLinker.C_LONG)
   );
 
+  private static final MethodHandle NUM_NODES = lookupFunction(
+      "num_nodes",
+      MethodType.methodType(int.class, MemoryAddress.class),
+      FunctionDescriptor.of(CLinker.C_INT, CLinker.C_POINTER)
+  );
+
   private static final MethodHandle QUERY_NODE = lookupFunction(
       "query_node",
       MethodType.methodType(MemorySegment.class, MemoryAddress.class, int.class),
@@ -77,6 +77,12 @@ public class Graph extends NativeObject {
       MethodType.methodType(MemorySegment.class, MemoryAddress.class, int.class, int.class),
       FunctionDescriptor.of(EdgeInfo.STRUCT.getLayout(),
           CLinker.C_POINTER, CLinker.C_INT, CLinker.C_INT)
+  );
+
+  private static final MethodHandle COMPUTE_CONTRACTION = lookupFunction(
+      "compute_contraction",
+      MethodType.methodType(void.class, MemoryAddress.class, int.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_INT, CLinker.C_POINTER)
   );
 
   // Only protected because of mockup
@@ -180,6 +186,19 @@ public class Graph extends NativeObject {
   }
 
   /**
+   * Query how many nodes there are in the graph.
+   *
+   * @return the number of nodes.
+   */
+  public int numNodes() {
+    try {
+      return (int) NUM_NODES.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while querying number of nodes", e);
+    }
+  }
+
+  /**
    * Retrieve information about a node in this graph.
    *
    * @param index The index of the node to find.
@@ -210,6 +229,18 @@ public class Graph extends NativeObject {
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while querying edge", e);
     }
+  }
+
+  public int[] computeContraction(int iterations) {
+    int[] mapping;
+    try (var localScope = ResourceScope.newConfinedScope()) {
+      var segment = MemorySegment.allocateNative(CLinker.C_INT.byteSize() * numNodes(), localScope);
+      COMPUTE_CONTRACTION.invokeExact(getPointer(), iterations, segment.address());
+      mapping = segment.toIntArray();
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while computing graph contraction", e);
+    }
+    return mapping;
   }
 
   /**

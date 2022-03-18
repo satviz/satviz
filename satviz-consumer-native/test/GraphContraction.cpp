@@ -117,7 +117,8 @@ TEST(GraphContraction, ComputeContraction) {
   Graph graph(4);
   graph.submitWeightUpdate(wu);
 
-  auto mapping = computeContraction(graph, 1);
+  int *mapping = new int[graph.numNodes()];
+  computeContraction(graph, 1, mapping);
 
   for (int i = 0; i < graph.numNodes(); i++) {
     EXPECT_LT(mapping[i], 2);
