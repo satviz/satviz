@@ -10,7 +10,7 @@ std::vector<Conn> mergeConnections(const std::vector<Conn> &a, const std::vector
   std::vector<Conn> d;
   int i = 0, j = 0;
   int maxi = (int) a.size(), maxj = (int) b.size();
-  while (i < maxi && j < maxj) {
+  while (i < maxi || j < maxj) {
     Conn c;
     if (j == maxj) c = a[i++];
     else if (i == maxi) c = b[j++];
