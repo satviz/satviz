@@ -44,14 +44,4 @@ class ClauseTest {
     assertEquals(2, statusMap.keySet().size());
   }
 
-  /**
-   * This tests, whether the overridden {@code toString()} method works as intended.
-   */
-  @Test
-  void toString_test() {
-    Clause clause = new Clause(new int[] {-2, 33, 0});
-
-    assertEquals("[-2, 33, 0]", clause.toString());
-  }
-
 }

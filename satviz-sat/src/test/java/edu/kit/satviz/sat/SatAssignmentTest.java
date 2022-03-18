@@ -215,16 +215,4 @@ class SatAssignmentTest {
     assertEquals(2, statusMap.keySet().size());
   }
 
-  /**
-   * This tests, whether the overridden {@code toString()} method works as intended.
-   */
-  @Test
-  void toString_test() {
-    SatAssignment satAssignment = new SatAssignment(5);
-    satAssignment.set(3, VariableState.SET);
-    satAssignment.set(4, VariableState.UNSET);
-
-    assertEquals("[DONTCARE, DONTCARE, SET, UNSET, DONTCARE]", satAssignment.toString());
-  }
-
 }
