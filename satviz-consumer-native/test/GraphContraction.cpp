@@ -123,6 +123,10 @@ TEST(GraphContraction, ComputeContraction) {
 		EXPECT_LT(mapping[i], 2);
 	}
 
+	EXPECT_EQ(mapping[0], mapping[1]);
+	EXPECT_EQ(mapping[1], mapping[2]);
+	EXPECT_NE(mapping[2], mapping[3]);
+
 	delete[] mapping;
 }
 
