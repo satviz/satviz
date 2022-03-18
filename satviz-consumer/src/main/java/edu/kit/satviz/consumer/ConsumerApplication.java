@@ -84,7 +84,9 @@ public final class ConsumerApplication {
     Supplier<VariableInteractionGraph> vig =
         () -> new RingInteractionGraph(config.getWeightFactor());
 
-    GlComponents components = initializeRendering(config, vig, contract(config, vig, initialData), initialData, glScheduler);
+    Graph.Contraction contraction = contract(config, vig, initialData);
+    logger.log(Level.INFO, "Graph contracted to {0} nodes", contraction.remainingNodes());
+    GlComponents components = initializeRendering(config, vig, contraction, initialData, glScheduler);
 
     ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
         tempDir, initialData.variables, components.nodeMapping);
@@ -125,10 +127,11 @@ public final class ConsumerApplication {
       Supplier<? extends VariableInteractionGraph> vig,
       InitialGraphInfo initialData
   ) {
+    logger.info("Applying graph contraction");
     try (Graph initialGraph = Graph.create(initialData.variables)) {
       initialGraph.submitUpdate(vig.get()
           .process(initialData.clauses, initialGraph, IdentityMapping.INSTANCE));
-      return initialGraph.computeContraction(1); // TODO: 18/03/2022 use config value
+      return initialGraph.computeContraction(config.getContractionIterations());
     }
   }
 
