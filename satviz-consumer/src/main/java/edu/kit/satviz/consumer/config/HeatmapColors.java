@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.config;
 
+import javafx.scene.paint.Color;
 import java.util.Objects;
 
 /**
@@ -9,60 +10,60 @@ import java.util.Objects;
 public class HeatmapColors {
 
   /**
-   * The default "from"-color. (prone to change!)
+   * The default hot color.
    */
-  public static final int DEFAULT_FROM_COLOR = 0xf4abff;
+  public static final Color DEFAULT_HOT_COLOR = Color.color(1, 0, 0);
 
   /**
-   * The default "to"-color. (prone to change too!)
+   * The default cold color.
    */
-  public static final int DEFAULT_TO_COLOR = 0x882020;
+  public static final Color DEFAULT_COLD_COLOR = Color.color(0, 0, 1);
 
-  private int fromColor;
-  private int toColor;
+  private Color hotColor;
+  private Color coldColor;
 
   /**
    * Simple constructor for instances of the <code>HeatmapColors</code> class.
    */
   public HeatmapColors() {
-    this.fromColor = DEFAULT_FROM_COLOR;
-    this.toColor = DEFAULT_TO_COLOR;
+    this.hotColor = DEFAULT_HOT_COLOR;
+    this.coldColor = DEFAULT_COLD_COLOR;
   }
 
   /**
-   * This method sets the "from"-color.
+   * This method sets the hot color.
    *
-   * @param fromColor "from"-color.
+   * @param hotColor The hot color.
    */
-  public void setFromColor(int fromColor) {
-    this.fromColor = fromColor;
+  public void setHotColor(Color hotColor) {
+    this.hotColor = hotColor;
   }
 
   /**
-   * This method sets the "to"-color.
+   * This method sets the cold color.
    *
-   * @param toColor "to"-color.
+   * @param coldColor The cold color.
    */
-  public void setToColor(int toColor) {
-    this.toColor = toColor;
+  public void setColdColor(Color coldColor) {
+    this.coldColor = coldColor;
   }
 
   /**
-   * This simple getter-method returns the "from"-color.
+   * This simple getter-method returns the hot color.
    *
-   * @return The "from"-color.
+   * @return The hot color.
    */
-  public int getFromColor() {
-    return fromColor;
+  public Color getHotColor() {
+    return hotColor;
   }
 
   /**
-   * This simple getter-method returns the "to"-color.
+   * This simple getter-method returns the cold color.
    *
-   * @return The "to"-color.
+   * @return The cold color.
    */
-  public int getToColor() {
-    return toColor;
+  public Color getColdColor() {
+    return coldColor;
   }
 
   @Override
@@ -74,11 +75,11 @@ public class HeatmapColors {
       return false;
     }
     HeatmapColors colors = (HeatmapColors) o;
-    return fromColor == colors.fromColor && toColor == colors.toColor;
+    return hotColor == colors.hotColor && coldColor == colors.coldColor;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(fromColor, toColor);
+    return Objects.hash(hotColor, coldColor);
   }
 }

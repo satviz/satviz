@@ -120,8 +120,8 @@ public class VisualizationController {
     GuiUtils.setOnFocusLost(windowSizeSpinner, this::updateWindowSize);
 
     HeatmapColors colors = config.getHeatmapColors();
-    coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
-    hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
+    coldColorColorPicker.setValue(colors.getHotColor());
+    hotColorColorPicker.setValue(colors.getColdColor());
 
     GuiUtils.initializeIntegerSpinner(highlightVariableSpinner,
         MIN_HIGHLIGHT_VARIABLE,

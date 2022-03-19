@@ -227,9 +227,9 @@ public class GeneralConfigController extends ConfigController {
 
     windowSizeSpinner.getValueFactory().setValue(ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
-    coldColorColorPicker.setValue(GuiUtils.intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
+    coldColorColorPicker.setValue(HeatmapColors.DEFAULT_HOT_COLOR);
 
-    hotColorColorPicker.setValue(GuiUtils.intToColor(HeatmapColors.DEFAULT_TO_COLOR));
+    hotColorColorPicker.setValue(HeatmapColors.DEFAULT_COLD_COLOR);
 
     satInstanceFile = null;
     satInstanceFileLabel.setText("");
@@ -277,8 +277,8 @@ public class GeneralConfigController extends ConfigController {
 
     HeatmapColors colors = config.getHeatmapColors();
     if (colors != null) {
-      coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
-      hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
+      coldColorColorPicker.setValue(colors.getHotColor());
+      hotColorColorPicker.setValue(colors.getColdColor());
     }
   }
 
@@ -304,8 +304,8 @@ public class GeneralConfigController extends ConfigController {
     config.setWindowSize(windowSizeSpinner.getValue());
 
     HeatmapColors colors = new HeatmapColors();
-    colors.setFromColor(GuiUtils.colorToInt(coldColorColorPicker.getValue()));
-    colors.setToColor(GuiUtils.colorToInt(hotColorColorPicker.getValue()));
+    colors.setHotColor(coldColorColorPicker.getValue());
+    colors.setColdColor(hotColorColorPicker.getValue());
     config.setHeatmapColors(colors);
   }
 

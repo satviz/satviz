@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import javafx.scene.paint.Color;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -71,8 +72,8 @@ class JsonConfigParsingTest {
     modeConfig.setSource(CONFIG2_SOURCE);
     modeConfig.setSourcePath(CONFIG2_SOURCE_PATH);
     HeatmapColors colors = new HeatmapColors();
-    colors.setFromColor(CONFIG2_FROM_COLOR);
-    colors.setToColor(CONFIG2_TO_COLOR);
+    colors.setHotColor(Color.color(1, 0.4, 0.4));
+    colors.setColdColor(Color.color(0, 0, 0.5));
     config2 = new ConsumerConfig();
     config2.setModeConfig(modeConfig);
     config2.setInstancePath(INSTANCE_PATH);
