@@ -9,6 +9,8 @@ build
 /satviz-consumer/src/test/temp/
 .ogdf-build
 
+test-run
+
 # Ignore crash files
 core.*
 hs_err_pid*.log

@@ -65,6 +65,10 @@ public class VisualizationController {
   private Button pauseOrContinueRecordingButton;
   @FXML
   private Button pauseOrContinueVisualizationButton;
+  @FXML
+  private Button resetCameraButton;
+  @FXML
+  private Button relayoutButton;
   // This is actually meant to be a Spinner<Long>.
   // However, there is no default implementation of a LongSpinnerValueFactory.
   // Hence, a DoubleSpinnerValueFactory is used in which all values
@@ -78,8 +82,6 @@ public class VisualizationController {
   private Label totalClausesLabel;
   @FXML
   private Slider processedClausesSlider;
-  @FXML
-  private Button relayoutButton;
 
   // ATTRIBUTES (OTHER)
 
@@ -236,6 +238,11 @@ public class VisualizationController {
     mediator.pauseOrContinueVisualization();
     visualizationRunning = !visualizationRunning;
     updateVisualizationRunningDisplay();
+  }
+
+  @FXML
+  private void resetCamera() {
+    mediator.resetCamera();
   }
 
   @FXML

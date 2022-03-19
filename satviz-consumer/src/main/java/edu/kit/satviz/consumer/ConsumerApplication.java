@@ -16,7 +16,9 @@ import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.gui.config.ConfigStarter;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationController;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationStarter;
+import edu.kit.satviz.consumer.processing.ArrayNodeMapping;
 import edu.kit.satviz.consumer.processing.ClauseCoordinator;
+import edu.kit.satviz.consumer.processing.IdentityMapping;
 import edu.kit.satviz.consumer.processing.Mediator;
 import edu.kit.satviz.consumer.processing.RecencyHeatmap;
 import edu.kit.satviz.consumer.processing.RingInteractionGraph;
@@ -26,6 +28,7 @@ import edu.kit.satviz.network.OfferType;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
+import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -37,6 +40,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.IntUnaryOperator;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
@@ -64,8 +69,7 @@ public final class ConsumerApplication {
     tempDir.toFile().deleteOnExit();
 
     logger.finer("Reading SAT instance file");
-    VariableInteractionGraph vig = new RingInteractionGraph(config.getWeightFactor());
-    InitialGraphInfo initialData = readDimacsFile(vig, config);
+    InitialGraphInfo initialData = readDimacsFile(config);
 
     logger.info("Setting up network connection");
     ConsumerConnection connection = setupNetworkConnection(config, tempDir);
@@ -77,11 +81,15 @@ public final class ConsumerApplication {
     }
     
     ScheduledExecutorService glScheduler = Executors.newSingleThreadScheduledExecutor();
+    Supplier<VariableInteractionGraph> vig =
+        () -> new RingInteractionGraph(config.getWeightFactor());
 
-    GlComponents components = initializeRendering(config, initialData, glScheduler);
+    Graph.Contraction contraction = contract(config, vig, initialData);
+    logger.log(Level.INFO, "Graph contracted to {0} nodes", contraction.remainingNodes());
+    GlComponents components = initializeRendering(config, vig, contraction, initialData, glScheduler);
 
     ClauseCoordinator coordinator = new ClauseCoordinator(components.graph,
-        tempDir, initialData.variables, literal -> Math.abs(literal) - 1);
+        tempDir, initialData.variables, components.nodeMapping);
 
     Mediator mediator = new Mediator.MediatorBuilder()
         .setConfig(config)
@@ -90,7 +98,7 @@ public final class ConsumerApplication {
         .setGraph(components.graph)
         .setCoordinator(coordinator)
         .setHeatmap(new RecencyHeatmap(config.getWindowSize()))
-        .setVig(vig)
+        .setVig(vig.get())
         .createMediator();
 
     mediator.registerCloseAction(() -> {
@@ -114,19 +122,34 @@ public final class ConsumerApplication {
     mediator.startRendering();
   }
 
+  private static Graph.Contraction contract(
+      ConsumerConfig config,
+      Supplier<? extends VariableInteractionGraph> vig,
+      InitialGraphInfo initialData
+  ) {
+    logger.info("Applying graph contraction");
+    try (Graph initialGraph = Graph.create(initialData.variables)) {
+      initialGraph.submitUpdate(vig.get()
+          .process(initialData.clauses, initialGraph, IdentityMapping.INSTANCE));
+      return initialGraph.computeContraction(config.getContractionIterations());
+    }
+  }
+
   private static GlComponents initializeRendering(
-      ConsumerConfig config, InitialGraphInfo initialData, ExecutorService glScheduler
+      ConsumerConfig config, Supplier<? extends VariableInteractionGraph> vig,
+      Graph.Contraction contraction, InitialGraphInfo initialData, ExecutorService glScheduler
   ) throws InterruptedException, ExecutionException {
     logger.finer("Initialising OpenGL window");
+
     GlComponents components = glScheduler.submit(() -> {
-      Graph graph = Graph.create(initialData.variables);
+      Graph graph = Graph.create(contraction.remainingNodes());
       VideoController videoController = VideoController.create(
           graph,
           (config.isNoGui()) ? DisplayType.OFFSCREEN : DisplayType.ONSCREEN,
           1920,
           1080
       );
-      return new GlComponents(graph, videoController);
+      return new GlComponents(graph, new ArrayNodeMapping(contraction.mapping()), videoController);
     }).get();
 
 
@@ -134,12 +157,14 @@ public final class ConsumerApplication {
     glScheduler.submit(() -> {
       try {
         HeatUpdate u = new HeatUpdate();
-        for (int i = 0; i < initialData.variables; i++) {
+        for (int i = 0; i < contraction.remainingNodes(); i++) {
           u.add(i, 0);
         }
         components.graph.submitUpdate(u);
-        components.graph.submitUpdate(initialData.initialUpdate);
+        components.graph.submitUpdate(vig.get().process(
+            initialData.clauses, components.graph, components.nodeMapping));
         components.graph.recalculateLayout();
+        components.controller.resetCamera();
         components.controller.nextFrame();
       } catch (Throwable e) {
         e.printStackTrace();
@@ -149,17 +174,13 @@ public final class ConsumerApplication {
     return components;
   }
 
-  private static InitialGraphInfo readDimacsFile(
-      VariableInteractionGraph vig,
-      ConsumerConfig config
-  ) throws IOException {
+  private static InitialGraphInfo readDimacsFile(ConsumerConfig config) throws IOException {
     try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
       int variableAmount = dimacsFile.getVariableAmount();
       logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
       ClauseUpdate[] clauses = StreamSupport.stream(dimacsFile.spliterator(), false)
           .toArray(ClauseUpdate[]::new);
-      WeightUpdate initialUpdate = vig.process(clauses, null, literal -> Math.abs(literal) - 1);
-      return new InitialGraphInfo(variableAmount, initialUpdate);
+      return new InitialGraphInfo(variableAmount, clauses);
     } catch (ParsingException e) {
       if (!config.isNoGui()) {
         // Error window.
@@ -290,11 +311,11 @@ public final class ConsumerApplication {
     GuiUtils.launch(VisualizationStarter.class);
   }
 
-  private record GlComponents(Graph graph, VideoController controller) {
+  private record GlComponents(Graph graph, IntUnaryOperator nodeMapping, VideoController controller) {
 
   }
 
-  private record InitialGraphInfo(int variables, WeightUpdate initialUpdate) {
+  private record InitialGraphInfo(int variables, ClauseUpdate[] clauses) {
 
   }
 }
