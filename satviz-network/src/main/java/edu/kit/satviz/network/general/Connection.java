@@ -41,10 +41,9 @@ public class Connection implements AutoCloseable {
   public Connection(String address, int port, NetworkBlueprint bp) throws IOException {
     this.bp = bp;
     this.chan = SocketChannel.open();
+    this.chan.configureBlocking(true);
+    this.chan.connect(new InetSocketAddress(address, port));
     this.chan.configureBlocking(false);
-    if (!this.chan.connect(new InetSocketAddress(address, port))) {
-      this.chan.finishConnect();
-    }
   }
 
   /**
