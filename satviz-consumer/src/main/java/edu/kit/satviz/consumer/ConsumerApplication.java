@@ -140,6 +140,7 @@ public final class ConsumerApplication {
         components.graph.submitUpdate(u);
         components.graph.submitUpdate(initialData.initialUpdate);
         components.graph.recalculateLayout();
+        components.controller.resetCamera();
         components.controller.nextFrame();
       } catch (Throwable e) {
         e.printStackTrace();
