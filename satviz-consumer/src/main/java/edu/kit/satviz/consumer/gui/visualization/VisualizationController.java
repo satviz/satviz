@@ -66,13 +66,15 @@ public class VisualizationController {
   @FXML
   private Button pauseOrContinueVisualizationButton;
   @FXML
+  private Button resetCameraButton;
+  @FXML
+  private Button relayoutButton;
+  @FXML
   private Spinner<Integer> processedClausesSpinner; // TODO: convert to Spinner<Long>
   @FXML
   private Label totalClausesLabel;
   @FXML
   private Slider processedClausesSlider;
-  @FXML
-  private Button relayoutButton;
 
   // ATTRIBUTES (OTHER)
 
@@ -223,6 +225,11 @@ public class VisualizationController {
     mediator.pauseOrContinueVisualization();
     visualizationRunning = !visualizationRunning;
     updateVisualizationRunningDisplay();
+  }
+
+  @FXML
+  private void resetCamera() {
+    mediator.resetCamera();
   }
 
   @FXML
