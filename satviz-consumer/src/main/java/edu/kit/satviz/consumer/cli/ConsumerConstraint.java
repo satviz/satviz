@@ -23,6 +23,9 @@ public class ConsumerConstraint implements Constraint<ConsumerConfig> {
       fail("No instance is set");
     }
     fileExists().validate(config.getInstancePath());
+    if (config.getVideoTemplatePath() == null) {
+      fail("No video template path ist set");
+    }
     fileExists().validate(Paths.get(config.getVideoTemplatePath()).getParent());
     ConsumerModeConfig modeConfig = config.getModeConfig();
     if (modeConfig.getMode() == ConsumerMode.EMBEDDED) {
