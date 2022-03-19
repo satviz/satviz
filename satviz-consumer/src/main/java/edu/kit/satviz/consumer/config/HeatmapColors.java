@@ -1,7 +1,7 @@
 package edu.kit.satviz.consumer.config;
 
-import javafx.scene.paint.Color;
 import java.util.Objects;
+import javafx.scene.paint.Color;
 
 /**
  * This class stores two colors, which will then be used
@@ -75,7 +75,7 @@ public class HeatmapColors {
       return false;
     }
     HeatmapColors colors = (HeatmapColors) o;
-    return hotColor == colors.hotColor && coldColor == colors.coldColor;
+    return hotColor.equals(colors.hotColor) && coldColor.equals(colors.coldColor);
   }
 
   @Override
