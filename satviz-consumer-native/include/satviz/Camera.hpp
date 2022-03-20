@@ -2,7 +2,6 @@
 #define SATVIZ_CAMERA_HPP_
 
 #include <SFML/System/Clock.hpp>
-#include <SFML/System/Vector2.hpp>
 
 namespace satviz {
 namespace video {
@@ -12,7 +11,8 @@ namespace video {
  */
 class Camera {
 private:
-  sf::Vector2f position;
+  float positionX = 0.0f;
+  float positionY = 0.0f;
   float zoomFactor = 1.0f;
   int width  = 0;
   int height = 0;
