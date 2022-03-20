@@ -2,7 +2,6 @@ package edu.kit.satviz.network.general;
 
 import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;

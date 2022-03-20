@@ -38,7 +38,7 @@ public class NetworkBlueprintTest {
       fail(e);
     }
 
-    SerialBuilder<?> builder = bp.getBuilder(42);
+    SerialBuilder<?> builder = bp.getBuilder((byte) 42);
     assertNotNull(builder);
     ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
     int read = byteIn.read();

@@ -50,7 +50,7 @@ public class NetworkBlueprint {
    * @param type the type
    * @return a new builder for the given type of objects, <code>null</code> if not specified
    */
-  public SerialBuilder<?> getBuilder(int type) {
+  public SerialBuilder<?> getBuilder(byte type) {
     Serializer<?> s = serializers[Byte.toUnsignedInt(type)];
     if (s != null) {
       return s.getBuilder();
