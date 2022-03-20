@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.config;
 
+import edu.kit.satviz.consumer.display.Theme;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,8 +36,8 @@ public class ConsumerConfig {
   public static final int DEFAULT_WINDOW_SIZE = 1000;
   public static final long DEFAULT_PERIOD = 33;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
-  // TODO: set to proper path
-  public static final String DEFAULT_SCREENSHOT_FOLDER = "path/to/screenshots";
+  public static final String DEFAULT_SCREENSHOT_FOLDER = System.getProperty("user.home")
+      + "/satviz/recordings/";
 
   // mandatory settings
   private ConsumerModeConfig modeConfig;
@@ -53,7 +54,7 @@ public class ConsumerConfig {
   private int windowSize = DEFAULT_WINDOW_SIZE;
   private HeatmapColors heatmapColors = new HeatmapColors(); // this contains the default colors
   private long period = DEFAULT_PERIOD;
-
+  private Theme theme = new Theme();
 
   /**
    * Setter-method for an instance of the <code>ConsumerModeConfig</code> class.
@@ -136,6 +137,15 @@ public class ConsumerConfig {
    */
   public void setHeatmapColors(HeatmapColors heatmapColors) {
     this.heatmapColors = heatmapColors;
+  }
+
+  /**
+   * Setter-method for the theme (heatmap colors + background + ...).
+   *
+   * @param theme An instance of the {@code Theme} class.
+   */
+  public void setTheme(Theme theme) {
+    this.theme = theme;
   }
 
   /**
@@ -232,6 +242,15 @@ public class ConsumerConfig {
   }
 
   /**
+   * Getter-method for the theme (heatmap colors + background + ...).
+   *
+   * @return An instance of the {@code Theme} class.
+   */
+  public Theme getTheme() {
+    return theme;
+  }
+
+  /**
    * Getter-method for the minimal time period in ms between advancing the animation.
    *
    * @return The minimal time period in ms between advancing the animation.
@@ -258,13 +277,14 @@ public class ConsumerConfig {
         && Objects.equals(videoTemplatePath, config.videoTemplatePath)
         && weightFactor == config.weightFactor
         && Objects.equals(heatmapColors, config.heatmapColors)
+        //&& Objects.equals(theme, config.theme)
         && period == config.period;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
-        recordImmediately, bufferSize, weightFactor, windowSize, heatmapColors, period);
+        recordImmediately, bufferSize, weightFactor, windowSize, theme, heatmapColors, period);
   }
 
 }
