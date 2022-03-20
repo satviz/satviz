@@ -24,17 +24,35 @@ VideoController::~VideoController() {
 }
 
 void VideoController::resetCamera() {
+#if 0
   ogdf::DRect box = graph.getOgdfAttrs().boundingBox();
   double cx = 0.5 * (box.p1().m_x + box.p2().m_x);
   double cy = 0.5 * (box.p1().m_y + box.p2().m_y);
   camera.setX((float) cx);
   camera.setY((float) cy);
   camera.zoomToFit((float) box.width(), (float) box.height(), display->getWidth(), display->getHeight());
+#endif
 }
 
 void VideoController::processEvent(sf::Event &event) {
   if (event.type == sf::Event::Closed) {
     wantToClose = true;
+  }
+  if (event.type == sf::Event::LostFocus) {
+    mouse_grabbed = false;
+  }
+  if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+    mouse_grabbed = true;
+    mouse_x = event.mouseButton.x;
+    mouse_y = event.mouseButton.y;
+  }
+  if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+    mouse_grabbed = false;
+  }
+  if (event.type == sf::Event::MouseMoved && mouse_grabbed) {
+    camera.drag(mouse_x, mouse_y, event.mouseMove.x, event.mouseMove.y);
+    mouse_x = event.mouseMove.x;
+    mouse_y = event.mouseMove.y;
   }
   if (event.type == sf::Event::MouseWheelScrolled) {
     float factor = 1.0f;
@@ -43,22 +61,9 @@ void VideoController::processEvent(sf::Event &event) {
     } else {
       factor = 1.0f * 1.3f;
     }
-    camera.setZoom(camera.getZoom() * factor);
+    camera.zoom(event.mouseWheelScroll.x, event.mouseWheelScroll.y, factor);
   }
   if (event.type == sf::Event::KeyPressed) {
-    const float SPEED = 200.0f;
-    if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) {
-      camera.setX(camera.getX() - SPEED / camera.getZoom());
-    }
-    if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
-      camera.setX(camera.getX() + SPEED / camera.getZoom());
-    }
-    if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
-      camera.setY(camera.getY() - SPEED / camera.getZoom());
-    }
-    if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
-      camera.setY(camera.getY() + SPEED / camera.getZoom());
-    }
     if (event.key.code == sf::Keyboard::Space) {
       resetCamera();
     }

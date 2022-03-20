@@ -6,26 +6,27 @@
 namespace satviz {
 namespace video {
 
-Camera::SmoothedValue::SmoothedValue(float v) : clock(), oldValue(v), newValue(v), curValue(v) {}
-
-void Camera::SmoothedValue::update() {
-  float delta = clock.getElapsedTime().asSeconds();
-  delta *= Camera::SMOOTH_SPEED;
-  if (delta < 1.0f) {
-    curValue = oldValue * (1.0f - delta) + newValue * delta;
-  } else {
-    curValue = oldValue = newValue;
-  }
+void Camera::update(int width, int height) {
+  this->width  = width;
+  this->height = height;
 }
 
-void Camera::SmoothedValue::set(float v) {
-  oldValue = curValue;
-  newValue = v;
-  clock.restart();
+void Camera::drag(int fromX, int fromY, int toX, int toY) {
+  sf::Vector2f from = deviceCoordsOfPixel(fromX, fromY);
+  sf::Vector2f to   = deviceCoordsOfPixel(toX, toY);
+
+  position.x += (float) width  / (2.0f * zoomFactor) * (from.x - to.x);
+  position.y += (float) height / (2.0f * zoomFactor) * (from.y - to.y);
 }
 
-Camera::Camera() : xpos(), ypos(), zoom(2.0f) {}
+void Camera::zoom(int atX, int atY, float factor) {
+  sf::Vector2f at = deviceCoordsOfPixel(atX, atY);
+  position.x += (float) width  * at.x / 2.0f * (1.0f / zoomFactor - 1.0f / (zoomFactor * factor));
+  position.y += (float) height * at.y / 2.0f * (1.0f / zoomFactor - 1.0f / (zoomFactor * factor));
+  zoomFactor *= factor;
+}
 
+#if 0
 void Camera::zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight) {
   float xZoom = (float) dpyWidth  / boxWidth;
   float yZoom = (float) dpyHeight / boxHeight;
@@ -34,14 +35,7 @@ void Camera::zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHei
   else mZoom *= 0.95f;
   setZoom(mZoom);
 }
-
-void Camera::update(int width, int height) {
-  this->width  = width;
-  this->height = height;
-  xpos.update();
-  ypos.update();
-  zoom.update();
-}
+#endif
 
 void Camera::toMatrix(float matrix[16]) {
   memset(matrix, 0, 16 * sizeof (float));

@@ -2,6 +2,7 @@
 #define SATVIZ_CAMERA_HPP_
 
 #include <SFML/System/Clock.hpp>
+#include <SFML/System/Vector2.hpp>
 
 namespace satviz {
 namespace video {
@@ -11,68 +12,24 @@ namespace video {
  */
 class Camera {
 private:
-  constexpr static const float SMOOTH_SPEED = 1.0f / 0.3f;
-
-  /**
-   * Encapsulates a float value that is smoothed (interpolated) over time.
-   */
-  struct SmoothedValue {
-    sf::Clock clock;
-    float oldValue;
-    float newValue;
-    float curValue;
-
-    /**
-     * Constructor for SmoothedValue.
-     * @param v the starting value
-     */
-    explicit SmoothedValue(float v = 0.0f);
-
-    /**
-     * Update the interpolation factor based on elapsed time.
-     */
-    void update();
-    /**
-     * Set the desired (target) value.
-     * @param v the desired value
-     */
-    void set(float v);
-
-    /**
-     * Get the desired (target) value.
-     * @return the desired value
-     */
-    inline float get() const { return newValue; }
-    /**
-     * Get the current (interpolated) value.
-     * @return the current value
-     */
-    inline float current() const { return curValue; }
-  };
-
-  SmoothedValue xpos;
-  SmoothedValue ypos;
-  SmoothedValue zoom;
+  sf::Vector2f position;
+  float zoomFactor = 1.0f;
 
   int width  = 0;
   int height = 0;
 
-  float getXScale() { return 2.0f / (float) width  * zoom.current(); }
-  float getYScale() { return 2.0f / (float) height * zoom.current(); }
-  float getXTranslation() { return -xpos.current() * getXScale(); }
-  float getYTranslation() { return -ypos.current() * getYScale(); }
+  float getXScale() { return 2.0f / (float) width  * zoomFactor; }
+  float getYScale() { return 2.0f / (float) height * zoomFactor; }
+  float getXTranslation() { return -position.x * getXScale(); }
+  float getYTranslation() { return -position.y * getYScale(); }
+
+  sf::Vector2f deviceCoordsOfPixel(int pixelX, int pixelY) {
+    return sf::Vector2f(
+         ((float) pixelX / (float) width  * 2.0f - 1.0f),
+        -((float) pixelY / (float) height * 2.0f - 1.0f));
+  }
 
 public:
-  Camera();
-
-  inline float getX() { return xpos.get(); }
-  inline void setX(float v) { xpos.set(v); }
-  inline float getY() { return ypos.get(); }
-  inline void setY(float v) { ypos.set(v); }
-  float getZoom() { return zoom.get(); }
-  void setZoom(float z) { zoom.set(z); }
-  void zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight);
-
   /**
    * Give the camera the opportunity to adapt to a (possibly) changed display size & update time-interpolated values.
    *
@@ -80,6 +37,10 @@ public:
    * @param height the height of the display
    */
   void update(int width, int height);
+
+  void drag(int fromX, int fromY, int toX, int toY);
+  void zoom(int atX, int atY, float factor);
+  //void zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight);
 
   /**
    * Create an OpenGL world-to-view matrix based on this camera.
