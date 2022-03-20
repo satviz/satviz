@@ -49,7 +49,8 @@ private:
   /// List of free/unused edge indices
   std::vector<int> free_edges;
 
-  float node_size;
+  float bg_color[3] = { 0.0f, 0.0f, 0.0f };
+  float node_size = 0.0f;
 
   /**
    * Initialize rendering data.
@@ -91,6 +92,7 @@ public:
 
   void applyTheme(const Theme &theme);
 
+  void clearScreen();
   /**
    * Draw the associated graph onto the OpenGL framebuffer.
    *

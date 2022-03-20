@@ -131,7 +131,15 @@ void GraphRenderer::applyTheme(const Theme &theme) {
   glUseProgram(resources.edge_prog);
   glUniform3fv(UNIFORM_EDGE_COLOR, 1, theme.edgeColor);
 
+  bg_color[0] = theme.bgColor[0];
+  bg_color[1] = theme.bgColor[1];
+  bg_color[2] = theme.bgColor[2];
   node_size = theme.nodeSize;
+}
+
+void GraphRenderer::clearScreen() {
+  glClearColor(bg_color[0], bg_color[1], bg_color[2], 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {

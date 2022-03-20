@@ -7,7 +7,7 @@ extern "C" {
 
 typedef struct Theme {
   // All colors are in RGB order, sRGB color space
-  //float bgColor  [3];
+  float bgColor  [3];
   float coldColor[3];
   float hotColor [3];
   float edgeColor[3];
