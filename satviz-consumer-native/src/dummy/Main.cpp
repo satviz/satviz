@@ -33,6 +33,7 @@ int main() {
   graph.submitWeightUpdate(wu);
   graph.submitHeatUpdate(hu);
   graph.recalculateLayout();
+
   while (!controller.wantToClose) {
     controller.nextFrame();
   }

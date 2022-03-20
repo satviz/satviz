@@ -20,6 +20,7 @@ set(SRC_SATVIZ_FILES
   Graph.cpp
   VideoFrame.cpp
   TheoraEncoder.cpp
+  GraphContraction.cpp
 )
 
 add_library(

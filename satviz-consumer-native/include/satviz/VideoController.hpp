@@ -38,6 +38,11 @@ public:
   ~VideoController();
 
   /**
+   * Move the camera so that the entire graph is in view.
+   */
+  void resetCamera();
+
+  /**
    * Process a new frame.
    *
    * This entails reacting to user input, redrawing the visuals, etc.

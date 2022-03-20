@@ -6,6 +6,8 @@ import edu.kit.satviz.consumer.graph.HeatUpdate;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.util.Arrays;
+import java.util.function.IntUnaryOperator;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +25,8 @@ class FrequencyHeatmapTest {
       .map(c -> new ClauseUpdate(c, ClauseUpdate.Type.ADD))
       .toArray(ClauseUpdate[]::new);
 
+  private static final IntUnaryOperator DEFAULT_NODE_MAPPING = literal -> Math.abs(literal) - 1;
+
   private Heatmap heatmap;
 
   @BeforeEach
@@ -32,7 +36,9 @@ class FrequencyHeatmapTest {
 
   @Test
   void test_process_single() {
-    var result = heatmap.process(new ClauseUpdate[] {UPDATES[0]}, null);
+    var result = heatmap.process(
+        new ClauseUpdate[] {UPDATES[0]}, null, DEFAULT_NODE_MAPPING
+    );
     var expected = new HeatUpdate();
     expected.add(0, 1);
     expected.add(5, 1);
@@ -44,7 +50,9 @@ class FrequencyHeatmapTest {
   @Test
   void test_process_multiple_overFull() {
     test_process_multiple_notFull();
-    var result = heatmap.process(Arrays.copyOfRange(UPDATES, 2, 5), null);
+    var result = heatmap.process(
+        Arrays.copyOfRange(UPDATES, 2, 5), null, DEFAULT_NODE_MAPPING
+    );
     var expected = new HeatUpdate();
     expected.add(0, 2f / 3); // 1: 2
     expected.add(1, 2f / 3); // 2: 2
@@ -58,7 +66,9 @@ class FrequencyHeatmapTest {
 
   @Test
   void test_process_multiple_notFull() {
-    var result = heatmap.process(Arrays.copyOfRange(UPDATES, 0, 2), null);
+    var result = heatmap.process(
+        Arrays.copyOfRange(UPDATES, 0, 2), null, DEFAULT_NODE_MAPPING
+    );
     var expected = new HeatUpdate();
     expected.add(0, 1f / 2);
     expected.add(1, 1f / 2);
@@ -71,7 +81,9 @@ class FrequencyHeatmapTest {
 
   @Test
   void test_process_multiple_full() {
-    var result = heatmap.process(Arrays.copyOfRange(UPDATES, 0, 3), null);
+    var result = heatmap.process(
+        Arrays.copyOfRange(UPDATES, 0, 3), null, DEFAULT_NODE_MAPPING
+    );
     var expected = new HeatUpdate();
     expected.add(0, 2f / 3); // 0: 2,
     expected.add(1, 2f / 3); // 1: 2,
@@ -84,7 +96,7 @@ class FrequencyHeatmapTest {
 
   @Test
   void test_reset() {
-    heatmap.process(UPDATES, null);
+    heatmap.process(UPDATES, null, DEFAULT_NODE_MAPPING);
     heatmap.reset();
     test_process_single();
   }

@@ -22,9 +22,15 @@ public final class HeatmapColorsType implements ArgumentType<HeatmapColors> {
   }
 
   @Override
-  public HeatmapColors convert(ArgumentParser parser, Argument arg, String value) throws ArgumentParserException {
+  public HeatmapColors convert(ArgumentParser parser, Argument arg, String value)
+      throws ArgumentParserException {
+    if (!value.matches("#([a-fA-F0-9]{6}):#([a-fA-F0-9]{6})")) {
+      throw new ArgumentParserException("Invalid heatmap colors.", parser);
+    }
+    String[] stringArray = value.split(":");
     HeatmapColors heatmapColors = new HeatmapColors();
-    // TODO: 25.02.2022
+    heatmapColors.setFromColor(Integer.parseInt(stringArray[0].substring(1)));
+    heatmapColors.setToColor(Integer.parseInt(stringArray[1].substring(1)));
     return heatmapColors;
   }
 

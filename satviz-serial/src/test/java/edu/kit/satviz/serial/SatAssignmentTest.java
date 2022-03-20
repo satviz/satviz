@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,5 +45,33 @@ class SatAssignmentTest {
     SatAssignment result = serial.deserialize(byteIn);
 
     assertEquals(assign, result); // .equals() implemented in SatAssignment
+  }
+
+  @Test
+  void testReset() {
+    SatAssignment assign = new SatAssignment(10);
+    assign.set(5, SatAssignment.VariableState.SET);
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+    try {
+      serial.serialize(assign, byteOut);
+    } catch (IOException e) {
+      fail(e);
+    }
+
+    SatAssignmentSerialBuilder builder = new SatAssignmentSerialBuilder();
+    try {
+      assertFalse(builder.addByte((byte) 42));
+      // don't want to use this byte
+      builder.reset();
+      for(byte b : byteOut.toByteArray()) {
+        builder.addByte(b);
+      }
+      SatAssignment assign2 = builder.getObject();
+      assertNotNull(assign2);
+      assertEquals(assign, assign2);
+
+    } catch (SerializationException e) {
+      fail(e);
+    }
   }
 }

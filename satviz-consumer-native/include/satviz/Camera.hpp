@@ -63,6 +63,7 @@ public:
   inline void setY(float v) { ypos.set(v); }
   float getZoom() { return zoom.get(); }
   void setZoom(float z) { zoom.set(z); }
+  void zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight);
 
   void update();
 

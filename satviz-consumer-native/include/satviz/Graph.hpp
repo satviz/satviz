@@ -146,6 +146,7 @@ public:
    */
   double getY(ogdf::node v) { return attrs.y(v); }
 
+  ogdf::node getNodeHandle(int index) { return node_handles[index]; }
   ogdf::edge getEdgeHandle(int index1, int index2);
 };
 

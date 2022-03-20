@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.IntUnaryOperator;
 
 /**
  * A class that manages incoming {@link ClauseUpdate}s. A {@code ClauseCoordinator}
@@ -65,6 +66,7 @@ public class ClauseCoordinator implements AutoCloseable {
   private Runnable changeListener;
 
   private final int variableAmount;
+  private final IntUnaryOperator nodeMapping;
 
   /**
    * Create a new {@code ClauseCoordinator}.
@@ -72,12 +74,16 @@ public class ClauseCoordinator implements AutoCloseable {
    * @param graph The underlying graph
    * @param tempDir The directory where the internal files used by this class will be stored.
    * @param variableAmount The amount of variables in the corresponding SAT instance.
+   * @param nodeMapping A mapping from variables to nodes.
    * @throws IOException If there is an I/O error while setting up the internal files
    */
-  public ClauseCoordinator(Graph graph, Path tempDir, int variableAmount) throws IOException {
+  public ClauseCoordinator(
+      Graph graph, Path tempDir, int variableAmount, IntUnaryOperator nodeMapping
+  ) throws IOException {
     this.graph = graph;
     this.tempDir = tempDir;
     this.variableAmount = variableAmount;
+    this.nodeMapping = nodeMapping;
 
     this.snapshotDir = Files.createTempDirectory(tempDir, "satviz-snapshots");
     snapshotDir.toFile().deleteOnExit();
@@ -118,11 +124,12 @@ public class ClauseCoordinator implements AutoCloseable {
    * this method will advance the highest amount of updates possible.
    *
    * @param numUpdates The amount of updates to process. This is a no-op if {@code numUpdates < 1}.
+   * @return the amount of clauses that were actually advanced.
    * @throws IOException If an I/O error occurs.
    * @throws SerializationException If the updates can't be deserialised from the external buffer.
    *                                This may only happen as a result of external interference with
    *                                the internal files used by this object.
-   * @return the amount of clauses that were actually advanced.
+   *
    */
   public int advanceVisualization(int numUpdates)
       throws IOException, SerializationException {
@@ -211,7 +218,7 @@ public class ClauseCoordinator implements AutoCloseable {
       ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
       actual = updates.length;
       for (ClauseUpdateProcessor processor : processors) {
-        graph.submitUpdate(processor.process(updates, graph));
+        graph.submitUpdate(processor.process(updates, graph, nodeMapping));
       }
       // this operation is not atomic although currentUpdate is volatile.
       // However, this is no problem because write access to currentUpdate is always coordinated

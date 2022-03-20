@@ -8,6 +8,7 @@ import edu.kit.satviz.consumer.processing.Mediator;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ForkJoinPool;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -65,13 +66,15 @@ public class VisualizationController {
   @FXML
   private Button pauseOrContinueVisualizationButton;
   @FXML
+  private Button resetCameraButton;
+  @FXML
+  private Button relayoutButton;
+  @FXML
   private Spinner<Integer> processedClausesSpinner; // TODO: convert to Spinner<Long>
   @FXML
   private Label totalClausesLabel;
   @FXML
   private Slider processedClausesSlider;
-  @FXML
-  private Button relayoutButton;
 
   // ATTRIBUTES (OTHER)
 
@@ -100,6 +103,7 @@ public class VisualizationController {
   public VisualizationController(Mediator mediator, ConsumerConfig config, int variableCount) {
     this.variableCount = variableCount;
     this.mediator = mediator;
+    this.mediator.registerCloseAction(Platform::exit);
     this.config = config;
   }
 
@@ -224,6 +228,11 @@ public class VisualizationController {
   }
 
   @FXML
+  private void resetCamera() {
+    mediator.resetCamera();
+  }
+
+  @FXML
   private void relayout() {
     mediator.relayout();
   }
@@ -245,8 +254,13 @@ public class VisualizationController {
   // METHODS (OTHER)
 
   public void quit() {
-    mediator.quit();
-    Platform.exit();
+    ForkJoinPool.commonPool().execute(() -> {
+      try {
+        mediator.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    });
   }
 
   /**
