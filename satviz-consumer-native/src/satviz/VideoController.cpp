@@ -60,11 +60,13 @@ void VideoController::processEvent(sf::Event &event) {
     }
     camera.zoom(event.mouseWheelScroll.x, event.mouseWheelScroll.y, factor);
   }
+#if 0
   if (event.type == sf::Event::KeyPressed) {
     if (event.key.code == sf::Keyboard::Space) {
       resetCamera();
     }
   }
+#endif
 }
 
 void VideoController::nextFrame() {

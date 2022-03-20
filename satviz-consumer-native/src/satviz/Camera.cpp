@@ -12,17 +12,15 @@ void Camera::update(int width, int height) {
 }
 
 void Camera::drag(int fromX, int fromY, int toX, int toY) {
-  sf::Vector2f from = deviceCoordsOfPixel(fromX, fromY);
-  sf::Vector2f to   = deviceCoordsOfPixel(toX, toY);
-
-  position.x += (float) width  / (2.0f * zoomFactor) * (from.x - to.x);
-  position.y += (float) height / (2.0f * zoomFactor) * (from.y - to.y);
+  position.x += (float) (fromX - toX) / zoomFactor;
+  position.y -= (float) (fromY - toY) / zoomFactor;
 }
 
 void Camera::zoom(int atX, int atY, float factor) {
   sf::Vector2f at = deviceCoordsOfPixel(atX, atY);
-  position.x += (float) width  * at.x / 2.0f * (1.0f / zoomFactor - 1.0f / (zoomFactor * factor));
-  position.y += (float) height * at.y / 2.0f * (1.0f / zoomFactor - 1.0f / (zoomFactor * factor));
+  float ratio = 1.0f / zoomFactor - 1.0f / (zoomFactor * factor);
+  position.x += (float) width  * at.x / 2.0f * ratio;
+  position.y += (float) height * at.y / 2.0f * ratio;
   zoomFactor *= factor;
 }
 
