@@ -90,9 +90,17 @@ public:
   GraphRenderer(graph::Graph &gr);
   virtual ~GraphRenderer();
 
+  /**
+   * Applies the contents of a Theme to the renderer.
+   * @param theme the theme to apply
+   */
   void applyTheme(const Theme &theme);
 
+  /**
+   * Overwrite the contents of the screen with the current background color.
+   */
   void clearScreen();
+
   /**
    * Draw the associated graph onto the OpenGL framebuffer.
    *

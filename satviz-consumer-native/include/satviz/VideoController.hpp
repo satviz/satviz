@@ -37,6 +37,10 @@ public:
   VideoController(graph::Graph &gr, Display *dpy);
   ~VideoController();
 
+  /**
+   * Applies the contents of a Theme to the running visualization.
+   * @param theme the theme to apply
+   */
   void applyTheme(const Theme &theme) { renderer->applyTheme(theme); }
 
   /**

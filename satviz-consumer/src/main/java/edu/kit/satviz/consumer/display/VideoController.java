@@ -188,6 +188,10 @@ public class VideoController extends NativeObject {
     }
   }
 
+  /**
+   * Applies the contents of a Theme to the running visualization.
+   * @param theme the theme to apply
+   */
   public void applyTheme(Theme theme) {
     try (ResourceScope local = ResourceScope.newConfinedScope()) {
       MemorySegment segment = theme.toSegment(local);

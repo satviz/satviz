@@ -42,6 +42,11 @@ public class Theme {
     }
   }
 
+  /**
+   * Write the contents of this theme into a new native object.
+   * @param scope the resource scope to which the new native object should be bound.
+   * @return a memory segment pointing to the native object.
+   */
   public MemorySegment toSegment(ResourceScope scope) {
     MemorySegment segment = MemorySegment.allocateNative(LAYOUT, scope);
 
