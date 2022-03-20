@@ -37,13 +37,15 @@ public final class HeatUpdate implements GraphUpdate {
   private final Map<Integer, Float> values = new HashMap<>();
 
   /**
-   * Add a node whose heat should be adjusted via this batch of updates.
+   * Add a node whose heat should be adjusted via this batch of updates.<br>
+   * If there already is a heat value stored for the given index,
+   * it will be replaced iff the given value is greater than the existing one.
    *
    * @param index The index of the node to update
    * @param heat The new heat value, a value between 0.0f and 1.0f
    */
   public void add(int index, float heat) {
-    values.put(index, heat);
+    values.merge(index, heat, Float::max);
   }
 
   @Override
