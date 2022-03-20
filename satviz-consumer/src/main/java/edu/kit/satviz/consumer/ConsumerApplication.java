@@ -11,7 +11,6 @@ import edu.kit.satviz.consumer.display.DisplayType;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.consumer.graph.HeatUpdate;
-import edu.kit.satviz.consumer.graph.WeightUpdate;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.gui.config.ConfigStarter;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationController;
@@ -28,7 +27,6 @@ import edu.kit.satviz.network.OfferType;
 import edu.kit.satviz.network.ProducerId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
-import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -45,7 +43,6 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
-import javafx.application.Application;
 import net.lingala.zip4j.ZipFile;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
@@ -111,7 +108,7 @@ public final class ConsumerApplication {
     }); // TODO: 05.03.2022 remove try catch after merging with latest network version
 
     if (!config.isNoGui()) {
-      startVisualisationGui(mediator, config, initialData.variables, coordinator);
+      startVisualisationGui(mediator, config, initialData.variables);
     }
 
     connection.connect(ConsumerApplication.pid, mediator);
@@ -298,8 +295,7 @@ public final class ConsumerApplication {
   private static void startVisualisationGui(
       Mediator mediator,
       ConsumerConfig config,
-      int variableAmount,
-      ClauseCoordinator coordinator
+      int variableAmount
   ) {
     VisualizationController visController = new VisualizationController(
         mediator,
