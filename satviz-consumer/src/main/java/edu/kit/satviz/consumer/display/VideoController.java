@@ -2,7 +2,7 @@ package edu.kit.satviz.consumer.display;
 
 import edu.kit.satviz.consumer.bindings.NativeInvocationException;
 import edu.kit.satviz.consumer.bindings.NativeObject;
-import edu.kit.satviz.consumer.bindings.Struct;
+import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.graph.Graph;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -11,7 +11,6 @@ import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
-import jdk.incubator.foreign.SegmentAllocator;
 
 /**
  * Class used to render and record the visualisation done by satviz.

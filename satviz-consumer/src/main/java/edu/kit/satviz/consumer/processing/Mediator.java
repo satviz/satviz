@@ -2,7 +2,7 @@ package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
-import edu.kit.satviz.consumer.display.Theme;
+import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.network.ConsumerConnectionListener;

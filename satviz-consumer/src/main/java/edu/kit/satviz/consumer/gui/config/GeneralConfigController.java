@@ -9,7 +9,7 @@ import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
-import edu.kit.satviz.consumer.display.Theme;
+import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,6 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 

@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import edu.kit.satviz.consumer.display.Theme;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorDeserializer;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorSerializer;
 import javafx.scene.paint.Color;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,8 @@ class JsonConfigParsingTest {
   void setUp() {
     SimpleModule m = new SimpleModule("PathToString");
     m.addSerializer(Path.class, new ToStringSerializer());
+    m.addSerializer(Color.class, new ColorSerializer());
+    m.addDeserializer(Color.class, new ColorDeserializer());
     this.mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
     mapper.registerModule(m);
     setUpConfig2();
@@ -71,8 +74,8 @@ class JsonConfigParsingTest {
     modeConfig.setSource(CONFIG2_SOURCE);
     modeConfig.setSourcePath(CONFIG2_SOURCE_PATH);
     HeatmapColors colors = new HeatmapColors();
-    colors.setHotColor(Color.color(1, 0.4, 0.4));
-    colors.setColdColor(Color.color(0, 0, 0.5));
+    colors.setHotColor(Color.web("#FF0000"));
+    colors.setColdColor(Color.web("#0000FF"));
     config2 = new ConsumerConfig();
     config2.setModeConfig(modeConfig);
     config2.setInstancePath(INSTANCE_PATH);
@@ -104,6 +107,7 @@ class JsonConfigParsingTest {
         JsonConfigParsingTest.class.getResource(CONFIG2_JSON_PATH),
         ConsumerConfig.class
     );
+    System.out.println("");
     assertEquals(config2, config);
   }
 

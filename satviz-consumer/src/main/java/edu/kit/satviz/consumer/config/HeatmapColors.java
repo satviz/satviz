@@ -19,16 +19,8 @@ public class HeatmapColors {
    */
   public static final Color DEFAULT_COLD_COLOR = Color.color(0, 0, 1);
 
-  private Color hotColor;
-  private Color coldColor;
-
-  /**
-   * Simple constructor for instances of the <code>HeatmapColors</code> class.
-   */
-  public HeatmapColors() {
-    this.hotColor = DEFAULT_HOT_COLOR;
-    this.coldColor = DEFAULT_COLD_COLOR;
-  }
+  private Color hotColor = DEFAULT_HOT_COLOR;
+  private Color coldColor = DEFAULT_COLD_COLOR;
 
   /**
    * This method sets the hot color.

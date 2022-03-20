@@ -8,13 +8,12 @@ import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
+import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
-
-import edu.kit.satviz.consumer.display.Theme;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;

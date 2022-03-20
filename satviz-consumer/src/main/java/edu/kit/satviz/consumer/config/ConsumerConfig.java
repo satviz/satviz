@@ -1,6 +1,5 @@
 package edu.kit.satviz.consumer.config;
 
-import edu.kit.satviz.consumer.display.Theme;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

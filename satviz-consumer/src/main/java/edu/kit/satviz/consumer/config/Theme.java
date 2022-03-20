@@ -1,8 +1,8 @@
-package edu.kit.satviz.consumer.display;
+package edu.kit.satviz.consumer.config;
 
 import edu.kit.satviz.consumer.bindings.NativeObject;
-import edu.kit.satviz.consumer.config.HeatmapColors;
 import java.lang.invoke.VarHandle;
+import java.util.Objects;
 import javafx.scene.paint.Color;
 import jdk.incubator.foreign.CLinker;
 import jdk.incubator.foreign.MemoryLayout;
@@ -12,8 +12,8 @@ import jdk.incubator.foreign.ResourceScope;
 
 public class Theme {
 
-  public static final Color DEFAULT_BACKGROUND_COLOR = Color.color(0.3d, 0.3d, 0.3d);
-  public static final Color DEFAULT_EDGE_COLOR = Color.color(1.0d, 1.0d, 1.0d);
+  public static final Color DEFAULT_BACKGROUND_COLOR = Color.web("#4d4d4d");
+  public static final Color DEFAULT_EDGE_COLOR = Color.WHITE;
 
   private static final MemoryLayout LAYOUT = NativeObject.paddedStruct(
       MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT).withName("bgColor"),
@@ -111,8 +111,22 @@ public class Theme {
 
   @Override
   public boolean equals(Object o) {
-    // TODO: 20.03.22
-    return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    Theme theme = (Theme) o;
+    return Objects.equals(bgColor, theme.bgColor)
+        && Objects.equals(heatmapColors, theme.heatmapColors)
+        && Objects.equals(edgeColor, theme.edgeColor)
+        && nodeSize == nodeSize;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(bgColor, heatmapColors, edgeColor, nodeSize);
   }
 
 }
