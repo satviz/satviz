@@ -14,20 +14,8 @@ class Camera {
 private:
   sf::Vector2f position;
   float zoomFactor = 1.0f;
-
   int width  = 0;
   int height = 0;
-
-  float getXScale() { return 2.0f / (float) width  * zoomFactor; }
-  float getYScale() { return 2.0f / (float) height * zoomFactor; }
-  float getXTranslation() { return -position.x * getXScale(); }
-  float getYTranslation() { return -position.y * getYScale(); }
-
-  sf::Vector2f deviceCoordsOfPixel(int pixelX, int pixelY) {
-    return sf::Vector2f(
-         ((float) pixelX / (float) width  * 2.0f - 1.0f),
-        -((float) pixelY / (float) height * 2.0f - 1.0f));
-  }
 
 public:
   /**

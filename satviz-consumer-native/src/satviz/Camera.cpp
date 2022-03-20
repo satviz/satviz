@@ -17,10 +17,9 @@ void Camera::drag(int fromX, int fromY, int toX, int toY) {
 }
 
 void Camera::zoom(int atX, int atY, float factor) {
-  sf::Vector2f at = deviceCoordsOfPixel(atX, atY);
   float ratio = 1.0f / zoomFactor - 1.0f / (zoomFactor * factor);
-  position.x += (float) width  * at.x / 2.0f * ratio;
-  position.y += (float) height * at.y / 2.0f * ratio;
+  position.x += ratio * ((float) atX - (float) width  / 2.0f);
+  position.y -= ratio * ((float) atY - (float) height / 2.0f);
   zoomFactor *= factor;
 }
 
@@ -37,12 +36,17 @@ void Camera::focusOnBox(float boxX1, float boxY1, float boxX2, float boxY2) {
 }
 
 void Camera::toMatrix(float matrix[16]) {
+  float xScale = 2.0f / (float) width  * zoomFactor;
+  float yScale = 2.0f / (float) height * zoomFactor;
+  float xTranslation = -position.x * xScale;
+  float yTranslation = -position.y * yScale;
+
   memset(matrix, 0, 16 * sizeof (float));
-  matrix[ 0] = getXScale();
-  matrix[ 5] = getYScale();
+  matrix[ 0] = xScale;
+  matrix[ 5] = yScale;
   matrix[10] = -1.0f;
-  matrix[12] = getXTranslation();
-  matrix[13] = getYTranslation();
+  matrix[12] = xTranslation;
+  matrix[13] = yTranslation;
   matrix[15] = 1.0f;
 }
 
