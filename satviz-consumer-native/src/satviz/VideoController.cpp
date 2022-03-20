@@ -64,37 +64,6 @@ void VideoController::processEvent(sf::Event &event) {
     if (event.key.code == sf::Keyboard::Space) {
       resetCamera();
     }
-#if 0
-    if (event.key.code == sf::Keyboard::K) {
-      ogdf::Graph &og = graph.getOgdfGraph();
-      ogdf::node node1 = og.chooseNode();
-      ogdf::node node2 = og.chooseNode();
-      ogdf::edge edge = og.searchEdge(node1, node2, false);
-      double old_weight = 0.0;
-      if (edge) {
-        old_weight = graph.getOgdfAttrs().doubleWeight(edge);
-      }
-      double new_weight = (double) rand() / (double) RAND_MAX;
-      graph::WeightUpdate wu;
-      wu.values.push_back(std::make_tuple(node1->index(), node2->index(), new_weight - old_weight));
-      graph.submitWeightUpdate(wu);
-    }
-    if (event.key.code == sf::Keyboard::R) {
-      switch (recording_state) {
-        case REC_OFF:
-          startRecording("temp.ogv", new TheoraEncoder);
-          break;
-        case REC_ON:
-          finishRecording();
-          break;
-        default:
-          break;
-      }
-    }
-    if (event.key.code == sf::Keyboard::L) {
-      graph.recalculateLayout();
-    }
-#endif
   }
 }
 
