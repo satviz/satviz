@@ -306,7 +306,7 @@ public final class ConsumerApplication {
         config,
         variableAmount
     );
-    coordinator.registerChangeListener(visController::onClauseUpdate);
+    mediator.registerFrameAction(visController::onClauseUpdate);
     VisualizationStarter.setVisualizationController(visController);
     GuiUtils.launch(VisualizationStarter.class);
   }
