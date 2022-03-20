@@ -25,11 +25,6 @@ public class NetworkBlueprint {
     }
   }
 
-  private int unsignedType(byte type) {
-    // convenience method to work around java signed bytes
-    return (type >= 0) ? type : (int) type + 256;
-  }
-
   /**
    * Serializes an object according to its type.
    *
@@ -41,7 +36,7 @@ public class NetworkBlueprint {
    */
   public void serialize(byte type, Object obj, OutputStream out) throws IOException,
       SerializationException {
-    Serializer<?> serial = serializers[unsignedType(type)];
+    Serializer<?> serial = serializers[Byte.toUnsignedInt(type)];
     if (serial != null) {
       serial.serializeUnsafe(obj, out);
     } else {
@@ -56,7 +51,7 @@ public class NetworkBlueprint {
    * @return a new builder for the given type of objects, <code>null</code> if not specified
    */
   public SerialBuilder<?> getBuilder(int type) {
-    Serializer<?> s = serializers[unsignedType((byte) type)];
+    Serializer<?> s = serializers[Byte.toUnsignedInt(type)];
     if (s != null) {
       return s.getBuilder();
     }
