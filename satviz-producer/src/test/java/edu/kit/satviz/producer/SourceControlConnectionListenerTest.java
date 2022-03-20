@@ -43,7 +43,7 @@ class SourceControlConnectionListenerTest {
     var listener = new SourceControlConnectionListener(connection, data.source());
     listener.onConnect();
     listener.getSourceThread().join();
-    verify(connection).terminateFailed(anyString());
+    verify(connection).terminateOtherwise(anyString());
   }
 
   @Test
