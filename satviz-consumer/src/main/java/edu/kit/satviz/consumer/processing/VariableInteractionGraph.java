@@ -21,6 +21,9 @@ import java.util.function.IntUnaryOperator;
  */
 public abstract class VariableInteractionGraph implements ClauseUpdateProcessor {
 
+  public static final VariableInteractionGraphImplementation DEFAULT_IMPLEMENTATION =
+      VariableInteractionGraphImplementation.RING;
+
   private WeightFactor weightFactor;
   private final StringSerializer serializer;
 
