@@ -35,22 +35,21 @@ void Camera::zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHei
   setZoom(mZoom);
 }
 
-void Camera::update() {
+void Camera::update(int width, int height) {
+  this->width  = width;
+  this->height = height;
   xpos.update();
   ypos.update();
   zoom.update();
 }
 
-void Camera::toMatrix(float matrix[16], int width, int height) {
-  float zoom = this->zoom.current();
-  float xScale = 2.0f / (float) width  * zoom;
-  float yScale = 2.0f / (float) height * zoom;
+void Camera::toMatrix(float matrix[16]) {
   memset(matrix, 0, 16 * sizeof (float));
-  matrix[ 0] = xScale;
-  matrix[ 5] = yScale;
+  matrix[ 0] = getXScale();
+  matrix[ 5] = getYScale();
   matrix[10] = -1.0f;
-  matrix[12] = -xpos.current() * xScale;
-  matrix[13] = -ypos.current() * yScale;
+  matrix[12] = getXTranslation();
+  matrix[13] = getYTranslation();
   matrix[15] = 1.0f;
 }
 

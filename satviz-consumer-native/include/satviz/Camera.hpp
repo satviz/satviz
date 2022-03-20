@@ -54,6 +54,14 @@ private:
   SmoothedValue ypos;
   SmoothedValue zoom;
 
+  int width  = 0;
+  int height = 0;
+
+  float getXScale() { return 2.0f / (float) width  * zoom.current(); }
+  float getYScale() { return 2.0f / (float) height * zoom.current(); }
+  float getXTranslation() { return -xpos.current() * getXScale(); }
+  float getYTranslation() { return -ypos.current() * getYScale(); }
+
 public:
   Camera();
 
@@ -65,15 +73,19 @@ public:
   void setZoom(float z) { zoom.set(z); }
   void zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight);
 
-  void update();
+  /**
+   * Give the camera the opportunity to adapt to a (possibly) changed display size & update time-interpolated values.
+   *
+   * @param width  the width of the display
+   * @param height the height of the display
+   */
+  void update(int width, int height);
 
   /**
    * Create an OpenGL world-to-view matrix based on this camera.
    * @param matrix output parameter
-   * @param width  the width of the display
-   * @param height the height of the display
    */
-  void toMatrix(float *matrix, int width, int height);
+  void toMatrix(float *matrix);
 };
 
 } // namespace video

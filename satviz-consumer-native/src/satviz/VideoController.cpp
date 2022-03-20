@@ -101,7 +101,7 @@ void VideoController::nextFrame() {
   while (display->pollEvent(event)) {
     processEvent(event);
   }
-  camera.update();
+  camera.update(display->getWidth(), display->getHeight());
   display->startFrame();
   renderer->draw(camera, display->getWidth(), display->getHeight());
   if (recording_state == REC_ON || recording_state == REC_WINDUP) {
