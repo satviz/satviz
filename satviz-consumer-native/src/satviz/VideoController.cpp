@@ -14,6 +14,7 @@ VideoController::VideoController(graph::Graph &gr, Display *dpy)
   renderer = new GraphRenderer(graph);
   graph.addObserver(renderer);
   renderer->onReload();
+  camera.update(display->getWidth(), display->getHeight());
 }
 
 VideoController::~VideoController() {
@@ -24,14 +25,10 @@ VideoController::~VideoController() {
 }
 
 void VideoController::resetCamera() {
-#if 0
   ogdf::DRect box = graph.getOgdfAttrs().boundingBox();
-  double cx = 0.5 * (box.p1().m_x + box.p2().m_x);
-  double cy = 0.5 * (box.p1().m_y + box.p2().m_y);
-  camera.setX((float) cx);
-  camera.setY((float) cy);
-  camera.zoomToFit((float) box.width(), (float) box.height(), display->getWidth(), display->getHeight());
-#endif
+  camera.focusOnBox(
+      (float) box.p1().m_x, (float) box.p1().m_y,
+      (float) box.p2().m_x, (float) box.p2().m_y);
 }
 
 void VideoController::processEvent(sf::Event &event) {

@@ -26,16 +26,17 @@ void Camera::zoom(int atX, int atY, float factor) {
   zoomFactor *= factor;
 }
 
-#if 0
-void Camera::zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight) {
-  float xZoom = (float) dpyWidth  / boxWidth;
-  float yZoom = (float) dpyHeight / boxHeight;
+void Camera::focusOnBox(float boxX1, float boxY1, float boxX2, float boxY2) {
+  position.x = 0.5f * (boxX1 + boxX2);
+  position.y = 0.5f * (boxY1 + boxY2);
+
+  float xZoom = (float) width  / (boxX2 - boxX1);
+  float yZoom = (float) height / (boxY2 - boxY1);
   float mZoom = xZoom < yZoom ? xZoom : yZoom;
   if (std::isinf(mZoom)) mZoom = 2.0f;
   else mZoom *= 0.95f;
-  setZoom(mZoom);
+  zoomFactor = mZoom;
 }
-#endif
 
 void Camera::toMatrix(float matrix[16]) {
   memset(matrix, 0, 16 * sizeof (float));

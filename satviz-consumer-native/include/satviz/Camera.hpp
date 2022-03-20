@@ -40,7 +40,7 @@ public:
 
   void drag(int fromX, int fromY, int toX, int toY);
   void zoom(int atX, int atY, float factor);
-  //void zoomToFit(float boxWidth, float boxHeight, int dpyWidth, int dpyHeight);
+  void focusOnBox(float boxX1, float boxY1, float boxX2, float boxY2);
 
   /**
    * Create an OpenGL world-to-view matrix based on this camera.
