@@ -1,20 +1,23 @@
 package edu.kit.satviz.sat;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import edu.kit.satviz.sat.SatAssignment.VariableState;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 /**
- * This class tests the functionality of the <code>SatAssignment</code> class.
+ * This class tests the functionality of the {@code SatAssignment} class.
  */
 class SatAssignmentTest {
 
   /**
    * This tests, whether invalid parameters result in an
-   * <code>IllegalArgumentException</code> in the constructor.
+   * {@code IllegalArgumentException} in the constructor.
    */
   @Test
   void constructor_invalidParameters_test() {
@@ -29,7 +32,7 @@ class SatAssignmentTest {
   }
 
   /**
-   * This test recursively tests the <code>set()</code> and <code>get()</code>
+   * This test recursively tests the {@code set()} and {@code get()}
    * for a lot of possible combinations of variables and states.
    */
   @Test
@@ -70,7 +73,7 @@ class SatAssignmentTest {
 
   /**
    * This tests, whether invalid parameters result in an
-   * <code>IllegalArgumentException</code> in the <code>set()</code> method.
+   * {@code IllegalArgumentException} in the {@code set()} method.
    */
   @Test
   void set_invalidParameters_test() {
@@ -92,7 +95,7 @@ class SatAssignmentTest {
 
   /**
    * This tests, whether invalid parameters result in an
-   * <code>IllegalArgumentException</code> in the <code>get()</code> method.
+   * {@code IllegalArgumentException} in the {@code get()} method.
    */
   @Test
   void get_invalidParameters_test() {
@@ -109,8 +112,8 @@ class SatAssignmentTest {
   }
 
   /**
-   * This tests, whether an instance of <code>SatAssignment</code> is initialised
-   * with <code>DONTCARE</code> for every variable state.
+   * This tests, whether an instance of {@code SatAssignment} is initialised
+   * with {@code DONTCARE} for every variable state.
    */
   @Test
   void get_noAssignment_test() {
@@ -121,8 +124,8 @@ class SatAssignmentTest {
   }
 
   /**
-   * This tests, whether invalid parameters result in an <code>IllegalArgumentException</code>
-   * in the <code>convertVariableStateToIntState()</code> method.
+   * This tests, whether invalid parameters result in an {@code IllegalArgumentException}
+   * in the {@code convertVariableStateToIntState()} method.
    */
   @Test
   void convertVariableStateToIntState_invalidParameters_test() {
@@ -138,6 +141,78 @@ class SatAssignmentTest {
             IllegalArgumentException.class,
             () -> SatAssignment.convertVariableStateToIntState(-10, VariableState.SET)
     );
+  }
+
+  /**
+   * This tests, whether the {@code fromIntState()} method returns the correct
+   * {@code VariableState} for a given integer.
+   */
+  @Test
+  void fromIntState_test() {
+    assertEquals(VariableState.DONTCARE, VariableState.fromIntState(0));
+    assertEquals(VariableState.SET, VariableState.fromIntState(1));
+    assertEquals(VariableState.SET, VariableState.fromIntState(999999));
+    assertEquals(VariableState.UNSET, VariableState.fromIntState(-1));
+    assertEquals(VariableState.UNSET, VariableState.fromIntState(-7777));
+  }
+
+  /**
+   * This tests, whether the overridden {@code equals()} method works as intended.
+   */
+  @Test
+  void equals_test() {
+    SatAssignment satAssignment1 = new SatAssignment(10);
+    satAssignment1.set(3, VariableState.SET);
+    satAssignment1.set(4, VariableState.UNSET);
+
+    SatAssignment satAssignment2 = new SatAssignment(10);
+    satAssignment2.set(3, VariableState.SET);
+    satAssignment2.set(4, VariableState.UNSET);
+
+    SatAssignment satAssignment3 = new SatAssignment(10);
+    satAssignment3.set(4, VariableState.UNSET);
+
+    SatAssignment satAssignment4 = new SatAssignment(10);
+    satAssignment4.set(3, VariableState.SET);
+    satAssignment4.set(4, VariableState.UNSET);
+    satAssignment4.set(6, VariableState.SET);
+
+    SatAssignment satAssignment5 = new SatAssignment(9);
+    satAssignment5.set(3, VariableState.SET);
+    satAssignment5.set(4, VariableState.UNSET);
+
+    assertEquals(satAssignment1, satAssignment1);
+    assertEquals(satAssignment1, satAssignment2);
+    assertNotEquals(satAssignment1, null);
+    assertNotEquals(satAssignment1, new Object());
+    assertNotEquals(satAssignment1, satAssignment3);
+    assertNotEquals(satAssignment1, satAssignment4);
+    assertNotEquals(satAssignment1, satAssignment5);
+  }
+
+  /**
+   * This tests, whether the overridden {@code hashCode()} method works as intended.
+   */
+  @Test
+  void hashCode_test() {
+    SatAssignment satAssignment1 = new SatAssignment(10);
+    satAssignment1.set(3, VariableState.SET);
+    satAssignment1.set(4, VariableState.UNSET);
+
+    SatAssignment satAssignment2 = new SatAssignment(10);
+    satAssignment2.set(3, VariableState.SET);
+    satAssignment2.set(4, VariableState.UNSET);
+
+    SatAssignment satAssignment3 = new SatAssignment(10);
+    satAssignment3.set(4, VariableState.UNSET);
+
+    Map<SatAssignment, String> statusMap = new HashMap<>();
+    statusMap.put(satAssignment1, "status: 1.1");
+    assertTrue(statusMap.containsKey(satAssignment2));
+    statusMap.put(satAssignment2, "status: 2.1");
+    assertEquals("status: 2.1", statusMap.get(satAssignment1));
+    statusMap.put(satAssignment3, "status: 3.1");
+    assertEquals(2, statusMap.keySet().size());
   }
 
 }
