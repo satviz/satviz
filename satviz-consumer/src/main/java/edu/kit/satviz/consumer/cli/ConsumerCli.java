@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
+
+import edu.kit.satviz.consumer.display.Theme;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -136,7 +138,10 @@ public final class ConsumerCli {
     config.setBufferSize(namespace.getInt("buffer"));
     config.setWeightFactor(namespace.get("weight"));
     config.setWindowSize(namespace.getInt("window"));
-    config.setHeatmapColors(namespace.get("colors"));
+    Theme theme = new Theme();
+    HeatmapColors heatmapColors = namespace.get("colors");
+    theme.setHeatmapColors(heatmapColors);
+    config.setTheme(theme);
     return config;
   }
 

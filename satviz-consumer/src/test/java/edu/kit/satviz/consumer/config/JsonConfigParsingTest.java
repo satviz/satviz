@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import edu.kit.satviz.consumer.display.Theme;
 import javafx.scene.paint.Color;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +32,6 @@ class JsonConfigParsingTest {
   private static final int CONFIG1_PORT = 12345;
   private static final ConsumerMode CONFIG2_MODE = ConsumerMode.EMBEDDED;
   private static final int CONFIG2_BUFFER_SIZE = 350;
-  private static final int CONFIG2_FROM_COLOR = 12;
-  private static final int CONFIG2_TO_COLOR = 10;
   private static final Path CONFIG2_SOURCE_PATH = Paths.get("foo/bar/solver.so");
   private static final EmbeddedModeSource CONFIG2_SOURCE = EmbeddedModeSource.SOLVER;
 
@@ -79,7 +78,9 @@ class JsonConfigParsingTest {
     config2.setInstancePath(INSTANCE_PATH);
     config2.setVideoTemplatePath(VIDEO_TEMPLATE_PATH);
     config2.setBufferSize(CONFIG2_BUFFER_SIZE);
-    config2.setHeatmapColors(colors);
+    Theme theme = new Theme();
+    theme.setHeatmapColors(colors);
+    config2.setTheme(theme);
   }
 
   /**

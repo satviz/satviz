@@ -64,7 +64,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.snapshotPeriod = clausesPerAdvance * 500;
     this.taskQueue = new LinkedBlockingQueue<>();
     this.closeActions = new CopyOnWriteArrayList<>();
-    this.theme = new Theme();
+    this.theme = config.getTheme();
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -78,12 +78,12 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   }
 
   public void updateHeatmapColdColor(Color color) {
-    theme.setColdColor((float) color.getRed(), (float) color.getGreen(), (float) color.getBlue());
+    theme.setColdColor(color);
     taskQueue.offer(() -> videoController.applyTheme(theme));
   }
 
   public void updateHeatmapHotColor(Color color) {
-    theme.setHotColor((float) color.getRed(), (float) color.getGreen(), (float) color.getBlue());
+    theme.setHotColor(color);
     taskQueue.offer(() -> videoController.applyTheme(theme));
   }
 

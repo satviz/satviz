@@ -52,7 +52,6 @@ public class ConsumerConfig {
   private int bufferSize = DEFAULT_BUFFER_SIZE;
   private WeightFactor weightFactor = DEFAULT_WEIGHT_FACTOR;
   private int windowSize = DEFAULT_WINDOW_SIZE;
-  private HeatmapColors heatmapColors = new HeatmapColors(); // this contains the default colors
   private long period = DEFAULT_PERIOD;
   private Theme theme = new Theme();
 
@@ -128,15 +127,6 @@ public class ConsumerConfig {
    */
   public void setWindowSize(int windowSize) {
     this.windowSize = windowSize;
-  }
-
-  /**
-   * Setter-method for the heatmap colors.
-   *
-   * @param heatmapColors An instance of the <code>HeatmapColors</code> class.
-   */
-  public void setHeatmapColors(HeatmapColors heatmapColors) {
-    this.heatmapColors = heatmapColors;
   }
 
   /**
@@ -233,15 +223,6 @@ public class ConsumerConfig {
   }
 
   /**
-   * Getter-method for the heatmap colors.
-   *
-   * @return An instance of the <code>HeatmapColors</code> class.
-   */
-  public HeatmapColors getHeatmapColors() {
-    return heatmapColors;
-  }
-
-  /**
    * Getter-method for the theme (heatmap colors + background + ...).
    *
    * @return An instance of the {@code Theme} class.
@@ -276,15 +257,14 @@ public class ConsumerConfig {
         && Objects.equals(instancePath, config.instancePath)
         && Objects.equals(videoTemplatePath, config.videoTemplatePath)
         && weightFactor == config.weightFactor
-        && Objects.equals(heatmapColors, config.heatmapColors)
-        //&& Objects.equals(theme, config.theme)
+        && Objects.equals(theme, config.theme)
         && period == config.period;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
-        recordImmediately, bufferSize, weightFactor, windowSize, theme, heatmapColors, period);
+        recordImmediately, bufferSize, weightFactor, windowSize, theme, period);
   }
 
 }

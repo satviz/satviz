@@ -9,6 +9,7 @@ import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.display.Theme;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -275,10 +277,10 @@ public class GeneralConfigController extends ConfigController {
 
     windowSizeSpinner.getValueFactory().setValue(config.getWindowSize());
 
-    HeatmapColors colors = config.getHeatmapColors();
-    if (colors != null) {
-      coldColorColorPicker.setValue(colors.getColdColor());
-      hotColorColorPicker.setValue(colors.getHotColor());
+    Theme theme = config.getTheme();
+    if (theme != null) {
+      coldColorColorPicker.setValue(theme.getColdColor());
+      hotColorColorPicker.setValue(theme.getHotColor());
     }
   }
 
@@ -303,10 +305,10 @@ public class GeneralConfigController extends ConfigController {
 
     config.setWindowSize(windowSizeSpinner.getValue());
 
-    HeatmapColors colors = new HeatmapColors();
-    colors.setColdColor(coldColorColorPicker.getValue());
-    colors.setHotColor(hotColorColorPicker.getValue());
-    config.setHeatmapColors(colors);
+    Theme theme = new Theme();
+    theme.setColdColor(coldColorColorPicker.getValue());
+    theme.setHotColor(hotColorColorPicker.getValue());
+    config.setTheme(theme);
   }
 
   @Override

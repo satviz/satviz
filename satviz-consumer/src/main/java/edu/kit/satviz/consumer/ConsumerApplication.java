@@ -41,7 +41,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
-import javafx.application.Application;
 import net.lingala.zip4j.ZipFile;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 
@@ -127,7 +126,7 @@ public final class ConsumerApplication {
           1920,
           1080
       );
-      videoController.applyTheme(new Theme());
+      videoController.applyTheme(config.getTheme());
       return new GlComponents(graph, videoController);
     }).get();
 
