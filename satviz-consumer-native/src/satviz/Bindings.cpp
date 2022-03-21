@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <satviz/Graph.hpp>
+#include <satviz/GraphContraction.hpp>
 #include <satviz/Display.hpp>
 #include <satviz/OnscreenDisplay.hpp>
 #include <satviz/OffscreenDisplay.hpp>
@@ -65,12 +66,20 @@ void satviz_submit_heat_update(void *graph, CHeatUpdate *update) {
   static_cast<Graph*>(graph)->submitHeatUpdate(realUpdate);
 }
 
+int satviz_num_nodes(void *graph) {
+  return static_cast<Graph*>(graph)->numNodes();
+}
+
 NodeInfo satviz_query_node(void *graph, int index) {
   return static_cast<Graph*>(graph)->queryNode(index);
 }
 
 EdgeInfo satviz_query_edge(void *graph, int index1, int index2) {
   return static_cast<Graph*>(graph)->queryEdge(index1, index2);
+}
+
+int satviz_compute_contraction(void *graph, int iterations, int *mapping) {
+  return computeContraction(*static_cast<Graph*>(graph), iterations, mapping);
 }
 
 void *satviz_new_video_controller(void *graph, int display_type, int width, int height) {

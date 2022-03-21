@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<TitledPane alignment="CENTER" animated="false" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="635.0" prefWidth="462.0" text="Configuration" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<TitledPane alignment="CENTER" animated="false" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="743.0" prefWidth="462.0" text="Configuration" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <font>
         <Font size="16.0" />
     </font>
@@ -166,6 +166,25 @@
                               <Insets bottom="10.0" />
                            </padding>
                         </VBox>
+                         <VBox prefHeight="200.0" prefWidth="100.0">
+                             <children>
+                                 <Label text="Graph Contraction">
+                                     <font>
+                                         <Font size="20.0" />
+                                     </font>
+                                 </Label>
+                                 <HBox prefHeight="100.0" prefWidth="200.0">
+                                     <children>
+                                         <Label text="Iterations: ">
+                                             <HBox.margin>
+                                                 <Insets right="5.0" />
+                                             </HBox.margin>
+                                         </Label>
+                                         <Spinner fx:id="contractionIterationsSpinner" editable="true" />
+                                     </children>
+                                 </HBox>
+                             </children>
+                         </VBox>
                         <VBox prefHeight="200.0" prefWidth="100.0">
                            <children>
                               <Label text="SAT Instance">

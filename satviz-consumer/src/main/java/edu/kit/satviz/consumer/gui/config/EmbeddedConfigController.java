@@ -3,6 +3,7 @@ package edu.kit.satviz.consumer.gui.config;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
+import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
@@ -42,7 +43,7 @@ public class EmbeddedConfigController extends ConfigController {
     FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(
         producerModeChoiceBox.getValue().name(), fileExtensions);
 
-    fileChooser.getExtensionFilters().add(filter);
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
 
     File file = fileChooser.showOpenDialog(null);
     if (file != null) {

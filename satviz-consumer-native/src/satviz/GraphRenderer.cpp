@@ -144,7 +144,7 @@ void GraphRenderer::clearScreen() {
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {
   float view_matrix[16];
-  camera.toMatrix(view_matrix, width, height);
+  camera.toMatrix(view_matrix);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

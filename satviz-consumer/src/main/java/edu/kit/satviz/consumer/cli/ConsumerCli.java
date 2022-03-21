@@ -61,8 +61,7 @@ public final class ConsumerCli {
 
     PARSER.addArgument("--instance", "-i")
         .type(PathArgumentType.get())
-        .help("Path to a DIMACS CNF instance file")
-        .required(true);
+        .help("Path to a DIMACS CNF instance file");
     PARSER.addArgument("--file", "-f")
         .type(PathArgumentType.get())
         .help("Path to configuration file");

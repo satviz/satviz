@@ -33,6 +33,9 @@ public class ConsumerConfig {
   public static final int MIN_WINDOW_SIZE = 0;
   public static final int MAX_WINDOW_SIZE = Integer.MAX_VALUE;
   public static final int DEFAULT_WINDOW_SIZE = 1000;
+  public static final int MIN_CONTRACTION_ITERATIONS = 0;
+  public static final int MAX_CONTRACTION_ITERATIONS = Integer.MAX_VALUE;
+  public static final int DEFAULT_CONTRACTION_ITERATIONS = 0;
   public static final long DEFAULT_PERIOD = 33;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
   public static final String DEFAULT_SCREENSHOT_FOLDER = System.getProperty("user.home")
@@ -51,6 +54,7 @@ public class ConsumerConfig {
   private int bufferSize = DEFAULT_BUFFER_SIZE;
   private WeightFactor weightFactor = DEFAULT_WEIGHT_FACTOR;
   private int windowSize = DEFAULT_WINDOW_SIZE;
+  private int contractionIterations = DEFAULT_CONTRACTION_ITERATIONS;
   private long period = DEFAULT_PERIOD;
   private Theme theme = new Theme();
 
@@ -135,6 +139,16 @@ public class ConsumerConfig {
    */
   public void setTheme(Theme theme) {
     this.theme = theme;
+  }
+
+  /**
+   * Setter-method for the number of iterations for the graph contraction.
+   *
+   * @param contractionIterations The number of iterations the graph contraction
+   *                              algorithm is supposed to do.
+   */
+  public void setContractionIterations(int contractionIterations) {
+    this.contractionIterations = contractionIterations;
   }
 
   /**
@@ -228,6 +242,15 @@ public class ConsumerConfig {
    */
   public Theme getTheme() {
     return theme;
+  }
+
+  /**
+   * Getter-method for the number of iterations for the graph contraction.
+   *
+   * @return The number of iterations the graph contraction algorithm is supposed to do.
+   */
+  public int getContractionIterations() {
+    return contractionIterations;
   }
 
   /**

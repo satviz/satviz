@@ -11,6 +11,7 @@ add_executable(
   VideoFrame.cpp
   Display.cpp
   Graph.cpp
+  GraphContraction.cpp
 )
 
 target_compile_options(native-test PRIVATE ${SATVIZ_COMPILER_WARNINGS})

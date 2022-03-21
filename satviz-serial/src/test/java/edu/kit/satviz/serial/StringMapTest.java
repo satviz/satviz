@@ -67,4 +67,27 @@ class StringMapTest {
       assertEquals(map.get(key), value);
     }
   }
+
+  @Test
+  void testReset() {
+    StringMapSerialBuilder builder = new StringMapSerialBuilder();
+    byte[] mapping = new byte[]{'b', '=', '2'};
+    try {
+      assertFalse(builder.addByte((byte) 'a'));
+      // don't want to use this character
+      builder.reset();
+      for (byte b : mapping) {
+        assertFalse(builder.addByte(b));
+      }
+      assertTrue(builder.addByte((byte) '\0'));
+
+      Map<String, String> m = builder.getObject();
+      assertNotNull(m);
+      assertEquals(1, m.size());
+      assertEquals("2", m.get("b"));
+
+    } catch (SerializationException e) {
+      fail(e);
+    }
+  }
 }

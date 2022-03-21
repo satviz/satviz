@@ -60,6 +60,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private ColorPicker hotColorColorPicker;
   @FXML
+  private Spinner<Integer> contractionIterationsSpinner;
+  @FXML
   private Button satInstanceFileButton;
   @FXML
   private Label satInstanceFileLabel;
@@ -90,9 +92,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void loadSettings() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
-    fileChooser.getExtensionFilters().add(filter);
-
+    var filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
     File file = fileChooser.showOpenDialog(null);
     if (file == null) {
       return;
@@ -115,8 +116,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void saveSettings() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
-    fileChooser.getExtensionFilters().add(filter);
+    var filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
 
     File file = fileChooser.showSaveDialog(null);
     if (file == null) {
@@ -135,8 +136,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void selectRecordingFile() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Video Files", "*.ogv");
-    fileChooser.getExtensionFilters().add(filter);
+    var filter = new FileChooser.ExtensionFilter("OGV Files", "*.ogv");
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
 
     File file = fileChooser.showSaveDialog(null);
     if (file != null) {
@@ -157,8 +158,9 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void selectSatInstanceFile() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("SAT Instances", "*.cnf");
-    fileChooser.getExtensionFilters().add(filter);
+    var filter = new FileChooser.ExtensionFilter(
+        "SAT Instances", "*.cnf", "*.cnf.xz");
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
 
     File file = fileChooser.showOpenDialog(null);
     if (file != null) {
@@ -214,6 +216,11 @@ public class GeneralConfigController extends ConfigController {
         ConsumerConfig.MAX_WINDOW_SIZE,
         ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
+    GuiUtils.initializeIntegerSpinner(contractionIterationsSpinner,
+        ConsumerConfig.MIN_CONTRACTION_ITERATIONS,
+        ConsumerConfig.MAX_CONTRACTION_ITERATIONS,
+        ConsumerConfig.DEFAULT_CONTRACTION_ITERATIONS);
+
     modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
   }
 
@@ -234,6 +241,9 @@ public class GeneralConfigController extends ConfigController {
     coldColorColorPicker.setValue(HeatmapColors.DEFAULT_COLD_COLOR);
 
     hotColorColorPicker.setValue(HeatmapColors.DEFAULT_HOT_COLOR);
+
+    contractionIterationsSpinner.getValueFactory().setValue(
+        ConsumerConfig.DEFAULT_CONTRACTION_ITERATIONS);
 
     satInstanceFile = null;
     satInstanceFileLabel.setText("");
@@ -284,6 +294,8 @@ public class GeneralConfigController extends ConfigController {
       coldColorColorPicker.setValue(theme.getColdColor());
       hotColorColorPicker.setValue(theme.getHotColor());
     }
+
+    contractionIterationsSpinner.getValueFactory().setValue(config.getContractionIterations());
   }
 
   @Override
@@ -310,6 +322,8 @@ public class GeneralConfigController extends ConfigController {
     Theme theme = config.getTheme();
     theme.setColdColor(coldColorColorPicker.getValue());
     theme.setHotColor(hotColorColorPicker.getValue());
+
+    config.setContractionIterations(contractionIterationsSpinner.getValue());
   }
 
   @Override

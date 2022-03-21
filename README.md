@@ -4,6 +4,8 @@ satviz is an application that visualises reentrant incremental satisfiability (S
 
 The visualisation part currently only supports *Linux*.
 
+![ortholatin-7.cnf](img/ortholatin-7.gif)
+
 ## Prerequisites
 
 To work on the project and to build it, you'll need to install a few dependencies:

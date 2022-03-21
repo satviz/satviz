@@ -5,9 +5,6 @@ import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.processing.Mediator;
-import java.awt.Desktop;
-import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.ForkJoinPool;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -66,13 +63,22 @@ public class VisualizationController {
   @FXML
   private Button pauseOrContinueVisualizationButton;
   @FXML
-  private Spinner<Integer> processedClausesSpinner; // TODO: convert to Spinner<Long>
+  private Button resetCameraButton;
+  @FXML
+  private Button relayoutButton;
+  // This is actually meant to be a Spinner<Long>.
+  // However, there is no default implementation of a LongSpinnerValueFactory.
+  // Hence, a DoubleSpinnerValueFactory is used in which all values
+  // are basically treated as long values.
+  // Furthermore, since JavaFX-Spinners also only work with double values
+  // (see processedClausesSlider), this simplifies setting one component to
+  // the value of the respective other.
+  @FXML
+  private Spinner<Double> processedClausesSpinner;
   @FXML
   private Label totalClausesLabel;
   @FXML
   private Slider processedClausesSlider;
-  @FXML
-  private Button relayoutButton;
 
   // ATTRIBUTES (OTHER)
 
@@ -83,8 +89,11 @@ public class VisualizationController {
   private boolean recording;
   private boolean recordingPaused;
   private boolean visualizationRunning;
+  // a single variable instead of two separate ones will most likely also suffice
+  private boolean processedClausesSliderMousePressed;
+  private boolean processedClausesSliderKeyPressed;
 
-  private ChangeListener<String> processedClausesSpinnerIntegerValidationListener;
+  private ChangeListener<String> processedClausesSpinnerLongValidationListener;
 
 
   // CONSTRUCTORS
@@ -140,7 +149,7 @@ public class VisualizationController {
     long totalClauses = mediator.numberOfUpdates();
     long processedClauses = mediator.currentUpdate();
 
-    processedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+    processedClausesSpinnerLongValidationListener = GuiUtils.initializeLongSpinnerAsDouble(
         processedClausesSpinner,
         MIN_PROCESSED_CLAUSES,
         (int) totalClauses,
@@ -197,11 +206,14 @@ public class VisualizationController {
 
   @FXML
   private void openScreenshotFolder() {
+    // TODO: implement screenshot feature
+    /*
     try {
       Desktop.getDesktop().open(new File(ConsumerConfig.DEFAULT_SCREENSHOT_FOLDER));
     } catch (IOException e) {
       e.printStackTrace();
     }
+     */
   }
 
   @FXML
@@ -226,26 +238,50 @@ public class VisualizationController {
   }
 
   @FXML
+  private void resetCamera() {
+    mediator.resetCamera();
+  }
+
+  @FXML
   private void relayout() {
     mediator.relayout();
   }
 
   @FXML
   private void updateProcessedClausesSpinner() {
-    long currentUpdate = processedClausesSpinner.getValue();
+    double currentUpdate = processedClausesSpinner.getValue();
     processedClausesSlider.setValue(currentUpdate);
-    mediator.seekToUpdate(currentUpdate);
+    mediator.seekToUpdate((long) currentUpdate);
   }
 
   @FXML
-  private void updateProcessedClausesSlider() {
-    long currentUpdate = (long) processedClausesSlider.getValue();
-    processedClausesSpinner.getValueFactory().setValue((int) currentUpdate);
-    mediator.seekToUpdate(currentUpdate);
+  private void processedClausesSliderOnMousePressed() {
+    processedClausesSliderMousePressed = true;
+  }
+
+  // this is constantly firing if key is held down...
+  @FXML
+  private void processedClausesSliderOnKeyPressed() {
+    processedClausesSliderKeyPressed = true;
+  }
+
+  @FXML
+  private void processedClausesSliderOnMouseReleased() {
+    processedClausesSliderMousePressed = false;
+    updateProcessedClausesSlider();
+  }
+
+  @FXML
+  private void processedClausesSliderOnKeyReleased() {
+    processedClausesSliderKeyPressed = false;
+    updateProcessedClausesSlider();
   }
 
   // METHODS (OTHER)
 
+  /**
+   * Closes the application.
+   */
   public void quit() {
     ForkJoinPool.commonPool().execute(() -> {
       try {
@@ -254,6 +290,12 @@ public class VisualizationController {
         e.printStackTrace();
       }
     });
+  }
+
+  private void updateProcessedClausesSlider() {
+    double currentUpdate = processedClausesSlider.getValue();
+    processedClausesSpinner.getValueFactory().setValue(currentUpdate);
+    mediator.seekToUpdate((long) currentUpdate);
   }
 
   /**
@@ -272,8 +314,8 @@ public class VisualizationController {
     Platform.runLater(() -> {
       // update spinner
       processedClausesSpinner.getEditor().textProperty().removeListener(
-          processedClausesSpinnerIntegerValidationListener);
-      processedClausesSpinnerIntegerValidationListener = GuiUtils.initializeIntegerSpinner(
+          processedClausesSpinnerLongValidationListener);
+      processedClausesSpinnerLongValidationListener = GuiUtils.initializeLongSpinnerAsDouble(
           processedClausesSpinner,
           MIN_PROCESSED_CLAUSES,
           (int) totalUpdates,
@@ -282,9 +324,11 @@ public class VisualizationController {
       // update label
       totalClausesLabel.setText(TOTAL_CLAUSES_DELIMITER + totalUpdates);
 
-      // update slider
-      processedClausesSlider.setMax(totalUpdates);
-      processedClausesSlider.setValue(currentUpdate);
+      // update slider (allow slider to be moved even if clauses are currently coming in)
+      if (!(processedClausesSliderMousePressed || processedClausesSliderKeyPressed)) {
+        processedClausesSlider.setMax(totalUpdates);
+        processedClausesSlider.setValue(currentUpdate);
+      }
     });
   }
 
