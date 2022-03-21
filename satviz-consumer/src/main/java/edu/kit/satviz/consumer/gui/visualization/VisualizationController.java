@@ -43,6 +43,8 @@ public class VisualizationController {
   @FXML
   private ChoiceBox<WeightFactor> weightFactorChoiceBox;
   @FXML
+  private Spinner<Integer> bufferSizeSpinner;
+  @FXML
   private Spinner<Integer> windowSizeSpinner;
   @FXML
   private ColorPicker coldColorColorPicker;
@@ -121,6 +123,13 @@ public class VisualizationController {
     weightFactorChoiceBox.setItems(FXCollections.observableArrayList(WeightFactor.values()));
     weightFactorChoiceBox.setValue(config.getWeightFactor());
 
+    GuiUtils.initializeIntegerSpinner(bufferSizeSpinner,
+        ConsumerConfig.MIN_BUFFER_SIZE,
+        ConsumerConfig.MAX_BUFFER_SIZE,
+        config.getBufferSize());
+
+    GuiUtils.setOnFocusLost(bufferSizeSpinner, this::updateBufferSize);
+
     GuiUtils.initializeIntegerSpinner(windowSizeSpinner,
         ConsumerConfig.MIN_WINDOW_SIZE,
         ConsumerConfig.MAX_WINDOW_SIZE,
@@ -172,6 +181,11 @@ public class VisualizationController {
   @FXML
   private void updateWeightFactor() {
     mediator.updateWeightFactor(weightFactorChoiceBox.getValue());
+  }
+
+  @FXML
+  private void updateBufferSize() {
+    mediator.setClausesPerAdvance(bufferSizeSpinner.getValue());
   }
 
   @FXML

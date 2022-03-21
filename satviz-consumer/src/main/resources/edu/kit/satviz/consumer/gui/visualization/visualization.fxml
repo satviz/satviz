@@ -52,7 +52,7 @@
                         <Insets left="5.0" />
                      </HBox.margin>
                   </Label>
-                  <Spinner>
+                  <Spinner fx:id="bufferSizeSpinner" editable="true" onKeyPressed="#updateBufferSize" onMouseClicked="#updateBufferSize">
                      <HBox.margin>
                         <Insets left="2.5" />
                      </HBox.margin>
