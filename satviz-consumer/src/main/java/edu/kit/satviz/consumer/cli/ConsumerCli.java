@@ -1,9 +1,7 @@
 package edu.kit.satviz.consumer.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import edu.kit.satviz.common.PathArgumentType;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -13,13 +11,11 @@ import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorDeserializer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
-
-import edu.kit.satviz.consumer.config.jsonparsing.ColorDeserializer;
-import edu.kit.satviz.consumer.config.jsonparsing.ColorSerializer;
 import javafx.scene.paint.Color;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;

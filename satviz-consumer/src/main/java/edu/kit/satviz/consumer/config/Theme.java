@@ -10,9 +10,19 @@ import jdk.incubator.foreign.MemoryLayout.PathElement;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
 
+/**
+ * This class contains all parameters that are considered when first rendering the graph.
+ */
 public class Theme {
 
+  /**
+   * The default background color.
+   */
   public static final Color DEFAULT_BACKGROUND_COLOR = Color.web("#4d4d4d");
+
+  /**
+   * The default edge color.
+   */
   public static final Color DEFAULT_EDGE_COLOR = Color.WHITE;
 
   private static final MemoryLayout LAYOUT = NativeObject.paddedStruct(
@@ -121,7 +131,7 @@ public class Theme {
     return Objects.equals(bgColor, theme.bgColor)
         && Objects.equals(heatmapColors, theme.heatmapColors)
         && Objects.equals(edgeColor, theme.edgeColor)
-        && nodeSize == nodeSize;
+        && nodeSize == theme.nodeSize;
   }
 
   @Override
