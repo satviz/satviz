@@ -1,6 +1,9 @@
 package edu.kit.satviz.consumer.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import edu.kit.satviz.common.PathArgumentType;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -14,6 +17,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
+
+import edu.kit.satviz.consumer.config.jsonparsing.ColorDeserializer;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorSerializer;
+import javafx.scene.paint.Color;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -120,6 +127,9 @@ public final class ConsumerCli {
   private static ConsumerConfig parseConfigFile(File configFile)
       throws ArgumentParserException {
     ObjectMapper mapper = new ObjectMapper();
+    SimpleModule m = new SimpleModule("HexToColor");
+    m.addDeserializer(Color.class, new ColorDeserializer());
+    mapper.registerModule(m);
     try {
       return mapper.readValue(configFile, ConsumerConfig.class);
     } catch (IOException e) {

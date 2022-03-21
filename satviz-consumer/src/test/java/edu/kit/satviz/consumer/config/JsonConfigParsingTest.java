@@ -47,12 +47,14 @@ class JsonConfigParsingTest {
    */
   @BeforeEach
   void setUp() {
-    SimpleModule m = new SimpleModule("PathToString");
-    m.addSerializer(Path.class, new ToStringSerializer());
-    m.addSerializer(Color.class, new ColorSerializer());
-    m.addDeserializer(Color.class, new ColorDeserializer());
-    this.mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
-    mapper.registerModule(m);
+    SimpleModule pathToStringModule = new SimpleModule("PathToString");
+    pathToStringModule.addSerializer(Path.class, new ToStringSerializer());
+    SimpleModule colorModule = new SimpleModule("ColorAndHexConverter");
+    colorModule.addSerializer(Color.class, new ColorSerializer());
+    colorModule.addDeserializer(Color.class, new ColorDeserializer());
+    mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
+    mapper.registerModule(pathToStringModule);
+    mapper.registerModule(colorModule);
     setUpConfig2();
     setUpConfig1();
   }

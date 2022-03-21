@@ -10,6 +10,8 @@ import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.config.Theme;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorDeserializer;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorSerializer;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +26,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -343,9 +346,13 @@ public class GeneralConfigController extends ConfigController {
     if (mapper == null) {
       mapper = new ObjectMapper();
       mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-      SimpleModule m = new SimpleModule("PathToString");
-      m.addSerializer(Path.class, new ToStringSerializer());
-      mapper.registerModule(m);
+      SimpleModule pathToStringModule = new SimpleModule("PathToString");
+      pathToStringModule.addSerializer(Path.class, new ToStringSerializer());
+      mapper.registerModule(pathToStringModule);
+      SimpleModule colorModule = new SimpleModule("ColorAndHexConverter");
+      colorModule.addSerializer(Color.class, new ColorSerializer());
+      colorModule.addDeserializer(Color.class, new ColorDeserializer());
+      mapper.registerModule(colorModule);
     }
     return mapper;
   }
