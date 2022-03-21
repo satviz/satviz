@@ -154,7 +154,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void selectSatInstanceFile() {
     FileChooser fileChooser = new FileChooser();
-    var filter = new FileChooser.ExtensionFilter("SAT Instances", "*.cnf");
+    var filter = new FileChooser.ExtensionFilter(
+        "SAT Instances", "*.cnf", "*.cnf.xz");
     fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
 
     File file = fileChooser.showOpenDialog(null);
