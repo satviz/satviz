@@ -6,6 +6,7 @@ package edu.kit.satviz.consumer.processing;
 public enum HeatmapImplementation {
 
   RECENCY,
-  FREQUENCY
+  FREQUENCY_MAX_FREQUENCY,
+  FREQUENCY_SIZE
 
 }

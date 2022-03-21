@@ -17,6 +17,9 @@ import edu.kit.satviz.consumer.gui.visualization.VisualizationController;
 import edu.kit.satviz.consumer.gui.visualization.VisualizationStarter;
 import edu.kit.satviz.consumer.processing.ArrayNodeMapping;
 import edu.kit.satviz.consumer.processing.ClauseCoordinator;
+import edu.kit.satviz.consumer.processing.CliqueInteractionGraph;
+import edu.kit.satviz.consumer.processing.FrequencyHeatmap;
+import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.IdentityMapping;
 import edu.kit.satviz.consumer.processing.Mediator;
 import edu.kit.satviz.consumer.processing.RecencyHeatmap;
@@ -78,8 +81,7 @@ public final class ConsumerApplication {
     }
     
     ScheduledExecutorService glScheduler = Executors.newSingleThreadScheduledExecutor();
-    Supplier<VariableInteractionGraph> vig =
-        () -> new RingInteractionGraph(config.getWeightFactor());
+    Supplier<VariableInteractionGraph> vig = () -> getVigImplementation(config);
 
     Graph.Contraction contraction = contract(config, vig, initialData);
     logger.log(Level.INFO, "Graph contracted to {0} nodes", contraction.remainingNodes());
@@ -94,7 +96,7 @@ public final class ConsumerApplication {
         .setController(components.controller)
         .setGraph(components.graph)
         .setCoordinator(coordinator)
-        .setHeatmap(new RecencyHeatmap(config.getWindowSize()))
+        .setHeatmap(getHeatmapImplementation(config))
         .setVig(vig.get())
         .createMediator();
 
@@ -117,6 +119,23 @@ public final class ConsumerApplication {
       mediator.startOrStopRecording();
     }
     mediator.startRendering();
+  }
+
+  private static Heatmap getHeatmapImplementation(ConsumerConfig config) {
+    return switch (config.getHeatmapImplementation()) {
+      case RECENCY -> new RecencyHeatmap(config.getWindowSize());
+      case FREQUENCY_SIZE -> new FrequencyHeatmap(config.getWindowSize(),
+          FrequencyHeatmap.HeatStrategy.SIZE);
+      case FREQUENCY_MAX_FREQUENCY -> new FrequencyHeatmap(config.getWindowSize(),
+          FrequencyHeatmap.HeatStrategy.MAX_FREQUENCY);
+    };
+  }
+
+  private static VariableInteractionGraph getVigImplementation(ConsumerConfig config) {
+    return switch (config.getVigImplementation()) {
+      case RING -> new RingInteractionGraph(config.getWeightFactor());
+      case CLIQUE -> new CliqueInteractionGraph(config.getWeightFactor());
+    };
   }
 
   private static Graph.Contraction contract(
