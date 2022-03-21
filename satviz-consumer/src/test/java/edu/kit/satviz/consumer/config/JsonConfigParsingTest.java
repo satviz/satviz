@@ -26,6 +26,7 @@ class JsonConfigParsingTest {
 
   private static final String CONFIG1_JSON_PATH = "/config1.json";
   private static final String CONFIG2_JSON_PATH = "/config2.json";
+  private static final String CONFIG3_JSON_PATH = "/config3.json";
 
   private static final String VIDEO_TEMPLATE_PATH = "Videos/video-%s.mp4";
   private static final Path INSTANCE_PATH = Paths.get("foo/bar/instance.cnf");
@@ -39,6 +40,7 @@ class JsonConfigParsingTest {
   private ObjectMapper mapper;
   private ConsumerConfig config1;
   private ConsumerConfig config2;
+  private ConsumerConfig config3;
 
   /**
    * This set-up method creates a gson parser using the <code>ModeConfigAdapterFactory</code>
@@ -55,8 +57,9 @@ class JsonConfigParsingTest {
     mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
     mapper.registerModule(pathToStringModule);
     mapper.registerModule(colorModule);
-    setUpConfig2();
     setUpConfig1();
+    setUpConfig2();
+    setUpConfig3();
   }
 
   private void setUpConfig1() {
@@ -88,6 +91,26 @@ class JsonConfigParsingTest {
     config2.setTheme(theme);
   }
 
+  private void setUpConfig3() {
+    EmbeddedModeConfig modeConfig = new EmbeddedModeConfig();
+    modeConfig.setMode(CONFIG2_MODE);
+    modeConfig.setSource(CONFIG2_SOURCE);
+    modeConfig.setSourcePath(CONFIG2_SOURCE_PATH);
+    HeatmapColors colors = new HeatmapColors();
+    colors.setHotColor(Color.web("#FFFFFF"));
+    colors.setColdColor(Color.web("#000000"));
+    config3 = new ConsumerConfig();
+    config3.setModeConfig(modeConfig);
+    config3.setInstancePath(INSTANCE_PATH);
+    config3.setVideoTemplatePath(VIDEO_TEMPLATE_PATH);
+    config3.setBufferSize(CONFIG2_BUFFER_SIZE);
+    Theme theme = new Theme();
+    theme.setHeatmapColors(colors);
+    theme.setBgColor(Color.web("#000000"));
+    theme.setEdgeColor(Color.web("#F0F0F0"));
+    config3.setTheme(theme);
+  }
+
   /**
    * This tests, whether the parser parses out <code>config1.json</code> correctly.
    */
@@ -109,8 +132,20 @@ class JsonConfigParsingTest {
         JsonConfigParsingTest.class.getResource(CONFIG2_JSON_PATH),
         ConsumerConfig.class
     );
-    System.out.println("");
     assertEquals(config2, config);
+  }
+
+  /**
+   * This tests, whether the parser parses out <code>config2.json</code> correctly.
+   */
+  @Test
+  void deserializeConfiguration_test3() throws IOException {
+    ConsumerConfig config = mapper.readValue(
+        JsonConfigParsingTest.class.getResource(CONFIG3_JSON_PATH),
+        ConsumerConfig.class
+    );
+    config = config;
+    assertEquals(config3, config);
   }
 
   /**

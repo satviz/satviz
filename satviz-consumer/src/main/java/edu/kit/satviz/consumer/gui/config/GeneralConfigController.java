@@ -307,10 +307,9 @@ public class GeneralConfigController extends ConfigController {
 
     config.setWindowSize(windowSizeSpinner.getValue());
 
-    Theme theme = new Theme();
+    Theme theme = config.getTheme();
     theme.setColdColor(coldColorColorPicker.getValue());
     theme.setHotColor(hotColorColorPicker.getValue());
-    config.setTheme(theme);
   }
 
   @Override
