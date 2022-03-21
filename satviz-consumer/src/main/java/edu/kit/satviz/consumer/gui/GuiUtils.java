@@ -6,6 +6,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
@@ -17,6 +18,12 @@ public final class GuiUtils {
   // CONSTANTS
 
   public static final Object CONFIG_MONITOR = new Object();
+
+  /**
+   * An extension filter for file choosing dialogues that shows all files.
+   */
+  public static final FileChooser.ExtensionFilter ALL_FILES
+      = new FileChooser.ExtensionFilter("All Files", "*.*");
 
   // ATTRIBUTES
 

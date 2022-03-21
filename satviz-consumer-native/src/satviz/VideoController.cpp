@@ -14,6 +14,7 @@ VideoController::VideoController(graph::Graph &gr, Display *dpy)
   renderer = new GraphRenderer(graph);
   graph.addObserver(renderer);
   renderer->onReload();
+  camera.update(display->getWidth(), display->getHeight());
 }
 
 VideoController::~VideoController() {
@@ -25,16 +26,30 @@ VideoController::~VideoController() {
 
 void VideoController::resetCamera() {
   ogdf::DRect box = graph.getOgdfAttrs().boundingBox();
-  double cx = 0.5 * (box.p1().m_x + box.p2().m_x);
-  double cy = 0.5 * (box.p1().m_y + box.p2().m_y);
-  camera.setX((float) cx);
-  camera.setY((float) cy);
-  camera.zoomToFit((float) box.width(), (float) box.height(), display->getWidth(), display->getHeight());
+  camera.focusOnBox(
+      (float) box.p1().m_x, (float) box.p1().m_y,
+      (float) box.p2().m_x, (float) box.p2().m_y);
 }
 
 void VideoController::processEvent(sf::Event &event) {
   if (event.type == sf::Event::Closed) {
     wantToClose = true;
+  }
+  if (event.type == sf::Event::LostFocus) {
+    mouse_grabbed = false;
+  }
+  if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+    mouse_grabbed = true;
+    mouse_x = event.mouseButton.x;
+    mouse_y = event.mouseButton.y;
+  }
+  if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+    mouse_grabbed = false;
+  }
+  if (event.type == sf::Event::MouseMoved && mouse_grabbed) {
+    camera.drag(mouse_x, mouse_y, event.mouseMove.x, event.mouseMove.y);
+    mouse_x = event.mouseMove.x;
+    mouse_y = event.mouseMove.y;
   }
   if (event.type == sf::Event::MouseWheelScrolled) {
     float factor = 1.0f;
@@ -43,57 +58,15 @@ void VideoController::processEvent(sf::Event &event) {
     } else {
       factor = 1.0f * 1.3f;
     }
-    camera.setZoom(camera.getZoom() * factor);
+    camera.zoom(event.mouseWheelScroll.x, event.mouseWheelScroll.y, factor);
   }
+#if 0
   if (event.type == sf::Event::KeyPressed) {
-    const float SPEED = 200.0f;
-    if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::A) {
-      camera.setX(camera.getX() - SPEED / camera.getZoom());
-    }
-    if (event.key.code == sf::Keyboard::Right || event.key.code == sf::Keyboard::D) {
-      camera.setX(camera.getX() + SPEED / camera.getZoom());
-    }
-    if (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S) {
-      camera.setY(camera.getY() - SPEED / camera.getZoom());
-    }
-    if (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W) {
-      camera.setY(camera.getY() + SPEED / camera.getZoom());
-    }
     if (event.key.code == sf::Keyboard::Space) {
       resetCamera();
     }
-#if 0
-    if (event.key.code == sf::Keyboard::K) {
-      ogdf::Graph &og = graph.getOgdfGraph();
-      ogdf::node node1 = og.chooseNode();
-      ogdf::node node2 = og.chooseNode();
-      ogdf::edge edge = og.searchEdge(node1, node2, false);
-      double old_weight = 0.0;
-      if (edge) {
-        old_weight = graph.getOgdfAttrs().doubleWeight(edge);
-      }
-      double new_weight = (double) rand() / (double) RAND_MAX;
-      graph::WeightUpdate wu;
-      wu.values.push_back(std::make_tuple(node1->index(), node2->index(), new_weight - old_weight));
-      graph.submitWeightUpdate(wu);
-    }
-    if (event.key.code == sf::Keyboard::R) {
-      switch (recording_state) {
-        case REC_OFF:
-          startRecording("temp.ogv", new TheoraEncoder);
-          break;
-        case REC_ON:
-          finishRecording();
-          break;
-        default:
-          break;
-      }
-    }
-    if (event.key.code == sf::Keyboard::L) {
-      graph.recalculateLayout();
-    }
-#endif
   }
+#endif
 }
 
 void VideoController::nextFrame() {
@@ -101,7 +74,7 @@ void VideoController::nextFrame() {
   while (display->pollEvent(event)) {
     processEvent(event);
   }
-  camera.update();
+  camera.update(display->getWidth(), display->getHeight());
   display->startFrame();
   renderer->draw(camera, display->getWidth(), display->getHeight());
   if (recording_state == REC_ON || recording_state == REC_WINDUP) {

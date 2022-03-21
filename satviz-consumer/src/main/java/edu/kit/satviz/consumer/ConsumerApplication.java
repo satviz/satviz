@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer;
 
+import edu.kit.satviz.common.Compression;
 import edu.kit.satviz.common.Hashing;
 import edu.kit.satviz.consumer.cli.ConsumerCli;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
@@ -191,7 +192,8 @@ public final class ConsumerApplication {
   }
 
   private static InitialGraphInfo readDimacsFile(ConsumerConfig config) throws IOException {
-    try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
+    try (DimacsFile dimacsFile = new DimacsFile(
+        Compression.openPossiblyCompressed(config.getInstancePath()))) {
       int variableAmount = dimacsFile.getVariableAmount();
       logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
       ClauseUpdate[] clauses = StreamSupport.stream(dimacsFile.spliterator(), false)
