@@ -88,9 +88,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void loadSettings() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
-    fileChooser.getExtensionFilters().add(filter);
-
+    var filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
     File file = fileChooser.showOpenDialog(null);
     if (file == null) {
       return;
@@ -113,8 +112,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void saveSettings() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
-    fileChooser.getExtensionFilters().add(filter);
+    var filter = new FileChooser.ExtensionFilter("JSON Files", "*.json");
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
 
     File file = fileChooser.showSaveDialog(null);
     if (file == null) {
@@ -133,8 +132,8 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void selectRecordingFile() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Video Files", "*.ogv");
-    fileChooser.getExtensionFilters().add(filter);
+    var filter = new FileChooser.ExtensionFilter("OGV Files", "*.ogv");
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
 
     File file = fileChooser.showSaveDialog(null);
     if (file != null) {
@@ -155,8 +154,9 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private void selectSatInstanceFile() {
     FileChooser fileChooser = new FileChooser();
-    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("SAT Instances", "*.cnf");
-    fileChooser.getExtensionFilters().add(filter);
+    var filter = new FileChooser.ExtensionFilter(
+        "SAT Instances", "*.cnf", "*.cnf.xz");
+    fileChooser.getExtensionFilters().addAll(filter, GuiUtils.ALL_FILES);
 
     File file = fileChooser.showOpenDialog(null);
     if (file != null) {

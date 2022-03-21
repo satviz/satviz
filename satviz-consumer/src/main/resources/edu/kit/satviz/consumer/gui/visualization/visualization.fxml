@@ -222,7 +222,7 @@
                                 <Insets bottom="3.0" />
                             </padding>
                         </HBox>
-                        <Slider fx:id="processedClausesSlider" onKeyReleased="#updateProcessedClausesSlider" onMouseReleased="#updateProcessedClausesSlider" prefHeight="16.0" prefWidth="169.0">
+                        <Slider fx:id="processedClausesSlider" onMousePressed="#processedClausesSliderOnMousePressed" onKeyPressed="#processedClausesSliderOnKeyPressed" onMouseReleased="#processedClausesSliderOnMouseReleased" onKeyReleased="#processedClausesSliderOnKeyReleased" prefHeight="16.0" prefWidth="169.0">
                             <opaqueInsets>
                                 <Insets top="2.5" />
                             </opaqueInsets>

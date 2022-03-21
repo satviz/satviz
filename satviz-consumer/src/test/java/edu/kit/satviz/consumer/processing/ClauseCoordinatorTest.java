@@ -66,8 +66,6 @@ class ClauseCoordinatorTest {
     Path tempDir = Files.createDirectory(Paths.get(TEMP_DIR));
     coordinator = new ClauseCoordinator(graph, tempDir, 6, DEFAULT_NODE_MAPPING);
     coordinator.addProcessor(processor1);
-
-    coordinator.registerChangeListener(changeListenerCallAmount::getAndIncrement);
   }
 
   @Test
@@ -120,49 +118,6 @@ class ClauseCoordinatorTest {
     verify(processor1).process(
         Arrays.copyOfRange(clauseUpdates, 0, 1), graph, DEFAULT_NODE_MAPPING
     );
-  }
-
-  // registerChangeListener
-
-  @Test
-  void test_registerChangeListener_advanceOnce() throws IOException, SerializationException {
-    coordinator.addClauseUpdate(clauseUpdates[0]);
-    assertEquals(1, changeListenerCallAmount.get());
-    coordinator.advanceVisualization(1);
-    assertEquals(2, changeListenerCallAmount.get());
-  }
-
-  @Test
-  void test_registerChangeListener_advanceMultipleTimes()
-          throws SerializationException, IOException {
-    int expectedCallAmount = 0;
-    for (ClauseUpdate update : clauseUpdates) {
-      coordinator.addClauseUpdate(update);
-      expectedCallAmount++;
-    }
-    while (coordinator.currentUpdate() < clauseUpdates.length) {
-      coordinator.advanceVisualization(1);
-      expectedCallAmount++;
-    }
-    assertEquals(expectedCallAmount, changeListenerCallAmount.get());
-  }
-
-  @Test
-  void test_registerChangeListener_withoutAdvance() throws IOException {
-    for (ClauseUpdate update : clauseUpdates) {
-      coordinator.addClauseUpdate(update);
-    }
-    assertEquals(clauseUpdates.length, changeListenerCallAmount.get());
-  }
-
-
-  /* There is no guarantee that the listener will not be called if nothing has changed,
-     therefore there is nothing to assert in this case */
-  @Test
-  @Disabled
-  void test_registerChangeListener_advanceZero() throws SerializationException, IOException {
-    coordinator.advanceVisualization(0);
-    assertEquals(0, changeListenerCallAmount.get());
   }
 
   // takeSnapshot

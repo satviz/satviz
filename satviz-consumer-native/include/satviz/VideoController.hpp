@@ -29,6 +29,10 @@ private:
   enum RecState recording_state = REC_OFF;
   VideoEncoder *video_encoder = nullptr;
 
+  bool mouse_grabbed = false;
+  int  mouse_x;
+  int  mouse_y;
+
   void processEvent(sf::Event &event);
 
 public:

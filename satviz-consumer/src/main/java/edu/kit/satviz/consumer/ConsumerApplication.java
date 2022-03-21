@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer;
 
+import edu.kit.satviz.common.Compression;
 import edu.kit.satviz.common.Hashing;
 import edu.kit.satviz.consumer.cli.ConsumerCli;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
@@ -105,7 +106,7 @@ public final class ConsumerApplication {
     });
 
     if (!config.isNoGui()) {
-      startVisualisationGui(mediator, config, initialData.variables, coordinator);
+      startVisualisationGui(mediator, config, initialData.variables);
     }
 
     connection.connect(ConsumerApplication.pid, mediator);
@@ -169,7 +170,8 @@ public final class ConsumerApplication {
   }
 
   private static InitialGraphInfo readDimacsFile(ConsumerConfig config) throws IOException {
-    try (DimacsFile dimacsFile = new DimacsFile(Files.newInputStream(config.getInstancePath()))) {
+    try (DimacsFile dimacsFile = new DimacsFile(
+        Compression.openPossiblyCompressed(config.getInstancePath()))) {
       int variableAmount = dimacsFile.getVariableAmount();
       logger.log(Level.INFO, "Instance contains {0} variables", variableAmount);
       ClauseUpdate[] clauses = StreamSupport.stream(dimacsFile.spliterator(), false)
@@ -300,15 +302,14 @@ public final class ConsumerApplication {
   private static void startVisualisationGui(
       Mediator mediator,
       ConsumerConfig config,
-      int variableAmount,
-      ClauseCoordinator coordinator
+      int variableAmount
   ) {
     VisualizationController visController = new VisualizationController(
         mediator,
         config,
         variableAmount
     );
-    coordinator.registerChangeListener(visController::onClauseUpdate);
+    mediator.registerFrameAction(visController::onClauseUpdate);
     VisualizationStarter.setVisualizationController(visController);
     GuiUtils.launch(VisualizationStarter.class);
   }

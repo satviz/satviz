@@ -57,16 +57,14 @@ public class ClauseCoordinator implements AutoCloseable {
   // processorLock provides mutual exclusion for addProcessor and takeSnapshot to coordinate
   // change detection in the list of processors. it is not needed to access the list elsewhere.
   private final ReentrantLock processorLock;
+  private final int variableAmount;
+  private final IntUnaryOperator nodeMapping;
 
   // currentUpdate is volatile, even though the stateLock prevents concurrent modification already.
   // this is because while updates to currentUpdate need to be consistent and coordinated,
   // concurrent reads are legal. to ensure a consistent and up-to-date view of currentUpdate, it is
   // therefore marked volatile.
   private volatile long currentUpdate;
-  private Runnable changeListener;
-
-  private final int variableAmount;
-  private final IntUnaryOperator nodeMapping;
 
   /**
    * Create a new {@code ClauseCoordinator}.
@@ -89,8 +87,6 @@ public class ClauseCoordinator implements AutoCloseable {
     snapshotDir.toFile().deleteOnExit();
     this.snapshots = new TreeMap<>();
     this.processors = new CopyOnWriteArrayList<>();
-    this.changeListener = () -> {
-    };
     this.currentUpdate = 0;
     this.buffer = new ExternalClauseBuffer(tempDir);
     this.snapshotLock = new ReentrantLock();
@@ -137,9 +133,7 @@ public class ClauseCoordinator implements AutoCloseable {
     if (stateLock.isHeldByCurrentThread()) {
       return 0;
     }
-    int num = advance(numUpdates);
-    changeListener.run();
-    return num;
+    return advance(numUpdates);
   }
 
   /**
@@ -201,7 +195,6 @@ public class ClauseCoordinator implements AutoCloseable {
     } finally {
       stateLock.unlock();
     }
-    changeListener.run();
   }
 
   private int advance(int numUpdates) throws SerializationException, IOException {
@@ -287,27 +280,9 @@ public class ClauseCoordinator implements AutoCloseable {
   public void addClauseUpdate(ClauseUpdate clauseUpdate) throws IOException {
     if (isValidClauseUpdate(clauseUpdate)) {
       buffer.addClauseUpdate(clauseUpdate);
-      changeListener.run();
     } else {
       throw new IllegalArgumentException(clauseUpdate + " is invalid.");
     }
-  }
-
-  /**
-   * Register a {@code Runnable} that will be called whenever one of the following values change:
-   * <ul>
-   *   <li>{@link #currentUpdate()}</li>
-   *   <li>{@link #totalUpdateCount()}</li>
-   * </ul>.
-   *
-   * <p><strong>Note:</strong> If the above criteria is met, the listener is called, but not
-   * necessarily the other way around (the listener being called does not imply that something
-   * has changed).
-   *
-   * @param action The action to run.
-   */
-  public void registerChangeListener(Runnable action) {
-    changeListener = Objects.requireNonNull(action);
   }
 
   private long loadClosestSnapshot(long index) throws IOException, SerializationException {
