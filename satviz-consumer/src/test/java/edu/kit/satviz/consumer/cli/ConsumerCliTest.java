@@ -1,5 +1,8 @@
 package edu.kit.satviz.consumer.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
@@ -10,8 +13,6 @@ import java.nio.file.Path;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ConsumerCliTest {
 
@@ -39,15 +40,16 @@ class ConsumerCliTest {
 
   @Test
   void test_parseArgs_validArgumentsWithValidation()
-      throws ArgumentParserException, ConstraintValidationException, IOException {
+      throws ArgumentParserException, ConstraintValidationException {
     ConsumerConfig config = ConsumerCli.parseArgs(arguments1);
-    Constraint<ConsumerConfig> inputConstraint = ConsumerConstraints.paramConstraints();
-    inputConstraint.validate(config);
+    (new ConsumerConstraint()).validate(config);
     assertEquals(validConfig1, config);
   }
 
   @Test
-  void test_parseArgs_withoutInstance() {
-    assertThrows(ArgumentParserException.class, () -> ConsumerCli.parseArgs(invalidArguments1));
+  void test_parseArgs_withoutInstance() throws ArgumentParserException {
+    ConsumerConfig config = ConsumerCli.parseArgs(invalidArguments1);
+    Constraint<ConsumerConfig> inputConstraint = new ConsumerConstraint();
+    assertThrows(ConstraintValidationException.class, () -> inputConstraint.validate(config));
   }
 }
