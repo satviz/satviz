@@ -40,11 +40,16 @@ class ConsumerCliTest {
     );
 
     validArguments1 = new String[] {
-        "-i", tempInstance.toString(), "-o", tempVideoTemplate.toString(), "external", "-P", "1231"
+        "-i", tempInstance.toString(),
+        "-o", tempVideoTemplate.toString(),
+        "external", "-P", "1231"
     };
     fileArgument = new String[] {"config", configPath.toString()};
     colorArguments = new String[] {
-        "-i", tempInstance.toString(), "-c", "#000000:#FFFFFF", "external", "-P", "1231"
+        "-i", tempInstance.toString(),
+        "-c", "#000000:#FFFFFF",
+        "-o", tempVideoTemplate.toString(),
+        "external", "-P", "1231"
     };
     invalidArguments1 = new String[] {"external", "-P", "1231"};
     invalidArguments2 = new String[] {"embedded"};
@@ -88,7 +93,7 @@ class ConsumerCliTest {
       throws ArgumentParserException, ConstraintValidationException {
     ConsumerConfig config = ConsumerCli.parseArgs(colorArguments);
     (new ConsumerConstraint()).validate(config);
-    assertEquals(validConfig1, config);
+    assertEquals(validConfig2, config);
   }
 
   @Test
