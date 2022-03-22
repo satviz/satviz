@@ -125,10 +125,12 @@ public final class ConsumerApplication {
         final long period = config.getPeriod();
         final int timeout = config.getVideoTimeout() * 1000;
         long frames = 0;
+        boolean stop = false;
 
         @Override
         public void run() {
-          if (frames++ * period >= timeout) {
+          if (!stop && frames++ * period >= timeout) {
+            stop = true;
             ForkJoinPool.commonPool().execute(() -> {
               try {
                 mediator.close();
