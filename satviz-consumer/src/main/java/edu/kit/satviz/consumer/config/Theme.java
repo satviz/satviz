@@ -57,6 +57,7 @@ public class Theme {
    * <p>
    * Same effect is achieved by entering {@code theme.getHeatmapColors().setColdColor(color);}
    * </p>
+   *
    * @param coldColor The cold color.
    */
   public void setColdColor(Color coldColor) {
