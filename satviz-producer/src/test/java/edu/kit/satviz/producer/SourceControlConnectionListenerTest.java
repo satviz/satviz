@@ -80,4 +80,12 @@ class SourceControlConnectionListenerTest {
     verify(connection).terminateRefuted();
   }
 
+  @Test
+  void test_onDisconnect() {
+    var source = mock(ClauseSource.class);
+    var listener = new SourceControlConnectionListener(connection, source);
+    listener.onDisconnect("foo");
+    verify(source).close();
+  }
+
 }
