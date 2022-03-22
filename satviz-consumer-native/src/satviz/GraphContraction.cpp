@@ -83,7 +83,7 @@ int computeContraction(int numNodes, std::vector<Conn> *conn, int iterations, in
 
     std::sort(choices.begin(), choices.end(), [](Axis a, Axis b) { return a.conn.weight > b.conn.weight; });
 
-    for (int i = 0; i < (int) (choices.size() * AGGRESSION); i++) {
+    for (int i = 0; i < (int) ((float) choices.size() * AGGRESSION); i++) {
       auto axis = choices[i];
       uf.unite(axis.node, axis.conn.index);
     }
