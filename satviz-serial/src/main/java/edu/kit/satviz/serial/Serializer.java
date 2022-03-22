@@ -33,14 +33,17 @@ public abstract class Serializer<T> {
    * @param o the object
    * @param out the stream to write to
    * @throws IOException if the stream cannot be used
-   * @throws ClassCastException if the object cannot be cast to type <code>T</code>
    * @throws SerializationException if the object cannot be serialized
+   *     or cast to type <code>T</code>
    */
-  public void serializeUnsafe(Object o, OutputStream out) throws IOException,
-      ClassCastException, SerializationException {
-    @SuppressWarnings("unchecked")
-    T t = (T) o;
-    serialize(t, out);
+  public void serializeUnsafe(Object o, OutputStream out) throws IOException, SerializationException {
+    try {
+      @SuppressWarnings("unchecked")
+      T t = (T) o;
+      serialize(t, out);
+    } catch (ClassCastException e) {
+      throw new SerializationException("invalid object type");
+    }
   }
 
   /**

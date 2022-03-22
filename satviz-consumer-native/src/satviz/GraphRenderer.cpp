@@ -128,22 +128,22 @@ void GraphRenderer::deinit() {
 }
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {
-  float view_matrix[16];
-  camera.toMatrix(view_matrix, width, height);
+  double view_matrix[16];
+  camera.toMatrix(view_matrix);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Draw edges
   glUseProgram(resources.edge_prog);
-  glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
+  glUniformMatrix4dv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
   glBindVertexArray(edge_state);
   glBindTexture(GL_TEXTURE_BUFFER, offset_texview);
   glDrawArraysInstanced(GL_LINES, 0, 2, edge_capacity);
 
   // Draw nodes
   glUseProgram(resources.node_prog);
-  glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
+  glUniformMatrix4dv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
   glUniform2f(UNIFORM_NODE_SIZE, 10.0f / (float) width, 10.0f / (float) height);
   glBindVertexArray(node_state);
   glBindTexture(GL_TEXTURE_1D, heat_palette);
@@ -156,7 +156,9 @@ void GraphRenderer::onWeightChange(ogdf::Array<ogdf::edge> &changed) {
   unsigned char *area = (unsigned char *) glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
   for (auto e : changed) {
     int idx = edge_mapping[e];
-    area[idx] = (unsigned char) (attrs.doubleWeight(e) * 255.0f);
+    double w = attrs.doubleWeight(e);
+    double I = w / (1.0 + w);
+    area[idx] = (unsigned char) (I * 256.0);
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }

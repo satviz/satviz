@@ -1,45 +1,53 @@
 #include <satviz/Camera.hpp>
 
 #include <cstring>
+#include <cmath>
 
 namespace satviz {
 namespace video {
 
-Camera::SmoothedValue::SmoothedValue(float v) : clock(), oldValue(v), newValue(v), curValue(v) {}
-
-void Camera::SmoothedValue::update() {
-  float delta = clock.getElapsedTime().asSeconds();
-  delta *= Camera::SMOOTH_SPEED;
-  if (delta < 1.0f) {
-    curValue = oldValue * (1.0f - delta) + newValue * delta;
-  } else {
-    curValue = oldValue = newValue;
-  }
+void Camera::update(int width, int height) {
+  this->width  = width;
+  this->height = height;
 }
 
-void Camera::SmoothedValue::set(float v) {
-  oldValue = curValue;
-  newValue = v;
-  clock.restart();
+void Camera::drag(int fromX, int fromY, int toX, int toY) {
+  positionX += (double) (fromX - toX) / zoomFactor;
+  positionY -= (double) (fromY - toY) / zoomFactor;
 }
 
-Camera::Camera() : xpos(), ypos(), zoom(2.0f) {}
-
-void Camera::update() {
-  xpos.update();
-  ypos.update();
-  zoom.update();
+void Camera::zoom(int atX, int atY, double factor) {
+  double ratio = 1.0 / zoomFactor - 1.0 / (zoomFactor * factor);
+  positionX += ratio * ((double) atX - (double) width  / 2.0);
+  positionY -= ratio * ((double) atY - (double) height / 2.0);
+  zoomFactor *= factor;
 }
 
-void Camera::toMatrix(float matrix[16], int width, int height) {
-  float zoom = this->zoom.current();
-  memset(matrix, 0, 16 * sizeof (float));
-  matrix[ 0] = 2.0f / (float) width  * zoom;
-  matrix[ 5] = 2.0f / (float) height * zoom;
-  matrix[10] = -1.0f;
-  matrix[12] = -xpos.current() * zoom;
-  matrix[13] = -ypos.current() * zoom;
-  matrix[15] = 1.0f;
+void Camera::focusOnBox(double boxX1, double boxY1, double boxX2, double boxY2) {
+  positionX = 0.5 * (boxX1 + boxX2);
+  positionY = 0.5 * (boxY1 + boxY2);
+
+  double xZoom = (double) width  / (boxX2 - boxX1);
+  double yZoom = (double) height / (boxY2 - boxY1);
+  double mZoom = xZoom < yZoom ? xZoom : yZoom;
+  if (std::isinf(mZoom)) mZoom = 2.0;
+  else mZoom *= 0.95;
+  zoomFactor = mZoom;
+}
+
+void Camera::toMatrix(double matrix[16]) {
+  double xScale = 2.0 / (double) width  * zoomFactor;
+  double yScale = 2.0 / (double) height * zoomFactor;
+  double xTranslation = -positionX * xScale;
+  double yTranslation = -positionY * yScale;
+
+  memset(matrix, 0, 16 * sizeof (double));
+  matrix[ 0] = xScale;
+  matrix[ 5] = yScale;
+  matrix[10] = -1.0;
+  matrix[12] = xTranslation;
+  matrix[13] = yTranslation;
+  matrix[15] = 1.0;
 }
 
 } // namespace video

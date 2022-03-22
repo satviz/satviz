@@ -29,6 +29,10 @@ private:
   enum RecState recording_state = REC_OFF;
   VideoEncoder *video_encoder = nullptr;
 
+  bool mouse_grabbed = false;
+  int  mouse_x;
+  int  mouse_y;
+
   void processEvent(sf::Event &event);
 
 public:
@@ -36,6 +40,11 @@ public:
 
   VideoController(graph::Graph &gr, Display *dpy);
   ~VideoController();
+
+  /**
+   * Move the camera so that the entire graph is in view.
+   */
+  void resetCamera();
 
   /**
    * Process a new frame.

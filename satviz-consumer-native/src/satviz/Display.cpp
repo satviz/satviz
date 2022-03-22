@@ -2,6 +2,8 @@
 
 #include <glad/gl.h>
 
+#include <cstring>
+
 namespace satviz {
 namespace video {
 
@@ -66,9 +68,24 @@ void Display::transferCurrentFrame() {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 }
 
+static void
+flipImage(char *pixels, int width, int height) {
+  int stride = 4 * width;
+  char *temp = new char[stride];
+  for (int r = 0; r < height / 2; r++) {
+    char *row1 = pixels + stride * r;
+    char *row2 = pixels + stride * (height - 1 - r);
+    memcpy(temp, row1, stride);
+    memcpy(row1, row2, stride);
+    memcpy(row2, temp, stride);
+  }
+  delete[] temp;
+}
+
 VideoFrame Display::grabPreviousFrame(const VideoGeometry &geom) {
   glBindBuffer(GL_PIXEL_PACK_BUFFER, pbos[PBO_READY]);
   void *pixels = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+  flipImage((char *) pixels, width, height);
   VideoFrame frame = VideoFrame::fromBgraImage(geom, pixels);
   glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
   glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);

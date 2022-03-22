@@ -1,5 +1,10 @@
 package edu.kit.satviz.consumer.config;
 
+import edu.kit.satviz.consumer.processing.Heatmap;
+import edu.kit.satviz.consumer.processing.HeatmapImplementation;
+import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
+import edu.kit.satviz.consumer.processing.VariableInteractionGraphImplementation;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +38,9 @@ public class ConsumerConfig {
   public static final int MIN_WINDOW_SIZE = 0;
   public static final int MAX_WINDOW_SIZE = Integer.MAX_VALUE;
   public static final int DEFAULT_WINDOW_SIZE = 1000;
+  public static final int MIN_CONTRACTION_ITERATIONS = 0;
+  public static final int MAX_CONTRACTION_ITERATIONS = Integer.MAX_VALUE;
+  public static final int DEFAULT_CONTRACTION_ITERATIONS = 0;
   public static final long DEFAULT_PERIOD = 33;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
   // TODO: set to proper path
@@ -50,8 +58,12 @@ public class ConsumerConfig {
   // cosmetic settings
   private int bufferSize = DEFAULT_BUFFER_SIZE;
   private WeightFactor weightFactor = DEFAULT_WEIGHT_FACTOR;
+  private HeatmapImplementation heatmapImplementation = Heatmap.DEFAULT_IMPLEMENTATION;
   private int windowSize = DEFAULT_WINDOW_SIZE;
   private HeatmapColors heatmapColors = new HeatmapColors(); // this contains the default colors
+  private VariableInteractionGraphImplementation vigImplementation =
+      VariableInteractionGraph.DEFAULT_IMPLEMENTATION;
+  private int contractionIterations = DEFAULT_CONTRACTION_ITERATIONS;
   private long period = DEFAULT_PERIOD;
 
 
@@ -121,6 +133,15 @@ public class ConsumerConfig {
   }
 
   /**
+   * Setter-method for the heatmap implementation.
+   *
+   * @param heatmapImplementation The heatmap implementation.
+   */
+  public void setHeatmapImplementation(HeatmapImplementation heatmapImplementation) {
+    this.heatmapImplementation = heatmapImplementation;
+  }
+
+  /**
    * Setter-method for the window size.
    *
    * @param windowSize The size of the moving window for the heatmap.
@@ -136,6 +157,25 @@ public class ConsumerConfig {
    */
   public void setHeatmapColors(HeatmapColors heatmapColors) {
     this.heatmapColors = heatmapColors;
+  }
+
+  /**
+   * Setter-method for the variable interaction graph implementation.
+   *
+   * @param vigImplementation The variable interaction graph implementation.
+   */
+  public void setVigImplementation(VariableInteractionGraphImplementation vigImplementation) {
+    this.vigImplementation = vigImplementation;
+  }
+
+  /**
+   * Setter-method for the number of iterations for the graph contraction.
+   *
+   * @param contractionIterations The number of iterations the graph contraction
+   *                              algorithm is supposed to do.
+   */
+  public void setContractionIterations(int contractionIterations) {
+    this.contractionIterations = contractionIterations;
   }
 
   /**
@@ -214,6 +254,15 @@ public class ConsumerConfig {
   }
 
   /**
+   * Getter-method for the heatmap implementation.
+   *
+   * @return The heatmap implementation.
+   */
+  public HeatmapImplementation getHeatmapImplementation() {
+    return heatmapImplementation;
+  }
+
+  /**
    * Getter-method for the window size.
    *
    * @return The size of the moving window for the heatmap.
@@ -229,6 +278,24 @@ public class ConsumerConfig {
    */
   public HeatmapColors getHeatmapColors() {
     return heatmapColors;
+  }
+
+  /**
+   * Getter-method for the variable interaction graph implementation.
+   *
+   * @return The variable interaction graph implementation.
+   */
+  public VariableInteractionGraphImplementation getVigImplementation() {
+    return vigImplementation;
+  }
+
+  /**
+   * Getter-method for the number of iterations for the graph contraction.
+   *
+   * @return The number of iterations the graph contraction algorithm is supposed to do.
+   */
+  public int getContractionIterations() {
+    return contractionIterations;
   }
 
   /**
@@ -257,14 +324,18 @@ public class ConsumerConfig {
         && Objects.equals(instancePath, config.instancePath)
         && Objects.equals(videoTemplatePath, config.videoTemplatePath)
         && weightFactor == config.weightFactor
+        && heatmapImplementation == config.heatmapImplementation
         && Objects.equals(heatmapColors, config.heatmapColors)
+        && vigImplementation == config.vigImplementation
+        && contractionIterations == config.contractionIterations
         && period == config.period;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
-        recordImmediately, bufferSize, weightFactor, windowSize, heatmapColors, period);
+        recordImmediately, bufferSize, weightFactor, heatmapImplementation, windowSize,
+        heatmapColors, vigImplementation, contractionIterations, period);
   }
 
 }

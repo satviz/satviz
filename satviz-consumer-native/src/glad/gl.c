@@ -32,10 +32,9 @@ int GLAD_GL_VERSION_3_0 = 0;
 int GLAD_GL_VERSION_3_1 = 0;
 int GLAD_GL_VERSION_3_2 = 0;
 int GLAD_GL_VERSION_3_3 = 0;
-int GLAD_GL_ARB_buffer_storage = 0;
 int GLAD_GL_ARB_explicit_attrib_location = 0;
 int GLAD_GL_ARB_explicit_uniform_location = 0;
-int GLAD_GL_ARB_vertex_attrib_binding = 0;
+int GLAD_GL_ARB_gpu_shader_fp64 = 0;
 int GLAD_GL_KHR_debug = 0;
 
 
@@ -56,7 +55,6 @@ PFNGLBINDRENDERBUFFERPROC glad_glBindRenderbuffer = NULL;
 PFNGLBINDSAMPLERPROC glad_glBindSampler = NULL;
 PFNGLBINDTEXTUREPROC glad_glBindTexture = NULL;
 PFNGLBINDVERTEXARRAYPROC glad_glBindVertexArray = NULL;
-PFNGLBINDVERTEXBUFFERPROC glad_glBindVertexBuffer = NULL;
 PFNGLBLENDCOLORPROC glad_glBlendColor = NULL;
 PFNGLBLENDEQUATIONPROC glad_glBlendEquation = NULL;
 PFNGLBLENDEQUATIONSEPARATEPROC glad_glBlendEquationSeparate = NULL;
@@ -64,7 +62,6 @@ PFNGLBLENDFUNCPROC glad_glBlendFunc = NULL;
 PFNGLBLENDFUNCSEPARATEPROC glad_glBlendFuncSeparate = NULL;
 PFNGLBLITFRAMEBUFFERPROC glad_glBlitFramebuffer = NULL;
 PFNGLBUFFERDATAPROC glad_glBufferData = NULL;
-PFNGLBUFFERSTORAGEPROC glad_glBufferStorage = NULL;
 PFNGLBUFFERSUBDATAPROC glad_glBufferSubData = NULL;
 PFNGLCHECKFRAMEBUFFERSTATUSPROC glad_glCheckFramebufferStatus = NULL;
 PFNGLCLAMPCOLORPROC glad_glClampColor = NULL;
@@ -209,6 +206,7 @@ PFNGLGETTRANSFORMFEEDBACKVARYINGPROC glad_glGetTransformFeedbackVarying = NULL;
 PFNGLGETUNIFORMBLOCKINDEXPROC glad_glGetUniformBlockIndex = NULL;
 PFNGLGETUNIFORMINDICESPROC glad_glGetUniformIndices = NULL;
 PFNGLGETUNIFORMLOCATIONPROC glad_glGetUniformLocation = NULL;
+PFNGLGETUNIFORMDVPROC glad_glGetUniformdv = NULL;
 PFNGLGETUNIFORMFVPROC glad_glGetUniformfv = NULL;
 PFNGLGETUNIFORMIVPROC glad_glGetUniformiv = NULL;
 PFNGLGETUNIFORMUIVPROC glad_glGetUniformuiv = NULL;
@@ -291,24 +289,32 @@ PFNGLTEXSUBIMAGE1DPROC glad_glTexSubImage1D = NULL;
 PFNGLTEXSUBIMAGE2DPROC glad_glTexSubImage2D = NULL;
 PFNGLTEXSUBIMAGE3DPROC glad_glTexSubImage3D = NULL;
 PFNGLTRANSFORMFEEDBACKVARYINGSPROC glad_glTransformFeedbackVaryings = NULL;
+PFNGLUNIFORM1DPROC glad_glUniform1d = NULL;
+PFNGLUNIFORM1DVPROC glad_glUniform1dv = NULL;
 PFNGLUNIFORM1FPROC glad_glUniform1f = NULL;
 PFNGLUNIFORM1FVPROC glad_glUniform1fv = NULL;
 PFNGLUNIFORM1IPROC glad_glUniform1i = NULL;
 PFNGLUNIFORM1IVPROC glad_glUniform1iv = NULL;
 PFNGLUNIFORM1UIPROC glad_glUniform1ui = NULL;
 PFNGLUNIFORM1UIVPROC glad_glUniform1uiv = NULL;
+PFNGLUNIFORM2DPROC glad_glUniform2d = NULL;
+PFNGLUNIFORM2DVPROC glad_glUniform2dv = NULL;
 PFNGLUNIFORM2FPROC glad_glUniform2f = NULL;
 PFNGLUNIFORM2FVPROC glad_glUniform2fv = NULL;
 PFNGLUNIFORM2IPROC glad_glUniform2i = NULL;
 PFNGLUNIFORM2IVPROC glad_glUniform2iv = NULL;
 PFNGLUNIFORM2UIPROC glad_glUniform2ui = NULL;
 PFNGLUNIFORM2UIVPROC glad_glUniform2uiv = NULL;
+PFNGLUNIFORM3DPROC glad_glUniform3d = NULL;
+PFNGLUNIFORM3DVPROC glad_glUniform3dv = NULL;
 PFNGLUNIFORM3FPROC glad_glUniform3f = NULL;
 PFNGLUNIFORM3FVPROC glad_glUniform3fv = NULL;
 PFNGLUNIFORM3IPROC glad_glUniform3i = NULL;
 PFNGLUNIFORM3IVPROC glad_glUniform3iv = NULL;
 PFNGLUNIFORM3UIPROC glad_glUniform3ui = NULL;
 PFNGLUNIFORM3UIVPROC glad_glUniform3uiv = NULL;
+PFNGLUNIFORM4DPROC glad_glUniform4d = NULL;
+PFNGLUNIFORM4DVPROC glad_glUniform4dv = NULL;
 PFNGLUNIFORM4FPROC glad_glUniform4f = NULL;
 PFNGLUNIFORM4FVPROC glad_glUniform4fv = NULL;
 PFNGLUNIFORM4IPROC glad_glUniform4i = NULL;
@@ -316,14 +322,23 @@ PFNGLUNIFORM4IVPROC glad_glUniform4iv = NULL;
 PFNGLUNIFORM4UIPROC glad_glUniform4ui = NULL;
 PFNGLUNIFORM4UIVPROC glad_glUniform4uiv = NULL;
 PFNGLUNIFORMBLOCKBINDINGPROC glad_glUniformBlockBinding = NULL;
+PFNGLUNIFORMMATRIX2DVPROC glad_glUniformMatrix2dv = NULL;
 PFNGLUNIFORMMATRIX2FVPROC glad_glUniformMatrix2fv = NULL;
+PFNGLUNIFORMMATRIX2X3DVPROC glad_glUniformMatrix2x3dv = NULL;
 PFNGLUNIFORMMATRIX2X3FVPROC glad_glUniformMatrix2x3fv = NULL;
+PFNGLUNIFORMMATRIX2X4DVPROC glad_glUniformMatrix2x4dv = NULL;
 PFNGLUNIFORMMATRIX2X4FVPROC glad_glUniformMatrix2x4fv = NULL;
+PFNGLUNIFORMMATRIX3DVPROC glad_glUniformMatrix3dv = NULL;
 PFNGLUNIFORMMATRIX3FVPROC glad_glUniformMatrix3fv = NULL;
+PFNGLUNIFORMMATRIX3X2DVPROC glad_glUniformMatrix3x2dv = NULL;
 PFNGLUNIFORMMATRIX3X2FVPROC glad_glUniformMatrix3x2fv = NULL;
+PFNGLUNIFORMMATRIX3X4DVPROC glad_glUniformMatrix3x4dv = NULL;
 PFNGLUNIFORMMATRIX3X4FVPROC glad_glUniformMatrix3x4fv = NULL;
+PFNGLUNIFORMMATRIX4DVPROC glad_glUniformMatrix4dv = NULL;
 PFNGLUNIFORMMATRIX4FVPROC glad_glUniformMatrix4fv = NULL;
+PFNGLUNIFORMMATRIX4X2DVPROC glad_glUniformMatrix4x2dv = NULL;
 PFNGLUNIFORMMATRIX4X2FVPROC glad_glUniformMatrix4x2fv = NULL;
+PFNGLUNIFORMMATRIX4X3DVPROC glad_glUniformMatrix4x3dv = NULL;
 PFNGLUNIFORMMATRIX4X3FVPROC glad_glUniformMatrix4x3fv = NULL;
 PFNGLUNMAPBUFFERPROC glad_glUnmapBuffer = NULL;
 PFNGLUSEPROGRAMPROC glad_glUseProgram = NULL;
@@ -364,9 +379,7 @@ PFNGLVERTEXATTRIB4SVPROC glad_glVertexAttrib4sv = NULL;
 PFNGLVERTEXATTRIB4UBVPROC glad_glVertexAttrib4ubv = NULL;
 PFNGLVERTEXATTRIB4UIVPROC glad_glVertexAttrib4uiv = NULL;
 PFNGLVERTEXATTRIB4USVPROC glad_glVertexAttrib4usv = NULL;
-PFNGLVERTEXATTRIBBINDINGPROC glad_glVertexAttribBinding = NULL;
 PFNGLVERTEXATTRIBDIVISORPROC glad_glVertexAttribDivisor = NULL;
-PFNGLVERTEXATTRIBFORMATPROC glad_glVertexAttribFormat = NULL;
 PFNGLVERTEXATTRIBI1IPROC glad_glVertexAttribI1i = NULL;
 PFNGLVERTEXATTRIBI1IVPROC glad_glVertexAttribI1iv = NULL;
 PFNGLVERTEXATTRIBI1UIPROC glad_glVertexAttribI1ui = NULL;
@@ -387,9 +400,7 @@ PFNGLVERTEXATTRIBI4UBVPROC glad_glVertexAttribI4ubv = NULL;
 PFNGLVERTEXATTRIBI4UIPROC glad_glVertexAttribI4ui = NULL;
 PFNGLVERTEXATTRIBI4UIVPROC glad_glVertexAttribI4uiv = NULL;
 PFNGLVERTEXATTRIBI4USVPROC glad_glVertexAttribI4usv = NULL;
-PFNGLVERTEXATTRIBIFORMATPROC glad_glVertexAttribIFormat = NULL;
 PFNGLVERTEXATTRIBIPOINTERPROC glad_glVertexAttribIPointer = NULL;
-PFNGLVERTEXATTRIBLFORMATPROC glad_glVertexAttribLFormat = NULL;
 PFNGLVERTEXATTRIBP1UIPROC glad_glVertexAttribP1ui = NULL;
 PFNGLVERTEXATTRIBP1UIVPROC glad_glVertexAttribP1uiv = NULL;
 PFNGLVERTEXATTRIBP2UIPROC glad_glVertexAttribP2ui = NULL;
@@ -399,7 +410,6 @@ PFNGLVERTEXATTRIBP3UIVPROC glad_glVertexAttribP3uiv = NULL;
 PFNGLVERTEXATTRIBP4UIPROC glad_glVertexAttribP4ui = NULL;
 PFNGLVERTEXATTRIBP4UIVPROC glad_glVertexAttribP4uiv = NULL;
 PFNGLVERTEXATTRIBPOINTERPROC glad_glVertexAttribPointer = NULL;
-PFNGLVERTEXBINDINGDIVISORPROC glad_glVertexBindingDivisor = NULL;
 PFNGLVIEWPORTPROC glad_glViewport = NULL;
 PFNGLWAITSYNCPROC glad_glWaitSync = NULL;
 
@@ -788,18 +798,26 @@ static void glad_gl_load_GL_VERSION_3_3( GLADuserptrloadfunc load, void* userptr
     glad_glVertexAttribP4ui = (PFNGLVERTEXATTRIBP4UIPROC) load(userptr, "glVertexAttribP4ui");
     glad_glVertexAttribP4uiv = (PFNGLVERTEXATTRIBP4UIVPROC) load(userptr, "glVertexAttribP4uiv");
 }
-static void glad_gl_load_GL_ARB_buffer_storage( GLADuserptrloadfunc load, void* userptr) {
-    if(!GLAD_GL_ARB_buffer_storage) return;
-    glad_glBufferStorage = (PFNGLBUFFERSTORAGEPROC) load(userptr, "glBufferStorage");
-}
-static void glad_gl_load_GL_ARB_vertex_attrib_binding( GLADuserptrloadfunc load, void* userptr) {
-    if(!GLAD_GL_ARB_vertex_attrib_binding) return;
-    glad_glBindVertexBuffer = (PFNGLBINDVERTEXBUFFERPROC) load(userptr, "glBindVertexBuffer");
-    glad_glVertexAttribBinding = (PFNGLVERTEXATTRIBBINDINGPROC) load(userptr, "glVertexAttribBinding");
-    glad_glVertexAttribFormat = (PFNGLVERTEXATTRIBFORMATPROC) load(userptr, "glVertexAttribFormat");
-    glad_glVertexAttribIFormat = (PFNGLVERTEXATTRIBIFORMATPROC) load(userptr, "glVertexAttribIFormat");
-    glad_glVertexAttribLFormat = (PFNGLVERTEXATTRIBLFORMATPROC) load(userptr, "glVertexAttribLFormat");
-    glad_glVertexBindingDivisor = (PFNGLVERTEXBINDINGDIVISORPROC) load(userptr, "glVertexBindingDivisor");
+static void glad_gl_load_GL_ARB_gpu_shader_fp64( GLADuserptrloadfunc load, void* userptr) {
+    if(!GLAD_GL_ARB_gpu_shader_fp64) return;
+    glad_glGetUniformdv = (PFNGLGETUNIFORMDVPROC) load(userptr, "glGetUniformdv");
+    glad_glUniform1d = (PFNGLUNIFORM1DPROC) load(userptr, "glUniform1d");
+    glad_glUniform1dv = (PFNGLUNIFORM1DVPROC) load(userptr, "glUniform1dv");
+    glad_glUniform2d = (PFNGLUNIFORM2DPROC) load(userptr, "glUniform2d");
+    glad_glUniform2dv = (PFNGLUNIFORM2DVPROC) load(userptr, "glUniform2dv");
+    glad_glUniform3d = (PFNGLUNIFORM3DPROC) load(userptr, "glUniform3d");
+    glad_glUniform3dv = (PFNGLUNIFORM3DVPROC) load(userptr, "glUniform3dv");
+    glad_glUniform4d = (PFNGLUNIFORM4DPROC) load(userptr, "glUniform4d");
+    glad_glUniform4dv = (PFNGLUNIFORM4DVPROC) load(userptr, "glUniform4dv");
+    glad_glUniformMatrix2dv = (PFNGLUNIFORMMATRIX2DVPROC) load(userptr, "glUniformMatrix2dv");
+    glad_glUniformMatrix2x3dv = (PFNGLUNIFORMMATRIX2X3DVPROC) load(userptr, "glUniformMatrix2x3dv");
+    glad_glUniformMatrix2x4dv = (PFNGLUNIFORMMATRIX2X4DVPROC) load(userptr, "glUniformMatrix2x4dv");
+    glad_glUniformMatrix3dv = (PFNGLUNIFORMMATRIX3DVPROC) load(userptr, "glUniformMatrix3dv");
+    glad_glUniformMatrix3x2dv = (PFNGLUNIFORMMATRIX3X2DVPROC) load(userptr, "glUniformMatrix3x2dv");
+    glad_glUniformMatrix3x4dv = (PFNGLUNIFORMMATRIX3X4DVPROC) load(userptr, "glUniformMatrix3x4dv");
+    glad_glUniformMatrix4dv = (PFNGLUNIFORMMATRIX4DVPROC) load(userptr, "glUniformMatrix4dv");
+    glad_glUniformMatrix4x2dv = (PFNGLUNIFORMMATRIX4X2DVPROC) load(userptr, "glUniformMatrix4x2dv");
+    glad_glUniformMatrix4x3dv = (PFNGLUNIFORMMATRIX4X3DVPROC) load(userptr, "glUniformMatrix4x3dv");
 }
 static void glad_gl_load_GL_KHR_debug( GLADuserptrloadfunc load, void* userptr) {
     if(!GLAD_GL_KHR_debug) return;
@@ -922,10 +940,9 @@ static int glad_gl_find_extensions_gl( int version) {
     char **exts_i = NULL;
     if (!glad_gl_get_extensions(version, &exts, &num_exts_i, &exts_i)) return 0;
 
-    GLAD_GL_ARB_buffer_storage = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_buffer_storage");
     GLAD_GL_ARB_explicit_attrib_location = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_explicit_attrib_location");
     GLAD_GL_ARB_explicit_uniform_location = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_explicit_uniform_location");
-    GLAD_GL_ARB_vertex_attrib_binding = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_vertex_attrib_binding");
+    GLAD_GL_ARB_gpu_shader_fp64 = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_ARB_gpu_shader_fp64");
     GLAD_GL_KHR_debug = glad_gl_has_extension(version, exts, num_exts_i, exts_i, "GL_KHR_debug");
 
     glad_gl_free_extensions(exts_i, num_exts_i);
@@ -995,8 +1012,7 @@ int gladLoadGLUserPtr( GLADuserptrloadfunc load, void *userptr) {
     glad_gl_load_GL_VERSION_3_3(load, userptr);
 
     if (!glad_gl_find_extensions_gl(version)) return 0;
-    glad_gl_load_GL_ARB_buffer_storage(load, userptr);
-    glad_gl_load_GL_ARB_vertex_attrib_binding(load, userptr);
+    glad_gl_load_GL_ARB_gpu_shader_fp64(load, userptr);
     glad_gl_load_GL_KHR_debug(load, userptr);
 
 

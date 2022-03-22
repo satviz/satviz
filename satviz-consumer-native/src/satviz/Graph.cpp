@@ -82,8 +82,8 @@ void Graph::submitWeightUpdate(WeightUpdate &update) {
   // (OGDF containers/iterators having a non-standard interface),
   // which in itself is only something we need to work around another bug in OGDF
   // (shrinking an Array with resize() results in a double free).
-  ogdf::Array<ogdf::edge> ogdfIsTerrible(changed.size());
-  for (int i = 0; i < changed.size(); i++) { ogdfIsTerrible[i] = changed[i]; }
+  ogdf::Array<ogdf::edge> ogdfIsTerrible((int) changed.size());
+  for (int i = 0; i < (int) changed.size(); i++) { ogdfIsTerrible[i] = changed[i]; }
 
   for (auto o : observers) {
     o->onWeightChange(ogdfIsTerrible);

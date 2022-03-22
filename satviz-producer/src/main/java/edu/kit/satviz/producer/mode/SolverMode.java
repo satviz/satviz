@@ -3,9 +3,9 @@ package edu.kit.satviz.producer.mode;
 import edu.kit.ipasir4j.Ipasir;
 import edu.kit.ipasir4j.IpasirNotFoundException;
 import edu.kit.ipasir4j.Solver;
+import edu.kit.satviz.common.Compression;
 import edu.kit.satviz.common.Hashing;
-import edu.kit.satviz.network.OfferType;
-import edu.kit.satviz.network.ProducerId;
+import edu.kit.satviz.network.pub.SolverId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
 import edu.kit.satviz.producer.ProducerMode;
@@ -31,12 +31,13 @@ public class SolverMode implements ProducerMode {
   @Override
   public ProducerModeData apply(ProducerParameters parameters) throws SourceException {
     tryLoadSolver(parameters.getSolverFile());
-    try (DimacsFile instance = new DimacsFile(Files.newInputStream(parameters.getInstanceFile()))) {
+    try (DimacsFile instance = new DimacsFile(
+        Compression.openPossiblyCompressed(parameters.getInstanceFile()))) {
       Solver solver = Ipasir.init();
       configureSolver(solver, instance);
       return new ProducerModeData(
           new SolverSource(solver, instance.getVariableAmount()),
-          new ProducerId(null, OfferType.SOLVER, Ipasir.signature(),
+          new SolverId(Ipasir.signature(),
               parameters.isNoWait(),
               Hashing.hashContent(Files.newInputStream(parameters.getInstanceFile())))
       );

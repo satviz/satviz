@@ -1,200 +1,133 @@
 package edu.kit.satviz.network;
 
-import edu.kit.satviz.serial.Serializer;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import edu.kit.satviz.network.general.Connection;
+import edu.kit.satviz.network.general.ConnectionServer;
+import edu.kit.satviz.network.general.NetworkMessage;
+import edu.kit.satviz.network.general.PollEvent;
+import edu.kit.satviz.network.pub.MessageTypes;
+import edu.kit.satviz.sat.Clause;
+import edu.kit.satviz.serial.SerializationException;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Queue;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// TODO for some reason, using the same port on more than one test does not work, even if the
+// TODO previous server socket was properly closed
+
 class ConnectionTest {
-  private static final int PORT = 35214;
+  private static Connection client;
+  public static ConnectionServer server;
 
-  private static NetworkBlueprint bp;
-  private static ByteBuffer data;
+  @Test
+  void testLocalhost() {
+    final int PORT = 34312;
+    try {
+      server = new ConnectionServer(PORT, MessageTypes.satvizBlueprint);
+      client = new Connection("localhost", PORT, MessageTypes.satvizBlueprint);
 
-  private static final Map<ConnectionId, List<NetworkMessage>> receivedServer = new HashMap<>();
-  private static final List<NetworkMessage> receivedClient = new ArrayList<>();
-  private static final List<ConnectionId> accepted = new ArrayList<>();
-  private static final List<ConnectionId> connected = new ArrayList<>();
-  private static String failListenedClient;
-  private static String failListenedServer;
-  private static final Object syncNewConnections = new Object();
+      PollEvent event = null;
+      while (event == null) {
+        event = server.poll();
+      }
+      // client is connected with ID 0
+      assertEquals(PollEvent.EventType.ACCEPT, event.type());
+      assertEquals(0, event.id());
+      assertNull(event.obj());
 
-  private static ServerConnectionManager server;
-  private static ClientConnectionManager client;
+      // send two clauses in quick succession
+      // note: this implicitly assumes that the server's receive buffer can hold both clauses
+      Clause c1 = new Clause(new int[]{1,2,3,4,5,-1,-2,-3,-4,400000});
+      Clause c2 = new Clause(new int[]{42});
+      client.write(MessageTypes.CLAUSE_ADD, c1);
+      client.write(MessageTypes.CLAUSE_DEL, c2);
 
-  @BeforeAll
-  static void initAll() {
-    Map<Byte, Serializer<?>> m = new HashMap<>();
-    m.put((byte) 1, new NullSerializer());
-    m.put((byte) 2, new NullSerializer());
-    bp = new NetworkBlueprint(m);
-  }
+      event = null;
+      while (event == null) {
+        event = server.poll();
+      }
+      assertEquals(PollEvent.EventType.READ, event.type());
+      assertEquals(0, event.id());
+      assertEquals(MessageTypes.CLAUSE_ADD, ((NetworkMessage) event.obj()).type());
+      assertEquals(c1, ((NetworkMessage) event.obj()).object());
+      event = null;
+      while (event == null) {
+        event = server.poll();
+      }
+      assertEquals(PollEvent.EventType.READ, event.type());
+      assertEquals(0, event.id());
+      assertEquals(MessageTypes.CLAUSE_DEL, ((NetworkMessage) event.obj()).type());
+      assertEquals(c2, ((NetworkMessage) event.obj()).object());
 
-  @BeforeEach
-  void init() {
-    server = null;
-    client = null;
-    receivedServer.clear();
-    receivedClient.clear();
-    accepted.clear();
-    connected.clear();
-    failListenedClient = null;
-    failListenedServer = null;
+      // make sure nothing else comes through
+      event = server.poll();
+      assertNull(event);
+
+      // test writing in other direction
+      Queue<NetworkMessage> q;
+      q = client.read();
+      assertTrue(q.isEmpty());
+      server.write(0, MessageTypes.CLAUSE_ADD, c1);
+      do {
+        q = client.read();
+      } while (q.isEmpty());
+      assertEquals(q.size(), 1);
+      assertEquals(MessageTypes.CLAUSE_ADD, q.peek().type());
+      assertEquals(c1, q.peek().object());
+
+    } catch (Throwable t) {
+      fail(t);
+    } finally {
+      if (client != null) client.close();
+      client = null;
+      if (server != null) server.close();
+      server = null;
+    }
   }
 
   @Test
-  void testConnection() throws InterruptedException {
-    server = new ServerConnectionManager(PORT, bp);
-    client = new ClientConnectionManager("localhost", PORT, bp);
-
-    System.out.println("initialized");
-
-    server.registerConnect(ConnectionTest::defaultListenerAccept);
-    server.registerGlobalFail(ConnectionTest::defaultListenerFailServer);
-    client.registerConnect(ConnectionTest::defaultListenerConnect);
-    client.registerGlobalFail(ConnectionTest::defaultListenerFailClient);
-
-    System.out.println("registered");
-
-    assertEquals(0, receivedServer.size());
-    assertEquals(0, receivedClient.size());
-    assertEquals(0, accepted.size());
-    assertEquals(0, connected.size());
-    assertNull(failListenedClient);
-    assertNull(failListenedServer);
-
+  void testFail() {
+    final int PORT = 34313;
     try {
-      assertTrue(client.start());
-      assertFalse(client.start());
+      server = new ConnectionServer(PORT, MessageTypes.satvizBlueprint);
+      client = new Connection("localhost", PORT, MessageTypes.satvizBlueprint);
 
-      System.out.println("client started");
+      assertThrows(SerializationException.class, () -> {
+        client.write(MessageTypes.CLAUSE_ADD, client); // wrong type
+      });
+      assertThrows(SerializationException.class, () -> {
+        client.write(MessageTypes.CLAUSE_ADD, new Clause(new int[]{1,2,3})); // correct now
+      });
 
-      assertTrue(server.start());
-      assertFalse(server.start());
+      assertThrows(IndexOutOfBoundsException.class, () -> {
+        server.write(42, MessageTypes.START, null); // invalid connection ID on server
+      });
 
-      System.out.println("server started");
-
-      synchronized (syncNewConnections) {
-        while (connected.isEmpty()) {
-          syncNewConnections.wait();
-        }
-      }
-
-      System.out.println("connected");
-      try {
-        System.out.println("connected: " + connected.get(0).address());
-        System.out.println("accepted: " + accepted.get(0).address());
-      } catch (IndexOutOfBoundsException e) {
-        fail("no connections received");
-      }
-
-      //
-      // send from client to server
-      //
-      try {
-        client.send(connected.get(0), (byte) 2, null);
-        client.send(connected.get(0), (byte) 1, null);
-      } catch (IOException e) {
-        fail("client send did not work:" + e);
-      }
-      synchronized (receivedServer) {
-        while (receivedServer.get(accepted.get(0)) == null || receivedServer.get(accepted.get(0)).size() != 2) {
-          receivedServer.wait();
-        }
-      }
-      List<NetworkMessage> l = receivedServer.get(accepted.get(0));
-      assertEquals(2, l.size());
-      NetworkMessage msg = l.get(0);
-      assertNotNull(msg);
-      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
-      assertEquals(2, msg.getType());
-      msg = l.get(1);
-      assertNotNull(msg);
-      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
-      assertEquals(1, msg.getType());
-
-      //
-      // send from server to client
-      //
-      try {
-        server.send(accepted.get(0), (byte) 2, null);
-        server.send(accepted.get(0), (byte) 1, null);
-      } catch (IOException e) {
-        fail ("server send did not work:" + e);
-      }
-      synchronized (receivedClient) {
-        while(receivedClient.size() != 2) {
-          receivedClient.wait();
-        }
-      }
-      assertEquals(2, receivedClient.size());
-      msg = receivedClient.get(0);
-      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
-      assertEquals(2, msg.getType());
-      msg = receivedClient.get(1);
-      assertEquals(NetworkMessage.State.PRESENT, msg.getState());
-      assertEquals(1, msg.getType());
-
+    } catch (Throwable t) {
+      fail(t);
     } finally {
-      System.out.println("cleanup client");
-      client.finishStop();
-      System.out.println("cleanup server");
-      server.finishStop();
-      System.out.println("cleanup done");
+      if (client != null) client.close();
+      client = null;
+      if (server != null) server.close();
+      server = null;
     }
   }
 
-  static void defaultListenerServer(ConnectionId cid, NetworkMessage msg) {
-    synchronized (receivedServer) {
-      System.out.println("received server");
-      List<NetworkMessage> l = receivedServer.computeIfAbsent(cid, k -> new ArrayList<>());
-      l.add(msg);
-      receivedServer.notifyAll();
+  @Test
+  void testBindEphemeral() {
+    final int PORT = 0;
+    try {
+      server = new ConnectionServer(PORT, MessageTypes.satvizBlueprint);
+      // check to see if we got a sensible port
+      assertTrue(server.getLocalAddress().getPort() >= 1024);
+      assertTrue(server.getLocalAddress().getPort() <= 65535);
+    } catch (Throwable t) {
+      fail(t);
+    } finally {
+      if (server != null) server.close();
+      server = null;
     }
-  }
-
-  static void defaultListenerClient(ConnectionId cid, NetworkMessage msg) {
-    synchronized(receivedClient) {
-      System.out.println("received client");
-      receivedClient.add(msg);
-      receivedClient.notifyAll();
-    }
-  }
-
-  static void defaultListenerAccept(ConnectionId newCid) {
-    server.register(newCid, ConnectionTest::defaultListenerServer);
-    synchronized (syncNewConnections) {
-      accepted.add(newCid);
-      if (connected.size() == accepted.size()) {
-        syncNewConnections.notifyAll();
-      }
-    }
-  }
-
-  static void defaultListenerConnect(ConnectionId newCid) {
-    client.register(newCid, ConnectionTest::defaultListenerClient);
-    synchronized (syncNewConnections) {
-      connected.add(newCid);
-      if (connected.size() == accepted.size()) {
-        syncNewConnections.notifyAll();
-      }
-    }
-  }
-
-  static void defaultListenerFailClient(String reason) {
-    failListenedClient = reason;
-  }
-
-  static void defaultListenerFailServer(String reason) {
-    failListenedServer = reason;
   }
 }

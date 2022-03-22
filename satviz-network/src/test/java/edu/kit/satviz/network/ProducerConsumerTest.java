@@ -1,169 +1,168 @@
 package edu.kit.satviz.network;
 
+import edu.kit.satviz.network.pub.*;
 import edu.kit.satviz.sat.Clause;
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.lang.invoke.StringConcatException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProducerConsumerTest implements ProducerConnectionListener, ConsumerConnectionListener {
+public class ProducerConsumerTest implements ProducerConnectionListener, ConsumerConnectionListener {
+  private static ProducerConnection prod;
+  private static ConsumerConnection cons;
+  private static final Object SYNC_PROD = new Object();
+  private static final Object SYNC_CONS = new Object();
 
-  private volatile String prodFail = null;
-  private volatile String consFail = null;
+  private static List<ProducerId> lsConnectCalls;
+  private static List<String> lsFailCalls;
 
-  private final Object syncConnect1 = new Object();
-  private final Object syncConnect2 = new Object();
-  private final Object syncTerm = new Object();
-  private final Object syncClauseUpdate = new Object();
+  private static Map<ProducerId, List<ClauseUpdate>> onClauseUpdateCalls;
+  private static Map<ProducerId, SatAssignment> onTerminateSolvedCalls;
+  private static List<ProducerId> onTerminateRefutedCalls;
+  private static Map<ProducerId, String> onTerminateOtherCalls;
 
-  private boolean prodOnConnect = false;
-  private String prodOnDisconnect = null;
-  private List<ProducerId> consConnections = new ArrayList<>();
-  private Map<ProducerId, List<ClauseUpdate>> clauseUpdates = new HashMap<>();
-  private Map<ProducerId, SatAssignment> termSolved = new HashMap<>();
-  private Set<ProducerId> termRefuted = new HashSet<>();
-  private Map<ProducerId, String> termOtherwise = new HashMap<>();
+  private static int onConnectCalls;
+  private static List<String> onDisconnectCalls;
 
-  private static final int PORT = 35124;
+  @BeforeEach
+  void beforeEach() {
+    lsConnectCalls = new ArrayList<>();
+    lsFailCalls = new ArrayList<>();
+    onClauseUpdateCalls = new HashMap<>();
+    onTerminateSolvedCalls = new HashMap<>();
+    onTerminateRefutedCalls = new ArrayList<>();
+    onTerminateOtherCalls = new HashMap<>();
+    onConnectCalls = 0;
+    onDisconnectCalls = new ArrayList<>();
+  }
 
   @Test
-  void connectionTest() throws InterruptedException {
-    ProducerConnection prod = new ProducerConnection("localhost", PORT);
-    ConsumerConnection cons = new ConsumerConnection(PORT);
-
+  void testProdTerminate() {
+    final int PORT = 34314;
     try {
-      prod.registerGlobalFail(this::prodFailListener);
-      prod.register(this);
-      cons.registerGlobalFail(this::consFailListener);
-      cons.registerConnect(this::consConnectListener);
+      prod = new ProducerConnection("localhost", PORT);
+      prod.establish(new SolverId("cadical", false, 42), this);
 
-      ProducerId establishPid = new ProducerId(null, OfferType.SOLVER, "cadical", true, 42);
-      prod.establish(establishPid);
-
+      cons = new ConsumerConnection(PORT, this::lsConnect, this::lsFail);
       cons.start();
 
-      synchronized (syncConnect1) {
-        while (consConnections.isEmpty()) {
-          syncConnect1.wait();
+      synchronized (SYNC_PROD) {
+        while (onConnectCalls == 0) {
+          SYNC_PROD.wait();
         }
       }
-
-      ProducerId consId = consConnections.get(0);
-      assertEquals(OfferType.SOLVER, consId.type());
-      assertEquals("cadical", consId.solverName());
-      assertTrue(consId.solverDelayed());
-      assertEquals(42, consId.instanceHash());
-
-      cons.connect(consId, this);
-
-      synchronized (syncConnect2) {
-        while (!prodOnConnect) {
-          syncConnect2.wait();
+      synchronized (SYNC_CONS) {
+        while(lsConnectCalls.isEmpty()) {
+          SYNC_CONS.wait();
         }
       }
+      // consumer and producer found each other
+      assertEquals(OfferType.SOLVER, lsConnectCalls.get(0).getType());
+      SolverId sid = (SolverId) lsConnectCalls.get(0);
+      assertEquals("cadical", sid.getSolverName());
+      assertFalse(sid.isSolverDelayed());
+      assertEquals(42, sid.getInstanceHash());
 
-      ClauseUpdate c1 = new ClauseUpdate(new Clause(new int[]{1, 2, 3}), ClauseUpdate.Type.ADD);
-      ClauseUpdate c2 = new ClauseUpdate(new Clause(new int[]{42, 43, 44}), ClauseUpdate.Type.REMOVE);
-      try {
-        prod.sendClauseUpdate(c1);
-        prod.sendClauseUpdate(c2);
-      } catch (IllegalStateException e) {
-        fail("illegal state on sending clause update");
-      }
 
-      synchronized (syncClauseUpdate) {
-        while (clauseUpdates.get(consId) == null || clauseUpdates.get(consId).size() != 2) {
-          syncClauseUpdate.wait();
+      ClauseUpdate c1 = new ClauseUpdate(new Clause(new int[]{1,-1,400000}), ClauseUpdate.Type.ADD);
+      ClauseUpdate c2 = new ClauseUpdate(new Clause(new int[]{1,2,3,4,5,-1,-2,-3,-4,-5}), ClauseUpdate.Type.REMOVE);
+      SatAssignment assign = new SatAssignment(10);
+      assign.set(5, SatAssignment.VariableState.SET);
+      assertTrue(prod.sendClauseUpdate(c1));
+      assertTrue(prod.sendClauseUpdate(c2));
+      prod.terminateSolved(assign);
+      assertFalse(prod.sendClauseUpdate(c1)); // sending after terminating
+
+      synchronized (SYNC_CONS) {
+        while (onTerminateSolvedCalls.isEmpty()) {
+          SYNC_CONS.wait();
         }
       }
+      List<ClauseUpdate> updates = onClauseUpdateCalls.get(sid);
+      assertNotNull(updates);
+      assertEquals(2, updates.size());
+      assertEquals(c1, updates.get(0));
+      assertEquals(c2, updates.get(1));
+      assertTrue(onDisconnectCalls.isEmpty()); // prod disconnected, so no message
 
-      ClauseUpdate recC1 = clauseUpdates.get(consId).get(0);
-      ClauseUpdate recC2 = clauseUpdates.get(consId).get(1);
-      assertEquals(c1.clause(), recC1.clause());
-      assertEquals(c1.type(), recC1.type());
-      assertEquals(c2.clause(), recC2.clause());
-      assertEquals(c2.type(), recC2.type());
+      assertTrue(lsFailCalls.isEmpty());
 
-      SatAssignment sol = new SatAssignment(10);
-      sol.set(5, SatAssignment.VariableState.SET);
-      sol.set(7, SatAssignment.VariableState.UNSET);
-      prod.terminateSolved(sol);
-
-      synchronized (syncTerm) {
-        while (termSolved.isEmpty() || termSolved.get(consId) == null) {
-          syncTerm.wait();
-        }
-      }
-
-      assertEquals(sol, termSolved.get(consId));
-
+    } catch (Throwable t) {
+      fail(t);
     } finally {
-      try {
-        prod.stop();
-        cons.stop();
-      } catch (InterruptedException e) {
-        fail(e);
-      }
+      if (prod != null) prod.terminateOtherwise("finally");
+      if (cons != null) cons.stop();
     }
-    assertNull(prodFail);
-    assertNull(consFail);
   }
 
-  private void consFailListener(String reason) {
-    consFail = reason;
-  }
-
-  private void prodFailListener(String reason) {
-    prodFail = reason;
-  }
-
+  @Override
   public void onConnect() {
-    synchronized (syncConnect2) {
-      prodOnConnect = true;
-      syncConnect2.notifyAll();
+    synchronized (SYNC_PROD) {
+      onConnectCalls++;
+      SYNC_PROD.notifyAll();
     }
   }
 
+  @Override
   public void onDisconnect(String reason) {
-    prodOnDisconnect = reason;
-  }
-
-  private void consConnectListener(ProducerId pid) {
-    synchronized (syncConnect1) {
-      consConnections.add(pid);
-      syncConnect1.notifyAll();
+    synchronized (SYNC_PROD) {
+      onDisconnectCalls.add(reason);
+      SYNC_PROD.notifyAll();
     }
   }
 
+  public void lsConnect(ProducerId pid) {
+    synchronized (SYNC_CONS) {
+      lsConnectCalls.add(pid);
+      cons.connect(pid, this);
+      SYNC_CONS.notifyAll();
+    }
+  }
+
+  public void lsFail(String msg) {
+    synchronized (SYNC_CONS) {
+      lsFailCalls.add(msg);
+      SYNC_CONS.notifyAll();
+    }
+  }
+
+  @Override
   public void onClauseUpdate(ProducerId pid, ClauseUpdate c) {
-    synchronized (syncClauseUpdate) {
-      List<ClauseUpdate> updates = clauseUpdates.computeIfAbsent(pid, k -> new ArrayList<>());
-      updates.add(c);
-      syncClauseUpdate.notifyAll();
+    synchronized (SYNC_CONS) {
+      onClauseUpdateCalls.computeIfAbsent(pid, (p) -> new ArrayList<>()).add(c);
+      SYNC_CONS.notifyAll();
     }
   }
 
+  @Override
   public void onTerminateSolved(ProducerId pid, SatAssignment assign) {
-    synchronized (syncTerm) {
-      termSolved.put(pid, assign);
-      syncTerm.notifyAll();
+    synchronized (SYNC_CONS) {
+      onTerminateSolvedCalls.put(pid, assign);
+      SYNC_CONS.notifyAll();
     }
   }
 
+  @Override
   public void onTerminateRefuted(ProducerId pid) {
-    synchronized (syncTerm) {
-      termRefuted.add(pid);
-      syncTerm.notifyAll();
+    synchronized (SYNC_CONS) {
+      onTerminateRefutedCalls.add(pid);
+      SYNC_CONS.notifyAll();
     }
   }
 
+  @Override
   public void onTerminateOtherwise(ProducerId pid, String reason) {
-    synchronized (syncTerm) {
-      termOtherwise.put(pid, reason);
-      syncTerm.notifyAll();
+    synchronized (SYNC_CONS) {
+      onTerminateOtherCalls.put(pid, reason);
+      SYNC_CONS.notifyAll();
     }
   }
 }

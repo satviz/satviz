@@ -60,6 +60,12 @@ public class VideoController extends NativeObject {
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
   );
 
+  private static final MethodHandle RESET_CAMERA = lookupFunction(
+      "reset_camera",
+      MethodType.methodType(void.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
   private static final MethodHandle NEXT_FRAME = lookupFunction(
       "next_frame",
       MethodType.methodType(void.class, MemoryAddress.class),
@@ -151,6 +157,17 @@ public class VideoController extends NativeObject {
       FINISH_RECORDING.invokeExact(getPointer());
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while finishing a recording", e);
+    }
+  }
+
+  /**
+   * Resets the camera to include the entire graph.
+   */
+  public void resetCamera() {
+    try {
+      RESET_CAMERA.invokeExact(getPointer());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while resetting camera", e);
     }
   }
 

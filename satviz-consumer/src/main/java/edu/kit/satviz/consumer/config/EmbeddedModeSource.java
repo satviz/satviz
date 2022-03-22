@@ -17,7 +17,7 @@ public enum EmbeddedModeSource {
   /**
    * Use a finished proof as the source.
    */
-  PROOF(List.of(".drat"));
+  PROOF(List.of(".drat", ".drat.xz"));
 
   private final List<String> fileExtensions;
 

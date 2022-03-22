@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.IntUnaryOperator;
 
 /**
  * A class that manages incoming {@link ClauseUpdate}s. A {@code ClauseCoordinator}
@@ -56,15 +57,14 @@ public class ClauseCoordinator implements AutoCloseable {
   // processorLock provides mutual exclusion for addProcessor and takeSnapshot to coordinate
   // change detection in the list of processors. it is not needed to access the list elsewhere.
   private final ReentrantLock processorLock;
+  private final int variableAmount;
+  private final IntUnaryOperator nodeMapping;
 
   // currentUpdate is volatile, even though the stateLock prevents concurrent modification already.
   // this is because while updates to currentUpdate need to be consistent and coordinated,
   // concurrent reads are legal. to ensure a consistent and up-to-date view of currentUpdate, it is
   // therefore marked volatile.
   private volatile long currentUpdate;
-  private Runnable changeListener;
-
-  private final int variableAmount;
 
   /**
    * Create a new {@code ClauseCoordinator}.
@@ -72,19 +72,21 @@ public class ClauseCoordinator implements AutoCloseable {
    * @param graph The underlying graph
    * @param tempDir The directory where the internal files used by this class will be stored.
    * @param variableAmount The amount of variables in the corresponding SAT instance.
+   * @param nodeMapping A mapping from variables to nodes.
    * @throws IOException If there is an I/O error while setting up the internal files
    */
-  public ClauseCoordinator(Graph graph, Path tempDir, int variableAmount) throws IOException {
+  public ClauseCoordinator(
+      Graph graph, Path tempDir, int variableAmount, IntUnaryOperator nodeMapping
+  ) throws IOException {
     this.graph = graph;
     this.tempDir = tempDir;
     this.variableAmount = variableAmount;
+    this.nodeMapping = nodeMapping;
 
     this.snapshotDir = Files.createTempDirectory(tempDir, "satviz-snapshots");
     snapshotDir.toFile().deleteOnExit();
     this.snapshots = new TreeMap<>();
     this.processors = new CopyOnWriteArrayList<>();
-    this.changeListener = () -> {
-    };
     this.currentUpdate = 0;
     this.buffer = new ExternalClauseBuffer(tempDir);
     this.snapshotLock = new ReentrantLock();
@@ -118,11 +120,12 @@ public class ClauseCoordinator implements AutoCloseable {
    * this method will advance the highest amount of updates possible.
    *
    * @param numUpdates The amount of updates to process. This is a no-op if {@code numUpdates < 1}.
+   * @return the amount of clauses that were actually advanced.
    * @throws IOException If an I/O error occurs.
    * @throws SerializationException If the updates can't be deserialised from the external buffer.
    *                                This may only happen as a result of external interference with
    *                                the internal files used by this object.
-   * @return the amount of clauses that were actually advanced.
+   *
    */
   public int advanceVisualization(int numUpdates)
       throws IOException, SerializationException {
@@ -130,9 +133,7 @@ public class ClauseCoordinator implements AutoCloseable {
     if (stateLock.isHeldByCurrentThread()) {
       return 0;
     }
-    int num = advance(numUpdates);
-    changeListener.run();
-    return num;
+    return advance(numUpdates);
   }
 
   /**
@@ -194,7 +195,6 @@ public class ClauseCoordinator implements AutoCloseable {
     } finally {
       stateLock.unlock();
     }
-    changeListener.run();
   }
 
   private int advance(int numUpdates) throws SerializationException, IOException {
@@ -211,7 +211,7 @@ public class ClauseCoordinator implements AutoCloseable {
       ClauseUpdate[] updates = buffer.getClauseUpdates(currentUpdate, numUpdates);
       actual = updates.length;
       for (ClauseUpdateProcessor processor : processors) {
-        graph.submitUpdate(processor.process(updates, graph));
+        graph.submitUpdate(processor.process(updates, graph, nodeMapping));
       }
       // this operation is not atomic although currentUpdate is volatile.
       // However, this is no problem because write access to currentUpdate is always coordinated
@@ -280,27 +280,9 @@ public class ClauseCoordinator implements AutoCloseable {
   public void addClauseUpdate(ClauseUpdate clauseUpdate) throws IOException {
     if (isValidClauseUpdate(clauseUpdate)) {
       buffer.addClauseUpdate(clauseUpdate);
-      changeListener.run();
     } else {
       throw new IllegalArgumentException(clauseUpdate + " is invalid.");
     }
-  }
-
-  /**
-   * Register a {@code Runnable} that will be called whenever one of the following values change:
-   * <ul>
-   *   <li>{@link #currentUpdate()}</li>
-   *   <li>{@link #totalUpdateCount()}</li>
-   * </ul>.
-   *
-   * <p><strong>Note:</strong> If the above criteria is met, the listener is called, but not
-   * necessarily the other way around (the listener being called does not imply that something
-   * has changed).
-   *
-   * @param action The action to run.
-   */
-  public void registerChangeListener(Runnable action) {
-    changeListener = Objects.requireNonNull(action);
   }
 
   private long loadClosestSnapshot(long index) throws IOException, SerializationException {

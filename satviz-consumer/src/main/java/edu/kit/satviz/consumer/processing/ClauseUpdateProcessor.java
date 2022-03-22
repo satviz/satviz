@@ -7,6 +7,7 @@ import edu.kit.satviz.serial.SerializationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.function.IntUnaryOperator;
 
 /**
  * This interface allows for instances of the {@code ClauseUpdate} class to be
@@ -19,9 +20,10 @@ public interface ClauseUpdateProcessor {
    *
    * @param clauseUpdates An array of {@code ClauseUpdate}s.
    * @param graph An instance of the {@code Graph} class.
+   * @param nodeMapping A mapping from literals to nodes in the {@code graph}.
    * @return An instance of the {@code GraphUpdate} class.
    */
-  GraphUpdate process(ClauseUpdate[] clauseUpdates, Graph graph);
+  GraphUpdate process(ClauseUpdate[] clauseUpdates, Graph graph, IntUnaryOperator nodeMapping);
 
   /**
    * This method serializes the internal state of the processor.<br>
