@@ -20,7 +20,7 @@ import java.io.OutputStream;
  */
 public abstract class VariableInteractionGraph implements ClauseUpdateProcessor {
 
-  public static final float MIN_WEIGHT = 1e-10f;
+  public static final float MIN_WEIGHT = 1e-7f;
 
   private WeightFactor weightFactor;
   private final StringSerializer serializer;
