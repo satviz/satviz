@@ -1,9 +1,11 @@
 package edu.kit.satviz.consumer;
 
 import edu.kit.satviz.common.Compression;
+import edu.kit.satviz.common.ConstraintValidationException;
 import edu.kit.satviz.common.Hashing;
 import edu.kit.satviz.consumer.cli.ConsumerCli;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
+import edu.kit.satviz.consumer.config.ConsumerConstraint;
 import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
@@ -65,6 +68,13 @@ public final class ConsumerApplication {
     if (config == null) {
       System.exit(0);
       return;
+    }
+
+    try {
+      new ConsumerConstraint().validate(config);
+    } catch (ConstraintValidationException e) {
+      logger.severe(e.getMessage());
+      System.exit(1);
     }
 
     Path tempDir = Files.createTempDirectory("satviz"); // TODO: 05.03.2022 make own temp?
@@ -109,6 +119,27 @@ public final class ConsumerApplication {
 
     if (!config.isNoGui()) {
       startVisualisationGui(mediator, config, initialData.variables);
+    } else {
+      mediator.registerFrameAction(new Runnable() {
+
+        final long period = config.getPeriod();
+        final int timeout = config.getVideoTimeout() * 1000;
+        long frames = 0;
+
+        @Override
+        public void run() {
+          if (frames++ * period >= timeout) {
+            ForkJoinPool.commonPool().execute(() -> {
+              try {
+                mediator.close();
+              } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(2);
+              }
+            });
+          }
+        }
+      });
     }
 
     connection.connect(ConsumerApplication.pid, mediator);
@@ -248,11 +279,11 @@ public final class ConsumerApplication {
       logger.info("Starting embedded producer");
       EmbeddedModeConfig embedConfig = (EmbeddedModeConfig) modeConfig;
       try {
-        String sourcePath = embedConfig.getSourcePath().toString();
+        String sourcePath = embedConfig.getSourcePath().toAbsolutePath().toString();
         List<String> baseArgs = List.of("-H", InetAddress.getLocalHost().getHostAddress(),
             "-P", String.valueOf(connection.getPort()));
         List<String> additionalArgs = switch (embedConfig.getSource()) {
-          case SOLVER -> List.of("-s", sourcePath, "-i", config.getInstancePath().toString());
+          case SOLVER -> List.of("-s", sourcePath, "-i", config.getInstancePath().toAbsolutePath().toString());
           case PROOF -> List.of("-p", sourcePath);
         };
         List<String> allArgs = new ArrayList<>();
