@@ -6,17 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerConstraint;
 import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.Objects;
+import edu.kit.satviz.consumer.config.Theme;
+import javafx.scene.paint.Color;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,28 +32,6 @@ class ConsumerCliTest {
   void setUp() throws IOException {
     tempInstance = Files.createTempFile("instance", ".cnf");
     tempVideoTemplate = Files.createTempFile("video", ".ogv");
-  }
-
-  private ConsumerConfig getExternalConfig() {
-    var config = new ConsumerConfig();
-    var externalModeConfig = new ExternalModeConfig();
-    externalModeConfig.setPort(1231);
-    config.setModeConfig(externalModeConfig);
-    config.setInstancePath(tempInstance);
-    config.setVideoTemplatePath(tempVideoTemplate.toString());
-    return config;
-  }
-
-  private ConsumerConfig getEmbeddedConfig(
-      EmbeddedModeSource sourceMode, Path source
-  ) {
-    var config = new ConsumerConfig();
-    var embeddedModeConfig = new EmbeddedModeConfig();
-    embeddedModeConfig.setSource(sourceMode);
-    embeddedModeConfig.setSourcePath(source);
-    config.setModeConfig(embeddedModeConfig);
-    config.setInstancePath(tempInstance);
-    return config;
   }
 
   @Test
@@ -118,13 +98,37 @@ class ConsumerCliTest {
         "external", "-P", "1231"
     };
     var config = getExternalConfig();
+    Theme theme = new Theme();
     HeatmapColors heatmapColors = new HeatmapColors();
-    heatmapColors.setFromColor(0x000000);
-    heatmapColors.setToColor(0xffffff);
-    config.setHeatmapColors(heatmapColors);
+    heatmapColors.setColdColor(Color.web("#000000"));
+    heatmapColors.setHotColor(Color.web("#FFFFFF"));
+    theme.setHeatmapColors(heatmapColors);
+    config.setTheme(theme);
     var result = ConsumerCli.parseArgs(arguments);
     (new ConsumerConstraint()).validate(result);
     assertEquals(config, result);
+  }
+
+  private ConsumerConfig getExternalConfig() {
+    var config = new ConsumerConfig();
+    var externalModeConfig = new ExternalModeConfig();
+    externalModeConfig.setPort(1231);
+    config.setModeConfig(externalModeConfig);
+    config.setInstancePath(tempInstance);
+    config.setVideoTemplatePath(tempVideoTemplate.toString());
+    return config;
+  }
+
+  private ConsumerConfig getEmbeddedConfig(
+      EmbeddedModeSource sourceMode, Path source
+  ) {
+    var config = new ConsumerConfig();
+    var embeddedModeConfig = new EmbeddedModeConfig();
+    embeddedModeConfig.setSource(sourceMode);
+    embeddedModeConfig.setSourcePath(source);
+    config.setModeConfig(embeddedModeConfig);
+    config.setInstancePath(tempInstance);
+    return config;
   }
 
   @Test

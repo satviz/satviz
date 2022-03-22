@@ -334,7 +334,7 @@ public class ConsumerConfig {
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
         recordImmediately, bufferSize, weightFactor, heatmapImplementation, windowSize, theme,
-        heatmapColors, vigImplementation, contractionIterations, period);
+        vigImplementation, contractionIterations, period);
   }
 
 }
