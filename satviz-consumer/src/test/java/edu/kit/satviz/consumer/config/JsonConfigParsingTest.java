@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorDeserializer;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorSerializer;
+import javafx.scene.paint.Color;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +26,7 @@ class JsonConfigParsingTest {
 
   private static final String CONFIG1_JSON_PATH = "/config1.json";
   private static final String CONFIG2_JSON_PATH = "/config2.json";
+  private static final String CONFIG3_JSON_PATH = "/config3.json";
 
   private static final String VIDEO_TEMPLATE_PATH = "Videos/video-%s.mp4";
   private static final Path INSTANCE_PATH = Paths.get("foo/bar/instance.cnf");
@@ -30,14 +34,13 @@ class JsonConfigParsingTest {
   private static final int CONFIG1_PORT = 12345;
   private static final ConsumerMode CONFIG2_MODE = ConsumerMode.EMBEDDED;
   private static final int CONFIG2_BUFFER_SIZE = 350;
-  private static final int CONFIG2_FROM_COLOR = 12;
-  private static final int CONFIG2_TO_COLOR = 10;
   private static final Path CONFIG2_SOURCE_PATH = Paths.get("foo/bar/solver.so");
   private static final EmbeddedModeSource CONFIG2_SOURCE = EmbeddedModeSource.SOLVER;
 
   private ObjectMapper mapper;
   private ConsumerConfig config1;
   private ConsumerConfig config2;
+  private ConsumerConfig config3;
 
   /**
    * This set-up method creates a gson parser using the <code>ModeConfigAdapterFactory</code>
@@ -46,12 +49,17 @@ class JsonConfigParsingTest {
    */
   @BeforeEach
   void setUp() {
-    SimpleModule m = new SimpleModule("PathToString");
-    m.addSerializer(Path.class, new ToStringSerializer());
-    this.mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
-    mapper.registerModule(m);
-    setUpConfig2();
+    SimpleModule pathToStringModule = new SimpleModule("PathToString");
+    pathToStringModule.addSerializer(Path.class, new ToStringSerializer());
+    SimpleModule colorModule = new SimpleModule("ColorAndHexConverter");
+    colorModule.addSerializer(Color.class, new ColorSerializer());
+    colorModule.addDeserializer(Color.class, new ColorDeserializer());
+    mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
+    mapper.registerModule(pathToStringModule);
+    mapper.registerModule(colorModule);
     setUpConfig1();
+    setUpConfig2();
+    setUpConfig3();
   }
 
   private void setUpConfig1() {
@@ -71,14 +79,36 @@ class JsonConfigParsingTest {
     modeConfig.setSource(CONFIG2_SOURCE);
     modeConfig.setSourcePath(CONFIG2_SOURCE_PATH);
     HeatmapColors colors = new HeatmapColors();
-    colors.setFromColor(CONFIG2_FROM_COLOR);
-    colors.setToColor(CONFIG2_TO_COLOR);
+    colors.setHotColor(Color.web("#FF0000"));
+    colors.setColdColor(Color.web("#0000FF"));
     config2 = new ConsumerConfig();
     config2.setModeConfig(modeConfig);
     config2.setInstancePath(INSTANCE_PATH);
     config2.setVideoTemplatePath(VIDEO_TEMPLATE_PATH);
     config2.setBufferSize(CONFIG2_BUFFER_SIZE);
-    config2.setHeatmapColors(colors);
+    Theme theme = new Theme();
+    theme.setHeatmapColors(colors);
+    config2.setTheme(theme);
+  }
+
+  private void setUpConfig3() {
+    EmbeddedModeConfig modeConfig = new EmbeddedModeConfig();
+    modeConfig.setMode(CONFIG2_MODE);
+    modeConfig.setSource(CONFIG2_SOURCE);
+    modeConfig.setSourcePath(CONFIG2_SOURCE_PATH);
+    HeatmapColors colors = new HeatmapColors();
+    colors.setHotColor(Color.web("#FFFFFF"));
+    colors.setColdColor(Color.web("#000000"));
+    config3 = new ConsumerConfig();
+    config3.setModeConfig(modeConfig);
+    config3.setInstancePath(INSTANCE_PATH);
+    config3.setVideoTemplatePath(VIDEO_TEMPLATE_PATH);
+    config3.setBufferSize(CONFIG2_BUFFER_SIZE);
+    Theme theme = new Theme();
+    theme.setHeatmapColors(colors);
+    theme.setBgColor(Color.web("#000000"));
+    theme.setEdgeColor(Color.web("#F0F0F0"));
+    config3.setTheme(theme);
   }
 
   /**
@@ -103,6 +133,19 @@ class JsonConfigParsingTest {
         ConsumerConfig.class
     );
     assertEquals(config2, config);
+  }
+
+  /**
+   * This tests, whether the parser parses out <code>config2.json</code> correctly.
+   */
+  @Test
+  void deserializeConfiguration_test3() throws IOException {
+    ConsumerConfig config = mapper.readValue(
+        JsonConfigParsingTest.class.getResource(CONFIG3_JSON_PATH),
+        ConsumerConfig.class
+    );
+    config = config;
+    assertEquals(config3, config);
   }
 
   /**

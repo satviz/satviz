@@ -1,6 +1,7 @@
 package edu.kit.satviz.consumer.cli;
 
 import edu.kit.satviz.consumer.config.HeatmapColors;
+import javafx.scene.paint.Color;
 import net.sourceforge.argparse4j.inf.Argument;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -29,8 +30,8 @@ public final class HeatmapColorsType implements ArgumentType<HeatmapColors> {
     }
     String[] stringArray = value.split(":");
     HeatmapColors heatmapColors = new HeatmapColors();
-    heatmapColors.setFromColor(Integer.parseInt(stringArray[0].substring(1)));
-    heatmapColors.setToColor(Integer.parseInt(stringArray[1].substring(1)));
+    heatmapColors.setColdColor(Color.web(stringArray[0]));
+    heatmapColors.setHotColor(Color.web(stringArray[1]));
     return heatmapColors;
   }
 

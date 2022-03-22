@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <satviz/info.h>
+#include <satviz/Theme.h>
 
 typedef struct CWeightUpdate {
   int *index1;
@@ -40,6 +41,7 @@ EdgeInfo satviz_query_edge(void *graph, int index1, int index2);
 // VideoController
 void *satviz_new_video_controller(void *graph, int display_type, int width, int height);
 void satviz_release_video_controller(void *controller);
+void satviz_apply_theme(void *controller, const Theme *theme);
 int satviz_start_recording(void *controller, const char *filename, const char *encoder_name);
 void satviz_stop_recording(void *controller);
 void satviz_resume_recording(void *controller);

@@ -9,6 +9,9 @@ import edu.kit.satviz.consumer.config.ConsumerMode;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.config.Theme;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorDeserializer;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorSerializer;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +31,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -254,9 +258,9 @@ public class GeneralConfigController extends ConfigController {
 
     windowSizeSpinner.getValueFactory().setValue(ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
-    coldColorColorPicker.setValue(GuiUtils.intToColor(HeatmapColors.DEFAULT_FROM_COLOR));
+    coldColorColorPicker.setValue(HeatmapColors.DEFAULT_COLD_COLOR);
 
-    hotColorColorPicker.setValue(GuiUtils.intToColor(HeatmapColors.DEFAULT_TO_COLOR));
+    hotColorColorPicker.setValue(HeatmapColors.DEFAULT_HOT_COLOR);
 
     vigImplementationChoiceBox.setValue(VariableInteractionGraph.DEFAULT_IMPLEMENTATION);
 
@@ -309,10 +313,10 @@ public class GeneralConfigController extends ConfigController {
 
     windowSizeSpinner.getValueFactory().setValue(config.getWindowSize());
 
-    HeatmapColors colors = config.getHeatmapColors();
-    if (colors != null) {
-      coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
-      hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
+    Theme theme = config.getTheme();
+    if (theme != null && theme.getColdColor() != null && theme.getHotColor() != null) {
+      coldColorColorPicker.setValue(theme.getColdColor());
+      hotColorColorPicker.setValue(theme.getHotColor());
     }
 
     vigImplementationChoiceBox.setValue(config.getVigImplementation());
@@ -343,10 +347,9 @@ public class GeneralConfigController extends ConfigController {
 
     config.setWindowSize(windowSizeSpinner.getValue());
 
-    HeatmapColors colors = new HeatmapColors();
-    colors.setFromColor(GuiUtils.colorToInt(coldColorColorPicker.getValue()));
-    colors.setToColor(GuiUtils.colorToInt(hotColorColorPicker.getValue()));
-    config.setHeatmapColors(colors);
+    Theme theme = config.getTheme();
+    theme.setColdColor(coldColorColorPicker.getValue());
+    theme.setHotColor(hotColorColorPicker.getValue());
 
     config.setVigImplementation(vigImplementationChoiceBox.getValue());
 
@@ -386,9 +389,13 @@ public class GeneralConfigController extends ConfigController {
     if (mapper == null) {
       mapper = new ObjectMapper();
       mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-      SimpleModule m = new SimpleModule("PathToString");
-      m.addSerializer(Path.class, new ToStringSerializer());
-      mapper.registerModule(m);
+      SimpleModule pathToStringModule = new SimpleModule("PathToString");
+      pathToStringModule.addSerializer(Path.class, new ToStringSerializer());
+      mapper.registerModule(pathToStringModule);
+      SimpleModule colorModule = new SimpleModule("ColorAndHexConverter");
+      colorModule.addSerializer(Color.class, new ColorSerializer());
+      colorModule.addDeserializer(Color.class, new ColorDeserializer());
+      mapper.registerModule(colorModule);
     }
     return mapper;
   }

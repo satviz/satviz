@@ -1,6 +1,7 @@
 package edu.kit.satviz.consumer.cli;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import edu.kit.satviz.common.PathArgumentType;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerModeConfig;
@@ -8,11 +9,14 @@ import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
 import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
+import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.config.jsonparsing.ColorDeserializer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
+import javafx.scene.paint.Color;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -41,7 +45,8 @@ public final class ConsumerCli {
 
     Subparsers subparsers = PARSER.addSubparsers().dest("subparser_name");
 
-    Subparser embeddedParser = subparsers.addParser("embedded");
+    Subparser embeddedParser = subparsers.addParser("embedded")
+        .help("Start consumer with an embedded producer");
     embeddedParser.addArgument("--solver", "-s")
         .type(PathArgumentType.get())
         .help("Path to an IPASIR solver shared library");
@@ -49,18 +54,23 @@ public final class ConsumerCli {
         .type(PathArgumentType.get())
         .help("Path to a DRAT proof");
 
-    Subparser externalParser = subparsers.addParser("external");
+    Subparser externalParser = subparsers.addParser("external")
+        .help("Start consumer, that waits for an external producer");
     externalParser.addArgument("--port", "-P")
         .setDefault(ExternalModeConfig.DEFAULT_PORT_NUMBER)
         .type(int.class)
         .help("Port, where clauses can be received");
 
+    Subparser fileParser = subparsers.addParser("config")
+        .help("Start consumer how it's specified in the configuration file");
+    fileParser.addArgument("file")
+        .nargs("?")
+        .type(PathArgumentType.get())
+        .help("Path to configuration file");
+
     PARSER.addArgument("--instance", "-i")
         .type(PathArgumentType.get())
         .help("Path to a DIMACS CNF instance file");
-    PARSER.addArgument("--file", "-f")
-        .type(PathArgumentType.get())
-        .help("Path to configuration file");
     PARSER.addArgument("--no-gui")
         .type(boolean.class)
         .action(Arguments.storeTrue())
@@ -118,6 +128,9 @@ public final class ConsumerCli {
   private static ConsumerConfig parseConfigFile(File configFile)
       throws ArgumentParserException {
     ObjectMapper mapper = new ObjectMapper();
+    SimpleModule m = new SimpleModule("HexToColor");
+    m.addDeserializer(Color.class, new ColorDeserializer());
+    mapper.registerModule(m);
     try {
       return mapper.readValue(configFile, ConsumerConfig.class);
     } catch (IOException e) {
@@ -135,7 +148,10 @@ public final class ConsumerCli {
     config.setBufferSize(namespace.getInt("buffer"));
     config.setWeightFactor(namespace.get("weight"));
     config.setWindowSize(namespace.getInt("window"));
-    config.setHeatmapColors(namespace.get("colors"));
+    Theme theme = new Theme();
+    HeatmapColors heatmapColors = namespace.get("colors");
+    theme.setHeatmapColors(heatmapColors);
+    config.setTheme(theme);
     return config;
   }
 

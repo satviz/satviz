@@ -2,7 +2,7 @@ package edu.kit.satviz.consumer.display;
 
 import edu.kit.satviz.consumer.bindings.NativeInvocationException;
 import edu.kit.satviz.consumer.bindings.NativeObject;
-import edu.kit.satviz.consumer.bindings.Struct;
+import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.graph.Graph;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -11,7 +11,6 @@ import jdk.incubator.foreign.FunctionDescriptor;
 import jdk.incubator.foreign.MemoryAddress;
 import jdk.incubator.foreign.MemorySegment;
 import jdk.incubator.foreign.ResourceScope;
-import jdk.incubator.foreign.SegmentAllocator;
 
 /**
  * Class used to render and record the visualisation done by satviz.
@@ -70,6 +69,12 @@ public class VideoController extends NativeObject {
       "next_frame",
       MethodType.methodType(void.class, MemoryAddress.class),
       FunctionDescriptor.ofVoid(CLinker.C_POINTER)
+  );
+
+  private static final MethodHandle APPLY_THEME = lookupFunction(
+      "apply_theme",
+      MethodType.methodType(void.class, MemoryAddress.class, MemoryAddress.class),
+      FunctionDescriptor.ofVoid(CLinker.C_POINTER, CLinker.C_POINTER)
   );
 
   private VideoController(MemoryAddress pointer) {
@@ -179,6 +184,19 @@ public class VideoController extends NativeObject {
       NEXT_FRAME.invokeExact(getPointer());
     } catch (Throwable e) {
       throw new NativeInvocationException("Error while progressing to next frame", e);
+    }
+  }
+
+  /**
+   * Applies the contents of a Theme to the running visualization.
+   * @param theme the theme to apply
+   */
+  public void applyTheme(Theme theme) {
+    try (ResourceScope local = ResourceScope.newConfinedScope()) {
+      MemorySegment segment = theme.toSegment(local);
+      APPLY_THEME.invokeExact(getPointer(), segment.address());
+    } catch (Throwable e) {
+      throw new NativeInvocationException("Error while applying theme", e);
     }
   }
 

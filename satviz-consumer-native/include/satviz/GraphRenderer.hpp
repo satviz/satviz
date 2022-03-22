@@ -6,6 +6,8 @@
 
 #include <ogdf/basic/EdgeArray.h>
 
+#include <satviz/Theme.h>
+
 namespace satviz {
 namespace video {
 
@@ -47,6 +49,9 @@ private:
   /// List of free/unused edge indices
   std::vector<int> free_edges;
 
+  float bg_color[3] = { 0.0f, 0.0f, 0.0f };
+  float node_size = 0.0f;
+
   /**
    * Initialize rendering data.
    *
@@ -84,6 +89,17 @@ public:
    */
   GraphRenderer(graph::Graph &gr);
   virtual ~GraphRenderer();
+
+  /**
+   * Applies the contents of a Theme to the renderer.
+   * @param theme the theme to apply
+   */
+  void applyTheme(const Theme &theme);
+
+  /**
+   * Overwrite the contents of the screen with the current background color.
+   */
+  void clearScreen();
 
   /**
    * Draw the associated graph onto the OpenGL framebuffer.

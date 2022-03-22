@@ -163,6 +163,7 @@ public final class ConsumerApplication {
           1920,
           1080
       );
+      videoController.applyTheme(config.getTheme());
       return new GlComponents(graph, new ArrayNodeMapping(contraction.mapping()), videoController);
     }).get();
 

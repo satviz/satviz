@@ -2,6 +2,7 @@ package edu.kit.satviz.consumer.processing;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.network.pub.ConsumerConnectionListener;
@@ -31,6 +32,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   private final Queue<Runnable> taskQueue;
   private final List<Runnable> closeActions;
   private final List<Runnable> frameActions;
+  private final Theme theme;
 
   private boolean recording;
   private boolean recordingPaused;
@@ -71,6 +73,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.taskQueue = new LinkedBlockingQueue<>();
     this.closeActions = new CopyOnWriteArrayList<>();
     this.frameActions = new CopyOnWriteArrayList<>();
+    this.theme = config.getTheme();
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
   }
@@ -84,11 +87,13 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   }
 
   public void updateHeatmapColdColor(Color color) {
-    // TODO: 19/02/2022
+    theme.setColdColor(color);
+    taskQueue.offer(() -> videoController.applyTheme(theme));
   }
 
   public void updateHeatmapHotColor(Color color) {
-    // TODO: 19/02/2022
+    theme.setHotColor(color);
+    taskQueue.offer(() -> videoController.applyTheme(theme));
   }
 
   public void setClausesPerAdvance(int clausesPerAdvance) {
