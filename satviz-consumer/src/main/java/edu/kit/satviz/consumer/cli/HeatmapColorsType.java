@@ -29,8 +29,8 @@ public final class HeatmapColorsType implements ArgumentType<HeatmapColors> {
     }
     String[] stringArray = value.split(":");
     HeatmapColors heatmapColors = new HeatmapColors();
-    heatmapColors.setFromColor(Integer.parseInt(stringArray[0].substring(1)));
-    heatmapColors.setToColor(Integer.parseInt(stringArray[1].substring(1)));
+    heatmapColors.setFromColor(Integer.parseInt(stringArray[0].substring(1), 16));
+    heatmapColors.setToColor(Integer.parseInt(stringArray[1].substring(1), 16));
     return heatmapColors;
   }
 
