@@ -67,7 +67,7 @@ public class HeatmapColors {
       return false;
     }
     HeatmapColors colors = (HeatmapColors) o;
-    return hotColor.equals(colors.hotColor) && coldColor.equals(colors.coldColor);
+    return Objects.equals(hotColor, colors.hotColor) && Objects.equals(coldColor, colors.coldColor);
   }
 
   @Override

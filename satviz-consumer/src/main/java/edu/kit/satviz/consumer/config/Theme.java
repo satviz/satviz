@@ -25,6 +25,11 @@ public class Theme {
    */
   public static final Color DEFAULT_EDGE_COLOR = Color.WHITE;
 
+  /**
+   * The default node size.
+   */
+  public static final float DEFAULT_NODE_SIZE = 10.0f;
+
   private static final MemoryLayout LAYOUT = NativeObject.paddedStruct(
       MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT).withName("bgColor"),
       MemoryLayout.sequenceLayout(3, CLinker.C_FLOAT).withName("coldColor"),
@@ -36,7 +41,7 @@ public class Theme {
   private Color bgColor = DEFAULT_BACKGROUND_COLOR;
   private HeatmapColors heatmapColors = new HeatmapColors();
   private Color edgeColor = DEFAULT_EDGE_COLOR;
-  private float nodeSize  = 10.0f;
+  private float nodeSize = DEFAULT_NODE_SIZE;
 
   public void setBgColor(Color bgColor) {
     this.bgColor = bgColor;
@@ -46,10 +51,27 @@ public class Theme {
     this.heatmapColors = heatmapColors;
   }
 
+  /**
+   * This method sets the cold color within the instance
+   * of the {@code HeatmapColors} class.<br>
+   * <p>
+   * Same effect is achieved by entering {@code theme.getHeatmapColors().setColdColor(color);}
+   * </p>
+   * @param coldColor The cold color.
+   */
   public void setColdColor(Color coldColor) {
     this.heatmapColors.setColdColor(coldColor);
   }
 
+  /**
+   * This method sets the hot color within the instance
+   * of the {@code HeatmapColors} class.<br>
+   * <p>
+   * Same effect is achieved by entering {@code theme.getHeatmapColors().setHotColor(color);}
+   * </p>
+   *
+   * @param hotColor The hot color.
+   */
   public void setHotColor(Color hotColor) {
     this.heatmapColors.setHotColor(hotColor);
   }
@@ -66,10 +88,32 @@ public class Theme {
     return bgColor;
   }
 
+  public HeatmapColors getHeatmapColors() {
+    return heatmapColors;
+  }
+
+  /**
+   * This getter-method returns the cold color within the
+   * instance of the {@code HeatmapColors} class.<br>
+   * <p>
+   * Same effect is achieved by entering {@code theme.getHeatmapColors().getColdColor();}
+   * </p>
+   *
+   * @return The cold color.
+   */
   public Color getColdColor() {
     return heatmapColors.getColdColor();
   }
 
+  /**
+   * This getter-method returns the hot color within the
+   * instance of the {@code HeatmapColors} class.<br>
+   * <p>
+   * Same effect is achieved by entering {@code theme.getHeatmapColors().getHotColor();}
+   * </p>
+   *
+   * @return The hot color.
+   */
   public Color getHotColor() {
     return heatmapColors.getHotColor();
   }

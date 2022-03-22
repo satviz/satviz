@@ -290,7 +290,7 @@ public class GeneralConfigController extends ConfigController {
     windowSizeSpinner.getValueFactory().setValue(config.getWindowSize());
 
     Theme theme = config.getTheme();
-    if (theme != null) {
+    if (theme != null && theme.getColdColor() != null && theme.getHotColor() != null) {
       coldColorColorPicker.setValue(theme.getColdColor());
       hotColorColorPicker.setValue(theme.getHotColor());
     }
