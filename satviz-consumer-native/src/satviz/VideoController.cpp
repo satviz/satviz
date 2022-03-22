@@ -27,8 +27,8 @@ VideoController::~VideoController() {
 void VideoController::resetCamera() {
   ogdf::DRect box = graph.getOgdfAttrs().boundingBox();
   camera.focusOnBox(
-      (float) box.p1().m_x, (float) box.p1().m_y,
-      (float) box.p2().m_x, (float) box.p2().m_y);
+      box.p1().m_x, box.p1().m_y,
+      box.p2().m_x, box.p2().m_y);
 }
 
 void VideoController::processEvent(sf::Event &event) {
@@ -52,11 +52,11 @@ void VideoController::processEvent(sf::Event &event) {
     mouse_y = event.mouseMove.y;
   }
   if (event.type == sf::Event::MouseWheelScrolled) {
-    float factor = 1.0f;
+    double factor = 1.0;
     if (event.mouseWheelScroll.delta < 0.0f) {
-      factor = 1.0f / 1.3f;
+      factor = 1.0 / 1.3;
     } else {
-      factor = 1.0f * 1.3f;
+      factor = 1.0 * 1.3;
     }
     camera.zoom(event.mouseWheelScroll.x, event.mouseWheelScroll.y, factor);
   }
