@@ -1,5 +1,9 @@
 package edu.kit.satviz.consumer.cli;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
@@ -7,12 +11,11 @@ import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ConsumerCliTest {
 
@@ -26,14 +29,17 @@ class ConsumerCliTest {
   void setUp() throws IOException {
     Path tempInstance = Files.createTempFile("instance",".cnf");
     Path tempVideoTemplate = Files.createTempFile("video", ".ogv");
-    Path configPath = Paths.get(
-        String.valueOf(ConsumerCliTest.class.getResource("/config2.json"))
+    Path configPath = Files.createTempFile("config", ".json");
+    Files.copy(
+        ConsumerCliTest.class.getResourceAsStream("/config2.json"),
+        configPath,
+        StandardCopyOption.REPLACE_EXISTING
     );
 
     validArguments1 = new String[] {
         "-i", tempInstance.toString(), "-o", tempVideoTemplate.toString(), "external", "-P", "1231"
     };
-    fileArgument = new String[] {"file", configPath.toString()};
+    fileArgument = new String[] {"config", configPath.toString()};
     invalidArguments1 = new String[] {"external", "-P", "1231"};
     invalidArguments2 = new String[] {"embedded"}; // should not throw NullPointerException
 
