@@ -2,7 +2,7 @@ package edu.kit.satviz.producer;
 
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
-import edu.kit.satviz.network.ProducerConnection;
+import edu.kit.satviz.network.pub.ProducerConnection;
 import edu.kit.satviz.producer.cli.ProducerCli;
 import edu.kit.satviz.producer.cli.ProducerConstraints;
 import edu.kit.satviz.producer.cli.ProducerParameters;
@@ -43,9 +43,10 @@ public class ProducerApplication {
       logger.info("Clause source opened");
       ProducerConnection connection = new ProducerConnection(
           parameters.getHost(), parameters.getPort());
-      connection.register(new SourceControlConnectionListener(connection, data.source()));
+      SourceControlConnectionListener ls = new SourceControlConnectionListener(connection,
+          data.source());
       logger.info("Waiting for network connection...");
-      connection.establish(data.id());
+      connection.establish(data.id(), ls);
     } catch (SourceException e) {
       logger.log(Level.SEVERE, e.getMessage(), e);
       System.exit(1);

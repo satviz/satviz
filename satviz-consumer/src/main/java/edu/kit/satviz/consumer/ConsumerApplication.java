@@ -23,9 +23,10 @@ import edu.kit.satviz.consumer.processing.Mediator;
 import edu.kit.satviz.consumer.processing.RecencyHeatmap;
 import edu.kit.satviz.consumer.processing.RingInteractionGraph;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
-import edu.kit.satviz.network.ConsumerConnection;
-import edu.kit.satviz.network.OfferType;
-import edu.kit.satviz.network.ProducerId;
+import edu.kit.satviz.network.pub.ConsumerConnection;
+import edu.kit.satviz.network.pub.OfferType;
+import edu.kit.satviz.network.pub.ProducerId;
+import edu.kit.satviz.network.pub.SolverId;
 import edu.kit.satviz.parsers.DimacsFile;
 import edu.kit.satviz.parsers.ParsingException;
 import edu.kit.satviz.sat.ClauseUpdate;
@@ -100,13 +101,9 @@ public final class ConsumerApplication {
         .createMediator();
 
     mediator.registerCloseAction(() -> {
-      try {
-        logger.info("Closing connection (this may take a few seconds...)");
-        connection.stop();
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }); // TODO: 05.03.2022 remove try catch after merging with latest network version
+      logger.info("Closing connection (this may take a few seconds...)");
+      connection.stop();
+    });
 
     if (!config.isNoGui()) {
       startVisualisationGui(mediator, config, initialData.variables);
@@ -216,10 +213,18 @@ public final class ConsumerApplication {
     ConsumerModeConfig modeConfig = config.getModeConfig();
     boolean embedded = modeConfig.getMode() == ConsumerMode.EMBEDDED;
     int consumerPort = embedded ? 0 : ((ExternalModeConfig) modeConfig).getPort();
-    ConsumerConnection connection = new ConsumerConnection(consumerPort);
-    connection.registerConnect(ConsumerApplication::newConnectionAvailable);
-    connection.start();
-    logger.log(Level.INFO, "Port {0} opened", String.valueOf(connection.getPort()));
+    ConsumerConnection connection = new ConsumerConnection(consumerPort,
+        ConsumerApplication::newConnectionAvailable, (s) -> logger.log(Level.SEVERE,
+        "network fail: {0}", s));
+    try {
+      connection.start();
+      logger.log(Level.INFO, "Port {0} opened", String.valueOf(connection.getPort()));
+    } catch (IOException e) {
+      logger.log(Level.SEVERE, "Error while trying to start embedded producer", e);
+      System.exit(1);
+      return null;
+    }
+
     if (embedded) {
       logger.info("Starting embedded producer");
       EmbeddedModeConfig embedConfig = (EmbeddedModeConfig) modeConfig;
@@ -247,7 +252,6 @@ public final class ConsumerApplication {
         System.exit(1);
         return null;
       }
-      connection.getPort();
     }
     logger.info("Waiting for producer to connect...");
     synchronized (SYNC_OBJECT) {
@@ -283,13 +287,14 @@ public final class ConsumerApplication {
 
   private static boolean verifyInstanceHash(Path instancePath)
       throws IOException {
-    if (pid.type() != OfferType.SOLVER) {
+    if (pid.getType() != OfferType.SOLVER) {
       return true;
     }
     long hash = Hashing.hashContent(Files.newInputStream(instancePath));
-    if (hash != pid.instanceHash()) {
+    SolverId sid = (SolverId) pid;
+    if (hash != sid.getInstanceHash()) {
       logger.log(Level.SEVERE, "SAT instance mismatch: {0} (local) vs {1} (remote)",
-          new Object[] { hash, pid.instanceHash() });
+          new Object[] { hash, sid.getInstanceHash() });
       return false;
     }
     return true;
