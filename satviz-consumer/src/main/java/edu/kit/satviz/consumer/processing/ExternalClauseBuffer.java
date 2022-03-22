@@ -145,7 +145,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
   }
 
   // read clause updates from the given index byte by byte, without any buffering.
-  private void readUpdatesBufferless(long index, ClauseUpdate[] updates)
+  /*private void readUpdatesBufferless(long index, ClauseUpdate[] updates)
       throws IOException, SerializationException {
     clauseLookupReadFile.seek(index * Long.BYTES);
     byte[] array = new byte[Long.BYTES];
@@ -160,7 +160,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
       updates[i] = builder.getObject();
       builder.reset();
     }
-  }
+  }*/
 
   // read clause updates from given index, reading each entire clause at once
   private void readUpdatesWithEphemeralBuffers(long index, ClauseUpdate[] updates)
@@ -181,7 +181,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
   }
 
   // read clause updates from given index, reading the entire data all at once
-  private void readUpdatesWithBigBuffer(long index, ClauseUpdate[] updates)
+  /*private void readUpdatesWithBigBuffer(long index, ClauseUpdate[] updates)
       throws IOException, SerializationException {
     byte[] byteRange = new byte[2 * Long.BYTES];
     clauseLookupReadFile.seek(index * Long.BYTES);
@@ -198,7 +198,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
     for (int i = 0; i < updates.length; i++) {
       updates[i] = updateSerializer.deserialize(stream);
     }
-  }
+  }*/
 
   private void flush() throws IOException {
     clauseLookupOutStream.flush();
