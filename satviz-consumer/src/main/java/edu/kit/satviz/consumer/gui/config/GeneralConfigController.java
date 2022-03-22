@@ -214,7 +214,8 @@ public class GeneralConfigController extends ConfigController {
     GuiUtils.initializeIntegerSpinner(bufferSizeSpinner,
         ConsumerConfig.MIN_BUFFER_SIZE,
         ConsumerConfig.MAX_BUFFER_SIZE,
-        ConsumerConfig.DEFAULT_BUFFER_SIZE);
+        ConsumerConfig.DEFAULT_BUFFER_SIZE,
+        ConsumerConfig.STEP_AMOUNT_BUFFER_SIZE);
 
     heatmapImplementationChoiceBox.setItems(
         FXCollections.observableArrayList(HeatmapImplementation.values()));
@@ -222,7 +223,8 @@ public class GeneralConfigController extends ConfigController {
     GuiUtils.initializeIntegerSpinner(windowSizeSpinner,
         ConsumerConfig.MIN_WINDOW_SIZE,
         ConsumerConfig.MAX_WINDOW_SIZE,
-        ConsumerConfig.DEFAULT_WINDOW_SIZE);
+        ConsumerConfig.DEFAULT_WINDOW_SIZE,
+        ConsumerConfig.STEP_AMOUNT_WINDOW_SIZE);
 
     vigImplementationChoiceBox.setItems(
         FXCollections.observableArrayList(VariableInteractionGraphImplementation.values()));
@@ -230,7 +232,8 @@ public class GeneralConfigController extends ConfigController {
     GuiUtils.initializeIntegerSpinner(contractionIterationsSpinner,
         ConsumerConfig.MIN_CONTRACTION_ITERATIONS,
         ConsumerConfig.MAX_CONTRACTION_ITERATIONS,
-        ConsumerConfig.DEFAULT_CONTRACTION_ITERATIONS);
+        ConsumerConfig.DEFAULT_CONTRACTION_ITERATIONS,
+        ConsumerConfig.STEP_AMOUNT_CONTRACTION_ITERATIONS);
 
     modeChoiceBox.setItems(FXCollections.observableArrayList(ConsumerMode.values()));
   }

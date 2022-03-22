@@ -90,9 +90,10 @@ public final class GuiUtils {
   public static ChangeListener<String> initializeIntegerSpinner(Spinner<Integer> spinner,
                                               int min,
                                               int max,
-                                              int init) {
+                                              int init,
+                                              int amountToStepBy) {
     SpinnerValueFactory<Integer> spinnerValueFactory
-        = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, init);
+        = new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, init, amountToStepBy);
 
     // prevent exception when [value is null & (enter/arrow up/arrow down) is pressed]
     spinnerValueFactory.setConverter(new StringConverter<>() {
@@ -172,9 +173,10 @@ public final class GuiUtils {
   public static ChangeListener<String> initializeLongSpinnerAsDouble(Spinner<Double> spinner,
                                                                 long min,
                                                                 long max,
-                                                                long init) {
+                                                                long init,
+                                                                long amountToStepBy) {
     SpinnerValueFactory<Double> spinnerValueFactory
-            = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, init);
+            = new SpinnerValueFactory.DoubleSpinnerValueFactory(min, max, init, amountToStepBy);
 
     // prevent exception when [value is null & (enter/arrow up/arrow down) is pressed]
     spinnerValueFactory.setConverter(new StringConverter<>() {

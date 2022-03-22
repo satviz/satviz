@@ -112,14 +112,16 @@ public class VisualizationController {
     GuiUtils.initializeIntegerSpinner(bufferSizeSpinner,
         ConsumerConfig.MIN_BUFFER_SIZE,
         ConsumerConfig.MAX_BUFFER_SIZE,
-        config.getBufferSize());
+        config.getBufferSize(),
+        ConsumerConfig.STEP_AMOUNT_BUFFER_SIZE);
 
     GuiUtils.setOnFocusLost(bufferSizeSpinner, this::updateBufferSize);
 
     GuiUtils.initializeIntegerSpinner(windowSizeSpinner,
         ConsumerConfig.MIN_WINDOW_SIZE,
         ConsumerConfig.MAX_WINDOW_SIZE,
-        config.getWindowSize());
+        config.getWindowSize(),
+        ConsumerConfig.STEP_AMOUNT_WINDOW_SIZE);
 
     GuiUtils.setOnFocusLost(windowSizeSpinner, this::updateWindowSize);
 
@@ -136,12 +138,15 @@ public class VisualizationController {
 
     long totalClauses = mediator.numberOfUpdates();
     long processedClauses = mediator.currentUpdate();
+    long amountToStepBy =
+        (long) (ConsumerConfig.STEP_AMOUNT_FACTOR_PROCESSED_CLAUSES * totalClauses);
 
     processedClausesSpinnerLongValidationListener = GuiUtils.initializeLongSpinnerAsDouble(
         processedClausesSpinner,
         MIN_PROCESSED_CLAUSES,
-        (int) totalClauses,
-        (int) processedClauses);
+        totalClauses,
+        processedClauses,
+        amountToStepBy);
 
     GuiUtils.setOnFocusLost(processedClausesSpinner, this::updateProcessedClausesSpinner);
 
@@ -153,7 +158,7 @@ public class VisualizationController {
     // make slider move in discrete steps
     processedClausesSlider.setSnapToTicks(true);
     processedClausesSlider.setMajorTickUnit(1.0);
-    processedClausesSlider.setBlockIncrement(1.0);
+    processedClausesSlider.setBlockIncrement(amountToStepBy);
     processedClausesSlider.setMinorTickCount(0); // Disable minor ticks
   }
 
@@ -278,14 +283,18 @@ public class VisualizationController {
 
     // execute on JavaFX application thread
     Platform.runLater(() -> {
+      long amountToStepBy =
+          (long) (ConsumerConfig.STEP_AMOUNT_FACTOR_PROCESSED_CLAUSES * totalUpdates);
+
       // update spinner
       processedClausesSpinner.getEditor().textProperty().removeListener(
           processedClausesSpinnerLongValidationListener);
       processedClausesSpinnerLongValidationListener = GuiUtils.initializeLongSpinnerAsDouble(
           processedClausesSpinner,
           MIN_PROCESSED_CLAUSES,
-          (int) totalUpdates,
-          (int) currentUpdate);
+          totalUpdates,
+          currentUpdate,
+          amountToStepBy);
 
       // update label
       totalClausesLabel.setText(TOTAL_CLAUSES_DELIMITER + totalUpdates);
@@ -294,6 +303,7 @@ public class VisualizationController {
       if (!(processedClausesSliderMousePressed || processedClausesSliderKeyPressed)) {
         processedClausesSlider.setMax(totalUpdates);
         processedClausesSlider.setValue(currentUpdate);
+        processedClausesSlider.setBlockIncrement(amountToStepBy);
       }
     });
   }
