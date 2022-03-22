@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
+import edu.kit.satviz.consumer.config.ConsumerConstraint;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import java.io.IOException;
