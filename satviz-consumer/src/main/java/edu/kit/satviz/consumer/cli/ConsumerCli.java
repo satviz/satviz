@@ -41,7 +41,8 @@ public final class ConsumerCli {
 
     Subparsers subparsers = PARSER.addSubparsers().dest("subparser_name");
 
-    Subparser embeddedParser = subparsers.addParser("embedded");
+    Subparser embeddedParser = subparsers.addParser("embedded")
+        .help("Start consumer with an embedded producer");
     embeddedParser.addArgument("--solver", "-s")
         .type(PathArgumentType.get())
         .help("Path to an IPASIR solver shared library");
@@ -49,18 +50,23 @@ public final class ConsumerCli {
         .type(PathArgumentType.get())
         .help("Path to a DRAT proof");
 
-    Subparser externalParser = subparsers.addParser("external");
+    Subparser externalParser = subparsers.addParser("external")
+        .help("Start consumer, that waits for an external producer");
     externalParser.addArgument("--port", "-P")
         .setDefault(ExternalModeConfig.DEFAULT_PORT_NUMBER)
         .type(int.class)
         .help("Port, where clauses can be received");
 
+    Subparser fileParser = subparsers.addParser("config")
+        .help("Start consumer how it's specified in the configuration file");
+    fileParser.addArgument("file")
+        .nargs("?")
+        .type(PathArgumentType.get())
+        .help("Path to configuration file");
+
     PARSER.addArgument("--instance", "-i")
         .type(PathArgumentType.get())
         .help("Path to a DIMACS CNF instance file");
-    PARSER.addArgument("--file", "-f")
-        .type(PathArgumentType.get())
-        .help("Path to configuration file");
     PARSER.addArgument("--no-gui")
         .type(boolean.class)
         .action(Arguments.storeTrue())
