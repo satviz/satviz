@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<TitledPane fx:id="windowPane" alignment="CENTER" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="572.0" prefWidth="457.0" text="Visualization Controls" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<TitledPane fx:id="windowPane" alignment="CENTER" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="598.0" prefWidth="457.0" text="Visualization Controls" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <content>
         <VBox prefHeight="251.0" prefWidth="311.0">
             <children>
@@ -42,6 +42,26 @@
                         <Insets bottom="2.5" />
                     </VBox.margin>
                 </GridPane>
+            <HBox prefHeight="0.0" prefWidth="451.0" style="-fx-border-color: lightgrey;">
+               <children>
+                  <Label text="Buffer Size: ">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="5.0" />
+                     </HBox.margin>
+                  </Label>
+                  <Spinner fx:id="bufferSizeSpinner" editable="true" onKeyPressed="#updateBufferSize" onMouseClicked="#updateBufferSize">
+                     <HBox.margin>
+                        <Insets left="2.5" />
+                     </HBox.margin>
+                  </Spinner>
+               </children>
+               <padding>
+                  <Insets bottom="5.0" top="5.0" />
+               </padding>
+            </HBox>
                 <VBox style="-fx-border-color: lightgrey;">
                     <children>
                         <Label text="Heatmap">
@@ -222,7 +242,7 @@
                                 <Insets bottom="3.0" />
                             </padding>
                         </HBox>
-                        <Slider fx:id="processedClausesSlider" onMousePressed="#processedClausesSliderOnMousePressed" onKeyPressed="#processedClausesSliderOnKeyPressed" onMouseReleased="#processedClausesSliderOnMouseReleased" onKeyReleased="#processedClausesSliderOnKeyReleased" prefHeight="16.0" prefWidth="169.0">
+                        <Slider fx:id="processedClausesSlider" onKeyPressed="#processedClausesSliderOnKeyPressed" onKeyReleased="#processedClausesSliderOnKeyReleased" onMousePressed="#processedClausesSliderOnMousePressed" onMouseReleased="#processedClausesSliderOnMouseReleased" prefHeight="16.0" prefWidth="169.0">
                             <opaqueInsets>
                                 <Insets top="2.5" />
                             </opaqueInsets>

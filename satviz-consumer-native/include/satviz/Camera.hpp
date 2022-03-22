@@ -11,9 +11,9 @@ namespace video {
  */
 class Camera {
 private:
-  float positionX = 0.0f;
-  float positionY = 0.0f;
-  float zoomFactor = 1.0f;
+  double positionX = 0.0;
+  double positionY = 0.0;
+  double zoomFactor = 1.0;
   int width  = 0;
   int height = 0;
 
@@ -43,7 +43,7 @@ public:
    * @param atY the y coordinate of the point in pixels
    * @param factor how much to zoom by. Positive values mean zooming in, negative mean zooming out.
    */
-  void zoom(int atX, int atY, float factor);
+  void zoom(int atX, int atY, double factor);
 
   /**
    * Focus the camera on a box of coordinates that should be completely within view.
@@ -53,14 +53,14 @@ public:
    * @param boxX2 maximum x coordinate of the box
    * @param boxY2 maximum y coordinate of the box
    */
-  void focusOnBox(float boxX1, float boxY1, float boxX2, float boxY2);
+  void focusOnBox(double boxX1, double boxY1, double boxX2, double boxY2);
 
   /**
    * Create an OpenGL world-to-view matrix based on this camera.
    *
    * @param matrix output parameter
    */
-  void toMatrix(float *matrix);
+  void toMatrix(double *matrix);
 };
 
 } // namespace video

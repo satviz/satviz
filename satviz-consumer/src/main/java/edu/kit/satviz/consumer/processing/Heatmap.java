@@ -18,6 +18,8 @@ import java.util.Objects;
  */
 public abstract class Heatmap implements ClauseUpdateProcessor {
 
+  public static final HeatmapImplementation DEFAULT_IMPLEMENTATION = HeatmapImplementation.RECENCY;
+
   private static final IntSerializer intSerializer = new IntSerializer();
   private static final ClauseSerializer clauseSerializer = new ClauseSerializer();
 

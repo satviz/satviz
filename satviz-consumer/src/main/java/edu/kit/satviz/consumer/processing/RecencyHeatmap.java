@@ -42,8 +42,8 @@ public class RecencyHeatmap extends Heatmap {
     int size = recentClauses.length;
     HeatUpdate update = new HeatUpdate();
     zeroPendingVariables(update, nodeMapping);
-    for (int i = 0; i < size; i++) {
-      Clause subject = recentClauses[(i + cursor) % size];
+    for (int i = 1; i <= size; i++) {
+      Clause subject = recentClauses[(i + cursor - 1) % size];
       if (subject == null) {
         continue;
       }

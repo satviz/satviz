@@ -16,6 +16,11 @@ import edu.kit.satviz.consumer.gui.GuiUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+
+import edu.kit.satviz.consumer.processing.Heatmap;
+import edu.kit.satviz.consumer.processing.HeatmapImplementation;
+import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
+import edu.kit.satviz.consumer.processing.VariableInteractionGraphImplementation;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -54,11 +59,15 @@ public class GeneralConfigController extends ConfigController {
   @FXML
   private Spinner<Integer> bufferSizeSpinner;
   @FXML
+  private ChoiceBox<HeatmapImplementation> heatmapImplementationChoiceBox;
+  @FXML
   private Spinner<Integer> windowSizeSpinner;
   @FXML
   private ColorPicker coldColorColorPicker;
   @FXML
   private ColorPicker hotColorColorPicker;
+  @FXML
+  private ChoiceBox<VariableInteractionGraphImplementation> vigImplementationChoiceBox;
   @FXML
   private Spinner<Integer> contractionIterationsSpinner;
   @FXML
@@ -211,10 +220,16 @@ public class GeneralConfigController extends ConfigController {
         ConsumerConfig.MAX_BUFFER_SIZE,
         ConsumerConfig.DEFAULT_BUFFER_SIZE);
 
+    heatmapImplementationChoiceBox.setItems(
+        FXCollections.observableArrayList(HeatmapImplementation.values()));
+
     GuiUtils.initializeIntegerSpinner(windowSizeSpinner,
         ConsumerConfig.MIN_WINDOW_SIZE,
         ConsumerConfig.MAX_WINDOW_SIZE,
         ConsumerConfig.DEFAULT_WINDOW_SIZE);
+
+    vigImplementationChoiceBox.setItems(
+        FXCollections.observableArrayList(VariableInteractionGraphImplementation.values()));
 
     GuiUtils.initializeIntegerSpinner(contractionIterationsSpinner,
         ConsumerConfig.MIN_CONTRACTION_ITERATIONS,
@@ -236,11 +251,15 @@ public class GeneralConfigController extends ConfigController {
 
     bufferSizeSpinner.getValueFactory().setValue(ConsumerConfig.DEFAULT_BUFFER_SIZE);
 
+    heatmapImplementationChoiceBox.setValue(Heatmap.DEFAULT_IMPLEMENTATION);
+
     windowSizeSpinner.getValueFactory().setValue(ConsumerConfig.DEFAULT_WINDOW_SIZE);
 
     coldColorColorPicker.setValue(HeatmapColors.DEFAULT_COLD_COLOR);
 
     hotColorColorPicker.setValue(HeatmapColors.DEFAULT_HOT_COLOR);
+
+    vigImplementationChoiceBox.setValue(VariableInteractionGraph.DEFAULT_IMPLEMENTATION);
 
     contractionIterationsSpinner.getValueFactory().setValue(
         ConsumerConfig.DEFAULT_CONTRACTION_ITERATIONS);
@@ -287,6 +306,8 @@ public class GeneralConfigController extends ConfigController {
 
     bufferSizeSpinner.getValueFactory().setValue(config.getBufferSize());
 
+    heatmapImplementationChoiceBox.setValue(config.getHeatmapImplementation());
+
     windowSizeSpinner.getValueFactory().setValue(config.getWindowSize());
 
     Theme theme = config.getTheme();
@@ -294,6 +315,8 @@ public class GeneralConfigController extends ConfigController {
       coldColorColorPicker.setValue(theme.getColdColor());
       hotColorColorPicker.setValue(theme.getHotColor());
     }
+
+    vigImplementationChoiceBox.setValue(config.getVigImplementation());
 
     contractionIterationsSpinner.getValueFactory().setValue(config.getContractionIterations());
   }
@@ -317,11 +340,15 @@ public class GeneralConfigController extends ConfigController {
 
     config.setBufferSize(bufferSizeSpinner.getValue());
 
+    config.setHeatmapImplementation(heatmapImplementationChoiceBox.getValue());
+
     config.setWindowSize(windowSizeSpinner.getValue());
 
     Theme theme = config.getTheme();
     theme.setColdColor(coldColorColorPicker.getValue());
     theme.setHotColor(hotColorColorPicker.getValue());
+
+    config.setVigImplementation(vigImplementationChoiceBox.getValue());
 
     config.setContractionIterations(contractionIterationsSpinner.getValue());
   }

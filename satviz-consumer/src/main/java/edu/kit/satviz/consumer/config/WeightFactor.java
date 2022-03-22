@@ -47,4 +47,31 @@ public enum WeightFactor {
   public double apply(int n) {
     return function.applyAsDouble(n);
   }
+
+  /**
+   * This method calculates the factor, by which single clauses affect edge weights
+   * of their corresponding edges in the graph.<br>
+   * The {@code min} parameter determines the (exclusive) boundary, within which the return value
+   * is rounded down to {@code 0}.<br>
+   *<p>
+   * Example:<br>
+   * {@code >> factor = WeightFactor.RECIPROCAL; n = 4;}<br>
+   * {@code >> factor.apply(n);}<br>
+   * {@code 0.25}<br>
+   * {@code >> factor.apply(n, 0.25);}<br>
+   * {@code 0.25}<br>
+   * {@code >> factor.apply(n, 0.3);}<br>
+   * {@code 0.0}<br><br>
+   *</p>
+   * <i>NOTE: This function is meant to prevent underflow issues.</i>
+   *
+   * @param n The clause-size.
+   * @param min The minimal value.
+   * @return The calculated amount of increase for the edge weights.
+   */
+  public double apply(int n, double min) {
+    double result = apply(n);
+    return (result >= min) ? result : 0;
+  }
+
 }

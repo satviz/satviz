@@ -143,7 +143,7 @@ void GraphRenderer::clearScreen() {
 }
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {
-  float view_matrix[16];
+  double view_matrix[16];
   camera.toMatrix(view_matrix);
 
   glEnable(GL_BLEND);
@@ -151,14 +151,14 @@ void GraphRenderer::draw(Camera &camera, int width, int height) {
 
   // Draw edges
   glUseProgram(resources.edge_prog);
-  glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
+  glUniformMatrix4dv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
   glBindVertexArray(edge_state);
   glBindTexture(GL_TEXTURE_BUFFER, offset_texview);
   glDrawArraysInstanced(GL_LINES, 0, 2, edge_capacity);
 
   // Draw nodes
   glUseProgram(resources.node_prog);
-  glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
+  glUniformMatrix4dv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, view_matrix);
   glUniform2f(UNIFORM_NODE_SIZE, node_size / (float) width, node_size / (float) height);
   glBindVertexArray(node_state);
   glBindTexture(GL_TEXTURE_1D, heat_palette);

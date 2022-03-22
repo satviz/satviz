@@ -21,6 +21,11 @@ import java.util.function.IntUnaryOperator;
  */
 public abstract class VariableInteractionGraph implements ClauseUpdateProcessor {
 
+  public static final float MIN_WEIGHT = 1e-7f;
+  
+  public static final VariableInteractionGraphImplementation DEFAULT_IMPLEMENTATION =
+      VariableInteractionGraphImplementation.RING;
+
   private WeightFactor weightFactor;
   private final StringSerializer serializer;
 
@@ -66,7 +71,7 @@ public abstract class VariableInteractionGraph implements ClauseUpdateProcessor 
         literals[i] = Math.abs(literals[i]);
       }
 
-      float weight = (float) weightFactor.apply(literals.length);
+      float weight = (float) weightFactor.apply(literals.length, MIN_WEIGHT);
       weight = (clauseUpdate.type() == ClauseUpdate.Type.ADD) ? weight : -weight;
       process(weightUpdate, literals, weight, nodeMapping);
     }
