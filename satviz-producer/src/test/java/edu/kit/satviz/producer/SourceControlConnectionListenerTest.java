@@ -5,7 +5,7 @@ import static edu.kit.satviz.producer.ResourceHelper.extractResource;
 import static edu.kit.satviz.producer.SolverParams.solverParams;
 import static org.mockito.Mockito.*;
 
-import edu.kit.satviz.network.ProducerConnection;
+import edu.kit.satviz.network.pub.ProducerConnection;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 import edu.kit.satviz.producer.mode.ProofMode;
 import edu.kit.satviz.producer.mode.SolverMode;
@@ -43,7 +43,7 @@ class SourceControlConnectionListenerTest {
     var listener = new SourceControlConnectionListener(connection, data.source());
     listener.onConnect();
     listener.getSourceThread().join();
-    verify(connection).terminateFailed(anyString());
+    verify(connection).terminateOtherwise(anyString());
   }
 
   @Test

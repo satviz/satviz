@@ -1,7 +1,7 @@
 package edu.kit.satviz.producer;
 
-import edu.kit.satviz.network.ProducerConnection;
-import edu.kit.satviz.network.ProducerConnectionListener;
+import edu.kit.satviz.network.pub.ProducerConnection;
+import edu.kit.satviz.network.pub.ProducerConnectionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,10 +47,10 @@ public class SourceControlConnectionListener implements ProducerConnectionListen
         logger.info("Source closed.");
       } catch (SourceException e) {
         logger.log(Level.SEVERE, "Error draining source", e);
-        connection.terminateFailed(e.getMessage());
+        connection.terminateOtherwise(e.getMessage());
       } catch (Exception e) {
         logger.log(Level.SEVERE, "Unknown error", e);
-        connection.terminateFailed("internal error: " + e);
+        connection.terminateOtherwise("internal error: " + e);
       }
     }, "ClauseSource-" + Integer.toHexString(source.hashCode()));
     sourceThread.start();
