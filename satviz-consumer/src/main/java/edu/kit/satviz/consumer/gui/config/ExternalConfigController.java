@@ -24,7 +24,8 @@ public class ExternalConfigController extends ConfigController {
     GuiUtils.initializeIntegerSpinner(portSpinner,
         ExternalModeConfig.MIN_PORT_NUMBER,
         ExternalModeConfig.MAX_PORT_NUMBER,
-        ExternalModeConfig.DEFAULT_PORT_NUMBER);
+        ExternalModeConfig.DEFAULT_PORT_NUMBER,
+        ExternalModeConfig.STEP_AMOUNT_PORT_NUMBER);
   }
 
   @Override

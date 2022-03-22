@@ -13,6 +13,7 @@ public class ExternalModeConfig extends ConsumerModeConfig {
   public static final int MIN_PORT_NUMBER = 1;
   public static final int MAX_PORT_NUMBER = 65535;
   public static final int DEFAULT_PORT_NUMBER = 34312;
+  public static final int STEP_AMOUNT_PORT_NUMBER = 1;
 
   private int port;
 
