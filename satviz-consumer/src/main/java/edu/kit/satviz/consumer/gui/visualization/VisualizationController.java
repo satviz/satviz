@@ -280,12 +280,11 @@ public class VisualizationController {
   public void onClauseUpdate() {
     long totalUpdates = mediator.numberOfUpdates();
     long currentUpdate = mediator.currentUpdate();
+    long amountToStepBy =
+        (long) (ConsumerConfig.STEP_AMOUNT_FACTOR_PROCESSED_CLAUSES * totalUpdates);
 
     // execute on JavaFX application thread
     Platform.runLater(() -> {
-      long amountToStepBy =
-          (long) (ConsumerConfig.STEP_AMOUNT_FACTOR_PROCESSED_CLAUSES * totalUpdates);
-
       // update spinner
       processedClausesSpinner.getEditor().textProperty().removeListener(
           processedClausesSpinnerLongValidationListener);
