@@ -8,6 +8,7 @@ import edu.kit.satviz.consumer.graph.Graph;
 import edu.kit.satviz.network.pub.ConsumerConnectionListener;
 import edu.kit.satviz.network.pub.ProducerId;
 import edu.kit.satviz.sat.ClauseUpdate;
+import edu.kit.satviz.sat.SatAssignment;
 import java.io.IOException;
 import java.util.List;
 import java.util.Queue;
@@ -16,9 +17,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.paint.Color;
 
 public class Mediator implements ConsumerConnectionListener, AutoCloseable {
+
+  private static final Logger logger = Logger.getLogger("Mediator");
 
   private final Object renderLock = new Object();
   private final Graph graph;
@@ -237,13 +242,23 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   }
 
   @Override
+  public void onTerminateSolved(ProducerId pid, SatAssignment assign) {
+    logger.info("Connection terminated - Result: satisfiable");
+  }
+
+  @Override
+  public void onTerminateRefuted(ProducerId pid) {
+    logger.info("Connection terminated - Result: not satisfiable");
+  }
+
+  @Override
   public void onTerminateOtherwise(ProducerId pid, String reason) {
+    logger.log(Level.WARNING, "Connection terminated: {0}", reason);
     try {
       close();
     } catch (Exception e) {
       e.printStackTrace();
     }
-    // TODO: 04.03.2022 error & close gui
   }
 
   @Override
