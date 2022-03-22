@@ -45,6 +45,7 @@ public class ConsumerConfig {
   public static final int DEFAULT_CONTRACTION_ITERATIONS = 0;
   public static final int STEP_AMOUNT_CONTRACTION_ITERATIONS = 1;
   public static final long DEFAULT_PERIOD = 33;
+  public static final int DEFAULT_VIDEO_TIMEOUT = 60;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
   public static final double STEP_AMOUNT_FACTOR_PROCESSED_CLAUSES = 0.05;
 
@@ -66,6 +67,7 @@ public class ConsumerConfig {
       VariableInteractionGraph.DEFAULT_IMPLEMENTATION;
   private int contractionIterations = DEFAULT_CONTRACTION_ITERATIONS;
   private long period = DEFAULT_PERIOD;
+  private int videoTimeout = DEFAULT_VIDEO_TIMEOUT;
   private Theme theme = new Theme();
 
   /**
@@ -308,6 +310,14 @@ public class ConsumerConfig {
     return period;
   }
 
+  public int getVideoTimeout() {
+    return videoTimeout;
+  }
+
+  public void setVideoTimeout(int videoTimeout) {
+    this.videoTimeout = videoTimeout;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -329,14 +339,15 @@ public class ConsumerConfig {
         && heatmapImplementation == config.heatmapImplementation
         && vigImplementation == config.vigImplementation
         && contractionIterations == config.contractionIterations
-        && period == config.period;
+        && period == config.period
+        && videoTimeout == config.videoTimeout;
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
         recordImmediately, bufferSize, weightFactor, heatmapImplementation, windowSize, theme,
-        vigImplementation, contractionIterations, period);
+        vigImplementation, contractionIterations, period, videoTimeout);
   }
 
 }

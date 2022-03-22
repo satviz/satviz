@@ -99,6 +99,10 @@ public final class ConsumerCli {
         .type(boolean.class)
         .action(Arguments.storeTrue())
         .help("Start recording the animation immediately");
+    PARSER.addArgument("--video-timeout")
+        .type(int.class)
+        .setDefault(ConsumerConfig.DEFAULT_VIDEO_TIMEOUT)
+        .help("Set the amount of seconds to record, if --no-gui is set");
   }
 
   private ConsumerCli() {
@@ -148,6 +152,7 @@ public final class ConsumerCli {
     config.setBufferSize(namespace.getInt("buffer"));
     config.setWeightFactor(namespace.get("weight"));
     config.setWindowSize(namespace.getInt("window"));
+    config.setVideoTimeout(namespace.get("video_timeout"));
     Theme theme = new Theme();
     HeatmapColors heatmapColors = namespace.get("colors");
     theme.setHeatmapColors(heatmapColors);

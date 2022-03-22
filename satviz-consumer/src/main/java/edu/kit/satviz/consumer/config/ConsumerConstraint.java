@@ -15,11 +15,15 @@ public class ConsumerConstraint implements Constraint<ConsumerConfig> {
 
   @Override
   public void validate(ConsumerConfig config) throws ConstraintValidationException {
+    if (config.getVideoTimeout() < 0) {
+      fail("Timeout must be positive");
+    }
+
     if (config.getInstancePath() == null) {
       fail("No instance is set");
     }
     fileExists().validate(config.getInstancePath());
-    fileExists().validate(Paths.get(config.getVideoTemplatePath()).getParent());
+    fileExists().validate(Paths.get(config.getVideoTemplatePath()).toAbsolutePath().getParent());
     ConsumerModeConfig modeConfig = config.getModeConfig();
     if (modeConfig.getMode() == ConsumerMode.EMBEDDED) {
       EmbeddedModeConfig embeddedConfig = (EmbeddedModeConfig) modeConfig;
