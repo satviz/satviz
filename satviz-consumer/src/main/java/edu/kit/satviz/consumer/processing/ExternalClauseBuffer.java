@@ -187,7 +187,7 @@ public class ExternalClauseBuffer implements AutoCloseable {
     clauseLookupReadFile.seek(index * Long.BYTES);
     clauseLookupReadFile.read(byteRange, 0, Long.BYTES);
     clauseLookupReadFile.seek((index + updates.length) * Long.BYTES);
-    clauseLookupReadFile.read(byteRange, Long.BYTES, 2 * Long.BYTES);
+    clauseLookupReadFile.read(byteRange, Long.BYTES, Long.BYTES);
     ByteBuffer buffer = ByteBuffer.wrap(byteRange);
     long beginningByte = buffer.getLong();
     long endingByte = buffer.getLong();
