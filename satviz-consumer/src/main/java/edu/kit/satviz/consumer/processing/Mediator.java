@@ -175,6 +175,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
         e.printStackTrace();
       }
     });
+    resetCamera();
   }
 
   public long currentUpdate() {
