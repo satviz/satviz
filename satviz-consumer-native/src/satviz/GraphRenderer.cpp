@@ -172,7 +172,7 @@ void GraphRenderer::onWeightChange(ogdf::Array<ogdf::edge> &changed) {
   for (auto e : changed) {
     int idx = edge_mapping[e];
     double w = attrs.doubleWeight(e);
-    double I = w / (1.0 + w);
+    double I = w / (10.0 + w);
     area[idx] = (unsigned char) (I * 256.0);
   }
   glUnmapBuffer(GL_ARRAY_BUFFER);
