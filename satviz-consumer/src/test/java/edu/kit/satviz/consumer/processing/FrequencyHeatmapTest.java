@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.processing;
 
+import static edu.kit.satviz.consumer.processing.Constants.UPDATES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.kit.satviz.consumer.graph.HeatUpdate;
@@ -12,18 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class FrequencyHeatmapTest {
-
-  private static final Clause[] CLAUSES = {
-      new Clause(new int[] {1, 6, -5, 3}),
-      new Clause(new int[] {5, -4, 2}),
-      new Clause(new int[] {1, -2, 3}),
-      new Clause(new int[] {7, 4, -1}),
-      new Clause(new int[] {-6, 2})
-  };
-
-  private static final ClauseUpdate[] UPDATES = Arrays.stream(CLAUSES)
-      .map(c -> new ClauseUpdate(c, ClauseUpdate.Type.ADD))
-      .toArray(ClauseUpdate[]::new);
 
   private static final IntUnaryOperator DEFAULT_NODE_MAPPING = literal -> Math.abs(literal) - 1;
 
