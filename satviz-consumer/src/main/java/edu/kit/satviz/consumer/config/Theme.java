@@ -18,12 +18,12 @@ public class Theme {
   /**
    * The default background color.
    */
-  public static final Color DEFAULT_BACKGROUND_COLOR = Color.web("#4d4d4d");
+  public static final Color DEFAULT_BACKGROUND_COLOR = Color.web("#CCCCCC");
 
   /**
    * The default edge color.
    */
-  public static final Color DEFAULT_EDGE_COLOR = Color.WHITE;
+  public static final Color DEFAULT_EDGE_COLOR = Color.web("#2E2A2C");
 
   /**
    * The default node size.

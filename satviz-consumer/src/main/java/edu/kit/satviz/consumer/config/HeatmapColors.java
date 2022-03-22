@@ -12,12 +12,12 @@ public class HeatmapColors {
   /**
    * The default hot color.
    */
-  public static final Color DEFAULT_HOT_COLOR = Color.color(1, 0, 0);
+  public static final Color DEFAULT_HOT_COLOR = Color.web("#FF9139");
 
   /**
    * The default cold color.
    */
-  public static final Color DEFAULT_COLD_COLOR = Color.color(0, 0, 1);
+  public static final Color DEFAULT_COLD_COLOR = Color.web("#388BE8");
 
   private Color hotColor = DEFAULT_HOT_COLOR;
   private Color coldColor = DEFAULT_COLD_COLOR;
