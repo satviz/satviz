@@ -108,7 +108,7 @@ public final class ConsumerApplication {
     });
 
     if (!config.isNoGui()) {
-      startVisualisationGui(mediator, config, initialData.variables);
+      startVisualisationGui(mediator, config);
     }
 
     connection.connect(ConsumerApplication.pid, mediator);
@@ -318,16 +318,8 @@ public final class ConsumerApplication {
     return true;
   }
 
-  private static void startVisualisationGui(
-      Mediator mediator,
-      ConsumerConfig config,
-      int variableAmount
-  ) {
-    VisualizationController visController = new VisualizationController(
-        mediator,
-        config,
-        variableAmount
-    );
+  private static void startVisualisationGui(Mediator mediator, ConsumerConfig config) {
+    VisualizationController visController = new VisualizationController(mediator, config);
     mediator.registerFrameAction(visController::onClauseUpdate);
     VisualizationStarter.setVisualizationController(visController);
     GuiUtils.launch(VisualizationStarter.class);

@@ -29,8 +29,6 @@ public class VisualizationController {
 
   // CONSTANTS
 
-  private static final int MIN_HIGHLIGHT_VARIABLE = 1;
-  private static final int DEFAULT_HIGHLIGHT_VARIABLE = 1;
   private static final int MIN_PROCESSED_CLAUSES = 0;
   private static final String PLAY_SYMBOL = "▶";
   private static final String PAUSE_SYMBOL = "⏸";
@@ -50,14 +48,6 @@ public class VisualizationController {
   private ColorPicker coldColorColorPicker;
   @FXML
   private ColorPicker hotColorColorPicker;
-  @FXML
-  private Spinner<Integer> highlightVariableSpinner;
-  @FXML
-  private Button clearHighlightVariableButton;
-  @FXML
-  private Button screenshotButton;
-  @FXML
-  private Button openScreenshotFolderButton;
   @FXML
   private Button startOrStopRecordingButton;
   @FXML
@@ -86,7 +76,6 @@ public class VisualizationController {
 
   private final Mediator mediator;
   private final ConsumerConfig config;
-  private final int variableCount;
 
   private boolean recording;
   private boolean recordingPaused;
@@ -106,11 +95,8 @@ public class VisualizationController {
    * @param mediator The {@link Mediator} object to which this class delegates its method calls.
    * @param config The {@link ConsumerConfig} object containing the initial values
    *               for the configuration parameters.
-   * @param variableCount The number of variables of the SAT instance
-   *                      that is supposed to be visualized.
    */
-  public VisualizationController(Mediator mediator, ConsumerConfig config, int variableCount) {
-    this.variableCount = variableCount;
+  public VisualizationController(Mediator mediator, ConsumerConfig config) {
     this.mediator = mediator;
     this.mediator.registerCloseAction(Platform::exit);
     this.config = config;
@@ -140,13 +126,6 @@ public class VisualizationController {
     HeatmapColors colors = config.getHeatmapColors();
     coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
     hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
-
-    GuiUtils.initializeIntegerSpinner(highlightVariableSpinner,
-        MIN_HIGHLIGHT_VARIABLE,
-        variableCount,
-        DEFAULT_HIGHLIGHT_VARIABLE);
-
-    GuiUtils.setOnFocusLost(highlightVariableSpinner, this::highlightVariable);
 
     recording = config.isRecordImmediately();
     updateRecordingDisplay();
@@ -201,33 +180,6 @@ public class VisualizationController {
   @FXML
   private void updateHeatmapHotColor() {
     mediator.updateHeatmapHotColor(hotColorColorPicker.getValue());
-  }
-
-  @FXML
-  private void highlightVariable() {
-    mediator.highlightVariable(highlightVariableSpinner.getValue());
-  }
-
-  @FXML
-  private void clearHighlightVariable() {
-    mediator.clearHighlightVariable();
-  }
-
-  @FXML
-  private void screenshot() {
-    mediator.screenshot();
-  }
-
-  @FXML
-  private void openScreenshotFolder() {
-    // TODO: implement screenshot feature
-    /*
-    try {
-      Desktop.getDesktop().open(new File(ConsumerConfig.DEFAULT_SCREENSHOT_FOLDER));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-     */
   }
 
   @FXML
@@ -317,7 +269,7 @@ public class VisualizationController {
    * for "time" controls. It is supposed to be called whenever the {@link Mediator} object
    * of this class receives or processes new clauses.
    *
-   * @see VisualizationController#VisualizationController(Mediator, ConsumerConfig, int)
+   * @see VisualizationController#VisualizationController(Mediator, ConsumerConfig)
    * @see Mediator
    */
   public void onClauseUpdate() {
