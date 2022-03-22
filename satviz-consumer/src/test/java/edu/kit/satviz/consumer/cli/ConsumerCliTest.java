@@ -8,12 +8,15 @@ import edu.kit.satviz.common.Constraint;
 import edu.kit.satviz.common.ConstraintValidationException;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.ConsumerConstraint;
+import edu.kit.satviz.consumer.config.EmbeddedModeConfig;
+import edu.kit.satviz.consumer.config.EmbeddedModeSource;
 import edu.kit.satviz.consumer.config.ExternalModeConfig;
 import edu.kit.satviz.consumer.config.HeatmapColors;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +25,11 @@ class ConsumerCliTest {
 
   private ConsumerConfig validConfig1;
   private ConsumerConfig validConfig2;
-  private String[] validArguments1;
+  private ConsumerConfig validConfig3;
+  private ConsumerConfig validConfig4;
+  private String[] externalArguments;
+  private String[] embeddedSolverArguments;
+  private String[] embeddedProofArguments;
   private String[] fileArgument;
   private String[] colorArguments;
   private String[] invalidArguments1;
@@ -31,19 +38,29 @@ class ConsumerCliTest {
 
   @BeforeEach
   void setUp() throws IOException {
-    Path tempInstance = Files.createTempFile("instance",".cnf");
+    Path tempInstance = Files.createTempFile("instance", ".cnf");
     Path tempVideoTemplate = Files.createTempFile("video", ".ogv");
     Path configPath = Files.createTempFile("config", ".json");
     Files.copy(
-        ConsumerCliTest.class.getResourceAsStream("/config2.json"),
+        Objects.requireNonNull(ConsumerCliTest.class.getResourceAsStream("/config2.json")),
         configPath,
         StandardCopyOption.REPLACE_EXISTING
     );
 
-    validArguments1 = new String[] {
+    externalArguments = new String[] {
         "-i", tempInstance.toString(),
         "-o", tempVideoTemplate.toString(),
         "external", "-P", "1231"
+    };
+    Path tempSolver = Files.createTempFile("solver", ".so");
+    embeddedSolverArguments = new String[] {
+        "-i", tempInstance.toString(),
+        "embedded", "-s", tempSolver.toString()
+    };
+    Path tempProof = Files.createTempFile("proof", ".drat");
+    embeddedProofArguments = new String[] {
+        "-i", tempInstance.toString(),
+        "embedded", "-p", tempProof.toString()
     };
     fileArgument = new String[] {"config", configPath.toString()};
     colorArguments = new String[] {
@@ -59,29 +76,59 @@ class ConsumerCliTest {
     };
 
     validConfig1 = getExternalConfig(tempInstance, tempVideoTemplate);
-    validConfig2 = getExternalConfig(tempInstance, tempVideoTemplate);
+    validConfig2 = getEmbeddedConfig(tempInstance, EmbeddedModeSource.SOLVER, tempSolver);
+    validConfig3 = getEmbeddedConfig(tempInstance, EmbeddedModeSource.PROOF, tempProof);
+    validConfig4 = getExternalConfig(tempInstance, tempVideoTemplate);
     HeatmapColors heatmapColors = new HeatmapColors();
     heatmapColors.setFromColor(0x000000);
     heatmapColors.setToColor(0xffffff);
-    validConfig2.setHeatmapColors(heatmapColors);
+    validConfig4.setHeatmapColors(heatmapColors);
   }
 
-  private ConsumerConfig getExternalConfig(Path tempInstance, Path tempVideoTemplate) {
-    ConsumerConfig config = new ConsumerConfig();
-    ExternalModeConfig externalModeConfig = new ExternalModeConfig();
+  private ConsumerConfig getExternalConfig(Path instance, Path tempVideoTemplate) {
+    var config = new ConsumerConfig();
+    var externalModeConfig = new ExternalModeConfig();
     externalModeConfig.setPort(1231);
     config.setModeConfig(externalModeConfig);
-    config.setInstancePath(tempInstance);
+    config.setInstancePath(instance);
     config.setVideoTemplatePath(tempVideoTemplate.toString());
     return config;
   }
 
+  private ConsumerConfig getEmbeddedConfig(
+      Path instance, EmbeddedModeSource sourceMode, Path source
+  ) {
+    var config = new ConsumerConfig();
+    var embeddedModeConfig = new EmbeddedModeConfig();
+    embeddedModeConfig.setSource(sourceMode);
+    embeddedModeConfig.setSourcePath(source);
+    config.setModeConfig(embeddedModeConfig);
+    config.setInstancePath(instance);
+    return config;
+  }
+
   @Test
-  void test_parseArgs_valid_withValidation()
+  void test_parseArgs_valid_external()
       throws ArgumentParserException, ConstraintValidationException {
-    ConsumerConfig config = ConsumerCli.parseArgs(validArguments1);
+    ConsumerConfig config = ConsumerCli.parseArgs(externalArguments);
     (new ConsumerConstraint()).validate(config);
     assertEquals(validConfig1, config);
+  }
+
+  @Test
+  void test_parseArgs_valid_embeddedSolver()
+      throws ArgumentParserException, ConstraintValidationException {
+    ConsumerConfig config = ConsumerCli.parseArgs(embeddedSolverArguments);
+    (new ConsumerConstraint()).validate(config);
+    assertEquals(validConfig2, config);
+  }
+
+  @Test
+  void test_parseArgs_valid_embeddedProof()
+      throws ArgumentParserException, ConstraintValidationException {
+    ConsumerConfig config = ConsumerCli.parseArgs(embeddedProofArguments);
+    (new ConsumerConstraint()).validate(config);
+    assertEquals(validConfig3, config);
   }
 
   @Test
@@ -94,7 +141,7 @@ class ConsumerCliTest {
       throws ArgumentParserException, ConstraintValidationException {
     ConsumerConfig config = ConsumerCli.parseArgs(colorArguments);
     (new ConsumerConstraint()).validate(config);
-    assertEquals(validConfig2, config);
+    assertEquals(validConfig4, config);
   }
 
   @Test
