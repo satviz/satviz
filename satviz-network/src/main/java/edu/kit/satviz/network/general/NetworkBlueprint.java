@@ -1,4 +1,4 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.general;
 
 import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;
@@ -33,15 +33,14 @@ public class NetworkBlueprint {
    * @param out the stream to write to
    * @throws IOException if the stream cannot be used
    * @throws SerializationException if the serialization didn't work
-   * @throws ClassCastException if the type is invalid or unknown
    */
   public void serialize(byte type, Object obj, OutputStream out) throws IOException,
-      SerializationException, ClassCastException {
-    Serializer<?> serial = serializers[type];
+      SerializationException {
+    Serializer<?> serial = serializers[Byte.toUnsignedInt(type)];
     if (serial != null) {
       serial.serializeUnsafe(obj, out);
     } else {
-      throw new ClassCastException("unknown type");
+      throw new SerializationException("no serializer available");
     }
   }
 
@@ -51,8 +50,8 @@ public class NetworkBlueprint {
    * @param type the type
    * @return a new builder for the given type of objects, <code>null</code> if not specified
    */
-  public SerialBuilder<?> getBuilder(int type) {
-    Serializer<?> s = serializers[type & 0xff];
+  public SerialBuilder<?> getBuilder(byte type) {
+    Serializer<?> s = serializers[Byte.toUnsignedInt(type)];
     if (s != null) {
       return s.getBuilder();
     }

@@ -1,4 +1,4 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.pub;
 
 /**
  * A type of clause producer.

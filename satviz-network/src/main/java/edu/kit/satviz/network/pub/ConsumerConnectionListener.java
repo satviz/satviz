@@ -1,4 +1,4 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.network.pub;
 
 import edu.kit.satviz.sat.ClauseUpdate;
 import edu.kit.satviz.sat.SatAssignment;

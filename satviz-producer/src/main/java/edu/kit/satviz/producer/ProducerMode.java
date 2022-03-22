@@ -1,5 +1,6 @@
 package edu.kit.satviz.producer;
 
+import edu.kit.satviz.network.pub.ProducerId;
 import edu.kit.satviz.producer.cli.ProducerParameters;
 
 /**
@@ -22,7 +23,7 @@ public interface ProducerMode {
    *
    * @param parameters the {@link ProducerParameters}
    * @return {@link ProducerModeData} containing a {@link ClauseSource} implementation and a
-   *         {@link edu.kit.satviz.network.ProducerId} according to the parameters and this mode
+   *         {@link ProducerId} according to the parameters and this mode
    * @throws SourceException If the source can not be created for some reason.
    */
   ProducerModeData apply(ProducerParameters parameters) throws SourceException;

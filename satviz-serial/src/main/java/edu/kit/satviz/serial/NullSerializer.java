@@ -1,8 +1,5 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.serial;
 
-import edu.kit.satviz.serial.SerialBuilder;
-import edu.kit.satviz.serial.SerializationException;
-import edu.kit.satviz.serial.Serializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

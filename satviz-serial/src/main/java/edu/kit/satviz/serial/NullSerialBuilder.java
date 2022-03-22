@@ -1,4 +1,4 @@
-package edu.kit.satviz.network;
+package edu.kit.satviz.serial;
 
 import edu.kit.satviz.serial.SerialBuilder;
 import edu.kit.satviz.serial.SerializationException;

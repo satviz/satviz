@@ -7,7 +7,6 @@ import edu.kit.satviz.sat.SatAssignment;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.invoke.StringConcatException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProducerConsumerTest implements ProducerConnectionListener, ConsumerConnectionListener {
+public class ProducerConsumerTest2 implements ProducerConnectionListener, ConsumerConnectionListener {
   private static ProducerConnection prod;
   private static ConsumerConnection cons;
   private static final Object SYNC_PROD = new Object();
@@ -45,11 +44,11 @@ public class ProducerConsumerTest implements ProducerConnectionListener, Consume
   }
 
   @Test
-  void testProdTerminate() {
-    final int PORT = 34314;
+  void testConsTerminate() {
+    final int PORT = 34315;
     try {
       prod = new ProducerConnection("localhost", PORT);
-      prod.establish(new SolverId("cadical", false, 42), this);
+      prod.establish(new ProofId(), this);
 
       cons = new ConsumerConnection(PORT, this::lsConnect, this::lsFail);
       cons.start();
@@ -60,38 +59,22 @@ public class ProducerConsumerTest implements ProducerConnectionListener, Consume
         }
       }
       synchronized (SYNC_CONS) {
-        while(lsConnectCalls.isEmpty()) {
+        while (lsConnectCalls.isEmpty()) {
           SYNC_CONS.wait();
         }
       }
       // consumer and producer found each other
-      assertEquals(OfferType.SOLVER, lsConnectCalls.get(0).getType());
-      SolverId sid = (SolverId) lsConnectCalls.get(0);
-      assertEquals("cadical", sid.getSolverName());
-      assertFalse(sid.isSolverDelayed());
-      assertEquals(42, sid.getInstanceHash());
 
-
-      ClauseUpdate c1 = new ClauseUpdate(new Clause(new int[]{1,-1,400000}), ClauseUpdate.Type.ADD);
-      ClauseUpdate c2 = new ClauseUpdate(new Clause(new int[]{1,2,3,4,5,-1,-2,-3,-4,-5}), ClauseUpdate.Type.REMOVE);
-      SatAssignment assign = new SatAssignment(10);
-      assign.set(5, SatAssignment.VariableState.SET);
-      assertTrue(prod.sendClauseUpdate(c1));
-      assertTrue(prod.sendClauseUpdate(c2));
-      prod.terminateSolved(assign);
-      assertFalse(prod.sendClauseUpdate(c1)); // sending after terminating
-
-      synchronized (SYNC_CONS) {
-        while (onTerminateSolvedCalls.isEmpty()) {
-          SYNC_CONS.wait();
+      // disconnecting from consumer
+      cons.disconnect(lsConnectCalls.get(0));
+      synchronized (SYNC_PROD) {
+        while (onDisconnectCalls.isEmpty()) {
+          SYNC_PROD.wait();
         }
       }
-      List<ClauseUpdate> updates = onClauseUpdateCalls.get(sid);
-      assertNotNull(updates);
-      assertEquals(2, updates.size());
-      assertEquals(c1, updates.get(0));
-      assertEquals(c2, updates.get(1));
-      assertTrue(onDisconnectCalls.isEmpty()); // prod disconnected, so no message
+      assertEquals("stop", onDisconnectCalls.get(0));
+      assertFalse(prod.sendClauseUpdate(new ClauseUpdate(new Clause(new int[]{1, -2}), ClauseUpdate.Type.ADD)));
+
 
       assertTrue(lsFailCalls.isEmpty());
 

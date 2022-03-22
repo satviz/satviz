@@ -1,6 +1,6 @@
 package edu.kit.satviz.producer;
 
-import edu.kit.satviz.network.ProducerId;
+import edu.kit.satviz.network.pub.ProducerId;
 
 /**
  * The data a {@link ProducerMode} creates upon initialisation with a set of parameters.
