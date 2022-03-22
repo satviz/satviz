@@ -1,8 +1,8 @@
 package edu.kit.satviz.consumer.gui.visualization;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
-import edu.kit.satviz.consumer.config.HeatmapColors;
 import edu.kit.satviz.consumer.config.WeightFactor;
+import edu.kit.satviz.consumer.config.Theme;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.processing.Mediator;
 import java.util.concurrent.ForkJoinPool;
@@ -137,9 +137,9 @@ public class VisualizationController {
 
     GuiUtils.setOnFocusLost(windowSizeSpinner, this::updateWindowSize);
 
-    HeatmapColors colors = config.getHeatmapColors();
-    coldColorColorPicker.setValue(GuiUtils.intToColor(colors.getFromColor()));
-    hotColorColorPicker.setValue(GuiUtils.intToColor(colors.getToColor()));
+    Theme theme = config.getTheme();
+    coldColorColorPicker.setValue(theme.getColdColor());
+    hotColorColorPicker.setValue(theme.getHotColor());
 
     GuiUtils.initializeIntegerSpinner(highlightVariableSpinner,
         MIN_HIGHLIGHT_VARIABLE,

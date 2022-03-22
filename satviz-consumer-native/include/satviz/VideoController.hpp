@@ -42,6 +42,12 @@ public:
   ~VideoController();
 
   /**
+   * Applies the contents of a Theme to the running visualization.
+   * @param theme the theme to apply
+   */
+  void applyTheme(const Theme &theme) { renderer->applyTheme(theme); }
+
+  /**
    * Move the camera so that the entire graph is in view.
    */
   void resetCamera();

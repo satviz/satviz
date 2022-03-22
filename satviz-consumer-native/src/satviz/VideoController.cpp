@@ -76,6 +76,7 @@ void VideoController::nextFrame() {
   }
   camera.update(display->getWidth(), display->getHeight());
   display->startFrame();
+  renderer->clearScreen();
   renderer->draw(camera, display->getWidth(), display->getHeight());
   if (recording_state == REC_ON || recording_state == REC_WINDUP) {
     display->transferCurrentFrame();

@@ -252,30 +252,4 @@ public final class GuiUtils {
     });
   }
 
-  /**
-   * Parses an integer representation of a color into the corresponding {@link Color} object.
-   *
-   * @param color The color to be parsed.
-   * @return The parsed color.
-   */
-  public static Color intToColor(int color) {
-    int red = (color >>> 16) & 0xFF;
-    int green = (color >>> 8) & 0xFF;
-    int blue = color & 0xFF;
-    return new Color(red / 255.0, green / 255.0, blue / 255.0, 1.0);
-  }
-
-  /**
-   * Parses a {@link Color} object into its corresponding integer representation.
-   *
-   * @param color The color to be parsed.
-   * @return The parsed color.
-   */
-  public static int colorToInt(Color color) {
-    int red = (int) Math.round(color.getRed() * 255);
-    int green = (int) Math.round(color.getGreen() * 255);
-    int blue = (int) Math.round(color.getBlue() * 255);
-    return (red << 16) | (green << 8) | blue;
-  }
-
 }

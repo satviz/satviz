@@ -43,8 +43,8 @@ public class ConsumerConfig {
   public static final int DEFAULT_CONTRACTION_ITERATIONS = 0;
   public static final long DEFAULT_PERIOD = 33;
   public static final ConsumerMode DEFAULT_CONSUMER_MODE = ConsumerMode.EXTERNAL;
-  // TODO: set to proper path
-  public static final String DEFAULT_SCREENSHOT_FOLDER = "path/to/screenshots";
+  public static final String DEFAULT_SCREENSHOT_FOLDER = System.getProperty("user.home")
+      + "/satviz/recordings/";
 
   // mandatory settings
   private ConsumerModeConfig modeConfig;
@@ -60,12 +60,11 @@ public class ConsumerConfig {
   private WeightFactor weightFactor = DEFAULT_WEIGHT_FACTOR;
   private HeatmapImplementation heatmapImplementation = Heatmap.DEFAULT_IMPLEMENTATION;
   private int windowSize = DEFAULT_WINDOW_SIZE;
-  private HeatmapColors heatmapColors = new HeatmapColors(); // this contains the default colors
   private VariableInteractionGraphImplementation vigImplementation =
       VariableInteractionGraph.DEFAULT_IMPLEMENTATION;
   private int contractionIterations = DEFAULT_CONTRACTION_ITERATIONS;
   private long period = DEFAULT_PERIOD;
-
+  private Theme theme = new Theme();
 
   /**
    * Setter-method for an instance of the <code>ConsumerModeConfig</code> class.
@@ -151,12 +150,12 @@ public class ConsumerConfig {
   }
 
   /**
-   * Setter-method for the heatmap colors.
+   * Setter-method for the theme (heatmap colors + background + ...).
    *
-   * @param heatmapColors An instance of the <code>HeatmapColors</code> class.
+   * @param theme An instance of the {@code Theme} class.
    */
-  public void setHeatmapColors(HeatmapColors heatmapColors) {
-    this.heatmapColors = heatmapColors;
+  public void setTheme(Theme theme) {
+    this.theme = theme;
   }
 
   /**
@@ -272,12 +271,12 @@ public class ConsumerConfig {
   }
 
   /**
-   * Getter-method for the heatmap colors.
+   * Getter-method for the theme (heatmap colors + background + ...).
    *
-   * @return An instance of the <code>HeatmapColors</code> class.
+   * @return An instance of the {@code Theme} class.
    */
-  public HeatmapColors getHeatmapColors() {
-    return heatmapColors;
+  public Theme getTheme() {
+    return theme;
   }
 
   /**
@@ -324,8 +323,8 @@ public class ConsumerConfig {
         && Objects.equals(instancePath, config.instancePath)
         && Objects.equals(videoTemplatePath, config.videoTemplatePath)
         && weightFactor == config.weightFactor
+        && Objects.equals(theme, config.theme)
         && heatmapImplementation == config.heatmapImplementation
-        && Objects.equals(heatmapColors, config.heatmapColors)
         && vigImplementation == config.vigImplementation
         && contractionIterations == config.contractionIterations
         && period == config.period;
@@ -334,8 +333,8 @@ public class ConsumerConfig {
   @Override
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
-        recordImmediately, bufferSize, weightFactor, heatmapImplementation, windowSize,
-        heatmapColors, vigImplementation, contractionIterations, period);
+        recordImmediately, bufferSize, weightFactor, heatmapImplementation, windowSize, theme,
+        vigImplementation, contractionIterations, period);
   }
 
 }
