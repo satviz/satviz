@@ -65,6 +65,8 @@ private:
    */
   void deinit();
 
+  void uniformViewMatrix(double *matrix);
+
   int  allocateEdgeIndex();
   void freeEdgeIndex(int index);
 

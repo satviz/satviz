@@ -4,7 +4,12 @@
 
 #define SENTINEL_INDEX 0xFFFFFFFF
 
+#ifdef GL_ARB_gpu_shader_fp64
 layout(location = 0) uniform dmat4 world_to_view;
+#else
+layout(location = 0) uniform mat4 world_to_view;
+#endif
+
 uniform samplerBuffer offset_texview;
 
 layout(location = 0) in ivec2 edge_indices;
@@ -18,7 +23,11 @@ void main() {
         gl_Position = vec4(0.0, 0.0, -10.0, 1.0);
     } else {
         vec2 offset = texelFetch(offset_texview, index).rg;
+#ifdef GL_ARB_gpu_shader_fp64
         gl_Position = vec4(world_to_view * dvec4(offset, 0.0, 1.0));
+#else
+        gl_Position = vec4(world_to_view * vec4(offset, 0.0, 1.0));
+#endif
     }
     weight = edge_weight;
 }
