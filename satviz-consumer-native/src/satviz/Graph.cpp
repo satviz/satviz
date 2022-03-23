@@ -106,9 +106,12 @@ void Graph::submitHeatUpdate(HeatUpdate &update) {
 }
 
 void Graph::recalculateLayout() {
+  double MIN_WEIGHT = 0.0001;
+
   ogdf::EdgeArray<double> lengths(graph);
   for (auto e = graph.firstEdge(); e; e = e->succ()) {
     double w = attrs.doubleWeight(e);
+    if (w < MIN_WEIGHT) w = MIN_WEIGHT;
     //double l = 1.0 / (w * w);
     double l = 1.0 / w;
     lengths[e] = l;
