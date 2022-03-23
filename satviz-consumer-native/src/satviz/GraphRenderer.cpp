@@ -143,15 +143,15 @@ void GraphRenderer::clearScreen() {
 }
 
 void GraphRenderer::uniformViewMatrix(double *matrix) {
-	if (GLAD_GL_ARB_gpu_shader_fp64) {
-          glUniformMatrix4dv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, matrix);
-	} else {
-          float reduced[16];
-          for (int i = 0; i < 16; i++) {
-            reduced[i] = (float) matrix[i];
-          }
-          glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, reduced);
-	}
+  if (GLAD_GL_ARB_gpu_shader_fp64) {
+    glUniformMatrix4dv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, matrix);
+  } else {
+    float reduced[16];
+    for (int i = 0; i < 16; i++) {
+      reduced[i] = (float) matrix[i];
+    }
+    glUniformMatrix4fv(UNIFORM_WORLD_TO_VIEW, 1, GL_FALSE, reduced);
+  }
 }
 
 void GraphRenderer::draw(Camera &camera, int width, int height) {
