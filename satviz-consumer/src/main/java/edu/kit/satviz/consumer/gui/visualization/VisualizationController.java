@@ -84,6 +84,8 @@ public class VisualizationController {
   private boolean processedClausesSliderMousePressed;
   private boolean processedClausesSliderKeyPressed;
 
+  private boolean initialized = false;
+
   private ChangeListener<String> processedClausesSpinnerLongValidationListener;
 
 
@@ -160,6 +162,8 @@ public class VisualizationController {
     processedClausesSlider.setMajorTickUnit(1.0);
     processedClausesSlider.setBlockIncrement(amountToStepBy);
     processedClausesSlider.setMinorTickCount(0); // Disable minor ticks
+
+    initialized = true;
   }
 
   @FXML
@@ -278,6 +282,12 @@ public class VisualizationController {
    * @see Mediator
    */
   public void onClauseUpdate() {
+    // make sure that this method can only be properly called from other threads once the
+    // JavaFX thread is done initializing
+    if (!initialized) {
+      return;
+    }
+
     long totalUpdates = mediator.numberOfUpdates();
     long currentUpdate = mediator.currentUpdate();
     long amountToStepBy =
