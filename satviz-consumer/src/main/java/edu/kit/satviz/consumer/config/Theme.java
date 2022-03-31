@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import edu.kit.satviz.consumer.bindings.NativeObject;
 import java.lang.invoke.VarHandle;
 import java.util.Objects;
@@ -89,6 +90,7 @@ public class Theme {
     return bgColor;
   }
 
+  @JsonIgnore
   public HeatmapColors getHeatmapColors() {
     return heatmapColors;
   }
