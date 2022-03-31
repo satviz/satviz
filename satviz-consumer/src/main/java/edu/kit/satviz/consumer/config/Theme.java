@@ -48,6 +48,7 @@ public class Theme {
     this.bgColor = bgColor;
   }
 
+  @JsonIgnore
   public void setHeatmapColors(HeatmapColors heatmapColors) {
     this.heatmapColors = heatmapColors;
   }

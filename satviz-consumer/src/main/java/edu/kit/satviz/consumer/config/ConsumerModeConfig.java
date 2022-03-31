@@ -1,5 +1,6 @@
 package edu.kit.satviz.consumer.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.util.Objects;
@@ -17,6 +18,7 @@ public abstract class ConsumerModeConfig {
 
   private ConsumerMode mode;
 
+  @JsonIgnore
   /**
    * This method allows for a specific <code>ConsumerMode</code> to be set.
    *
@@ -26,6 +28,7 @@ public abstract class ConsumerModeConfig {
     this.mode = mode;
   }
 
+  @JsonIgnore
   /**
    * This simple getter-method returns the mode of the configuration.
    *
