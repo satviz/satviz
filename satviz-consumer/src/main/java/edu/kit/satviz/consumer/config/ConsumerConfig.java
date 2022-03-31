@@ -36,7 +36,7 @@ public class ConsumerConfig {
   public static final WeightFactor DEFAULT_WEIGHT_FACTOR = WeightFactor.RECIPROCAL;
   public static final int MIN_BUFFER_SIZE = 1;
   public static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE;
-  public static final int MIN_WINDOW_SIZE = 0;
+  public static final int MIN_WINDOW_SIZE = 1;
   public static final int MAX_WINDOW_SIZE = Integer.MAX_VALUE;
   public static final int DEFAULT_WINDOW_SIZE = 1000;
   public static final int STEP_AMOUNT_WINDOW_SIZE = 100;
