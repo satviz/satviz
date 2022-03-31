@@ -18,6 +18,9 @@ public class ConsumerConstraint implements Constraint<ConsumerConfig> {
     if (config.getVideoTimeout() < 0) {
       fail("Timeout must be positive");
     }
+    if (config.getWindowSize() <= 0) {
+      fail("Window size must be greater than 0");
+    }
 
     if (config.getInstancePath() == null) {
       fail("No instance is set");
