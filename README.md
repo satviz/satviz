@@ -28,7 +28,10 @@ git submodule init
 git submodule add
 ```
 
-Then you can build it using `./gradlew jlinkZip`. You will find the visualisation app in `satviz-consumer/build/satviz-consumer.zip` and the producer app in `satviz-producer/build/satviz-producer.zip`. Both contain a script to run them in `bin/`.
+To install the app on your system, run `sudo ./gradlew install`. 
+
+To only get a zipped distribution and not install it directly, use `./gradlew satvizDist` instead.
+You will find the visualisation app in `satviz-consumer/build/satviz.zip` and the producer app in `satviz-producer/build/satviz-producer.zip`. Both contain a script to run them in `bin/`.
 
 For testing purposes, you can also run `./gradlew installTestBuild`, which will put the consumer application in `test-run/satviz`.
 
