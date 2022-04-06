@@ -1,10 +1,8 @@
 {
   "bufferSize": 350,
   "theme": {
-    "heatmapColors": {
-      "hotColor": "#FF0000",
-      "coldColor": "#0000FF"
-    }
+    "hotColor": "#FF0000",
+    "coldColor": "#0000FF"
   },
   "modeConfig": {
     "sourcePath": "foo/bar/solver.so",

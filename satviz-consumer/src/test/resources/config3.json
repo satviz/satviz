@@ -1,10 +1,8 @@
 {
   "bufferSize": 350,
   "theme": {
-    "heatmapColors": {
-      "hotColor": "#FFFFFF",
-      "coldColor": "#000000"
-    },
+    "hotColor": "#FFFFFF",
+    "coldColor": "#000000",
     "bgColor": "#000000",
     "edgeColor": "#f0f0f0"
   },
