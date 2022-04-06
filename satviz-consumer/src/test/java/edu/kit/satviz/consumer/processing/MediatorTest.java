@@ -90,7 +90,7 @@ public class MediatorTest {
       fail();
     }
     verify(graph).recalculateLayout();
-    verify(controller).resetCamera();
+    verify(controller, times(2)).resetCamera();
   }
 
   @Test
