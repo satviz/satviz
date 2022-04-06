@@ -17,6 +17,7 @@ module edu.kit.satviz.consumer {
   exports edu.kit.satviz.consumer.gui.config to javafx.graphics;
   exports edu.kit.satviz.consumer.gui.visualization to javafx.graphics;
   exports edu.kit.satviz.consumer.processing to com.fasterxml.jackson.databind;
+  exports edu.kit.satviz.consumer.config.routines to com.fasterxml.jackson.databind;
 
   opens edu.kit.satviz.consumer.config;
   opens edu.kit.satviz.consumer.gui.config to javafx.fxml;

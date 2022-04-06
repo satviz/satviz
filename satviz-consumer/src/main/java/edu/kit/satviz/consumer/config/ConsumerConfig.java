@@ -1,5 +1,8 @@
 package edu.kit.satviz.consumer.config;
 
+import edu.kit.satviz.consumer.config.routines.NullRoutine;
+import edu.kit.satviz.consumer.config.routines.PeriodicRoutine;
+import edu.kit.satviz.consumer.config.routines.Routine;
 import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.HeatmapImplementation;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
@@ -69,6 +72,7 @@ public class ConsumerConfig {
   private long period = DEFAULT_PERIOD;
   private int videoTimeout = DEFAULT_VIDEO_TIMEOUT;
   private Theme theme = new Theme();
+  private Routine routine = new NullRoutine();
 
   /**
    * Setter-method for an instance of the <code>ConsumerModeConfig</code> class.
@@ -191,6 +195,24 @@ public class ConsumerConfig {
   }
 
   /**
+   * Setter-method for the desired length of the recorded video (in seconds).
+   *
+   * @param videoTimeout The desired length of the video.
+   */
+  public void setVideoTimeout(int videoTimeout) {
+    this.videoTimeout = videoTimeout;
+  }
+
+  /**
+   * Setter-method for the routine.
+   *
+   * @param routine Instance of the {@code Routine} class.
+   */
+  public void setRoutine(Routine routine) {
+    this.routine = routine;
+  }
+
+  /**
    * Getter-method for more settings set within an instance of
    * the <code>ConsumerModeConfig</code> class.
    *
@@ -310,12 +332,22 @@ public class ConsumerConfig {
     return period;
   }
 
+  /**
+   * Getter-method for the desired length of the recorded video (in seconds).
+   *
+   * @return The desired length of the video.
+   */
   public int getVideoTimeout() {
     return videoTimeout;
   }
 
-  public void setVideoTimeout(int videoTimeout) {
-    this.videoTimeout = videoTimeout;
+  /**
+   * Getter-method for the routine.
+   *
+   * @return Instance of the {@code Routine} class.
+   */
+  public Routine getRoutine() {
+    return routine;
   }
 
   @Override
@@ -340,14 +372,15 @@ public class ConsumerConfig {
         && vigImplementation == config.vigImplementation
         && contractionIterations == config.contractionIterations
         && period == config.period
-        && videoTimeout == config.videoTimeout;
+        && videoTimeout == config.videoTimeout
+        && Objects.equals(routine, config.routine);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
         recordImmediately, bufferSize, weightFactor, heatmapImplementation, windowSize, theme,
-        vigImplementation, contractionIterations, period, videoTimeout);
+        vigImplementation, contractionIterations, period, videoTimeout, routine);
   }
 
 }

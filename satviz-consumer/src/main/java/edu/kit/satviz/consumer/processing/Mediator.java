@@ -3,8 +3,10 @@ package edu.kit.satviz.consumer.processing;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.config.Theme;
+import edu.kit.satviz.consumer.config.routines.Routine;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
+import edu.kit.satviz.consumer.config.routines.PeriodicRoutine;
 import edu.kit.satviz.network.pub.ConsumerConnectionListener;
 import edu.kit.satviz.network.pub.ProducerId;
 import edu.kit.satviz.sat.ClauseUpdate;
@@ -45,6 +47,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   private int clauseCount;
   private volatile Future<?> currentRender;
   private boolean isRendering;
+  private Routine routine;
 
   private volatile boolean visualizationPaused;
   private volatile int clausesPerAdvance;
@@ -81,6 +84,9 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.theme = config.getTheme();
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
+
+    this.routine = config.getRoutine();
+    routine.addAction(this::relayout);
   }
 
   public void updateWeightFactor(WeightFactor factor) {
@@ -202,6 +208,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
   private void render() {
     try {
       long start = System.currentTimeMillis();
+      int countBefore = clauseCount;
       if (!visualizationPaused) {
         clauseCount += coordinator.advanceVisualization(clausesPerAdvance);
       }
@@ -211,6 +218,7 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
       }
 
       frameActions.forEach(Runnable::run);
+      routine.clausesAdded(clauseCount - countBefore);
 
       if (clauseCount >= snapshotPeriod) {
         coordinator.takeSnapshot();
