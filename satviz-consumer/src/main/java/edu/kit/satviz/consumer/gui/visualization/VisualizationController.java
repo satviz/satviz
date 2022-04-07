@@ -1,8 +1,8 @@
 package edu.kit.satviz.consumer.gui.visualization;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
-import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.config.Theme;
+import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.processing.Mediator;
 import java.util.concurrent.ForkJoinPool;
