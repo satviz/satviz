@@ -3,6 +3,7 @@ package edu.kit.satviz.consumer.processing;
 import edu.kit.satviz.consumer.config.ConsumerConfig;
 import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.config.Theme;
+import edu.kit.satviz.consumer.config.routines.NullRoutine;
 import edu.kit.satviz.consumer.config.routines.Routine;
 import edu.kit.satviz.consumer.display.VideoController;
 import edu.kit.satviz.consumer.graph.Graph;
@@ -81,11 +82,9 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
     this.closeActions = new CopyOnWriteArrayList<>();
     this.frameActions = new CopyOnWriteArrayList<>();
     this.theme = config.getTheme();
+    this.relayoutRoutine = new NullRoutine();
     coordinator.addProcessor(heatmap);
     coordinator.addProcessor(vig);
-
-    this.relayoutRoutine = config.getRelayoutRoutine();
-    relayoutRoutine.addAction(this::relayout);
   }
 
   public void updateWeightFactor(WeightFactor factor) {
@@ -108,6 +107,11 @@ public class Mediator implements ConsumerConnectionListener, AutoCloseable {
 
   public void setClausesPerAdvance(int clausesPerAdvance) {
     this.clausesPerAdvance = clausesPerAdvance;
+  }
+
+  public void setRelayoutRoutine(Routine relayoutRoutine) {
+    this.relayoutRoutine = relayoutRoutine;
+    relayoutRoutine.addAction(this::relayout);
   }
 
   public long getPeriod() {
