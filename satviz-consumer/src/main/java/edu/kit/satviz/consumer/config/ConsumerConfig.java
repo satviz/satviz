@@ -1,13 +1,11 @@
 package edu.kit.satviz.consumer.config;
 
 import edu.kit.satviz.consumer.config.routines.NullRoutine;
-import edu.kit.satviz.consumer.config.routines.PeriodicRoutine;
 import edu.kit.satviz.consumer.config.routines.Routine;
 import edu.kit.satviz.consumer.processing.Heatmap;
 import edu.kit.satviz.consumer.processing.HeatmapImplementation;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraph;
 import edu.kit.satviz.consumer.processing.VariableInteractionGraphImplementation;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,7 +70,7 @@ public class ConsumerConfig {
   private long period = DEFAULT_PERIOD;
   private int videoTimeout = DEFAULT_VIDEO_TIMEOUT;
   private Theme theme = new Theme();
-  private Routine routine = new NullRoutine();
+  private Routine relayoutRoutine = new NullRoutine();
 
   /**
    * Setter-method for an instance of the <code>ConsumerModeConfig</code> class.
@@ -204,12 +202,12 @@ public class ConsumerConfig {
   }
 
   /**
-   * Setter-method for the routine.
+   * Setter-method for the relayout routine.
    *
-   * @param routine Instance of the {@code Routine} class.
+   * @param relayoutRoutine Instance of the {@code Routine} class.
    */
-  public void setRoutine(Routine routine) {
-    this.routine = routine;
+  public void setRelayoutRoutine(Routine relayoutRoutine) {
+    this.relayoutRoutine = relayoutRoutine;
   }
 
   /**
@@ -342,12 +340,12 @@ public class ConsumerConfig {
   }
 
   /**
-   * Getter-method for the routine.
+   * Getter-method for the relayout routine.
    *
    * @return Instance of the {@code Routine} class.
    */
-  public Routine getRoutine() {
-    return routine;
+  public Routine getRelayoutRoutine() {
+    return relayoutRoutine;
   }
 
   @Override
@@ -373,14 +371,14 @@ public class ConsumerConfig {
         && contractionIterations == config.contractionIterations
         && period == config.period
         && videoTimeout == config.videoTimeout
-        && Objects.equals(routine, config.routine);
+        && Objects.equals(relayoutRoutine, config.relayoutRoutine);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(modeConfig, instancePath, noGui, videoTemplatePath,
         recordImmediately, bufferSize, weightFactor, heatmapImplementation, windowSize, theme,
-        vigImplementation, contractionIterations, period, videoTimeout, routine);
+        vigImplementation, contractionIterations, period, videoTimeout, relayoutRoutine);
   }
 
 }
