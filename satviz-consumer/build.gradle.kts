@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.nio.file.attribute.PosixFilePermissions
+
 plugins {
     java
     id("org.openjfx.javafxplugin") version "0.0.10"
@@ -22,7 +25,6 @@ javafx {
 }
 
 jlink {
-    imageName.set("satviz")
     launcher {
         name = "satviz"
         jvmArgs = listOf("--enable-native-access=edu.kit.satviz.consumer")
@@ -67,14 +69,46 @@ tasks {
         commandLine = listOf("make", "-j", "6")
     }
 
-    register<Copy>("installTestBuild") {
-        val dir = rootProject.projectDir.resolve("test-run/satviz")
-        doFirst {
-            dir.deleteRecursively()
+
+    val jlinkTask = getByName<org.beryx.jlink.JlinkTask>("jlink")
+
+    fun installTask(name: String, dir: String) =
+        register<Copy>(name) {
+            val installDir = rootProject.projectDir.resolve(dir)
+            doFirst {
+                installDir.deleteRecursively()
+            }
+            dependsOn.add(jlinkTask)
+            from(jlinkTask.imageDir)
+            into(installDir)
         }
-        dependsOn.add("jlink")
-        from(buildDir.resolve("satviz"))
-        into(dir)
+
+
+    installTask("installTestBuild", "test-run/satviz")
+
+    val installationDir = "/opt/satviz/"
+    val installation = installTask("install", installationDir).configure {
+        finalizedBy("createGlobalScript")
+    }
+
+    register<DefaultTask>("createGlobalScript") {
+        doLast {
+            val file = file("/usr/bin/satviz")
+            if (!file.exists()) {
+                Files.createFile(
+                    file.toPath(),
+                    PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-xr-x"))
+                )
+            }
+            file.writeText("exec ${installationDir}bin/satviz $@\n")
+        }
+    }
+
+    register<Zip>("satvizDist") {
+        dependsOn.add(jlinkTask)
+        from(jlinkTask.imageDir)
+        destinationDirectory.set(buildDir)
+        archiveBaseName.set("satviz")
     }
 
     processResources {
