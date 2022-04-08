@@ -1,8 +1,8 @@
 package edu.kit.satviz.consumer.gui.visualization;
 
 import edu.kit.satviz.consumer.config.ConsumerConfig;
-import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.config.Theme;
+import edu.kit.satviz.consumer.config.WeightFactor;
 import edu.kit.satviz.consumer.gui.GuiUtils;
 import edu.kit.satviz.consumer.processing.Mediator;
 import java.util.concurrent.ForkJoinPool;
@@ -18,6 +18,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TitledPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 /**
  * This class offers functionality to control the live visualization with GUI components.
@@ -162,6 +163,12 @@ public class VisualizationController {
     processedClausesSlider.setMajorTickUnit(1.0);
     processedClausesSlider.setBlockIncrement(amountToStepBy);
     processedClausesSlider.setMinorTickCount(0); // Disable minor ticks
+
+    // set button fonts
+    Font quivira = Font.loadFont(this.getClass().getResourceAsStream("Quivira.otf"), -1);
+    startOrStopRecordingButton.setFont(quivira);
+    pauseOrContinueRecordingButton.setFont(quivira);
+    pauseOrContinueVisualizationButton.setFont(quivira);
 
     initialized = true;
   }

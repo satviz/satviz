@@ -10,12 +10,15 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<TitledPane alignment="CENTER" animated="false" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="831.0" prefWidth="462.0" text="Configuration" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<TitledPane alignment="CENTER" animated="false" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="544.0" prefWidth="941.0" text="Configuration" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <font>
         <Font size="16.0" />
     </font>
@@ -39,231 +42,272 @@
                 </VBox>
             </bottom>
             <center>
-                <VBox prefHeight="429.0" prefWidth="0.0" BorderPane.alignment="CENTER">
+                <VBox prefHeight="279.0" prefWidth="895.0" BorderPane.alignment="CENTER">
                     <padding>
                         <Insets left="10.0" right="10.0" top="10.0" />
                     </padding>
                     <children>
-                  <VBox prefHeight="0.0" prefWidth="328.0">
+                        <Label style="-fx-font-weight: bold; -fx-font-size: 25;" text="Runtime Settings">
+                            <font>
+                                <Font size="25.0" />
+                            </font>
+                        </Label>
+                  <GridPane prefHeight="377.0" prefWidth="875.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="516.0" minWidth="10.0" prefWidth="438.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="758.0" minWidth="10.0" prefWidth="437.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
                      <children>
-                              <Label style="-fx-font-weight: bold; -fx-font-size: 25;" text="Runtime Settings">
-                                  <font>
-                                      <Font size="25.0" />
-                                  </font>
-                              </Label>
-                        <VBox prefHeight="200.0" prefWidth="100.0">
+                        <VBox prefHeight="200.0" prefWidth="100.0" style="-fx-border-color: lightgrey;">
                            <children>
-                              <Label text="Recording">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <HBox prefHeight="0.0" prefWidth="328.0">
+                              <VBox prefHeight="0.0" prefWidth="393.0">
                                  <children>
-                                    <Label text="Target File:">
-                                       <padding>
-                                          <Insets right="10.0" />
-                                       </padding>
-                                    </Label>
-                                    <Button fx:id="recordingFileButton" mnemonicParsing="false" onAction="#selectRecordingFile" prefHeight="21.0" prefWidth="61.0" text="Select File">
+                                    <Label text="Recording">
                                        <font>
-                                          <Font size="10.0" />
+                                          <Font size="20.0" />
                                        </font>
-                                    </Button>
-                                    <Label fx:id="recordingFileLabel">
-                                       <HBox.margin>
-                                          <Insets left="10.0" top="2.0" />
-                                       </HBox.margin>
                                     </Label>
+                                    <HBox prefHeight="0.0" prefWidth="328.0">
+                                       <children>
+                                          <Label text="Target File:">
+                                             <padding>
+                                                <Insets right="10.0" />
+                                             </padding>
+                                          </Label>
+                                          <Button fx:id="recordingFileButton" mnemonicParsing="false" onAction="#selectRecordingFile" prefHeight="21.0" prefWidth="61.0" text="Select File">
+                                             <font>
+                                                <Font size="10.0" />
+                                             </font>
+                                          </Button>
+                                          <Label fx:id="recordingFileLabel">
+                                             <HBox.margin>
+                                                <Insets left="10.0" top="2.0" />
+                                             </HBox.margin>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                            <CheckBox fx:id="showLiveVisualizationCheckBox" mnemonicParsing="false" onAction="#setLiveVisualization" text="Show Live Visualization" />
+                                            <CheckBox fx:id="recordFromStartCheckBox" mnemonicParsing="false" prefHeight="22.0" prefWidth="190.0" text="Record Animation From Start" />
                                  </children>
-                              </HBox>
-                                      <CheckBox fx:id="showLiveVisualizationCheckBox" mnemonicParsing="false" onAction="#setLiveVisualization" text="Show Live Visualization" />
-                                      <CheckBox fx:id="recordFromStartCheckBox" mnemonicParsing="false" prefHeight="22.0" prefWidth="190.0" text="Record Animation From Start" />
-                           </children>
-                           <padding>
-                              <Insets bottom="10.0" />
-                           </padding>
-                        </VBox>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
-                           <children>
-                              <Label text="Weight Factor:">
-                                 <HBox.margin>
-                                    <Insets right="10.0" />
-                                 </HBox.margin>
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <ChoiceBox fx:id="weightFactorChoiceBox" prefWidth="150.0" />
-                           </children>
-                           <VBox.margin>
-                              <Insets bottom="10.0" />
-                           </VBox.margin>
-                        </HBox>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
-                           <children>
-                              <Label text="Buffer Size:">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                                 <HBox.margin>
-                                    <Insets bottom="5.0" right="5.0" />
-                                 </HBox.margin>
-                              </Label>
-                              <Spinner fx:id="bufferSizeSpinner" editable="true">
-                                 <HBox.margin>
+                                 <padding>
+                                    <Insets bottom="10.0" />
+                                 </padding>
+                                 <VBox.margin>
                                     <Insets left="5.0" />
-                                 </HBox.margin>
-                              </Spinner>
-                           </children>
-                        </HBox>
-                        <VBox prefHeight="200.0" prefWidth="100.0">
-                           <children>
-                              <Label text="Heatmap">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 </VBox.margin>
+                              </VBox>
+                              <VBox prefHeight="0.0" prefWidth="382.0">
                                  <children>
-                                    <Label text="Implementation: ">
-                                       <HBox.margin>
-                                          <Insets />
-                                       </HBox.margin>
+                                    <Label text="Variable Interaction Graph">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
                                     </Label>
-                                    <ChoiceBox fx:id="heatmapImplementationChoiceBox" prefWidth="150.0" />
+                                    <HBox prefHeight="0.0" prefWidth="382.0">
+                                       <children>
+                                          <Label text="Implementation: " />
+                                          <ChoiceBox fx:id="vigImplementationChoiceBox" prefWidth="150.0" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="2.5" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox prefHeight="0.0" prefWidth="393.0">
+                                       <children>
+                                          <Label text="Weight Factor:">
+                                             <HBox.margin>
+                                                <Insets right="10.0" />
+                                             </HBox.margin>
+                                          </Label>
+                                          <ChoiceBox fx:id="weightFactorChoiceBox" prefWidth="150.0">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                          </ChoiceBox>
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="2.5" />
+                                       </VBox.margin>
+                                    </HBox>
                                  </children>
                                  <VBox.margin>
-                                    <Insets bottom="2.5" />
+                                    <Insets left="5.0" />
                                  </VBox.margin>
-                              </HBox>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
+                              </VBox>
+                              <VBox prefHeight="0.0" prefWidth="393.0">
                                  <children>
-                                    <Label text="Window Size:">
-                                       <padding>
-                                          <Insets right="10.0" />
-                                       </padding>
+                                    <Label text="Heatmap">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
                                     </Label>
-                                    <Spinner fx:id="windowSizeSpinner" editable="true">
+                                    <HBox prefHeight="100.0" prefWidth="200.0">
+                                       <children>
+                                          <Label text="Implementation: ">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                          </Label>
+                                          <ChoiceBox fx:id="heatmapImplementationChoiceBox" prefWidth="150.0" />
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets bottom="2.5" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox prefHeight="100.0" prefWidth="200.0">
+                                       <children>
+                                          <Label text="Window Size:">
+                                             <padding>
+                                                <Insets right="10.0" />
+                                             </padding>
+                                          </Label>
+                                          <Spinner fx:id="windowSizeSpinner" editable="true">
+                                             <HBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </HBox.margin>
+                                          </Spinner>
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="2.5" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox prefHeight="0.0" prefWidth="328.0">
+                                       <children>
+                                          <Label text="Cold Color:">
+                                             <padding>
+                                                <Insets right="10.0" />
+                                             </padding>
+                                          </Label>
+                                          <ColorPicker fx:id="coldColorColorPicker" prefHeight="0.0" prefWidth="142.0">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets bottom="2.5" />
+                                             </padding>
+                                          </ColorPicker>
+                                          <Label layoutX="10.0" layoutY="10.0" text="Hot Color:">
+                                             <padding>
+                                                <Insets left="10.0" right="10.0" />
+                                             </padding>
+                                          </Label>
+                                          <ColorPicker fx:id="hotColorColorPicker" layoutX="79.0" layoutY="10.0" prefHeight="22.0" prefWidth="133.0">
+                                             <HBox.margin>
+                                                <Insets />
+                                             </HBox.margin>
+                                             <padding>
+                                                <Insets bottom="2.5" />
+                                             </padding>
+                                          </ColorPicker>
+                                       </children>
+                                       <VBox.margin>
+                                          <Insets top="2.5" />
+                                       </VBox.margin>
+                                    </HBox>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets left="5.0" />
+                                 </VBox.margin>
+                              </VBox>
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="333.0" prefWidth="0.0" style="-fx-border-color: lightgrey;" GridPane.columnIndex="1">
+                           <children>
+                              <HBox prefHeight="0.0" prefWidth="393.0">
+                                 <children>
+                                    <Label text="Buffer Size:">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
                                        <HBox.margin>
-                                          <Insets bottom="5.0" />
+                                          <Insets bottom="5.0" right="5.0" />
+                                       </HBox.margin>
+                                    </Label>
+                                    <Spinner fx:id="bufferSizeSpinner" editable="true">
+                                       <HBox.margin>
+                                          <Insets left="5.0" />
                                        </HBox.margin>
                                     </Spinner>
                                  </children>
                                  <VBox.margin>
-                                    <Insets top="2.5" />
+                                    <Insets top="5.0" />
                                  </VBox.margin>
                               </HBox>
+                               <VBox prefHeight="0.0" prefWidth="382.0">
+                                   <children>
+                                       <Label text="Graph Contraction">
+                                           <font>
+                                               <Font size="20.0" />
+                                           </font>
+                                       </Label>
+                                       <HBox prefHeight="100.0" prefWidth="200.0">
+                                           <children>
+                                               <Label text="Iterations: ">
+                                                   <HBox.margin>
+                                                       <Insets right="5.0" />
+                                                   </HBox.margin>
+                                               </Label>
+                                               <Spinner fx:id="contractionIterationsSpinner" editable="true" />
+                                           </children>
+                                       </HBox>
+                                   </children>
+                               </VBox>
+                              <VBox prefHeight="6.0" prefWidth="382.0">
+                                 <children>
+                                    <Label text="SAT Instance">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                    </Label>
+                                    <HBox prefHeight="0.0" prefWidth="382.0">
+                                       <children>
+                                          <Button fx:id="satInstanceFileButton" mnemonicParsing="false" onAction="#selectSatInstanceFile" prefHeight="27.0" prefWidth="75.0" text="Select File" />
+                                          <Label fx:id="satInstanceFileLabel" alignment="BOTTOM_CENTER">
+                                             <HBox.margin>
+                                                <Insets left="10.0" top="5.0" />
+                                             </HBox.margin>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
                               <HBox prefHeight="0.0" prefWidth="328.0">
                                  <children>
-                                    <Label text="Cold Color:">
-                                       <padding>
+                                            <Label prefHeight="30.0" prefWidth="63.0" text="Mode:">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                       <HBox.margin>
                                           <Insets right="10.0" />
-                                       </padding>
-                                    </Label>
-                                    <ColorPicker fx:id="coldColorColorPicker" prefHeight="22.0" prefWidth="112.0">
-                                       <HBox.margin>
-                                          <Insets />
                                        </HBox.margin>
-                                    </ColorPicker>
-                                    <Label layoutX="10.0" layoutY="10.0" text="Hot Color:">
-                                       <padding>
-                                          <Insets left="10.0" right="10.0" />
-                                       </padding>
-                                    </Label>
-                                    <ColorPicker fx:id="hotColorColorPicker" layoutX="79.0" layoutY="10.0" prefHeight="22.0" prefWidth="112.0">
-                                       <HBox.margin>
-                                          <Insets />
-                                       </HBox.margin></ColorPicker>
+                                            </Label>
+                                            <ChoiceBox fx:id="modeChoiceBox" onAction="#updateMode" prefHeight="0.0" prefWidth="132.0" />
                                  </children>
-                                 <VBox.margin>
-                                    <Insets />
-                                 </VBox.margin>
+                                 <padding>
+                                    <Insets top="10.0" />
+                                 </padding>
                               </HBox>
+                                    <VBox fx:id="modeVbox" prefHeight="104.0" prefWidth="415.0" style="-fx-border-color: black;">
+                                        <VBox.margin>
+                                            <Insets right="5.0" top="10.0" />
+                                        </VBox.margin>
+                                        <padding>
+                                            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                        </padding>
+                                    </VBox>
                            </children>
+                           <GridPane.margin>
+                              <Insets left="5.0" />
+                           </GridPane.margin>
                            <padding>
-                              <Insets bottom="10.0" />
+                              <Insets left="5.0" />
                            </padding>
                         </VBox>
-                        <VBox prefHeight="200.0" prefWidth="100.0">
-                           <children>
-                              <Label text="Variable Interaction Graph">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
-                                 <children>
-                                    <Label text="Implementation: " />
-                                    <ChoiceBox fx:id="vigImplementationChoiceBox" prefWidth="150.0" />
-                                 </children>
-                              </HBox>
-                           </children>
-                        </VBox>
-                         <VBox prefHeight="200.0" prefWidth="100.0">
-                             <children>
-                                 <Label text="Graph Contraction">
-                                     <font>
-                                         <Font size="20.0" />
-                                     </font>
-                                 </Label>
-                                 <HBox prefHeight="100.0" prefWidth="200.0">
-                                     <children>
-                                         <Label text="Iterations: ">
-                                             <HBox.margin>
-                                                 <Insets right="5.0" />
-                                             </HBox.margin>
-                                         </Label>
-                                         <Spinner fx:id="contractionIterationsSpinner" editable="true" />
-                                     </children>
-                                 </HBox>
-                             </children>
-                         </VBox>
-                        <VBox prefHeight="200.0" prefWidth="100.0">
-                           <children>
-                              <Label text="SAT Instance">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
-                                 <children>
-                                    <Button fx:id="satInstanceFileButton" mnemonicParsing="false" onAction="#selectSatInstanceFile" prefHeight="27.0" prefWidth="75.0" text="Select File" />
-                                    <Label fx:id="satInstanceFileLabel" alignment="BOTTOM_CENTER">
-                                       <HBox.margin>
-                                          <Insets left="10.0" top="5.0" />
-                                       </HBox.margin>
-                                    </Label>
-                                 </children>
-                              </HBox>
-                           </children>
-                        </VBox>
-                        <HBox prefHeight="0.0" prefWidth="328.0">
-                           <children>
-                                      <Label prefHeight="30.0" prefWidth="63.0" text="Mode:">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                                 <HBox.margin>
-                                    <Insets right="10.0" />
-                                 </HBox.margin>
-                                      </Label>
-                                      <ChoiceBox fx:id="modeChoiceBox" onAction="#updateMode" prefHeight="0.0" prefWidth="132.0" />
-                           </children>
-                           <padding>
-                              <Insets top="10.0" />
-                           </padding>
-                        </HBox>
                      </children>
-                  </VBox>
-                        <VBox fx:id="modeVbox" prefHeight="104.0" prefWidth="415.0" style="-fx-border-color: black;">
-                            <VBox.margin>
-                                <Insets top="10.0" />
-                            </VBox.margin>
-                            <padding>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                            </padding>
-                        </VBox>
+                  </GridPane>
                     </children>
                     <BorderPane.margin>
                         <Insets bottom="10.0" />
