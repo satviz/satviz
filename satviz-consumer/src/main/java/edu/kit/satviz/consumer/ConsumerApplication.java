@@ -118,9 +118,9 @@ public final class ConsumerApplication {
     });
 
     if (!config.isNoGui()) {
-      mediator.setRelayoutRoutine(config.getRelayoutRoutine());
       startVisualisationGui(mediator, config);
     } else {
+      mediator.setRelayoutRoutine(config.getRelayoutRoutine());
       mediator.registerFrameAction(new Runnable() {
 
         final long period = config.getPeriod();
