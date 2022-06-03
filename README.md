@@ -25,7 +25,7 @@ For the JDK, we recommend [*sdkman!*](https://sdkman.io): `sdk install java 17.0
 Clone this repository and run the following commands:
 ```
 git submodule init
-git submodule add
+git submodule update
 ```
 
 To install the app on your system, run `sudo ./gradlew install`. 
