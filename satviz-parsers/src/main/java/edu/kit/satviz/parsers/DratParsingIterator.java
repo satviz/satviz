@@ -44,7 +44,7 @@ public class DratParsingIterator extends ClauseParsingIterator {
 
   @Override
   protected boolean isPrematureEndOfFile() {
-    return true;
+    return false;
   }
 
 }
