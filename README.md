@@ -33,5 +33,12 @@ To install the app on your system, run `sudo ./gradlew install`.
 To only get a zipped distribution and not install it directly, use `./gradlew satvizDist` instead.
 You will find the visualisation app in `satviz-consumer/build/satviz.zip` and the producer app in `satviz-producer/build/satviz-producer.zip`. Both contain a script to run them in `bin/`.
 
+## Information for Reviewers
+
 For testing purposes, you can also run `./gradlew installTestBuild`, which will put the consumer application in `test-run/satviz`.
+The script `test_satviz.sh [path-to-cnf] [path-to-drat] [n-contraction-rounds] [node-size]` can be used to run more easily. 
+This script creates a config file for full access to all satviz parameters. 
+So far, the command-line parameters of this script allows to access the most important parameters to reproduce the images created for our pos-2022 paper. 
+Note that as of now, the DRAT-file can not be in binary format, but it can be a text-file or a xz-packed text-file. 
+We recommend, as a default, 10 contraction rounds with a node size of 10. 
 
