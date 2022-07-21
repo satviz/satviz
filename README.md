@@ -6,7 +6,12 @@ The visualisation part currently only supports *Linux*.
 
 ![ortholatin-7.cnf](img/ortholatin-7.gif)
 
-## Prerequisites
+## Installation
+Pre-built images for Linux/x64 can be found in the [releases section](https://github.com/satviz/satviz/releases) of this repository.
+
+Download `satviz.zip` for the main application and (optionally) `satviz-producer.zip` for the standalone producer application (for externalised computing). Unzip the archives in a directory of your choice. `bin/satviz` or `bin/sat-prod` respectively can be used to run the applications.
+
+## Source Code Prerequisites
 
 To work on the project and to build it, you'll need to install a few dependencies:
 
@@ -21,7 +26,8 @@ On Ubuntu, you can install most of these using `sudo apt install build-essential
 
 For the JDK, we recommend [*sdkman!*](https://sdkman.io): `sdk install java 17.0.2-open`
 
-## Installation
+## Build from Source
+
 Clone this repository and run the following commands:
 ```
 git submodule init
